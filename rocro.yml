@@ -39,11 +39,14 @@ inspecode:
   ##
   ## * Get more help at https://help.gradle.org
   ##
-  #infer:
-  #  thresholds: { num-issues: 999 }
+  infer:
+    thresholds: { num-issues: 999 }
 
   jscpd:
-    thresholds: { num-issues: 774 }
+    thresholds: { num-issues: 775 }
+      # --> tractrix/codelift#1935
+      #  - external-tool found 775 clones
+      #  - tool-plugin reports 774 issues
 
   misspell:
     auto-fix: true
@@ -52,6 +55,8 @@ inspecode:
   pmd:
     auto-fix: true
     thresholds: { num-issues: 89 }
+      # on rocro.com ... auto-fix failed (tractrix/javalift#12)
+      # on tractrix/io ... succeeded (fixed version deployed)
 
   ## FAILURE: Build failed with an exception.
   ##
@@ -66,10 +71,10 @@ inspecode:
   ##
   ## * Get more help at https://help.gradle.org
   ##
-  #spotbugs:
-  #  options:
-  #    -targets: /
-  #  thresholds: { num-issues: 999 }
+  spotbugs:
+    options:
+      -targets: /
+    thresholds: { num-issues: 999 }
 
   uncrustify:
     auto-fix: true
