@@ -15,5 +15,5 @@ inspecode:
   ##
   spotbugs:
     options:
-      -targets: /
+      -targets: .
     thresholds: { num-issues: 999 }
