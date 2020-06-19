@@ -225,8 +225,8 @@
     <!-- ### Unable to instantiate 'FileContentsHolder' class.
     <module name="FileContentsHolder" />
     -->
-  </module>
 
-  <!-- allow warnings to be suppressed -->
-  <module name="SuppressionCommentFilter" />
+    <!-- allow warnings to be suppressed -->
+    <module name="SuppressionCommentFilter" />
+  </module>
 </module>
