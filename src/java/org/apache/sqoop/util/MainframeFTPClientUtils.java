@@ -66,19 +66,19 @@ public final class MainframeFTPClientUtils {
       dsType = conf.get(MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE);
     }
     try {
-    	p = new MainframeDatasetPath(dsName,conf);
+        p = new MainframeDatasetPath(dsName,conf);
     } catch (Exception e) {
-    	LOG.error(e.getMessage());
-    	LOG.error("MainframeDatasetPath helper class incorrectly initialised");
-    	e.printStackTrace();
+        LOG.error(e.getMessage());
+        LOG.error("MainframeDatasetPath helper class incorrectly initialised");
+        e.printStackTrace();
     }
     boolean isSequentialDs = false;
     boolean isGDG = false;
     if (dsType != null && p != null) {
-    	isSequentialDs = p.getMainframeDatasetType().toString().equals(MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE_SEQUENTIAL);
+        isSequentialDs = p.getMainframeDatasetType().toString().equals(MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE_SEQUENTIAL);
         isGDG = p.getMainframeDatasetType().toString().equals(MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE_GDG);
-    	pdsName = p.getMainframeDatasetFolder();
-    	fileName = p.getMainframeDatasetFileName();
+        pdsName = p.getMainframeDatasetFolder();
+        fileName = p.getMainframeDatasetFileName();
     }
     FTPClient ftp = null;
     try {
@@ -95,9 +95,9 @@ public final class MainframeFTPClientUtils {
             // excepting partitioned datasets, use the MainframeFTPFileEntryParser, default doesn't match larger datasets
             parser = ftp.initiateListParsing(MainframeConfiguration.MAINFRAME_FTP_FILE_ENTRY_PARSER_CLASSNAME, "");
           }
-        	List<FTPFile> listing = new ArrayList<FTPFile>();
-        	while(parser.hasNext()) {
-        		FTPFile[] files = parser.getNext(25);
+                List<FTPFile> listing = new ArrayList<FTPFile>();
+                while(parser.hasNext()) {
+                        FTPFile[] files = parser.getNext(25);
         		for (FTPFile file : files) {
         			if (file != null) {
         				listing.add(file);
@@ -114,8 +114,7 @@ public final class MainframeFTPClientUtils {
         			LOG.info(String.format("Name: %s, Type: %s",f.getName(),f.getType()));
         		}
         	}
-        }
-		else {
+        } else {
       // partitioned datasets have a different FTP listing structure
       LOG.info("Dataset is a partitioned dataset, using default FTP list parsing");
       ftpFiles = ftp.listFiles();
@@ -143,7 +142,7 @@ public final class MainframeFTPClientUtils {
 		}
       }
     } catch(IOException ioe) {
-      throw new IOException ("Could not list datasets from " + pdsName + ":"
+      throw new IOException("Could not list datasets from " + pdsName + ":"
           + ioe.toString());
     } finally {
       if (ftp != null) {
@@ -162,8 +161,7 @@ public final class MainframeFTPClientUtils {
       if (username == null) {
         username = "anonymous";
         password = "";
-      }
-      else {
+      } else {
         password = DBConfiguration.getPassword((JobConf) conf);
       }
 
@@ -208,8 +206,8 @@ public final class MainframeFTPClientUtils {
         throw new IOException("FTP server " + server
             + " refused connection:" + ftp.getReplyString());
       }
-      LOG.info("Connected to " + server + " on " +
-          (port>0 ? port : ftp.getDefaultPort()));
+      LOG.info("Connected to " + server + " on "
+          + (port>0 ? port : ftp.getDefaultPort()));
       if (!ftp.login(username, password)) {
         ftp.logout();
         throw new IOException("Could not login to server " + server

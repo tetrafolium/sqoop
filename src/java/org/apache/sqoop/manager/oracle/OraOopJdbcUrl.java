@@ -232,7 +232,7 @@ public class OraOopJdbcUrl {
     // Remove the "@" prefix of the hostname
     JdbcOracleThinConnection result =
         new JdbcOracleThinConnection(hostName.replaceFirst("^[@][/]{0,2}", "")
-            , port, sid, service, tnsName.replaceFirst("^[@][/]{0,2}", ""));
+, port, sid, service, tnsName.replaceFirst("^[@][/]{0,2}", ""));
 
     return result;
   }

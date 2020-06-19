@@ -194,7 +194,7 @@ public class HBaseImportJob extends DataDrivenImportJob {
       }
     } else {
       // Table exists, so retrieve their current version
-	    tableDesc = admin.getTableDescriptor(TableName.valueOf(tableName));
+            tableDesc = admin.getTableDescriptor(TableName.valueOf(tableName));
 
       // Check if current version do have specified column family
       if (!tableDesc.hasFamily(familyBytes)) {

@@ -165,7 +165,7 @@ public abstract class SavedJobsTestBase {
   public void testUpdateJob() throws  Exception {
     storage.create(TEST_JOB, createTestJobData(TEST_TABLE_NAME));
 
-    storage.update(TEST_JOB, createTestJobData(TEST_TABLE_NAME_2) );
+    storage.update(TEST_JOB, createTestJobData(TEST_TABLE_NAME_2));
 
     assertEquals("Update did not change data correctly",
             storage.read(TEST_JOB).getSqoopOptions().getTableName(),

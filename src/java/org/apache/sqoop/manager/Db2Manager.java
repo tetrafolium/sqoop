@@ -335,12 +335,12 @@ public class Db2Manager
   private String toDbSpecificJavaType(String tableName, String colName) {
     if (columnTypeNames == null) {
       columnTypeNames = getColumnTypeNames(tableName, options.getCall(),
-			 options.getSqlQuery());
+                         options.getSqlQuery());
     }
     String colTypeName = columnTypeNames.get(colName);
     if (colTypeName != null) {
       if (colTypeName.equalsIgnoreCase("XML")) {
-	return XML_TO_JAVA_DATA_TYPE;
+        return XML_TO_JAVA_DATA_TYPE;
       }
     }
     return null;
@@ -355,8 +355,8 @@ public class Db2Manager
    // Connection args (common)
    RelatedOptions extraOptions = new RelatedOptions("DB2 extra options:");
    extraOptions.addOption(OptionBuilder.withArgName("string").hasArg()
-			.withDescription("Optional schema name").withLongOpt(SCHEMA)
-			.create("schema"));
+                        .withDescription("Optional schema name").withLongOpt(SCHEMA)
+                        .create("schema"));
    return extraOptions;
  }
 

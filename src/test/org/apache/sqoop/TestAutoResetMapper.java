@@ -159,7 +159,7 @@ public class TestAutoResetMapper extends ImportJobTestCase {
       int numPartFiles = 0;
       List<String> importedData = new ArrayList<String>();
       // We expect utmost 2 files
-      for (int m = 0; m < 2 ; ++m) {
+      for (int m = 0; m < 2; ++m) {
         Path filePath = new Path(tablePath, "part-m-0000" + Integer.toString(m));
         if (fs.exists(filePath)) {
           ++numPartFiles;

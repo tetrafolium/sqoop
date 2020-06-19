@@ -40,7 +40,7 @@ public class HBaseImportAddRowKeyTest extends HBaseTestCase {
 
   @Parameterized.Parameters(name = "bulkLoad = {0}")
   public static Iterable<? extends Object> bulkLoadParameters() {
-    return Arrays.asList(new Boolean[] { false } , new Boolean[] { true } );
+    return Arrays.asList(new Boolean[] { false }, new Boolean[] { true });
   }
 
   private String[] columnTypes;

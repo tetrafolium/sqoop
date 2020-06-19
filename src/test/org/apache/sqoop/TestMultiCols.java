@@ -44,12 +44,12 @@ public class TestMultiCols extends ImportJobTestCase {
    * @param validateLine the text to expect as a toString() of the entire row,
    * as imported by the tool
    */
-  private void verifyTypes(String [] types , String [] insertVals,
+  private void verifyTypes(String [] types, String [] insertVals,
       String validateLine) {
     verifyTypes(types, insertVals, validateLine, null);
   }
 
-  private void verifyTypes(String [] types , String [] insertVals,
+  private void verifyTypes(String [] types, String [] insertVals,
       String validateLine, String [] importColumns) {
 
     createTableWithColTypes(types, insertVals);

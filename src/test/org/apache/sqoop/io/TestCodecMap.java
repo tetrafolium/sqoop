@@ -74,8 +74,8 @@ public class TestCodecMap  {
     verifyShortName("default", "org.apache.hadoop.io.compress.DefaultCodec");
 
     thrown.expect(UnsupportedCodecException.class);
-    thrown.reportMissingExceptionWithMessage("Expected UnsupportedCodecException with invalid codec name during getting " +
-        "short codec name");
+    thrown.reportMissingExceptionWithMessage("Expected UnsupportedCodecException with invalid codec name during getting "
+        + "short codec name");
     verifyShortName("NONE", "bogus");
   }
 

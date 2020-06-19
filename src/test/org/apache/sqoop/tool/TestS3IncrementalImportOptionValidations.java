@@ -65,7 +65,8 @@ public class TestS3IncrementalImportOptionValidations {
 
     private ImportTool importTool;
 
-    public TestS3IncrementalImportOptionValidations(SqoopOptions.IncrementalMode incrementalMode) {this.incrementalMode = incrementalMode;}
+    public TestS3IncrementalImportOptionValidations(SqoopOptions.IncrementalMode incrementalMode) {
+        this.incrementalMode = incrementalMode;}
 
     @Before
     public void before() {

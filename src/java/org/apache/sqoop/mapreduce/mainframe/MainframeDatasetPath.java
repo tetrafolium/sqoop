@@ -31,16 +31,16 @@ import org.apache.hadoop.conf.Configuration;
 
 public class MainframeDatasetPath {
 
-	private static final Log LOG =
-		      LogFactory.getLog(MainframeDatasetPath.class);	
-	private String datasetName;
-	private MainframeDatasetType datasetType;
-	private String dsFolderName = null;
-	private String dsFileName = null;
-	
-	// default constructor
-	public MainframeDatasetPath(){}
-	
+        private static final Log LOG =
+                      LogFactory.getLog(MainframeDatasetPath.class);    
+        private String datasetName;
+        private MainframeDatasetType datasetType;
+        private String dsFolderName = null;
+        private String dsFileName = null;
+        
+        // default constructor
+        public MainframeDatasetPath(){}
+        
 	// constructor that takes dataset name job configuration
 	public MainframeDatasetPath(String dsName, Configuration conf) throws Exception {
 		String inputName
@@ -82,7 +82,9 @@ public class MainframeDatasetPath {
 	      // so in this case, we should return blah1.blah2
 	      int lastDotIndex = this.datasetName.lastIndexOf(".");
 	      // if not found, it is probably in the root
-	      if (lastDotIndex == -1) { this.datasetName = ""; } else {
+	      if (lastDotIndex == -1) {
+           this.datasetName = "";
+       } else {
 	        // if found, return the truncated name
 	        dsFolderName = this.datasetName.substring(0, lastDotIndex);
 	        if (lastDotIndex + 1 < this.datasetName.length()) {
@@ -107,10 +109,15 @@ public class MainframeDatasetPath {
 	
 	// overloaded setter to parse string
 	public void setMainframeDatasetType(String dsType) throws ParseException {
-		if (dsType.equals("s")) { this.datasetType = MainframeDatasetType.SEQUENTIAL; }
-		else if (dsType.equals("p")) { this.datasetType = MainframeDatasetType.PARTITIONED; }
-		else if (dsType.equals("g")) { this.datasetType = MainframeDatasetType.GDG; }
-		else { throw new ParseException(String.format("Invalid data set type specified: %s",dsType), 0); }
+		if (dsType.equals("s")) {
+      this.datasetType = MainframeDatasetType.SEQUENTIAL;
+  } else if (dsType.equals("p")) {
+      this.datasetType = MainframeDatasetType.PARTITIONED;
+  } else if (dsType.equals("g")) {
+      this.datasetType = MainframeDatasetType.GDG;
+  } else {
+      throw new ParseException(String.format("Invalid data set type specified: %s",dsType), 0);
+  }
 	}
 	
 	public String getMainframeDatasetName() {

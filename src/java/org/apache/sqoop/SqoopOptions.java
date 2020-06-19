@@ -2518,13 +2518,15 @@ public class SqoopOptions implements Cloneable {
 
   // return whether the dataset is on tape
   public Boolean getMainframeInputDatasetTape() {
-	  if (mainframeInputDatasetTape == null) { return false; }
-	  return Boolean.parseBoolean(mainframeInputDatasetTape);
+          if (mainframeInputDatasetTape == null) {
+              return false;
+          }
+          return Boolean.parseBoolean(mainframeInputDatasetTape);
   }
 
   // sets whether the dataset is on tape
   public void setMainframeInputDatasetTape(String txtIsFromTape) {
-	  mainframeInputDatasetTape = Boolean.valueOf(Boolean.parseBoolean(txtIsFromTape)).toString();
+          mainframeInputDatasetTape = Boolean.valueOf(Boolean.parseBoolean(txtIsFromTape)).toString();
   }
   // returns the buffer size set.
   public Integer getBufferSize() {
@@ -2860,11 +2862,11 @@ public class SqoopOptions implements Cloneable {
   }
 
   public void setAutoResetToOneMapper(boolean b) {
-	 this.autoResetToOneMapper = b;
+         this.autoResetToOneMapper = b;
   }
 
   public boolean getAutoResetToOneMapper() {
-	return this.autoResetToOneMapper;
+        return this.autoResetToOneMapper;
   }
 
   public String getHCatalogPartitionKeys() {

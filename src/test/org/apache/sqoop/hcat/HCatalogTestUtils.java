@@ -713,7 +713,7 @@ public final class HCatalogTestUtils {
       statement.close();
     }
     statement = conn.prepareStatement(
-      getSqlCreateTableStatement(table, escapeIdMsgCols ,extraCols),
+      getSqlCreateTableStatement(table, escapeIdMsgCols,extraCols),
       ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
     try {
       statement.executeUpdate();

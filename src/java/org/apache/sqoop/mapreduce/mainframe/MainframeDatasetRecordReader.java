@@ -110,6 +110,6 @@ public abstract class MainframeDatasetRecordReader <T extends DBWritable>
     return conf;
   }
 
-  protected abstract boolean getNextRecord (T datasetRecord) throws IOException;
+  protected abstract boolean getNextRecord(T datasetRecord) throws IOException;
 
 }

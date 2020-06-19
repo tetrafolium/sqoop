@@ -315,7 +315,7 @@ public class OracleConnectionFactoryTest extends OraOopTestCase {
     Assert.assertEquals(0, statements.size());
 
     conf.set(OraOopConstants.ORAOOP_SESSION_INITIALIZATION_STATEMENTS
-        , "\ta");
+, "\ta");
     statements =
         OracleConnectionFactory
             .parseOraOopSessionInitializationStatements(conf);
@@ -355,14 +355,14 @@ public class OracleConnectionFactoryTest extends OraOopTestCase {
     if (!actual.equalsIgnoreCase(expected)) {
       Assert.fail(String.format(
         "Expected a session initialization statement of \"%s\", but got \"%s\"."
-                  , expected, actual));
+, expected, actual));
     }
     actual = statements.get(1);
     expected = "b=2/3";
     if (!actual.equalsIgnoreCase(expected)) {
       Assert.fail(String.format(
         "Expected a session initialization statement of \"%s\", but got \"%s\"."
-                  , expected, actual));
+, expected, actual));
     }
 
     // Expressions with default values...
@@ -380,14 +380,14 @@ public class OracleConnectionFactoryTest extends OraOopTestCase {
     if (!actual.equalsIgnoreCase(expected)) {
       Assert.fail(String.format(
         "Expected a session initialization statement of \"%s\", but got \"%s\"."
-                  , expected, actual));
+, expected, actual));
     }
     actual = statements.get(1);
     expected = "d=15/90";
     if (!actual.equalsIgnoreCase(expected)) {
       Assert.fail(String.format(
         "Expected a session initialization statement of \"%s\", but got \"%s\"."
-                  , expected, actual));
+, expected, actual));
     }
 
   }

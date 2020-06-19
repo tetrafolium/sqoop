@@ -158,7 +158,7 @@ public class TextSplitter extends BigDecimalSplitter {
 
 
     if (minVal.compareTo(maxVal) > 0) {
-        throw new ValidationException( minVal + " is greater than " + maxVal);
+        throw new ValidationException(minVal + " is greater than " + maxVal);
     }
 
     List<BigDecimal> splitPoints = split(
@@ -188,9 +188,9 @@ public class TextSplitter extends BigDecimalSplitter {
   /**
    * Return string after escaping single quotes
    */
-  private String escapeSingleQuotesInSql (String val) {
+  private String escapeSingleQuotesInSql(String val) {
     if (val == null) {
-	  return null;
+          return null;
     }
 
     return val.replaceAll("'", "''");

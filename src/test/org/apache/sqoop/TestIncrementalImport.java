@@ -1308,16 +1308,16 @@ public class TestIncrementalImport  {
     assertDirOfNumbers(TABLE_NAME, 20);
   }
   @Test
-	public void testIncrementalHiveAppendEmptyThenFull() throws Exception {
-		// This is to test Incremental Hive append feature. SQOOP-2470
-		final String TABLE_NAME = "incrementalHiveAppendEmptyThenFull";
-		Configuration conf = newConf();
-		conf.set(ConnFactory.FACTORY_CLASS_NAMES_KEY,
-				InstrumentHsqldbManagerFactory.class.getName());
-		clearDir(TABLE_NAME);
-		createIdTable(TABLE_NAME, 0);
-		List<String> args = new ArrayList<String>();
-		args.add("--connect");
+        public void testIncrementalHiveAppendEmptyThenFull() throws Exception {
+                // This is to test Incremental Hive append feature. SQOOP-2470
+                final String TABLE_NAME = "incrementalHiveAppendEmptyThenFull";
+                Configuration conf = newConf();
+                conf.set(ConnFactory.FACTORY_CLASS_NAMES_KEY,
+                                InstrumentHsqldbManagerFactory.class.getName());
+                clearDir(TABLE_NAME);
+                createIdTable(TABLE_NAME, 0);
+                List<String> args = new ArrayList<String>();
+                args.add("--connect");
 		args.add(SOURCE_DB_URL);
 		args.add("--table");
 		args.add(TABLE_NAME);

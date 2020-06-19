@@ -187,18 +187,18 @@ public class PGBulkloadManagerManualTest extends TestExport {
     // PGBulkloadManager does not support --columns option.
   }
 
-	@Test
+        @Test
   public void testMultiReduceExport() throws IOException, SQLException {
     multiFileTest(2, 10, 2, "-D", "mapred.reduce.tasks=2");
   }
 
-	@Test
+        @Test
   public void testMultiReduceExportWithNewProp()
       throws IOException, SQLException {
     multiFileTest(2, 10, 2, "-D", "mapreduce.job.reduces=2");
   }
 
-	@Test
+        @Test
   public void testExportWithTablespace() throws IOException, SQLException {
     multiFileTest(1, 10, 1,
                   "-D", "pgbulkload.staging.tablespace=" + TABLESPACE);

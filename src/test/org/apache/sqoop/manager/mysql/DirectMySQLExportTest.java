@@ -51,7 +51,7 @@ import static org.junit.Assert.fail;
 /**
  * Test the DirectMySQLManager implementation's exportJob() functionality.
  */
-@Category( MysqlTest.class)
+@Category(MysqlTest.class)
 public class DirectMySQLExportTest extends TestExport {
 
   public static final Log LOG = LogFactory.getLog(

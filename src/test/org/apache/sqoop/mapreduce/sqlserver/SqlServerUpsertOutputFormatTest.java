@@ -62,8 +62,7 @@ public class SqlServerUpsertOutputFormatTest {
       cls =
         Class
         .forName("org.apache.hadoop.mapreduce.task.TaskAttemptContextImpl");
-    }
-    catch(ClassNotFoundException cnfe) {
+    } catch(ClassNotFoundException cnfe) {
       // Not hadoop 2.0
     }
     if (cls == null) {
@@ -71,8 +70,7 @@ public class SqlServerUpsertOutputFormatTest {
         cls =
           Class
           .forName("org.apache.hadoop.mapreduce.task.TaskAttemptContext");
-      }
-      catch(ClassNotFoundException cnfe) {
+      } catch(ClassNotFoundException cnfe) {
         // Something wrong
       }
     }

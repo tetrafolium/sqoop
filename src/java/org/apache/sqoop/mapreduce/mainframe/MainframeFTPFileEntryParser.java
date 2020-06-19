@@ -29,16 +29,16 @@ import org.apache.commons.net.ftp.parser.ConfigurableFTPFileEntryParserImpl;
 
 public class MainframeFTPFileEntryParser extends ConfigurableFTPFileEntryParserImpl {
 
-	/* Volume Unit    Referred Ext Used Recfm Lrecl BlkSz Dsorg Dsname
-	 * xxx300 3390   2016/05/25  1   45  VB    2349 27998  PS  UNLOAD.EDH.UNLOADED
-	 * x31167 Tape                                             UNLOAD.EDH.UNLOADT
-	 * xxx305 3390   2016/05/23  1   45  VB    2349 27998  PS  UNLOAD.EDH.UNLOAD1
-	 * Migrated                                                DEV.DATA
-	 * Migrated                                                DUMMY.DATA
-	 * OVR343 3390   2018/01/23  1    1  FB     132 27984  PS  EMPTY
-	 * Migrated                                                JCL.CNTL
-	 * OVR346 3390   2018/01/22  1    1  FB      80 27920  PS  MIXED.FB80
-	 * Migrated                                                PLAIN.FB80
+        /* Volume Unit    Referred Ext Used Recfm Lrecl BlkSz Dsorg Dsname
+         * xxx300 3390   2016/05/25  1   45  VB    2349 27998  PS  UNLOAD.EDH.UNLOADED
+         * x31167 Tape                                             UNLOAD.EDH.UNLOADT
+         * xxx305 3390   2016/05/23  1   45  VB    2349 27998  PS  UNLOAD.EDH.UNLOAD1
+         * Migrated                                                DEV.DATA
+         * Migrated                                                DUMMY.DATA
+         * OVR343 3390   2018/01/23  1    1  FB     132 27984  PS  EMPTY
+         * Migrated                                                JCL.CNTL
+         * OVR346 3390   2018/01/22  1    1  FB      80 27920  PS  MIXED.FB80
+         * Migrated                                                PLAIN.FB80
 	 * OVR341 3390   2018/01/23  1    9  VA     125   129  PS  PRDA.SPFLOG1.LIST
 	 * G20427 Tape                                             UNLOAD.ABCDE.ZZ9UYT.FB.TAPE
 	 * SEM352 3390   2018/01/23  1    1  FB     150  1500  PS  USER.BRODCAST

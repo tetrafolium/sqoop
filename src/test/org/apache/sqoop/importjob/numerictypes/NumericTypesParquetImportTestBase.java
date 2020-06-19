@@ -64,7 +64,7 @@ public abstract class NumericTypesParquetImportTestBase<T extends ParquetTestCon
     MessageType parquetSchema = reader.readParquetSchema();
 
     String[] types = configuration.getTypes();
-    for (int i = 0; i < types.length; i ++) {
+    for (int i = 0; i < types.length; i++) {
       String type = types[i];
       if (isNumericSqlType(type)) {
         OriginalType parquetFieldType = parquetSchema.getFields().get(i).getOriginalType();

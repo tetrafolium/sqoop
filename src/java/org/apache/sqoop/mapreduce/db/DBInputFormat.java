@@ -187,8 +187,7 @@ extends InputFormat<LongWritable, T> implements Configurable  {
           this.connection.setTransactionIsolation(
             Connection.TRANSACTION_READ_UNCOMMITTED);
         }
-      }
-      else {
+      } else {
         LOG.info("Using read commited transaction isolation");
         this.connection.setTransactionIsolation(
           Connection.TRANSACTION_READ_COMMITTED);
@@ -307,10 +306,14 @@ extends InputFormat<LongWritable, T> implements Configurable  {
       throw new IOException("Got SQLException", e);
     } finally {
       try {
-        if (results != null) { results.close(); }
+        if (results != null) {
+            results.close();
+        }
       } catch (SQLException e1) { /* ignored */ }
       try {
-        if (statement != null) { statement.close(); }
+        if (statement != null) {
+            statement.close();
+        }
       } catch (SQLException e1) { /* ignored */ }
 
       closeConnection();

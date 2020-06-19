@@ -91,8 +91,8 @@ public class HBaseImportTest extends HBaseTestCase {
 
   @Test
   public void testAppendSucceeds() throws IOException {
-	// Test that we can create a table and then import multiple rows
-	// validate for append scenario with ID column(DATA_COL3)
+        // Test that we can create a table and then import multiple rows
+        // validate for append scenario with ID column(DATA_COL3)
     String [] argv = getArgv(true, "AppendTable", "AppendColumnFamily", true, null);
     String [] types = { "INT", "INT", "INT", "DATETIME" };
     String [] vals = { "0", "1", "1", "'2017-03-20'" };

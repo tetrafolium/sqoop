@@ -90,7 +90,7 @@ public abstract class LobAvroImportTestCase extends ImportJobTestCase {
     super.tearDown();
   }
 
-  protected String [] getArgv(String ... additionalArgs) {
+  protected String [] getArgv(String... additionalArgs) {
     // Import every column of the table
     String [] colNames = getColNames();
     String splitByCol = colNames[0];

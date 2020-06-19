@@ -85,10 +85,14 @@ public class MockResultSet implements ResultSet {
     }
 
 
-    public long position(Blob pattern, long start) { return 0; }
-    public long position(byte[] pattern, long start) { return 0; }
-    public OutputStream  setBinaryStream(long pos) { return null; }
-    public int setBytes(long pos, byte[] bytes) { return 0; }
+    public long position(Blob pattern, long start) {
+        return 0; }
+    public long position(byte[] pattern, long start) {
+        return 0; }
+    public OutputStream  setBinaryStream(long pos) {
+        return null; }
+    public int setBytes(long pos, byte[] bytes) {
+        return 0; }
     public int setBytes(long pos, byte[] bytes, int offset, int len) {
       return 0;
     }
@@ -129,11 +133,16 @@ public class MockResultSet implements ResultSet {
       return CLOB_DATA.length();
     }
 
-    public long position(Clob searchstr, long start) { return 0; }
-    public long position(String searchstr, long start) { return 0; }
-    public OutputStream setAsciiStream(long pos) { return null; }
-    public Writer setCharacterStream(long pos) { return null; }
-    public int setString(long pos, String str) { return 0; }
+    public long position(Clob searchstr, long start) {
+        return 0; }
+    public long position(String searchstr, long start) {
+        return 0; }
+    public OutputStream setAsciiStream(long pos) {
+        return null; }
+    public Writer setCharacterStream(long pos) {
+        return null; }
+    public int setString(long pos, String str) {
+        return 0; }
     public int setString(long pos, String str, int offset, int len) {
       return 0;
     }

@@ -149,7 +149,7 @@ public class AccumuloMutationProcessor implements Closeable, Configurable,
         try {
           this.table.addMutation(m);
         } catch (MutationsRejectedException ex) {
-          throw new IOException("Mutation rejected" , ex);
+          throw new IOException("Mutation rejected", ex);
         }
       }
     }

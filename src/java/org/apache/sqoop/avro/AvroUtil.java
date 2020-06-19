@@ -317,8 +317,8 @@ public final class AvroUtil {
       if (configuredPrecision != null) {
         precision = configuredPrecision;
       } else {
-        throw new RuntimeException("Invalid precision for Avro Schema. Please specify a default precision with the -D" +
-            ConfigurationConstants.PROP_AVRO_DECIMAL_PRECISION + " flag to avoid this issue.");
+        throw new RuntimeException("Invalid precision for Avro Schema. Please specify a default precision with the -D"
+            + ConfigurationConstants.PROP_AVRO_DECIMAL_PRECISION + " flag to avoid this issue.");
       }
       Integer configuredScale = ConfigurationHelper.getIntegerConfigIfExists(conf, ConfigurationConstants.PROP_AVRO_DECIMAL_SCALE);
       if (configuredScale != null) {

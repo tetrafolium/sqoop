@@ -112,7 +112,7 @@ public class TestAllTables extends ImportJobTestCase {
       }
 
       String [] types = { "INT NOT NULL PRIMARY KEY", "VARCHAR(32)" };
-      String [] vals = { Integer.toString(i++) , wrappedStr };
+      String [] vals = { Integer.toString(i++), wrappedStr };
       this.createTableWithColTypes(types, vals);
       this.tableNames.add(this.getTableName());
       this.removeTableDir();

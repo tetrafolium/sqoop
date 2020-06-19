@@ -85,9 +85,11 @@ public class SqoopJobDataPublisher {
             return url;
         }
 
-        public long getStartTime() { return startTime; }
+        public long getStartTime() {
+            return startTime; }
 
-        public long getEndTime() { return endTime; }
+        public long getEndTime() {
+            return endTime; }
 
         private void init(String operation, String url, String user, String storeType, String storeTable,
                           String storeQuery, String hiveDB, String hiveTable, Properties commandLineOpts,
@@ -122,10 +124,10 @@ public class SqoopJobDataPublisher {
                 hiveDatabase = options.getHCatDatabaseName();
             } else if (ImportJobBase.OPERATION.equals(operation)){
                 // import job data
-                hiveTableName = options.doHiveImport() ?
-                        options.getHiveTableName() : options.getHCatTableName();
-                hiveDatabase = options.doHiveImport() ?
-                        options.getHiveDatabaseName() : options.getHCatDatabaseName();
+                hiveTableName = options.doHiveImport()
+                        ? options.getHiveTableName() : options.getHCatTableName();
+                hiveDatabase = options.doHiveImport()
+                        ? options.getHiveDatabaseName() : options.getHCatDatabaseName();
             } else {
                 throw new Exception("Data published for unsupported Operation "
                         + operation + " in SqoopJobDataPublisher");

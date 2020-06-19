@@ -64,6 +64,7 @@ public class TestFileSystemUtil {
 
   public static final class MyFileSystem extends RawLocalFileSystem {
     @Override
-    public URI getUri() { return URI.create("my:///"); }
+    public URI getUri() {
+        return URI.create("my:///"); }
   }
 }

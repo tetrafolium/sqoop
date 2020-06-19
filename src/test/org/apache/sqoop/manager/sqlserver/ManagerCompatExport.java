@@ -494,16 +494,16 @@ public abstract class ManagerCompatExport extends ExportJobTestCase {
       fs.delete(tablePath, true);
       System.out.println("Warehouse dir deleted");
     } catch (IOException e) {
-      LOG.error("Setup fail with IOException: " +
-          StringUtils.stringifyException(e));
+      LOG.error("Setup fail with IOException: "
+          + StringUtils.stringifyException(e));
     }
     if (useHsqldbTestServer()) {
       // throw away any existing data that might be in the database.
       try {
         this.getTestServer().dropExistingSchema();
       } catch (SQLException sqlE) {
-        LOG.error("Setup fail with SQLException: " +
-            StringUtils.stringifyException(sqlE));
+        LOG.error("Setup fail with SQLException: "
+            + StringUtils.stringifyException(sqlE));
         fail(sqlE.toString());
       }
     }

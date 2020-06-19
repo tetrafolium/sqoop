@@ -178,8 +178,8 @@ public class GenericJobStorage extends JobStorage {
 
   protected void validateMetastoreConnectionString(String metastoreConnectStr) {
     if (!isDbSupported(metastoreConnectStr)) {
-      String errorMessage = metastoreConnectStr + " is an invalid connection string or the required RDBMS is not supported." +
-          "Supported RDBMSs are: " + SUPPORTED_DRIVERS.toString();
+      String errorMessage = metastoreConnectStr + " is an invalid connection string or the required RDBMS is not supported."
+          + "Supported RDBMSs are: " + SUPPORTED_DRIVERS.toString();
       throw new RuntimeException(errorMessage);
     }
   }

@@ -75,7 +75,7 @@ public class MySQLUpsertOutputFormat<K extends SqoopRecord, V>
       // with the operations in the update thread.
       Connection conn = getConnection();
       synchronized (conn) {
-	  stmt = conn.prepareStatement(getUpdateStatement(userRecords.size()));
+          stmt = conn.prepareStatement(getUpdateStatement(userRecords.size()));
       }
 
       // Inject the record parameters into the UPDATE and WHERE clauses.  This
@@ -113,7 +113,7 @@ public class MySQLUpsertOutputFormat<K extends SqoopRecord, V>
         if (i > 0) {
           sb.append("),(");
         }
-	for (int j = 0; j < columnNames.length; j++) {
+        for (int j = 0; j < columnNames.length; j++) {
           if (j > 0) {
             sb.append(", ");
           }

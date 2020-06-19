@@ -31,16 +31,16 @@ import org.junit.experimental.categories.Category;
 @Category(UnitTest.class)
 public class TestMainframeDatasetPath {
 
-	@Test
-	public void testCanGetFileNameOnSequential() throws Exception {
-		String dsName = "a.b.c.d";
-		String expectedFileName = "d";
-		MainframeDatasetPath p = new MainframeDatasetPath(dsName,MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE_SEQUENTIAL);
-		assertEquals(expectedFileName,p.getMainframeDatasetFileName());
-	}
-	
-	@Test
-	public void testCanGetFolderNameOnSequential() throws Exception {
+        @Test
+        public void testCanGetFileNameOnSequential() throws Exception {
+                String dsName = "a.b.c.d";
+                String expectedFileName = "d";
+                MainframeDatasetPath p = new MainframeDatasetPath(dsName,MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE_SEQUENTIAL);
+                assertEquals(expectedFileName,p.getMainframeDatasetFileName());
+        }
+        
+        @Test
+        public void testCanGetFolderNameOnSequential() throws Exception {
 		String dsName = "a.b.c.d";
 		String expectedFolderName = "a.b.c";
 		MainframeDatasetPath p = new MainframeDatasetPath(dsName,MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE_SEQUENTIAL);

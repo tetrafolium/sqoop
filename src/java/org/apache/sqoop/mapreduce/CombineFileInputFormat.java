@@ -410,8 +410,8 @@ public abstract class CombineFileInputFormat<K, V>
             addCreatedSplit(splits, getHosts(racks), validBlocks);
           } else {
             // There were a few blocks in this rack that
-        	// remained to be processed. Keep them in 'overflow' block list.
-        	// These will be combined later.
+                // remained to be processed. Keep them in 'overflow' block list.
+                // These will be combined later.
             overflowBlocks.addAll(validBlocks);
           }
         }

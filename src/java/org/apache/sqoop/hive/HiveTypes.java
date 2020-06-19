@@ -137,8 +137,7 @@ public final class HiveTypes {
         LOG.warn("Warning! Scale in the Hive table definition will be smaller than the actual scale of the column on storage! Hive may not be able to read data from this column.");
       }
       return String.format("%s (%d, %d)", HIVE_TYPE_DECIMAL, precision, scale);
-    }
-    else {
+    } else {
       return HIVE_TYPE_BINARY;
     }
   }

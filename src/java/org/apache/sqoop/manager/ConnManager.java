@@ -615,7 +615,7 @@ public abstract class ConnManager {
    * @param colNames Column names as provided by the user, etc.
    * @return
    */
-  public String [] escapeColNames(String ...colNames) {
+  public String [] escapeColNames(String...colNames) {
     String [] escaped = new String[colNames.length];
     int i = 0;
     for(String colName : colNames) {

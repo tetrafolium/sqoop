@@ -186,7 +186,7 @@ public class DBOutputFormat<K extends DBWritable, V>
     }
 
     public DBRecordWriter(Connection connection
-        , PreparedStatement statement) throws SQLException {
+, PreparedStatement statement) throws SQLException {
       this.connection = connection;
       this.statement = statement;
       this.connection.setAutoCommit(false);

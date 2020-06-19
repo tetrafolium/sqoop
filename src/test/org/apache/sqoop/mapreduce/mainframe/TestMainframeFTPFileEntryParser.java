@@ -32,12 +32,12 @@ import org.junit.experimental.categories.Category;
 
 @Category(UnitTest.class)
 public class TestMainframeFTPFileEntryParser {
-	static List<String> listing;
-	static MainframeFTPFileEntryParser parser2;
-	@BeforeClass
-	public static void setUpBeforeClass() throws Exception {
-		/* Volume Unit    Referred Ext Used Recfm Lrecl BlkSz Dsorg Dsname
-		 * xxx300 3390   2016/05/25  1   45  VB    2349 27998  PS  UNLOAD.EDH.UNLOADED
+        static List<String> listing;
+        static MainframeFTPFileEntryParser parser2;
+        @BeforeClass
+        public static void setUpBeforeClass() throws Exception {
+                /* Volume Unit    Referred Ext Used Recfm Lrecl BlkSz Dsorg Dsname
+                 * xxx300 3390   2016/05/25  1   45  VB    2349 27998  PS  UNLOAD.EDH.UNLOADED
 x31167 Tape                                                                               UNLOAD.EDH.UNLOADT
 xxx305 3390   2016/05/23  1   45  VB    2349 27998  PS  UNLOAD.EDH.UNLOAD1
 xxx305 3390   2016/05/25  1   45  VB    2349 27998  PS  UNLOAD.EDH.UNLOAD2
@@ -51,10 +51,10 @@ OVR341 3390   2018/01/23  1    9  VA     125   129  PS  PRDA.SPFLOG1.LIST
 G20427 Tape                                             UNLOAD.ABCDE.ZZ9UYT.FB.TAPE
 SEM352 3390   2018/01/23  1    1  FB     150  1500  PS  USER.BRODCAST
 OVR346 3390   2018/01/23  3    3  FB      80  6160  PO  USER.ISPPROF
-		 */
-		listing = new ArrayList<String>();
-		listing.add("Volume Unit    Referred Ext Used Recfm Lrecl BlkSz Dsorg Dsname");
-		listing.add("xxx300 3390   2016/05/25  1   45  VB    2349 27998  PS  UNLOAD.EDH.UNLOADED");
+                 */
+                listing = new ArrayList<String>();
+                listing.add("Volume Unit    Referred Ext Used Recfm Lrecl BlkSz Dsorg Dsname");
+                listing.add("xxx300 3390   2016/05/25  1   45  VB    2349 27998  PS  UNLOAD.EDH.UNLOADED");
 		listing.add("x31167 Tape                                                                               UNLOAD.EDH.UNLOADT");
 		listing.add("xxx305 3390   2016/05/23  1   45  VB    2349 27998  PS  UNLOAD.EDH.UNLOAD1");
 		listing.add("xxx305 3390   2016/05/25  1   45  VB    2349 27998  PS  UNLOAD.EDH.UNLOAD2");

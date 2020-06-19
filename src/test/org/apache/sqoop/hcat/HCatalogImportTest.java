@@ -459,7 +459,7 @@ public class HCatalogImportTest extends ImportJobTestCase {
               new HiveChar("1998", 20), new BigDecimal("1998"), KeyType.NOT_A_KEY),
       HCatalogTestUtils.colGenerator(HCatalogTestUtils.forIdx(5),
               "int", Types.INTEGER, HCatFieldSchema.Type.VARCHAR, 20, 0,
-              new HiveVarchar("2001", 20 ), new BigDecimal("2001"), KeyType.NOT_A_KEY),
+              new HiveVarchar("2001", 20), new BigDecimal("2001"), KeyType.NOT_A_KEY),
       HCatalogTestUtils.colGenerator(HCatalogTestUtils.forIdx(6),
               "int", Types.INTEGER, HCatFieldSchema.Type.CHAR, 20, 0,
               new HiveChar("2002", 20), new BigDecimal("2002"), KeyType.NOT_A_KEY),

@@ -106,8 +106,8 @@ public class AvroSchemaGenerator {
     TableClassName tableClassName = new TableClassName(options);
     String shortClassName = (tableName == null && options.getClassName() == null) ? DEFAULT_SCHEMA_NAME : tableClassName.getShortClassForTable(tableName);
     String avroTableName = (tableName == null ? TableClassName.QUERY_RESULT : tableName);
-    String avroName = schemaNameOverride != null ? schemaNameOverride :
-        (shortClassName == null ? avroTableName : shortClassName);
+    String avroName = schemaNameOverride != null ? schemaNameOverride
+        : (shortClassName == null ? avroTableName : shortClassName);
     String avroNamespace = tableClassName.getPackageForTable();
 
     String doc = "Sqoop import of " + avroTableName;
@@ -147,8 +147,7 @@ public class AvroSchemaGenerator {
   private boolean isLogicalTypeConversionEnabled() {
     if (ParquetFile.equals(options.getFileLayout())) {
       return options.getConf().getBoolean(ConfigurationConstants.PROP_ENABLE_PARQUET_LOGICAL_TYPE_DECIMAL, false);
-    }
-    else if (AvroDataFile.equals(options.getFileLayout())) {
+    } else if (AvroDataFile.equals(options.getFileLayout())) {
       return options.getConf().getBoolean(ConfigurationConstants.PROP_ENABLE_AVRO_LOGICAL_TYPE_DECIMAL, false);
     }
     return false;
@@ -167,13 +166,27 @@ public class AvroSchemaGenerator {
         LOG.info("Overriding type of column " + columnName + " to " + type);
       }
 
-      if (type.equalsIgnoreCase("INTEGER")) { return Type.INT; }
-      if (type.equalsIgnoreCase("LONG")) { return Type.LONG; }
-      if (type.equalsIgnoreCase("BOOLEAN")) { return Type.BOOLEAN; }
-      if (type.equalsIgnoreCase("FLOAT")) { return Type.FLOAT; }
-      if (type.equalsIgnoreCase("DOUBLE")) { return Type.DOUBLE; }
-      if (type.equalsIgnoreCase("STRING")) { return Type.STRING; }
-      if (type.equalsIgnoreCase("BYTES")) { return Type.BYTES; }
+      if (type.equalsIgnoreCase("INTEGER")) {
+          return Type.INT;
+      }
+      if (type.equalsIgnoreCase("LONG")) {
+          return Type.LONG;
+      }
+      if (type.equalsIgnoreCase("BOOLEAN")) {
+          return Type.BOOLEAN;
+      }
+      if (type.equalsIgnoreCase("FLOAT")) {
+          return Type.FLOAT;
+      }
+      if (type.equalsIgnoreCase("DOUBLE")) {
+          return Type.DOUBLE;
+      }
+      if (type.equalsIgnoreCase("STRING")) {
+          return Type.STRING;
+      }
+      if (type.equalsIgnoreCase("BYTES")) {
+          return Type.BYTES;
+      }
 
       // Mapping was not found
       throw new IllegalArgumentException("Cannot convert to AVRO type " + type);

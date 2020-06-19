@@ -703,7 +703,7 @@ public final class OraOopOracleQueries {
       OracleTable table, boolean escapingDisabled) throws SQLException {
 
     return getTableColumns(connection, table, false, null // <- dataTypesClause
-        , null, escapingDisabled); // <-columnNamesToOmit
+, null, escapingDisabled); // <-columnNamesToOmit
   }
 
   public static OracleTableColumns getTableColumns(Connection connection,
@@ -1303,11 +1303,11 @@ public final class OraOopOracleQueries {
 
     List<String> columnNames =
         getTableColumnNames(connection, tableToBeUpdated
-            , false // <- omitLobAndLongColumnsDuringImport
-            , OraOopConstants.Sqoop.Tool.EXPORT
-            , true // <- onlyOraOopSupportedTypes
-            , false // <- omitOraOopPseudoColumns
-            , escapingDisabled
+, false // <- omitLobAndLongColumnsDuringImport
+, OraOopConstants.Sqoop.Tool.EXPORT
+, true // <- onlyOraOopSupportedTypes
+, false // <- omitOraOopPseudoColumns
+, escapingDisabled
         );
 
     StringBuilder columnClause = new StringBuilder(2 * columnNames.size());

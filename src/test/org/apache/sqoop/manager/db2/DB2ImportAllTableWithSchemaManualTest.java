@@ -83,7 +83,7 @@ import static org.junit.Assert.fail;
 public class DB2ImportAllTableWithSchemaManualTest extends ImportJobTestCase {
 
   public static final Log LOG = LogFactory.getLog(
-		  DB2ImportAllTableWithSchemaManualTest.class.getName());
+                  DB2ImportAllTableWithSchemaManualTest.class.getName());
 
   static final String TABLE_NAME = "TEST.COMPANY";
   static final String TABLE_SCHEMA = "TEST";

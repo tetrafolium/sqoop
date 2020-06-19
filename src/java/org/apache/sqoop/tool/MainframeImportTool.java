@@ -71,9 +71,9 @@ public class MainframeImportTool extends ImportTool {
             .withLongOpt(DS_TYPE_ARG)
             .create());
     importOpts.addOption(OptionBuilder.withArgName("Dataset is on tape")
-    		.hasArg().withDescription("Dataset is on tape (true|false)")
-    		.withLongOpt(DS_TAPE_ARG)
-    		.create());
+                .hasArg().withDescription("Dataset is on tape (true|false)")
+                .withLongOpt(DS_TAPE_ARG)
+                .create());
 
     addValidationOpts(importOpts);
 
@@ -173,15 +173,15 @@ public class MainframeImportTool extends ImportTool {
     if (in.hasOption(DS_TYPE_ARG)) {
       out.setMainframeInputDatasetType(in.getOptionValue(DS_TYPE_ARG));
     } else {
-    	// set default data set type to partitioned
-    	out.setMainframeInputDatasetType(MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE_PARTITIONED);
+        // set default data set type to partitioned
+        out.setMainframeInputDatasetType(MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE_PARTITIONED);
     }
 
     if (in.hasOption(DS_TAPE_ARG)) {
-    	out.setMainframeInputDatasetTape(in.getOptionValue(DS_TAPE_ARG));
+        out.setMainframeInputDatasetTape(in.getOptionValue(DS_TAPE_ARG));
     } else {
-    	// set default tape value to false
-    	out.setMainframeInputDatasetTape("false");
+        // set default tape value to false
+        out.setMainframeInputDatasetTape("false");
     }
     if (in.hasOption(FMT_BINARYFILE_ARG)) {
       out.setMainframeFtpTransferMode(MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE_BINARY);
@@ -197,8 +197,7 @@ public class MainframeImportTool extends ImportTool {
       int bufSize = Integer.valueOf(in.getOptionValue(BUFFERSIZE_ARG));
       if (bufSize > 0) {
         out.setBufferSize(bufSize);
-      }
-      else {
+      } else {
         out.setBufferSize(MainframeConfiguration.MAINFRAME_FTP_TRANSFER_BINARY_DEFAULT_BUFFER_SIZE);
       }
     } else {
@@ -220,8 +219,8 @@ public class MainframeImportTool extends ImportTool {
     String dsType = options.getMainframeInputDatasetType();
     LOG.info("Dataset type: "+dsType);
     if (!dsType.equals(MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE_PARTITIONED)
-    		&& !dsType.equals(MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE_SEQUENTIAL)
-    		&& !dsType.equals(MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE_GDG)) {
+                && !dsType.equals(MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE_SEQUENTIAL)
+                && !dsType.equals(MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE_GDG)) {
       throw new InvalidOptionsException(
     		  "--" + DS_TYPE_ARG + " specified is invalid. " + HELP_STR);
     }

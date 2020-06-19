@@ -194,7 +194,7 @@ public class TestMainframeFTPClientUtils {
       List<String> files = MainframeFTPClientUtils.listSequentialDatasets("a.b.c.blah1", conf);
         Assert.assertEquals(1,files.size());
     } catch (IOException ioe) {
-		fail("No IOException should be thrown!");
+                fail("No IOException should be thrown!");
     }
   }
 
@@ -224,11 +224,11 @@ public class TestMainframeFTPClientUtils {
     conf.set(MainframeConfiguration.MAINFRAME_INPUT_DATASET_NAME,"a.b.c.blah1");
 
     try {
-		String dsName = conf.get(MainframeConfiguration.MAINFRAME_INPUT_DATASET_NAME);
-		List<String> files = MainframeFTPClientUtils.listSequentialDatasets(dsName, conf);
+                String dsName = conf.get(MainframeConfiguration.MAINFRAME_INPUT_DATASET_NAME);
+                List<String> files = MainframeFTPClientUtils.listSequentialDatasets(dsName, conf);
         Assert.assertEquals(0,files.size());
     } catch (IOException ioe) {
-		fail("No IOException should be thrown!");
+                fail("No IOException should be thrown!");
     }
   }
 
@@ -258,19 +258,19 @@ public class TestMainframeFTPClientUtils {
     conf.set(MainframeConfiguration.MAINFRAME_INPUT_DATASET_NAME,"a.b.c.blah1.");
 
     try {
-		String dsName = conf.get(MainframeConfiguration.MAINFRAME_INPUT_DATASET_NAME);
-		List<String> files = MainframeFTPClientUtils.listSequentialDatasets(dsName, conf);
+                String dsName = conf.get(MainframeConfiguration.MAINFRAME_INPUT_DATASET_NAME);
+                List<String> files = MainframeFTPClientUtils.listSequentialDatasets(dsName, conf);
         Assert.assertEquals(0,files.size());
     } catch (IOException ioe) {
-		String ioeString = ioe.getMessage();
-		Assert.assertEquals("Could not list datasets from a.b.c.blah1:java.io.IOException: Folder not found",ioeString);
+                String ioeString = ioe.getMessage();
+                Assert.assertEquals("Could not list datasets from a.b.c.blah1:java.io.IOException: Folder not found",ioeString);
     }
   }
   
   @Test
   public void testGdgGetLatest() {
-	  try {
-	      when(mockFTPClient.login("user", "pssword")).thenReturn(true);
+          try {
+              when(mockFTPClient.login("user", "pssword")).thenReturn(true);
 	      when(mockFTPClient.logout()).thenReturn(true);
 	      when(mockFTPClient.isConnected()).thenReturn(false);
 	      when(mockFTPClient.getReplyCode()).thenReturn(200);

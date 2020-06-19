@@ -334,8 +334,8 @@ public class SQLServerManager extends InformationSchemaManager {
     }
 
     if (cmdLine.hasOption(SqlServerManagerContextConfigurator.RESILIENT_OPTION)) {
-      LOG.warn("Sqoop will use resilient operations! In case of import, " +
-          "the split-by column also has to be specified, unique, and in ascending order.");
+      LOG.warn("Sqoop will use resilient operations! In case of import, "
+          + "the split-by column also has to be specified, unique, and in ascending order.");
     }
 
     identityInserts = cmdLine.hasOption(IDENTITY_INSERT);

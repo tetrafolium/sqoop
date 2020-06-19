@@ -99,6 +99,7 @@ public class AvroRecordReader<T>
   }
 
   @Override
-  public void close() throws IOException { reader.close(); }
+  public void close() throws IOException {
+      reader.close(); }
 }
 

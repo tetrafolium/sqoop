@@ -98,8 +98,7 @@ public class AvroTestUtils {
       if (expectedResults != null && expectedResults.length > i) {
         fail("More output data was expected");
       }
-    }
-    catch (IOException ioe) {
+    } catch (IOException ioe) {
       LOG.error("Issue with verifying the output", ioe);
       throw new RuntimeException(ioe);
     }

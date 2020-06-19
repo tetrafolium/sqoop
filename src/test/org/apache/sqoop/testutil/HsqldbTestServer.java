@@ -48,7 +48,9 @@ public class HsqldbTestServer {
   private static final String IN_MEM = "mem:";
   public static String getServerHost() {
     String host = System.getProperty("hsql.server.host", IN_MEM);
-    if (!host.endsWith("/")) { host += "/"; }
+    if (!host.endsWith("/")) {
+        host += "/";
+    }
     return host;
   }
 
@@ -103,7 +105,9 @@ public class HsqldbTestServer {
       LOG.info("Starting new hsqldb server; database=" + DATABASE_NAME);
       String tmpDir = System.getProperty("test.build.data", "/tmp/");
       String dbLocation = tmpDir + "/sqoop/testdb.file";
-      if (inMemoryDB) {dbLocation = IN_MEM; }
+      if (inMemoryDB) {
+          dbLocation = IN_MEM;
+      }
       server = new Server();
 
       server.setDatabaseName(0, DATABASE_NAME);

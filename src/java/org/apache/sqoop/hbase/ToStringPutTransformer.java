@@ -194,12 +194,12 @@ public class ToStringPutTransformer extends PutTransformer {
             put = new Put(Bytes.toBytes(rowKey));
             mutationList.add(put);
           }
-          if ( val instanceof byte[]) {
+          if (val instanceof byte[]) {
             put.addColumn(colFamilyBytes, getFieldNameBytes(colName),
                 (byte[])val);
           } else {
-	          put.addColumn(colFamilyBytes, getFieldNameBytes(colName),
-	              Bytes.toBytes(toHBaseString(val)));
+                  put.addColumn(colFamilyBytes, getFieldNameBytes(colName),
+                      Bytes.toBytes(toHBaseString(val)));
           }
           mutationList.add(put);
         } else {

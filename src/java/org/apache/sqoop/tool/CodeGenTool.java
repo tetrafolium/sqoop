@@ -91,8 +91,8 @@ public class CodeGenTool extends BaseSqoopTool {
     LOG.info("Beginning code generation");
 
     if (tableName != null && options.getFileLayout() == SqoopOptions.FileLayout.ParquetFile) {
-      String className = options.getClassName() != null ?
-          options.getClassName() : tableName;
+      String className = options.getClassName() != null
+          ? options.getClassName() : tableName;
       if (className.equalsIgnoreCase(tableName)) {
         className = "codegen_" + className;
         options.setClassName(className);

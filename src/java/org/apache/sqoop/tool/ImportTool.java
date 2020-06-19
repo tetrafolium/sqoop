@@ -470,8 +470,8 @@ public class ImportTool extends BaseSqoopTool {
 
         // Local job tracker needs jars in the classpath.
         if (options.getFileLayout() == SqoopOptions.FileLayout.ParquetFile) {
-          loadJars(options.getConf(), context.getJarFile(), ClassWriter.toJavaIdentifier("codegen_" +
-            context.getTableName()));
+          loadJars(options.getConf(), context.getJarFile(), ClassWriter.toJavaIdentifier("codegen_"
+            + context.getTableName()));
         } else {
           loadJars(options.getConf(), context.getJarFile(), context.getTableName());
         }
@@ -1040,16 +1040,16 @@ public class ImportTool extends BaseSqoopTool {
    * @param options the configured SqoopOptions to check
    */
   protected void validateImportOptions(SqoopOptions options)
-	      throws InvalidOptionsException {
-	    if (!allTables && options.getTableName() == null
-	        && options.getSqlQuery() == null) {
-	      throw new InvalidOptionsException(
-	          "--table or --" + SQL_QUERY_ARG + " is required for import. "
-	              + "(Or use sqoop import-all-tables.)"
-	              + HELP_STR);
-	    } else if (options.getExistingJarName() != null
-	        && options.getClassName() == null) {
-	      throw new InvalidOptionsException("Jar specified with --jar-file, but no "
+              throws InvalidOptionsException {
+            if (!allTables && options.getTableName() == null
+                && options.getSqlQuery() == null) {
+              throw new InvalidOptionsException(
+                  "--table or --" + SQL_QUERY_ARG + " is required for import. "
+                      + "(Or use sqoop import-all-tables.)"
+                      + HELP_STR);
+            } else if (options.getExistingJarName() != null
+                && options.getClassName() == null) {
+              throw new InvalidOptionsException("Jar specified with --jar-file, but no "
 	          + "class specified with --class-name." + HELP_STR);
 	    } else if (options.getTargetDir() != null
 	        && options.getWarehouseDir() != null) {
@@ -1140,8 +1140,8 @@ public class ImportTool extends BaseSqoopTool {
 	    }
 	    if (options.getNullStringValue() != null || options.getNullNonStringValue() != null) {
 	      throw new InvalidOptionsException(
-	              "The --direct option is not compatible with the --null-string or " +
-	                      "--null-non-string command for MySQL imports");
+	              "The --direct option is not compatible with the --null-string or "
+                       + "--null-non-string command for MySQL imports");
 	    }
 	  }
   /**

@@ -108,20 +108,20 @@ public class TestMainframeImportTool extends BaseSqoopTestCase {
   
   @Test
   public void testDataSetTypeOptionIsSet() throws ParseException, InvalidOptionsException {
-	  String[] args = new String[] { "--datasettype", MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE_GDG };
-	  ToolOptions toolOptions = new ToolOptions();
-	  SqoopOptions sqoopOption = new SqoopOptions();
-	  mfImportTool.configureOptions(toolOptions);
-	  sqoopOption = mfImportTool.parseArguments(args, null, sqoopOption, false);
-	  assertEquals(sqoopOption.getMainframeInputDatasetType(), MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE_GDG);
+          String[] args = new String[] { "--datasettype", MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE_GDG };
+          ToolOptions toolOptions = new ToolOptions();
+          SqoopOptions sqoopOption = new SqoopOptions();
+          mfImportTool.configureOptions(toolOptions);
+          sqoopOption = mfImportTool.parseArguments(args, null, sqoopOption, false);
+          assertEquals(sqoopOption.getMainframeInputDatasetType(), MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE_GDG);
   }
   
   @Test
   public void testDefaultDataSetTypeOptionIsSet() throws ParseException, InvalidOptionsException {
-	  String[] args = new String[] {};
-	  ToolOptions toolOptions = new ToolOptions();
-	  SqoopOptions sqoopOption = new SqoopOptions();
-	  mfImportTool.configureOptions(toolOptions);
+          String[] args = new String[] {};
+          ToolOptions toolOptions = new ToolOptions();
+          SqoopOptions sqoopOption = new SqoopOptions();
+          mfImportTool.configureOptions(toolOptions);
 	  sqoopOption = mfImportTool.parseArguments(args, null, sqoopOption, false);
 	  assertEquals(sqoopOption.getMainframeInputDatasetType(), MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE_PARTITIONED);
   }

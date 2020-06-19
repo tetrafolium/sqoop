@@ -178,8 +178,7 @@ public class SQLServerResilientExportOutputFormat<K extends SqoopRecord, V>
         if (currentList.size() > 0) {
           execThread.put(currentList);
         }
-      }
-      finally {
+      } finally {
         execThread.close();
         execThread.join();
       }
@@ -187,8 +186,8 @@ public class SQLServerResilientExportOutputFormat<K extends SqoopRecord, V>
       // Final check for any exceptions raised when writing to the database
       Exception lastException = execThread.getLastError();
       if (lastException != null) {
-        LOG.error("Asynchronous writer thread encountered the following " +
-          "exception: " + lastException.toString());
+        LOG.error("Asynchronous writer thread encountered the following "
+          + "exception: " + lastException.toString());
         throw new IOException(lastException);
       }
     }
