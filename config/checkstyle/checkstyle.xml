@@ -184,7 +184,9 @@
     <module name="IllegalInstantiation"/>
     <module name="InnerAssignment"/>
     <module name="MissingSwitchDefault"/>
+    <!-- ### Unable to instantiate 'RedundantThrows' class.
     <module name="RedundantThrows"/>
+    -->
     <module name="SimplifyBooleanExpression"/>
     <module name="SimplifyBooleanReturn"/>
     <module name="DefaultComesLast" />
