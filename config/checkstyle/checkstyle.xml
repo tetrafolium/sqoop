@@ -70,6 +70,7 @@
 
   <module name="FileLength"/>
   <module name="FileTabCharacter"/>
+  <module name="LineLength"/>
 
   <module name="TreeWalker">
     <!-- Checks for Javadoc comments.                     -->
@@ -112,7 +113,6 @@
 
     <!-- Checks for Size Violations.                    -->
     <!-- See http://checkstyle.sf.net/config_sizes.html -->
-    <module name="LineLength"/>
     <module name="MethodLength"/>
     <module name="ParameterNumber"/>
     <module name="OuterTypeNumber"/>
