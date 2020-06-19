@@ -1,5 +1,6 @@
 inspecode:
 
   unused:
+    ignore: src/test/
     options: [ --single-occurrence, --all-likelihoods ]
     thresholds: { num-issues: 999 }
