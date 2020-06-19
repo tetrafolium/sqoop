@@ -5,8 +5,9 @@ inspecode:
     thresholds: { num-issues: 999 }
 
   checkstyle:
+    #config-file: config/checkstyle/checkstyle.xml  # (auto-detected)
     auto-fix: true
-    thresholds: { num-issues: 999 }
+    thresholds: { num-issues: 895 }
 
   clang-format:
     auto-fix: true
@@ -53,4 +54,6 @@ inspecode:
   #  thresholds: { num-issues: 999 }
 
   unused:
-    thresholds: { num-issues: 999 }
+    ignore: src/test/
+    options: [ --single-occurrence, --all-likelihoods ]
+    thresholds: { num-issues: 111 }
