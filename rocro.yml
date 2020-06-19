@@ -2,7 +2,7 @@ inspecode:
 
   astyle:
     auto-fix: true
-    thresholds: { num-issues: 999 }
+    thresholds: { num-issues: 692 }
 
   checkstyle:
     #config-file: config/checkstyle/checkstyle.xml  # (auto-detected)
@@ -11,20 +11,20 @@ inspecode:
 
   clang-format:
     auto-fix: true
-    thresholds: { num-issues: 999 }
+    thresholds: { num-issues: 703 }
 
   cpd:
-    thresholds: { num-issues: 999 }
+    thresholds: { num-issues: 172 }
 
   #### not supported yet ??
   #fortify:
   #  thresholds: { num-issues: 999 }
 
   fossology:
-    thresholds: { num-issues: 999 }
+    thresholds: { num-issues: 7 }
 
   grep:
-    thresholds: { num-issues: 999 }
+    thresholds: { num-issues: 19 }
 
   ## FAILURE: Build failed with an exception.
   ##
@@ -43,15 +43,15 @@ inspecode:
   #  thresholds: { num-issues: 999 }
 
   jscpd:
-    thresholds: { num-issues: 999 }
+    thresholds: { num-issues: 774 }
 
   misspell:
     auto-fix: true
-    thresholds: { num-issues: 999 }
+    thresholds: { num-issues: 29 }
 
   pmd:
     auto-fix: true
-    thresholds: { num-issues: 999 }
+    thresholds: { num-issues: 89 }
 
   ## FAILURE: Build failed with an exception.
   ##
@@ -73,7 +73,7 @@ inspecode:
 
   uncrustify:
     auto-fix: true
-    thresholds: { num-issues: 999 }
+    thresholds: { num-issues: 703 }
 
   #### not supported yet ??
   #understand:
