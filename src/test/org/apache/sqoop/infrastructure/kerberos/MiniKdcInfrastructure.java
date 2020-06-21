@@ -20,8 +20,8 @@ package org.apache.sqoop.infrastructure.kerberos;
 
 public interface MiniKdcInfrastructure extends KerberosConfigurationProvider {
 
-  void start();
+    void start();
 
-  void stop();
+    void stop();
 
 }

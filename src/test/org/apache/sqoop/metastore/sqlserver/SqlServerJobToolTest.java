@@ -49,7 +49,7 @@ public class SqlServerJobToolTest extends JobToolTestBase {
 
     public SqlServerJobToolTest() {
         super(msSQLTestUtils.getDBConnectString(),
-                msSQLTestUtils.getDBUserName(),
-                msSQLTestUtils.getDBPassWord());
+              msSQLTestUtils.getDBUserName(),
+              msSQLTestUtils.getDBPassWord());
     }
 }

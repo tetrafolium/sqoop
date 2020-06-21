@@ -26,10 +26,10 @@ import org.junit.experimental.categories.Category;
 @Category(S3Test.class)
 public class TestS3IncrementalAppendSequenceFileImport extends AbstractTestIncrementalAppendSequenceFileImport {
 
-  @ClassRule
-  public static S3CredentialsRule credentialsRule = new S3CredentialsRule();
+    @ClassRule
+    public static S3CredentialsRule credentialsRule = new S3CredentialsRule();
 
-  public TestS3IncrementalAppendSequenceFileImport() {
-    super(credentialsRule);
-  }
+    public TestS3IncrementalAppendSequenceFileImport() {
+        super(credentialsRule);
+    }
 }

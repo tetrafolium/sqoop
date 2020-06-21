@@ -28,60 +28,62 @@ import java.util.List;
  */
 public class OracleImportJobTestConfiguration implements ImportJobTestConfiguration, AvroTestConfiguration, ParquetTestConfiguration, HiveTestConfiguration {
 
-  @Override
-  public String[] getTypes() {
-    return new String[]{"INT", "NUMBER(20)", "NUMBER(20,5)", "NUMBER(20,-5)", "NUMBER(*,5)",
-        "DECIMAL", "DECIMAL(20)", "DECIMAL(20,5)", "DECIMAL(20,-5)", "DECIMAL(*,5)"};
-  }
+    @Override
+    public String[] getTypes() {
+        return new String[] {"INT", "NUMBER(20)", "NUMBER(20,5)", "NUMBER(20,-5)", "NUMBER(*,5)",
+                             "DECIMAL", "DECIMAL(20)", "DECIMAL(20,5)", "DECIMAL(20,-5)", "DECIMAL(*,5)"
+                            };
+    }
 
-  @Override
-  public String[] getNames() {
-    return new String[]{"ID", "N2", "N3", "N4", "N5", "D1", "D2", "D3", "D4", "D5"};
-  }
+    @Override
+    public String[] getNames() {
+        return new String[] {"ID", "N2", "N3", "N4", "N5", "D1", "D2", "D3", "D4", "D5"};
+    }
 
-  @Override
-  public List<String[]> getSampleData() {
-    List<String[]> data = new ArrayList<>();
-    data.add(new String[]{"1", "1000000.05", "1000000.05", "1000000.05", "1000000.05",
-        "100.02", "1000000.05", "1000000.05", "1000000.05", "1000000.05"});
-    return data;
-  }
+    @Override
+    public List<String[]> getSampleData() {
+        List<String[]> data = new ArrayList<>();
+        data.add(new String[] {"1", "1000000.05", "1000000.05", "1000000.05", "1000000.05",
+                               "100.02", "1000000.05", "1000000.05", "1000000.05", "1000000.05"
+                              });
+        return data;
+    }
 
-  @Override
-  public String[] getExpectedResultsForAvro() {
-    String expectedRecord = "{\"ID\": 1, \"N2\": 1000000, \"N3\": 1000000.05000, \"N4\": 1000000, \"N5\": 1000000.05000, " +
-        "\"D1\": 100, \"D2\": 1000000, \"D3\": 1000000.05000, \"D4\": 1000000, \"D5\": 1000000.05000}";
-    String[] expectedResult = new String[1];
-    expectedResult[0] = expectedRecord;
-    return expectedResult;
-  }
+    @Override
+    public String[] getExpectedResultsForAvro() {
+        String expectedRecord = "{\"ID\": 1, \"N2\": 1000000, \"N3\": 1000000.05000, \"N4\": 1000000, \"N5\": 1000000.05000, " +
+                                "\"D1\": 100, \"D2\": 1000000, \"D3\": 1000000.05000, \"D4\": 1000000, \"D5\": 1000000.05000}";
+        String[] expectedResult = new String[1];
+        expectedResult[0] = expectedRecord;
+        return expectedResult;
+    }
 
-  @Override
-  public String[] getExpectedResultsForParquet() {
-    String expectedRecord = "1,1000000,1000000.05000,1000000,1000000.05000,100,1000000,1000000.05000,1000000,1000000.05000";
-    String[] expectedResult = new String[1];
-    expectedResult[0] = expectedRecord;
-    return expectedResult;
-  }
+    @Override
+    public String[] getExpectedResultsForParquet() {
+        String expectedRecord = "1,1000000,1000000.05000,1000000,1000000.05000,100,1000000,1000000.05000,1000000,1000000.05000";
+        String[] expectedResult = new String[1];
+        expectedResult[0] = expectedRecord;
+        return expectedResult;
+    }
 
-  @Override
-  public String toString() {
-    return getClass().getSimpleName();
-  }
+    @Override
+    public String toString() {
+        return getClass().getSimpleName();
+    }
 
-  @Override
-  public Object[] getExpectedResultsForHive() {
-    return new Object[]{
-        new BigDecimal("1"),
-        new BigDecimal("1000000"),
-        new BigDecimal("1000000.05000"),
-        new BigDecimal("1000000"),
-        new BigDecimal("1000000.05000"),
-        new BigDecimal("100"),
-        new BigDecimal("1000000"),
-        new BigDecimal("1000000.05000"),
-        new BigDecimal("1000000"),
-        new BigDecimal("1000000.05000")
-    };
-  }
+    @Override
+    public Object[] getExpectedResultsForHive() {
+        return new Object[] {
+                   new BigDecimal("1"),
+                   new BigDecimal("1000000"),
+                   new BigDecimal("1000000.05000"),
+                   new BigDecimal("1000000"),
+                   new BigDecimal("1000000.05000"),
+                   new BigDecimal("100"),
+                   new BigDecimal("1000000"),
+                   new BigDecimal("1000000.05000"),
+                   new BigDecimal("1000000"),
+                   new BigDecimal("1000000.05000")
+               };
+    }
 }

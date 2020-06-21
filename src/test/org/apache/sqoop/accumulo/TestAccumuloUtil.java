@@ -33,16 +33,16 @@ import static org.junit.Assert.assertTrue;
 @Category(UnitTest.class)
 public class TestAccumuloUtil {
 
-  @Test
-  public void testAccumuloPresent() {
-    assertTrue(AccumuloUtil.isAccumuloJarPresent());
-  }
+    @Test
+    public void testAccumuloPresent() {
+        assertTrue(AccumuloUtil.isAccumuloJarPresent());
+    }
 
-  @Test
-  public void testAccumuloNotPresent() {
-    AccumuloUtil.setAlwaysNoAccumuloJarMode(true);
-    boolean present = AccumuloUtil.isAccumuloJarPresent();
-    AccumuloUtil.setAlwaysNoAccumuloJarMode(false);
-    assertFalse(present);
-  }
+    @Test
+    public void testAccumuloNotPresent() {
+        AccumuloUtil.setAlwaysNoAccumuloJarMode(true);
+        boolean present = AccumuloUtil.isAccumuloJarPresent();
+        AccumuloUtil.setAlwaysNoAccumuloJarMode(false);
+        assertFalse(present);
+    }
 }

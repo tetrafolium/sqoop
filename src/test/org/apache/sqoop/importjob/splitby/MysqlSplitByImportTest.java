@@ -26,8 +26,8 @@ import org.junit.experimental.categories.Category;
 @Category(MysqlTest.class)
 public class MysqlSplitByImportTest extends SplitByImportTestBase {
 
-  @Override
-  public DatabaseAdapter createAdapter() {
-    return new MysqlDatabaseAdapter();
-  }
+    @Override
+    public DatabaseAdapter createAdapter() {
+        return new MysqlDatabaseAdapter();
+    }
 }

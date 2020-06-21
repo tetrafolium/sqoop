@@ -50,8 +50,8 @@ public class SqlServerSavedJobsTest extends SavedJobsTestBase {
 
     public SqlServerSavedJobsTest() {
         super(msSQLTestUtils.getDBConnectString(),
-                msSQLTestUtils.getDBUserName(),
-                msSQLTestUtils.getDBPassWord(),
-                JdbcDrivers.SQLSERVER.getDriverClass());
+              msSQLTestUtils.getDBUserName(),
+              msSQLTestUtils.getDBPassWord(),
+              JdbcDrivers.SQLSERVER.getDriverClass());
     }
 }

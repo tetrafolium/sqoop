@@ -23,19 +23,19 @@ package org.apache.sqoop.util;
  */
 public abstract class ErrorableThread extends Thread {
 
-  private volatile boolean error;
+    private volatile boolean error;
 
-  public ErrorableThread() {
-    this.error = false;
-  }
+    public ErrorableThread() {
+        this.error = false;
+    }
 
-  protected void setError() {
-    this.error = true;
-  }
+    protected void setError() {
+        this.error = true;
+    }
 
-  public boolean isErrored() {
-    return this.error;
-  }
+    public boolean isErrored() {
+        return this.error;
+    }
 
 }
 

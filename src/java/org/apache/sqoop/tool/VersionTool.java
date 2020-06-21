@@ -26,20 +26,20 @@ import org.apache.sqoop.cli.ToolOptions;
  */
 public class VersionTool extends BaseSqoopTool {
 
-  public VersionTool() {
-    super("version");
-  }
+    public VersionTool() {
+        super("version");
+    }
 
-  @Override
-  /** {@inheritDoc} */
-  public int run(SqoopOptions options) {
-    System.out.print(new org.apache.sqoop.SqoopVersion().toString());
-    return 0;
-  }
+    @Override
+    /** {@inheritDoc} */
+    public int run(SqoopOptions options) {
+        System.out.print(new org.apache.sqoop.SqoopVersion().toString());
+        return 0;
+    }
 
-  @Override
-  public void printHelp(ToolOptions opts) {
-    System.out.println("usage: sqoop " + getToolName());
-  }
+    @Override
+    public void printHelp(ToolOptions opts) {
+        System.out.println("usage: sqoop " + getToolName());
+    }
 }
 

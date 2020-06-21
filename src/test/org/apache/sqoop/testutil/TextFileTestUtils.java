@@ -36,7 +36,7 @@ public class TextFileTestUtils {
     private static final String DEFAULT_OUTPUT_FILE_NAME = "/part-m-00000";
 
     public static final Log LOG = LogFactory.getLog(
-            TextFileTestUtils.class.getName());
+                                      TextFileTestUtils.class.getName());
 
     /**
      * Verify results at the given tablePath.

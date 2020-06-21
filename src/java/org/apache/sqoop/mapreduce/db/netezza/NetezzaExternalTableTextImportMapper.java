@@ -26,14 +26,14 @@ import org.apache.hadoop.io.Text;
  * Netezza import mapper using external tables for text formats.
  */
 public class NetezzaExternalTableTextImportMapper
-  extends NetezzaExternalTableImportMapper<Text, NullWritable> {
+    extends NetezzaExternalTableImportMapper<Text, NullWritable> {
 
-  @Override
-  protected void writeRecord(Text text, Context context)
+    @Override
+    protected void writeRecord(Text text, Context context)
     throws IOException, InterruptedException {
-    // May be we should set the output to be String for faster performance
-    // There is no real benefit in changing it to Text and then
-    // converting it back in our case
-    context.write(text, NullWritable.get());
-  }
+        // May be we should set the output to be String for faster performance
+        // There is no real benefit in changing it to Text and then
+        // converting it back in our case
+        context.write(text, NullWritable.get());
+    }
 }

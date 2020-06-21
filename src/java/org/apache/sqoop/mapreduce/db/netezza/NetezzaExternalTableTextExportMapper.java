@@ -29,10 +29,10 @@ import org.apache.hadoop.io.Text;
 public class NetezzaExternalTableTextExportMapper extends
     NetezzaExternalTableExportMapper<LongWritable, Text> {
 
-  @Override
-  public void map(LongWritable key, Text text, Context context)
-      throws IOException, InterruptedException {
-    writeTextRecord(text);
-    context.progress();
-  }
+    @Override
+    public void map(LongWritable key, Text text, Context context)
+    throws IOException, InterruptedException {
+        writeTextRecord(text);
+        context.progress();
+    }
 }

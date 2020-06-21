@@ -29,20 +29,20 @@ import org.apache.sqoop.lib.SqoopRecord;
 public class MySQLRecordExportMapper
     extends MySQLExportMapper<LongWritable, SqoopRecord> {
 
-  /**
-   * Export the table to MySQL by using mysqlimport to write the data to the
-   * database.
-   *
-   * Expects one SqoopRecord as the value. Ignores the key.
-   */
-  @Override
-  public void map(LongWritable key, SqoopRecord val, Context context)
-      throws IOException, InterruptedException {
+    /**
+     * Export the table to MySQL by using mysqlimport to write the data to the
+     * database.
+     *
+     * Expects one SqoopRecord as the value. Ignores the key.
+     */
+    @Override
+    public void map(LongWritable key, SqoopRecord val, Context context)
+    throws IOException, InterruptedException {
 
-    writeRecord(val.toString(), null);
+        writeRecord(val.toString(), null);
 
-    // We don't emit anything to the OutputCollector because we wrote
-    // straight to mysql. Send a progress indicator to prevent a timeout.
-    context.progress();
-  }
+        // We don't emit anything to the OutputCollector because we wrote
+        // straight to mysql. Send a progress indicator to prevent a timeout.
+        context.progress();
+    }
 }

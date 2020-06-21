@@ -56,226 +56,226 @@ import static org.mockito.Mockito.when;
 @Category(UnitTest.class)
 public class TestTableDefWriter {
 
-  private static final String TEST_AVRO_SCHEMA = "{\"type\":\"record\",\"name\":\"IMPORT_TABLE_1\",\"fields\":[{\"name\":\"C1_VARCHAR\",\"type\":[\"null\",\"string\"]},{\"name\":\"C2_INTEGER\",\"type\":[\"null\",\"int\"]},{\"name\":\"_3C_CHAR\",\"type\":[\"null\",\"string\"]}]}";
+    private static final String TEST_AVRO_SCHEMA = "{\"type\":\"record\",\"name\":\"IMPORT_TABLE_1\",\"fields\":[{\"name\":\"C1_VARCHAR\",\"type\":[\"null\",\"string\"]},{\"name\":\"C2_INTEGER\",\"type\":[\"null\",\"int\"]},{\"name\":\"_3C_CHAR\",\"type\":[\"null\",\"string\"]}]}";
 
-  private static final String EXPECTED_CREATE_PARQUET_TABLE_STMNT = "CREATE TABLE IF NOT EXISTS `outputTable` ( `C1_VARCHAR` STRING, `C2_INTEGER` INT, `_3C_CHAR` STRING) STORED AS PARQUET";
+    private static final String EXPECTED_CREATE_PARQUET_TABLE_STMNT = "CREATE TABLE IF NOT EXISTS `outputTable` ( `C1_VARCHAR` STRING, `C2_INTEGER` INT, `_3C_CHAR` STRING) STORED AS PARQUET";
 
-  public static final Log LOG = LogFactory.getLog(
-      TestTableDefWriter.class.getName());
+    public static final Log LOG = LogFactory.getLog(
+                                      TestTableDefWriter.class.getName());
 
-  private ConnManager connManager;
+    private ConnManager connManager;
 
-  private Configuration conf;
+    private Configuration conf;
 
-  private SqoopOptions options;
+    private SqoopOptions options;
 
-  private TableDefWriter writer;
+    private TableDefWriter writer;
 
-  private String inputTable;
+    private String inputTable;
 
-  private String outputTable;
+    private String outputTable;
 
-  @Rule
-  public ExpectedException thrown = ExpectedException.none();
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
 
-  @Before
-  public void before() {
-    inputTable = HsqldbTestServer.getTableName();
-    outputTable = "outputTable";
-    connManager = mock(ConnManager.class);
-    conf = new Configuration();
-    options = new SqoopOptions();
-    when(connManager.getColumnTypes(anyString())).thenReturn(new SqlTypeMap<String, Integer>());
-    when(connManager.getColumnNames(anyString())).thenReturn(new String[]{});
+    @Before
+    public void before() {
+        inputTable = HsqldbTestServer.getTableName();
+        outputTable = "outputTable";
+        connManager = mock(ConnManager.class);
+        conf = new Configuration();
+        options = new SqoopOptions();
+        when(connManager.getColumnTypes(anyString())).thenReturn(new SqlTypeMap<String, Integer>());
+        when(connManager.getColumnNames(anyString())).thenReturn(new String[] {});
 
-    writer = new TableDefWriter(options, connManager, inputTable, outputTable, conf, false);
-  }
+        writer = new TableDefWriter(options, connManager, inputTable, outputTable, conf, false);
+    }
 
-  // Test getHiveOctalCharCode and expect an IllegalArgumentException.
-  private void expectExceptionInCharCode(int charCode) {
-    thrown.expect(IllegalArgumentException.class);
-    thrown.reportMissingExceptionWithMessage("Expected IllegalArgumentException with out-of-range Hive delimiter");
-    TableDefWriter.getHiveOctalCharCode(charCode);
-  }
+    // Test getHiveOctalCharCode and expect an IllegalArgumentException.
+    private void expectExceptionInCharCode(int charCode) {
+        thrown.expect(IllegalArgumentException.class);
+        thrown.reportMissingExceptionWithMessage("Expected IllegalArgumentException with out-of-range Hive delimiter");
+        TableDefWriter.getHiveOctalCharCode(charCode);
+    }
 
-  @Test
-  public void testHiveOctalCharCode() {
-    assertEquals("\\000", TableDefWriter.getHiveOctalCharCode(0));
-    assertEquals("\\001", TableDefWriter.getHiveOctalCharCode(1));
-    assertEquals("\\012", TableDefWriter.getHiveOctalCharCode((int) '\n'));
-    assertEquals("\\177", TableDefWriter.getHiveOctalCharCode(0177));
+    @Test
+    public void testHiveOctalCharCode() {
+        assertEquals("\\000", TableDefWriter.getHiveOctalCharCode(0));
+        assertEquals("\\001", TableDefWriter.getHiveOctalCharCode(1));
+        assertEquals("\\012", TableDefWriter.getHiveOctalCharCode((int) '\n'));
+        assertEquals("\\177", TableDefWriter.getHiveOctalCharCode(0177));
 
-    expectExceptionInCharCode(4096);
-    expectExceptionInCharCode(0200);
-    expectExceptionInCharCode(254);
-  }
+        expectExceptionInCharCode(4096);
+        expectExceptionInCharCode(0200);
+        expectExceptionInCharCode(254);
+    }
 
-  @Test
-  public void testDifferentTableNames() throws Exception {
-    String createTable = writer.getCreateTableStmt();
-    String loadData = writer.getLoadDataStmt();
+    @Test
+    public void testDifferentTableNames() throws Exception {
+        String createTable = writer.getCreateTableStmt();
+        String loadData = writer.getLoadDataStmt();
 
-    LOG.debug("Create table stmt: " + createTable);
-    LOG.debug("Load data stmt: " + loadData);
+        LOG.debug("Create table stmt: " + createTable);
+        LOG.debug("Load data stmt: " + loadData);
 
-    // Assert that the statements generated have the form we expect.
-    assertTrue(createTable.indexOf(
-        "CREATE TABLE IF NOT EXISTS `outputTable`") != -1);
-    assertTrue(loadData.indexOf("INTO TABLE `outputTable`") != -1);
-    assertTrue(loadData.indexOf("/" + inputTable + "'") != -1);
-  }
+        // Assert that the statements generated have the form we expect.
+        assertTrue(createTable.indexOf(
+                       "CREATE TABLE IF NOT EXISTS `outputTable`") != -1);
+        assertTrue(loadData.indexOf("INTO TABLE `outputTable`") != -1);
+        assertTrue(loadData.indexOf("/" + inputTable + "'") != -1);
+    }
 
-  @Test
-  public void testDifferentTargetDirs() throws Exception {
-    String targetDir = "targetDir";
+    @Test
+    public void testDifferentTargetDirs() throws Exception {
+        String targetDir = "targetDir";
 
-    // Specify a different target dir from input table name
-    options.setTargetDir(targetDir);
+        // Specify a different target dir from input table name
+        options.setTargetDir(targetDir);
 
-    String createTable = writer.getCreateTableStmt();
-    String loadData = writer.getLoadDataStmt();
+        String createTable = writer.getCreateTableStmt();
+        String loadData = writer.getLoadDataStmt();
 
-    LOG.debug("Create table stmt: " + createTable);
-    LOG.debug("Load data stmt: " + loadData);
+        LOG.debug("Create table stmt: " + createTable);
+        LOG.debug("Load data stmt: " + loadData);
 
-    // Assert that the statements generated have the form we expect.
-    assertTrue(createTable.indexOf(
-        "CREATE TABLE IF NOT EXISTS `" + outputTable + "`") != -1);
-    assertTrue(loadData.indexOf("INTO TABLE `" + outputTable + "`") != -1);
-    assertTrue(loadData.indexOf("/" + targetDir + "'") != -1);
-  }
+        // Assert that the statements generated have the form we expect.
+        assertTrue(createTable.indexOf(
+                       "CREATE TABLE IF NOT EXISTS `" + outputTable + "`") != -1);
+        assertTrue(loadData.indexOf("INTO TABLE `" + outputTable + "`") != -1);
+        assertTrue(loadData.indexOf("/" + targetDir + "'") != -1);
+    }
 
-  @Test
-  public void testPartitions() throws Exception {
-    options.setHivePartitionKey("ds");
-    options.setHivePartitionValue("20110413");
+    @Test
+    public void testPartitions() throws Exception {
+        options.setHivePartitionKey("ds");
+        options.setHivePartitionValue("20110413");
 
-    String createTable = writer.getCreateTableStmt();
-    String loadData = writer.getLoadDataStmt();
+        String createTable = writer.getCreateTableStmt();
+        String loadData = writer.getLoadDataStmt();
 
-    assertNotNull(createTable);
-    assertNotNull(loadData);
-    assertEquals("CREATE TABLE IF NOT EXISTS `outputTable` ( ) "
-        + "PARTITIONED BY (ds STRING) "
-        + "ROW FORMAT DELIMITED FIELDS TERMINATED BY '\\054' "
-        + "LINES TERMINATED BY '\\012' STORED AS TEXTFILE", createTable);
-    assertTrue(loadData.endsWith(" PARTITION (ds='20110413')"));
-  }
+        assertNotNull(createTable);
+        assertNotNull(loadData);
+        assertEquals("CREATE TABLE IF NOT EXISTS `outputTable` ( ) "
+                     + "PARTITIONED BY (ds STRING) "
+                     + "ROW FORMAT DELIMITED FIELDS TERMINATED BY '\\054' "
+                     + "LINES TERMINATED BY '\\012' STORED AS TEXTFILE", createTable);
+        assertTrue(loadData.endsWith(" PARTITION (ds='20110413')"));
+    }
 
-  @Test
-  public void testLzoSplitting() throws Exception {
-    options.setUseCompression(true);
-    options.setCompressionCodec("lzop");
+    @Test
+    public void testLzoSplitting() throws Exception {
+        options.setUseCompression(true);
+        options.setCompressionCodec("lzop");
 
-    String createTable = writer.getCreateTableStmt();
-    String loadData = writer.getLoadDataStmt();
+        String createTable = writer.getCreateTableStmt();
+        String loadData = writer.getLoadDataStmt();
 
-    assertNotNull(createTable);
-    assertNotNull(loadData);
-    assertEquals("CREATE TABLE IF NOT EXISTS `outputTable` ( ) "
-        + "ROW FORMAT DELIMITED FIELDS TERMINATED BY '\\054' "
-        + "LINES TERMINATED BY '\\012' STORED AS "
-        + "INPUTFORMAT 'com.hadoop.mapred.DeprecatedLzoTextInputFormat' "
-        + "OUTPUTFORMAT "
-        + "'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat'",
-        createTable);
-  }
+        assertNotNull(createTable);
+        assertNotNull(loadData);
+        assertEquals("CREATE TABLE IF NOT EXISTS `outputTable` ( ) "
+                     + "ROW FORMAT DELIMITED FIELDS TERMINATED BY '\\054' "
+                     + "LINES TERMINATED BY '\\012' STORED AS "
+                     + "INPUTFORMAT 'com.hadoop.mapred.DeprecatedLzoTextInputFormat' "
+                     + "OUTPUTFORMAT "
+                     + "'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat'",
+                     createTable);
+    }
 
-  @Test
-  public void testUserMappingNoDecimal() throws Exception {
-    options.setMapColumnHive("id=STRING,value=INTEGER");
+    @Test
+    public void testUserMappingNoDecimal() throws Exception {
+        options.setMapColumnHive("id=STRING,value=INTEGER");
 
-    Map<String, Integer> colTypes = new SqlTypeMap<String, Integer>();
-    colTypes.put("id", Types.INTEGER);
-    colTypes.put("value", Types.VARCHAR);
+        Map<String, Integer> colTypes = new SqlTypeMap<String, Integer>();
+        colTypes.put("id", Types.INTEGER);
+        colTypes.put("value", Types.VARCHAR);
 
-    setUpMockConnManager(HsqldbTestServer.getTableName(), colTypes);
+        setUpMockConnManager(HsqldbTestServer.getTableName(), colTypes);
 
-    String createTable = writer.getCreateTableStmt();
+        String createTable = writer.getCreateTableStmt();
 
-    assertNotNull(createTable);
+        assertNotNull(createTable);
 
-    assertTrue(createTable.contains("`id` STRING"));
-    assertTrue(createTable.contains("`value` INTEGER"));
+        assertTrue(createTable.contains("`id` STRING"));
+        assertTrue(createTable.contains("`value` INTEGER"));
 
-    assertFalse(createTable.contains("`id` INTEGER"));
-    assertFalse(createTable.contains("`value` STRING"));
-  }
+        assertFalse(createTable.contains("`id` INTEGER"));
+        assertFalse(createTable.contains("`value` STRING"));
+    }
 
-  @Test
-  public void testUserMappingWithDecimal() throws Exception {
-    options.setMapColumnHive("id=STRING,value2=DECIMAL(13,5),value1=INTEGER,value3=DECIMAL(4,5),value4=VARCHAR(255)");
+    @Test
+    public void testUserMappingWithDecimal() throws Exception {
+        options.setMapColumnHive("id=STRING,value2=DECIMAL(13,5),value1=INTEGER,value3=DECIMAL(4,5),value4=VARCHAR(255)");
 
-    Map<String, Integer> colTypes = new SqlTypeMap<String, Integer>();
-    colTypes.put("id", Types.INTEGER);
-    colTypes.put("value1", Types.VARCHAR);
-    colTypes.put("value2", Types.DOUBLE);
-    colTypes.put("value3", Types.FLOAT);
-    colTypes.put("value4", Types.CHAR);
+        Map<String, Integer> colTypes = new SqlTypeMap<String, Integer>();
+        colTypes.put("id", Types.INTEGER);
+        colTypes.put("value1", Types.VARCHAR);
+        colTypes.put("value2", Types.DOUBLE);
+        colTypes.put("value3", Types.FLOAT);
+        colTypes.put("value4", Types.CHAR);
 
-    setUpMockConnManager(HsqldbTestServer.getTableName(), colTypes);
+        setUpMockConnManager(HsqldbTestServer.getTableName(), colTypes);
 
-    String createTable = writer.getCreateTableStmt();
+        String createTable = writer.getCreateTableStmt();
 
-    assertNotNull(createTable);
+        assertNotNull(createTable);
 
-    assertTrue(createTable.contains("`id` STRING"));
-    assertTrue(createTable.contains("`value1` INTEGER"));
-    assertTrue(createTable.contains("`value2` DECIMAL(13,5)"));
-    assertTrue(createTable.contains("`value3` DECIMAL(4,5)"));
-    assertTrue(createTable.contains("`value4` VARCHAR(255)"));
+        assertTrue(createTable.contains("`id` STRING"));
+        assertTrue(createTable.contains("`value1` INTEGER"));
+        assertTrue(createTable.contains("`value2` DECIMAL(13,5)"));
+        assertTrue(createTable.contains("`value3` DECIMAL(4,5)"));
+        assertTrue(createTable.contains("`value4` VARCHAR(255)"));
 
-    assertFalse(createTable.contains("`id` INTEGER"));
-    assertFalse(createTable.contains("`value1` STRING"));
-    assertFalse(createTable.contains("`value2` DOUBLE"));
-    assertFalse(createTable.contains("`value3` FLOAT"));
-    assertFalse(createTable.contains("`value4` CHAR"));
-  }
+        assertFalse(createTable.contains("`id` INTEGER"));
+        assertFalse(createTable.contains("`value1` STRING"));
+        assertFalse(createTable.contains("`value2` DOUBLE"));
+        assertFalse(createTable.contains("`value3` FLOAT"));
+        assertFalse(createTable.contains("`value4` CHAR"));
+    }
 
-  @Test
-  public void testUserMappingFailWhenCantBeApplied() throws Exception {
-    options.setMapColumnHive("id=STRING,value=INTEGER");
+    @Test
+    public void testUserMappingFailWhenCantBeApplied() throws Exception {
+        options.setMapColumnHive("id=STRING,value=INTEGER");
 
-    Map<String, Integer> colTypes = new SqlTypeMap<String, Integer>();
-    colTypes.put("id", Types.INTEGER);
-    setUpMockConnManager(HsqldbTestServer.getTableName(), colTypes);
+        Map<String, Integer> colTypes = new SqlTypeMap<String, Integer>();
+        colTypes.put("id", Types.INTEGER);
+        setUpMockConnManager(HsqldbTestServer.getTableName(), colTypes);
 
-    thrown.expect(IllegalArgumentException.class);
-    thrown.reportMissingExceptionWithMessage("Expected IllegalArgumentException on non applied Hive type mapping");
-    writer.getCreateTableStmt();
-  }
+        thrown.expect(IllegalArgumentException.class);
+        thrown.reportMissingExceptionWithMessage("Expected IllegalArgumentException on non applied Hive type mapping");
+        writer.getCreateTableStmt();
+    }
 
-  @Test
-  public void testHiveDatabase() throws Exception {
-    options.setHiveDatabaseName("db");
+    @Test
+    public void testHiveDatabase() throws Exception {
+        options.setHiveDatabaseName("db");
 
-    String createTable = writer.getCreateTableStmt();
-    assertNotNull(createTable);
-    assertTrue(createTable.contains("`db`.`outputTable`"));
+        String createTable = writer.getCreateTableStmt();
+        assertNotNull(createTable);
+        assertTrue(createTable.contains("`db`.`outputTable`"));
 
-    String loadStmt = writer.getLoadDataStmt();
-    assertNotNull(loadStmt);
-    assertTrue(createTable.contains("`db`.`outputTable`"));
-  }
+        String loadStmt = writer.getLoadDataStmt();
+        assertNotNull(loadStmt);
+        assertTrue(createTable.contains("`db`.`outputTable`"));
+    }
 
-  @Test
-  public void testGetCreateTableStmtDiscardsConnection() throws Exception {
-    writer.getCreateTableStmt();
+    @Test
+    public void testGetCreateTableStmtDiscardsConnection() throws Exception {
+        writer.getCreateTableStmt();
 
-    verify(connManager).discardConnection(true);
-  }
+        verify(connManager).discardConnection(true);
+    }
 
-  @Test
-  public void testGetCreateTableStmtWithAvroSchema() throws Exception {
-    options.setFileLayout(ParquetFile);
-    options.getConf().set(SQOOP_PARQUET_AVRO_SCHEMA_KEY, TEST_AVRO_SCHEMA);
+    @Test
+    public void testGetCreateTableStmtWithAvroSchema() throws Exception {
+        options.setFileLayout(ParquetFile);
+        options.getConf().set(SQOOP_PARQUET_AVRO_SCHEMA_KEY, TEST_AVRO_SCHEMA);
 
-    assertEquals(EXPECTED_CREATE_PARQUET_TABLE_STMNT, writer.getCreateTableStmt());
-  }
+        assertEquals(EXPECTED_CREATE_PARQUET_TABLE_STMNT, writer.getCreateTableStmt());
+    }
 
-  private void setUpMockConnManager(String tableName, Map<String, Integer> typeMap) {
-    when(connManager.getColumnTypes(tableName)).thenReturn(typeMap);
-    when(connManager.getColumnNames(tableName)).thenReturn(typeMap.keySet().toArray(new String[]{}));
-  }
+    private void setUpMockConnManager(String tableName, Map<String, Integer> typeMap) {
+        when(connManager.getColumnTypes(tableName)).thenReturn(typeMap);
+        when(connManager.getColumnNames(tableName)).thenReturn(typeMap.keySet().toArray(new String[] {}));
+    }
 
 }

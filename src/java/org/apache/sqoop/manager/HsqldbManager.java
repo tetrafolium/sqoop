@@ -35,59 +35,59 @@ import java.io.IOException;
 public class HsqldbManager
     extends org.apache.sqoop.manager.GenericJdbcManager {
 
-  public static final Log LOG = LogFactory.getLog(
-      HsqldbManager.class.getName());
+    public static final Log LOG = LogFactory.getLog(
+                                      HsqldbManager.class.getName());
 
-  // HsqlDb doesn't have a notion of multiple "databases"; the user's database
-  // is always called "PUBLIC".
-  private static final String HSQL_SCHEMA_NAME = "PUBLIC";
+    // HsqlDb doesn't have a notion of multiple "databases"; the user's database
+    // is always called "PUBLIC".
+    private static final String HSQL_SCHEMA_NAME = "PUBLIC";
 
-  public HsqldbManager(final SqoopOptions opts) {
-    super(HSQLDB.getDriverClass(), opts);
-  }
+    public HsqldbManager(final SqoopOptions opts) {
+        super(HSQLDB.getDriverClass(), opts);
+    }
 
-  /**
-   * Return list of databases hosted by the server.
-   * HSQLDB only supports a single schema named "PUBLIC".
-   */
-  @Override
-  public String[] listDatabases() {
-    String [] databases = {HSQL_SCHEMA_NAME};
-    return databases;
-  }
+    /**
+     * Return list of databases hosted by the server.
+     * HSQLDB only supports a single schema named "PUBLIC".
+     */
+    @Override
+    public String[] listDatabases() {
+        String [] databases = {HSQL_SCHEMA_NAME};
+        return databases;
+    }
 
-  @Override
-  public String escapeTableName(String tableName) {
-    return '"' + tableName + '"';
-  }
+    @Override
+    public String escapeTableName(String tableName) {
+        return '"' + tableName + '"';
+    }
 
-  @Override
-  public String escapeColName(String colName) {
-    return '"' + colName + '"';
-  }
+    @Override
+    public String escapeColName(String colName) {
+        return '"' + colName + '"';
+    }
 
-  @Override
-  /**
-   * {@inheritDoc}
-   */
-  protected String getCurTimestampQuery() {
-    // HSQLDB requires that you select from a table; this table is
-    // guaranteed to exist.
-    return "SELECT CURRENT_TIMESTAMP FROM INFORMATION_SCHEMA.SYSTEM_TABLES";
-  }
+    @Override
+    /**
+     * {@inheritDoc}
+     */
+    protected String getCurTimestampQuery() {
+        // HSQLDB requires that you select from a table; this table is
+        // guaranteed to exist.
+        return "SELECT CURRENT_TIMESTAMP FROM INFORMATION_SCHEMA.SYSTEM_TABLES";
+    }
 
-  @Override
-  public boolean supportsStagingForExport() {
-    return true;
-  }
+    @Override
+    public boolean supportsStagingForExport() {
+        return true;
+    }
 
-  @Override
-  /** {@inheritDoc} */
-  public void exportTable(org.apache.sqoop.manager.ExportJobContext context)
-      throws IOException, ExportException {
-    // HSQLDB does not support multi-row inserts; disable that before export.
-    context.getOptions().getConf().setInt(
-        AsyncSqlOutputFormat.RECORDS_PER_STATEMENT_KEY, 1);
-    super.exportTable(context);
-  }
+    @Override
+    /** {@inheritDoc} */
+    public void exportTable(org.apache.sqoop.manager.ExportJobContext context)
+    throws IOException, ExportException {
+        // HSQLDB does not support multi-row inserts; disable that before export.
+        context.getOptions().getConf().setInt(
+            AsyncSqlOutputFormat.RECORDS_PER_STATEMENT_KEY, 1);
+        super.exportTable(context);
+    }
 }

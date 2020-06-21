@@ -32,79 +32,79 @@ import org.junit.rules.ExpectedException;
 
 public abstract class AbstractTestIncrementalMergeTextImport extends CloudImportJobTestCase {
 
-  public static final Log LOG = LogFactory.getLog(AbstractTestIncrementalMergeTextImport.class.getName());
+    public static final Log LOG = LogFactory.getLog(AbstractTestIncrementalMergeTextImport.class.getName());
 
-  @Rule
-  public ExpectedException thrown = ExpectedException.none();
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
 
-  @Override
-  @Before
-  public void setUp() {
-    super.setUp();
-    createTestTableFromInitialInputDataForMerge();
-  }
-
-  protected AbstractTestIncrementalMergeTextImport(CloudCredentialsRule credentialsRule) {
-    super(credentialsRule);
-  }
-
-  @Test
-  public void testIncrementalMergeAsTextFileWhenNoNewRowIsImported() throws Exception {
-    String[] args = getArgs(false);
-    runImport(args);
-
-    clearTable(getTableName());
-
-    args = getIncrementalMergeArgs(false);
-    runImport(args);
-
-    TextFileTestUtils.verify(getDataSet().getExpectedTextOutputBeforeMerge(), fileSystemRule.getCloudFileSystem(), fileSystemRule.getTargetDirPath(), REDUCE_OUTPUT_FILE_00000);
-  }
-
-  @Test
-  public void testIncrementalMergeAsTextFile() throws Exception {
-    String[] args = getArgs(false);
-    runImport(args);
-
-    clearTable(getTableName());
-
-    insertInputDataIntoTableForMerge(getDataSet().getNewInputDataForMerge());
-
-    args = getIncrementalMergeArgs(false);
-    runImport(args);
-
-    TextFileTestUtils.verify(getDataSet().getExpectedTextOutputAfterMerge(), fileSystemRule.getCloudFileSystem(), fileSystemRule.getTargetDirPath(), REDUCE_OUTPUT_FILE_00000);
-  }
-
-  @Test
-  public void testIncrementalMergeAsTextFileWithMapreduceOutputBasenameProperty() throws Exception {
-    String[] args = getArgs(true);
-    runImport(args);
-
-    clearTable(getTableName());
-
-    insertInputDataIntoTableForMerge(getDataSet().getNewInputDataForMerge());
-
-    args = getIncrementalMergeArgs(true);
-    runImport(args);
-
-    TextFileTestUtils.verify(getDataSet().getExpectedTextOutputAfterMerge(), fileSystemRule.getCloudFileSystem(), fileSystemRule.getTargetDirPath(), CUSTOM_REDUCE_OUTPUT_FILE_00000);
-  }
-
-  private String[] getArgs(boolean withMapreduceOutputBasenameProperty) {
-    ArgumentArrayBuilder builder = getArgumentArrayBuilderForUnitTests(fileSystemRule.getTargetDirPath().toString());
-    if (withMapreduceOutputBasenameProperty) {
-      builder.withProperty(MAPREDUCE_OUTPUT_BASENAME_PROPERTY, MAPREDUCE_OUTPUT_BASENAME);
+    @Override
+    @Before
+    public void setUp() {
+        super.setUp();
+        createTestTableFromInitialInputDataForMerge();
     }
-    return builder.build();
-  }
 
-  private String[] getIncrementalMergeArgs(boolean withMapreduceOutputBasenameProperty) {
-    ArgumentArrayBuilder builder = getArgumentArrayBuilderForUnitTests(fileSystemRule.getTargetDirPath().toString());
-    builder = addIncrementalMergeImportArgs(builder, fileSystemRule.getTemporaryRootDirPath().toString());
-    if (withMapreduceOutputBasenameProperty) {
-      builder.withProperty(MAPREDUCE_OUTPUT_BASENAME_PROPERTY, MAPREDUCE_OUTPUT_BASENAME);
+    protected AbstractTestIncrementalMergeTextImport(CloudCredentialsRule credentialsRule) {
+        super(credentialsRule);
     }
-    return builder.build();
-  }
+
+    @Test
+    public void testIncrementalMergeAsTextFileWhenNoNewRowIsImported() throws Exception {
+        String[] args = getArgs(false);
+        runImport(args);
+
+        clearTable(getTableName());
+
+        args = getIncrementalMergeArgs(false);
+        runImport(args);
+
+        TextFileTestUtils.verify(getDataSet().getExpectedTextOutputBeforeMerge(), fileSystemRule.getCloudFileSystem(), fileSystemRule.getTargetDirPath(), REDUCE_OUTPUT_FILE_00000);
+    }
+
+    @Test
+    public void testIncrementalMergeAsTextFile() throws Exception {
+        String[] args = getArgs(false);
+        runImport(args);
+
+        clearTable(getTableName());
+
+        insertInputDataIntoTableForMerge(getDataSet().getNewInputDataForMerge());
+
+        args = getIncrementalMergeArgs(false);
+        runImport(args);
+
+        TextFileTestUtils.verify(getDataSet().getExpectedTextOutputAfterMerge(), fileSystemRule.getCloudFileSystem(), fileSystemRule.getTargetDirPath(), REDUCE_OUTPUT_FILE_00000);
+    }
+
+    @Test
+    public void testIncrementalMergeAsTextFileWithMapreduceOutputBasenameProperty() throws Exception {
+        String[] args = getArgs(true);
+        runImport(args);
+
+        clearTable(getTableName());
+
+        insertInputDataIntoTableForMerge(getDataSet().getNewInputDataForMerge());
+
+        args = getIncrementalMergeArgs(true);
+        runImport(args);
+
+        TextFileTestUtils.verify(getDataSet().getExpectedTextOutputAfterMerge(), fileSystemRule.getCloudFileSystem(), fileSystemRule.getTargetDirPath(), CUSTOM_REDUCE_OUTPUT_FILE_00000);
+    }
+
+    private String[] getArgs(boolean withMapreduceOutputBasenameProperty) {
+        ArgumentArrayBuilder builder = getArgumentArrayBuilderForUnitTests(fileSystemRule.getTargetDirPath().toString());
+        if (withMapreduceOutputBasenameProperty) {
+            builder.withProperty(MAPREDUCE_OUTPUT_BASENAME_PROPERTY, MAPREDUCE_OUTPUT_BASENAME);
+        }
+        return builder.build();
+    }
+
+    private String[] getIncrementalMergeArgs(boolean withMapreduceOutputBasenameProperty) {
+        ArgumentArrayBuilder builder = getArgumentArrayBuilderForUnitTests(fileSystemRule.getTargetDirPath().toString());
+        builder = addIncrementalMergeImportArgs(builder, fileSystemRule.getTemporaryRootDirPath().toString());
+        if (withMapreduceOutputBasenameProperty) {
+            builder.withProperty(MAPREDUCE_OUTPUT_BASENAME_PROPERTY, MAPREDUCE_OUTPUT_BASENAME);
+        }
+        return builder.build();
+    }
 }

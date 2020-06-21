@@ -69,199 +69,199 @@ import static org.junit.Assert.assertTrue;
 public class SQLServerDatatypeExportSequenceFileTest
     extends ManagerCompatExport {
 
-  private static Map jars = new HashMap();
+    private static Map jars = new HashMap();
 
-  @Override
-  public void createFile(DATATYPES dt, String[] data) throws Exception {
-    try {
-      codeGen(dt);
-      // Instantiate the value record object via reflection.
-      Class cls = Class.forName(getTableName(dt), true, Thread
-        .currentThread().getContextClassLoader());
-      SqoopRecord record = (SqoopRecord) ReflectionUtils.newInstance(cls,
-        new Configuration());
+    @Override
+    public void createFile(DATATYPES dt, String[] data) throws Exception {
+        try {
+            codeGen(dt);
+            // Instantiate the value record object via reflection.
+            Class cls = Class.forName(getTableName(dt), true, Thread
+                                      .currentThread().getContextClassLoader());
+            SqoopRecord record = (SqoopRecord) ReflectionUtils.newInstance(cls,
+                                 new Configuration());
 
-      // Create the SequenceFile.
-      Configuration conf = new Configuration();
-      String hdfsroot;
-      hdfsroot = System.getProperty("ms.datatype.test.hdfsprefix");
-      if (hdfsroot == null){
-        hdfsroot ="hdfs://localhost/";
-      }
-      conf.set("fs.default.name", hdfsroot);
-      FileSystem fs = FileSystem.get(conf);
-      Path tablePath = getTablePath(dt);
-      Path filePath = new Path(tablePath, getTableName(dt));
-      fs.mkdirs(tablePath);
-      SequenceFile.Writer w = SequenceFile.createWriter(fs, conf,
-        filePath, LongWritable.class, cls);
+            // Create the SequenceFile.
+            Configuration conf = new Configuration();
+            String hdfsroot;
+            hdfsroot = System.getProperty("ms.datatype.test.hdfsprefix");
+            if (hdfsroot == null) {
+                hdfsroot ="hdfs://localhost/";
+            }
+            conf.set("fs.default.name", hdfsroot);
+            FileSystem fs = FileSystem.get(conf);
+            Path tablePath = getTablePath(dt);
+            Path filePath = new Path(tablePath, getTableName(dt));
+            fs.mkdirs(tablePath);
+            SequenceFile.Writer w = SequenceFile.createWriter(fs, conf,
+                                    filePath, LongWritable.class, cls);
 
-      int cnt = 0;
-      for (String tmp : data) {
-        record.parse(tmp + "\n");
-        w.append(new LongWritable(cnt), record);
-      }
+            int cnt = 0;
+            for (String tmp : data) {
+                record.parse(tmp + "\n");
+                w.append(new LongWritable(cnt), record);
+            }
 
-      w.close();
-    } catch (ClassNotFoundException cnfe) {
-     throw new IOException(cnfe);
-    } catch (RecordParser.ParseError pe) {
-     throw new IOException(pe);
-    }
-  }
-
-  @Override
-  public void createFile(DATATYPES dt, String data) throws Exception {
-    createFile(dt, new String[] { data });
-  }
-
-  public String[] codeGen(DATATYPES dt) throws Exception {
-
-    CodeGenTool codeGen = new CodeGenTool();
-
-    String[] codeGenArgs = getCodeGenArgv(dt);
-    SqoopOptions options = codeGen.parseArguments(codeGenArgs, null, null,
-      true);
-    String username = MSSQLTestUtils.getDBUserName();
-    String password = MSSQLTestUtils.getDBPassWord();
-
-    options.setUsername(username);
-    options.setPassword(password);
-    codeGen.validateOptions(options);
-
-    int ret = codeGen.run(options);
-    assertEquals(0, ret);
-    List<String> generatedJars = codeGen.getGeneratedJarFiles();
-
-    assertNotNull(generatedJars);
-    assertEquals("Expected 1 generated jar file", 1, generatedJars.size());
-    String jarFileName = generatedJars.get(0);
-    // Sqoop generates jars named "foo.jar"; by default, this should contain
-    // a class named 'foo'. Extract the class name.
-    Path jarPath = new Path(jarFileName);
-    String jarBaseName = jarPath.getName();
-    assertTrue(jarBaseName.endsWith(".jar"));
-    assertTrue(jarBaseName.length() > ".jar".length());
-    String className = jarBaseName.substring(0, jarBaseName.length()
-      - ".jar".length());
-
-    LOG.info("Using jar filename: " + jarFileName);
-    LOG.info("Using class name: " + className);
-
-    ClassLoader prevClassLoader = null;
-
-
-    if (null != jarFileName) {
-    prevClassLoader = ClassLoaderStack.addJarFile(jarFileName,
-      className);
-    System.out.println("Jar,class =" + jarFileName + " , "
-      + className);
-    }
-
-    // Now run and verify the export.
-    LOG.info("Exporting SequenceFile-based data");
-    jars.put(dt, jarFileName);
-    return (getArgv(dt, "--class-name", className, "--jar-file",
-     jarFileName));
-  }
-
-  @Override
-  protected String[] getArgv(DATATYPES dt) {
-
-    String[] args = super.getArgv(dt);
-    String[] addtionalArgs = Arrays.copyOf(args, args.length + 4);
-
-    String[] additional = new String[4];
-    additional[0] = "--class-name";
-    additional[1] = getTableName(dt);
-    additional[2] = "--jar-file";
-    additional[3] = jars.get(dt).toString();
-    for (int i = args.length, j = 0; i < addtionalArgs.length; i++, j++) {
-     addtionalArgs[i] = additional[j];
-    }
-
-    for (String a : addtionalArgs) {
-     System.out.println(a);
-    }
-    return addtionalArgs;
-  }
-
-  /**
-  * @return an argv for the CodeGenTool to use when creating tables to
-  *         export.
-  */
-  protected String[] getCodeGenArgv(DATATYPES dt) {
-    List<String> codeGenArgv = new ArrayList<String>();
-
-    codeGenArgv.add("--table");
-    codeGenArgv.add(getTableName(dt));
-    codeGenArgv.add("--connect");
-    codeGenArgv.add(MSSQLTestUtils.getDBConnectString());
-    codeGenArgv.add("--fields-terminated-by");
-    codeGenArgv.add("\\t");
-    codeGenArgv.add("--lines-terminated-by");
-    codeGenArgv.add("\\n");
-
-    return codeGenArgv.toArray(new String[0]);
-  }
-
-  protected String[] getArgv(DATATYPES dt, String... additionalArgv) {
-    ArrayList<String> args = new ArrayList<String>();
-
-    // Any additional Hadoop flags (-D foo=bar) are prepended.
-    if (null != additionalArgv) {
-      boolean prevIsFlag = false;
-      for (String arg : additionalArgv) {
-        if (arg.equals("-D")) {
-          args.add(arg);
-          prevIsFlag = true;
-        } else if (prevIsFlag) {
-          args.add(arg);
-          prevIsFlag = false;
+            w.close();
+        } catch (ClassNotFoundException cnfe) {
+            throw new IOException(cnfe);
+        } catch (RecordParser.ParseError pe) {
+            throw new IOException(pe);
         }
-      }
     }
 
-    // The sqoop-specific additional args are then added.
-    if (null != additionalArgv) {
-      boolean prevIsFlag = false;
-      for (String arg : additionalArgv) {
-        if (arg.equals("-D")) {
-          prevIsFlag = true;
-          continue;
-        } else if (prevIsFlag) {
-          prevIsFlag = false;
-          continue;
-        } else {
-         // normal argument.
-          args.add(arg);
+    @Override
+    public void createFile(DATATYPES dt, String data) throws Exception {
+        createFile(dt, new String[] { data });
+    }
+
+    public String[] codeGen(DATATYPES dt) throws Exception {
+
+        CodeGenTool codeGen = new CodeGenTool();
+
+        String[] codeGenArgs = getCodeGenArgv(dt);
+        SqoopOptions options = codeGen.parseArguments(codeGenArgs, null, null,
+                               true);
+        String username = MSSQLTestUtils.getDBUserName();
+        String password = MSSQLTestUtils.getDBPassWord();
+
+        options.setUsername(username);
+        options.setPassword(password);
+        codeGen.validateOptions(options);
+
+        int ret = codeGen.run(options);
+        assertEquals(0, ret);
+        List<String> generatedJars = codeGen.getGeneratedJarFiles();
+
+        assertNotNull(generatedJars);
+        assertEquals("Expected 1 generated jar file", 1, generatedJars.size());
+        String jarFileName = generatedJars.get(0);
+        // Sqoop generates jars named "foo.jar"; by default, this should contain
+        // a class named 'foo'. Extract the class name.
+        Path jarPath = new Path(jarFileName);
+        String jarBaseName = jarPath.getName();
+        assertTrue(jarBaseName.endsWith(".jar"));
+        assertTrue(jarBaseName.length() > ".jar".length());
+        String className = jarBaseName.substring(0, jarBaseName.length()
+                           - ".jar".length());
+
+        LOG.info("Using jar filename: " + jarFileName);
+        LOG.info("Using class name: " + className);
+
+        ClassLoader prevClassLoader = null;
+
+
+        if (null != jarFileName) {
+            prevClassLoader = ClassLoaderStack.addJarFile(jarFileName,
+                              className);
+            System.out.println("Jar,class =" + jarFileName + " , "
+                               + className);
         }
-      }
+
+        // Now run and verify the export.
+        LOG.info("Exporting SequenceFile-based data");
+        jars.put(dt, jarFileName);
+        return (getArgv(dt, "--class-name", className, "--jar-file",
+                        jarFileName));
     }
 
-    args.add("--table");
-    args.add(getTableName(dt));
-    args.add("--export-dir");
-    args.add(getTablePath(dt).toString());
-    args.add("--connect");
-    args.add(MSSQLTestUtils.getDBConnectString());
-    args.add("--fields-terminated-by");
-    args.add("\\t");
-    args.add("--lines-terminated-by");
-    args.add("\\n");
-    args.add("-m");
-    args.add("1");
+    @Override
+    protected String[] getArgv(DATATYPES dt) {
 
-    LOG.debug("args:");
-    for (String a : args) {
-     LOG.debug("  " + a);
+        String[] args = super.getArgv(dt);
+        String[] addtionalArgs = Arrays.copyOf(args, args.length + 4);
+
+        String[] additional = new String[4];
+        additional[0] = "--class-name";
+        additional[1] = getTableName(dt);
+        additional[2] = "--jar-file";
+        additional[3] = jars.get(dt).toString();
+        for (int i = args.length, j = 0; i < addtionalArgs.length; i++, j++) {
+            addtionalArgs[i] = additional[j];
+        }
+
+        for (String a : addtionalArgs) {
+            System.out.println(a);
+        }
+        return addtionalArgs;
     }
 
-    return args.toArray(new String[0]);
-  }
+    /**
+    * @return an argv for the CodeGenTool to use when creating tables to
+    *         export.
+    */
+    protected String[] getCodeGenArgv(DATATYPES dt) {
+        List<String> codeGenArgv = new ArrayList<String>();
 
-  public String getOutputFileName() {
-    return "ManagerCompatExportSeq.txt";
-  }
+        codeGenArgv.add("--table");
+        codeGenArgv.add(getTableName(dt));
+        codeGenArgv.add("--connect");
+        codeGenArgv.add(MSSQLTestUtils.getDBConnectString());
+        codeGenArgv.add("--fields-terminated-by");
+        codeGenArgv.add("\\t");
+        codeGenArgv.add("--lines-terminated-by");
+        codeGenArgv.add("\\n");
+
+        return codeGenArgv.toArray(new String[0]);
+    }
+
+    protected String[] getArgv(DATATYPES dt, String... additionalArgv) {
+        ArrayList<String> args = new ArrayList<String>();
+
+        // Any additional Hadoop flags (-D foo=bar) are prepended.
+        if (null != additionalArgv) {
+            boolean prevIsFlag = false;
+            for (String arg : additionalArgv) {
+                if (arg.equals("-D")) {
+                    args.add(arg);
+                    prevIsFlag = true;
+                } else if (prevIsFlag) {
+                    args.add(arg);
+                    prevIsFlag = false;
+                }
+            }
+        }
+
+        // The sqoop-specific additional args are then added.
+        if (null != additionalArgv) {
+            boolean prevIsFlag = false;
+            for (String arg : additionalArgv) {
+                if (arg.equals("-D")) {
+                    prevIsFlag = true;
+                    continue;
+                } else if (prevIsFlag) {
+                    prevIsFlag = false;
+                    continue;
+                } else {
+                    // normal argument.
+                    args.add(arg);
+                }
+            }
+        }
+
+        args.add("--table");
+        args.add(getTableName(dt));
+        args.add("--export-dir");
+        args.add(getTablePath(dt).toString());
+        args.add("--connect");
+        args.add(MSSQLTestUtils.getDBConnectString());
+        args.add("--fields-terminated-by");
+        args.add("\\t");
+        args.add("--lines-terminated-by");
+        args.add("\\n");
+        args.add("-m");
+        args.add("1");
+
+        LOG.debug("args:");
+        for (String a : args) {
+            LOG.debug("  " + a);
+        }
+
+        return args.toArray(new String[0]);
+    }
+
+    public String getOutputFileName() {
+        return "ManagerCompatExportSeq.txt";
+    }
 
 }

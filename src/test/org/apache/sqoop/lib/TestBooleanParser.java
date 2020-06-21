@@ -32,29 +32,29 @@ import static org.junit.Assert.assertTrue;
 @Category(UnitTest.class)
 public class TestBooleanParser {
 
-  @Test
-  public void testBoolParser() {
-    assertTrue(BooleanParser.valueOf("true"));
-    assertTrue(BooleanParser.valueOf("TRUE"));
-    assertTrue(BooleanParser.valueOf("True"));
-    assertTrue(BooleanParser.valueOf("t"));
-    assertTrue(BooleanParser.valueOf("T"));
-    assertTrue(BooleanParser.valueOf("on"));
-    assertTrue(BooleanParser.valueOf("On"));
-    assertTrue(BooleanParser.valueOf("ON"));
-    assertTrue(BooleanParser.valueOf("yes"));
-    assertTrue(BooleanParser.valueOf("yEs"));
-    assertTrue(BooleanParser.valueOf("YES"));
-    assertTrue(BooleanParser.valueOf("1"));
+    @Test
+    public void testBoolParser() {
+        assertTrue(BooleanParser.valueOf("true"));
+        assertTrue(BooleanParser.valueOf("TRUE"));
+        assertTrue(BooleanParser.valueOf("True"));
+        assertTrue(BooleanParser.valueOf("t"));
+        assertTrue(BooleanParser.valueOf("T"));
+        assertTrue(BooleanParser.valueOf("on"));
+        assertTrue(BooleanParser.valueOf("On"));
+        assertTrue(BooleanParser.valueOf("ON"));
+        assertTrue(BooleanParser.valueOf("yes"));
+        assertTrue(BooleanParser.valueOf("yEs"));
+        assertTrue(BooleanParser.valueOf("YES"));
+        assertTrue(BooleanParser.valueOf("1"));
 
-    assertFalse(BooleanParser.valueOf(null));
+        assertFalse(BooleanParser.valueOf(null));
 
-    assertFalse(BooleanParser.valueOf("no"));
-    assertFalse(BooleanParser.valueOf("false"));
-    assertFalse(BooleanParser.valueOf("FALSE"));
-    assertFalse(BooleanParser.valueOf("0"));
-    assertFalse(BooleanParser.valueOf("off"));
-    assertFalse(BooleanParser.valueOf("OFF"));
-    assertFalse(BooleanParser.valueOf("anything else in the world"));
-  }
+        assertFalse(BooleanParser.valueOf("no"));
+        assertFalse(BooleanParser.valueOf("false"));
+        assertFalse(BooleanParser.valueOf("FALSE"));
+        assertFalse(BooleanParser.valueOf("0"));
+        assertFalse(BooleanParser.valueOf("off"));
+        assertFalse(BooleanParser.valueOf("OFF"));
+        assertFalse(BooleanParser.valueOf("anything else in the world"));
+    }
 }

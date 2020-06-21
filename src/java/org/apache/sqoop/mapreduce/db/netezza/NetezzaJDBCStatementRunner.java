@@ -33,71 +33,71 @@ import org.apache.commons.logging.LogFactory;
  * during construction itself.
  */
 public class NetezzaJDBCStatementRunner extends Thread {
-  public static final Log LOG = LogFactory
-      .getLog(NetezzaJDBCStatementRunner.class.getName());
+    public static final Log LOG = LogFactory
+                                  .getLog(NetezzaJDBCStatementRunner.class.getName());
 
-  private Connection con;
-  private Exception exception;
-  private PreparedStatement ps;
-  private AtomicBoolean failed;
+    private Connection con;
+    private Exception exception;
+    private PreparedStatement ps;
+    private AtomicBoolean failed;
 
-  public boolean hasExceptions() {
-    return exception != null;
-  }
-
-  public void printException() {
-    if (exception != null) {
-      LOG.error("Errors encountered during external table JDBC processing");
-      LOG.error("Exception " + exception.getMessage(), exception);
+    public boolean hasExceptions() {
+        return exception != null;
     }
-  }
 
-  public Throwable getException() {
-    if (!hasExceptions()) {
-      return null;
-    }
-    return exception;
-  }
-
-  /**
-   * Execute Netezza SQL statement on given connection.
-   * @param failed Set this to true if the operation fails.
-   * @param con connection
-   * @param sqlStatement statement to execute
-   * @throws SQLException
-   */
-  public NetezzaJDBCStatementRunner(AtomicBoolean failed, Connection con,
-                                    String sqlStatement) throws SQLException {
-    this.failed = failed;
-    this.con = con;
-    this.ps = con.prepareStatement(sqlStatement);
-    this.exception = null;
-  }
-
-  public void run() {
-    boolean interruptParent = false;
-    try {
-
-      // Excecute the statement - this will make data to flow in the
-      // named pipes
-      ps.execute();
-
-    } catch (SQLException sqle) {
-      interruptParent = true;
-      LOG.error("Unable to execute external table export", sqle);
-      this.exception = sqle;
-    } finally {
-      if (con != null) {
-        try {
-          con.close();
-        } catch (Exception e) {
-          LOG.debug("Exception closing connection " + e.getMessage());
+    public void printException() {
+        if (exception != null) {
+            LOG.error("Errors encountered during external table JDBC processing");
+            LOG.error("Exception " + exception.getMessage(), exception);
         }
-      }
-      con = null;
     }
-    if (interruptParent) {
-      failed.set(true);
+
+    public Throwable getException() {
+        if (!hasExceptions()) {
+            return null;
+        }
+        return exception;
     }
-  }
+
+    /**
+     * Execute Netezza SQL statement on given connection.
+     * @param failed Set this to true if the operation fails.
+     * @param con connection
+     * @param sqlStatement statement to execute
+     * @throws SQLException
+     */
+    public NetezzaJDBCStatementRunner(AtomicBoolean failed, Connection con,
+                                      String sqlStatement) throws SQLException {
+        this.failed = failed;
+        this.con = con;
+        this.ps = con.prepareStatement(sqlStatement);
+        this.exception = null;
+    }
+
+    public void run() {
+        boolean interruptParent = false;
+        try {
+
+            // Excecute the statement - this will make data to flow in the
+            // named pipes
+            ps.execute();
+
+        } catch (SQLException sqle) {
+            interruptParent = true;
+            LOG.error("Unable to execute external table export", sqle);
+            this.exception = sqle;
+        } finally {
+            if (con != null) {
+                try {
+                    con.close();
+                } catch (Exception e) {
+                    LOG.debug("Exception closing connection " + e.getMessage());
+                }
+            }
+            con = null;
+        }
+        if (interruptParent) {
+            failed.set(true);
+        }
+    }
 }

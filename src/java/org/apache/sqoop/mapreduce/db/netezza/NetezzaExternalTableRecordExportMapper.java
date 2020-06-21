@@ -29,10 +29,10 @@ import org.apache.sqoop.lib.SqoopRecord;
 public class NetezzaExternalTableRecordExportMapper extends
     NetezzaExternalTableExportMapper<LongWritable, SqoopRecord> {
 
-  @Override
-  public void map(LongWritable key, SqoopRecord sqr, Context context)
-      throws IOException, InterruptedException {
-    writeSqoopRecord(sqr);
-    context.progress();
-  }
+    @Override
+    public void map(LongWritable key, SqoopRecord sqr, Context context)
+    throws IOException, InterruptedException {
+        writeSqoopRecord(sqr);
+        context.progress();
+    }
 }

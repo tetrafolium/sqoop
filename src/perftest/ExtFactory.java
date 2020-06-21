@@ -27,16 +27,16 @@ import org.apache.sqoop.manager.ManagerFactory;
  * An external ConnFactory used by ExtConnFactoryTest.
  */
 public class ExtFactory extends ManagerFactory {
-  public static final Log LOG =
-      LogFactory.getLog(ExtFactory.class.getName());
+    public static final Log LOG =
+        LogFactory.getLog(ExtFactory.class.getName());
 
-  public ExtFactory() {
-    LOG.info("Instantiating ExtFactory");
-  }
+    public ExtFactory() {
+        LOG.info("Instantiating ExtFactory");
+    }
 
-  public ConnManager accept(SqoopOptions options) {
-    LOG.info("ExtFactory accepting manager for: "
-        + options.getConnectString());
-    return new ExtConnFactoryTest.FailingManager(options);
-  }
+    public ConnManager accept(SqoopOptions options) {
+        LOG.info("ExtFactory accepting manager for: "
+                 + options.getConnectString());
+        return new ExtConnFactoryTest.FailingManager(options);
+    }
 }

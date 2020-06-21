@@ -43,75 +43,75 @@ import static org.junit.Assert.assertEquals;
 @Category(OracleTest.class)
 public class OracleColumnEscapeImportTest extends ImportJobTestCase {
 
-  public static final Log LOG = LogFactory.getLog(
-      OracleColumnEscapeImportTest.class.getName());
+    public static final Log LOG = LogFactory.getLog(
+                                      OracleColumnEscapeImportTest.class.getName());
 
-  @Override
-  protected boolean useHsqldbTestServer() {
-    return false;
-  }
-
-  @Override
-  protected String getConnectString() {
-    return OracleUtils.CONNECT_STRING;
-  }
-
-  @Override
-  protected SqoopOptions getSqoopOptions(Configuration conf) {
-    SqoopOptions opts = new SqoopOptions(conf);
-    OracleUtils.setOracleAuth(opts);
-    return opts;
-  }
-
-  @Override
-  protected void dropTableIfExists(String table) throws SQLException {
-    OracleUtils.dropTable(table, getManager());
-  }
-
-  @After
-  public void tearDown() {
-    try {
-      OracleUtils.dropTable(getTableName(), getManager());
-    } catch (SQLException e) {
-      LOG.error("Test table could not be dropped", e);
+    @Override
+    protected boolean useHsqldbTestServer() {
+        return false;
     }
-    super.tearDown();
-  }
 
-  protected String [] getArgv() {
-    ArrayList<String> args = new ArrayList<String>();
+    @Override
+    protected String getConnectString() {
+        return OracleUtils.CONNECT_STRING;
+    }
 
-    CommonArgs.addHadoopFlags(args);
+    @Override
+    protected SqoopOptions getSqoopOptions(Configuration conf) {
+        SqoopOptions opts = new SqoopOptions(conf);
+        OracleUtils.setOracleAuth(opts);
+        return opts;
+    }
 
-    args.add("--connect");
-    args.add(getConnectString());
-    args.add("--username");
-    args.add(OracleUtils.ORACLE_USER_NAME);
-    args.add("--password");
-    args.add(OracleUtils.ORACLE_USER_PASS);
-    args.add("--target-dir");
-    args.add(getTablePath().toString());
-    args.add("--num-mappers");
-    args.add("1");
-    args.add("--query");
-    args.add("select REGEXP_REPLACE(TRIM(" + getColName(0) + "), '\\:','!') from " + getTableName() + " WHERE $CONDITIONS");
+    @Override
+    protected void dropTableIfExists(String table) throws SQLException {
+        OracleUtils.dropTable(table, getManager());
+    }
 
-    return args.toArray(new String[0]);
-  }
+    @After
+    public void tearDown() {
+        try {
+            OracleUtils.dropTable(getTableName(), getManager());
+        } catch (SQLException e) {
+            LOG.error("Test table could not be dropped", e);
+        }
+        super.tearDown();
+    }
 
-  @Test
-  public void testRegexpReplaceEscapeWithSpecialCharacters() throws IOException {
-    String [] types = { "VARCHAR(50)"};
-    String [] vals = { "'hello, world:'"};
-    createTableWithColTypes(types, vals);
-    String[] args = getArgv();
-    runImport(args);
+    protected String [] getArgv() {
+        ArrayList<String> args = new ArrayList<String>();
 
-    Path filePath = new Path(getTablePath(), "part-m-00000");
-    String output = Files.toString(new File(filePath.toString()), Charsets.UTF_8);
+        CommonArgs.addHadoopFlags(args);
 
-    assertEquals("hello, world!", output.trim());
-  }
+        args.add("--connect");
+        args.add(getConnectString());
+        args.add("--username");
+        args.add(OracleUtils.ORACLE_USER_NAME);
+        args.add("--password");
+        args.add(OracleUtils.ORACLE_USER_PASS);
+        args.add("--target-dir");
+        args.add(getTablePath().toString());
+        args.add("--num-mappers");
+        args.add("1");
+        args.add("--query");
+        args.add("select REGEXP_REPLACE(TRIM(" + getColName(0) + "), '\\:','!') from " + getTableName() + " WHERE $CONDITIONS");
+
+        return args.toArray(new String[0]);
+    }
+
+    @Test
+    public void testRegexpReplaceEscapeWithSpecialCharacters() throws IOException {
+        String [] types = { "VARCHAR(50)"};
+        String [] vals = { "'hello, world:'"};
+        createTableWithColTypes(types, vals);
+        String[] args = getArgv();
+        runImport(args);
+
+        Path filePath = new Path(getTablePath(), "part-m-00000");
+        String output = Files.toString(new File(filePath.toString()), Charsets.UTF_8);
+
+        assertEquals("hello, world!", output.trim());
+    }
 
 }
 

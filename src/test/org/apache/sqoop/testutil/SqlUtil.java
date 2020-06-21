@@ -27,31 +27,31 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 public class SqlUtil {
-  public static final Log LOG = LogFactory.getLog(SqlUtil.class.getName());
+    public static final Log LOG = LogFactory.getLog(SqlUtil.class.getName());
 
-  public static void executeStatement(String statement, ConnManager manager)
-      throws SQLException {
-    Connection connection = null;
-    Statement st = null;
+    public static void executeStatement(String statement, ConnManager manager)
+    throws SQLException {
+        Connection connection = null;
+        Statement st = null;
 
-    try {
-      connection = manager.getConnection();
-      connection.setAutoCommit(false);
-      st = connection.createStatement();
+        try {
+            connection = manager.getConnection();
+            connection.setAutoCommit(false);
+            st = connection.createStatement();
 
-      // create the database table and populate it with data.
-      st.executeUpdate(statement);
+            // create the database table and populate it with data.
+            st.executeUpdate(statement);
 
-      connection.commit();
-    } finally {
-      try {
-        if (null != st) {
-          st.close();
+            connection.commit();
+        } finally {
+            try {
+                if (null != st) {
+                    st.close();
+                }
+            } catch (SQLException sqlE) {
+                LOG.warn("Got SQLException when closing connection: " + sqlE);
+            }
         }
-      } catch (SQLException sqlE) {
-        LOG.warn("Got SQLException when closing connection: " + sqlE);
-      }
     }
-  }
 
 }

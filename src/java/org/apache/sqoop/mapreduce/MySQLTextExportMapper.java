@@ -30,33 +30,33 @@ import org.apache.sqoop.manager.MySQLUtils;
 public class MySQLTextExportMapper
     extends MySQLExportMapper<LongWritable, Text> {
 
-  // End-of-record delimiter.
-  private String recordEndStr;
+    // End-of-record delimiter.
+    private String recordEndStr;
 
-  @Override
-  protected void setup(Context context) {
-    super.setup(context);
+    @Override
+    protected void setup(Context context) {
+        super.setup(context);
 
-    char recordDelim = (char) conf.getInt(MySQLUtils.OUTPUT_RECORD_DELIM_KEY,
-        (int) '\n');
-    this.recordEndStr = "" + recordDelim;
-  }
+        char recordDelim = (char) conf.getInt(MySQLUtils.OUTPUT_RECORD_DELIM_KEY,
+                                              (int) '\n');
+        this.recordEndStr = "" + recordDelim;
+    }
 
-  /**
-   * Export the table to MySQL by using mysqlimport to write the data to the
-   * database.
-   *
-   * Expects one delimited text record as the 'val'; ignores the key.
-   */
-  @Override
-  public void map(LongWritable key, Text val, Context context)
-      throws IOException, InterruptedException {
+    /**
+     * Export the table to MySQL by using mysqlimport to write the data to the
+     * database.
+     *
+     * Expects one delimited text record as the 'val'; ignores the key.
+     */
+    @Override
+    public void map(LongWritable key, Text val, Context context)
+    throws IOException, InterruptedException {
 
-    writeRecord(val.toString(), this.recordEndStr);
+        writeRecord(val.toString(), this.recordEndStr);
 
-    // We don't emit anything to the OutputCollector because we wrote
-    // straight to mysql. Send a progress indicator to prevent a timeout.
-    context.progress();
-  }
+        // We don't emit anything to the OutputCollector because we wrote
+        // straight to mysql. Send a progress indicator to prevent a timeout.
+        context.progress();
+    }
 
 }

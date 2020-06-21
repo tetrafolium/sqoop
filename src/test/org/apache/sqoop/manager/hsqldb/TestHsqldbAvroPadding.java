@@ -34,49 +34,49 @@ import java.util.List;
 
 public class TestHsqldbAvroPadding extends ImportJobTestCase {
 
-  public static final Log LOG = LogFactory.getLog(
-      TestHsqldbAvroPadding.class.getName());
+    public static final Log LOG = LogFactory.getLog(
+                                      TestHsqldbAvroPadding.class.getName());
 
-  @Rule
-  public ExpectedException thrown = ExpectedException.none();
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
 
-  @Before
-  public void setUp() {
-    super.setUp();
-    createTestTable();
-  }
+    @Before
+    public void setUp() {
+        super.setUp();
+        createTestTable();
+    }
 
-  protected void createTestTable() {
-    String[] names = {"ID",  "NAME", "SALARY", "DEPT"};
-    String[] types = { "INT", "VARCHAR(24)", "DECIMAL(20,5)", "VARCHAR(32)"};
-    List<String[]> inputData = AvroTestUtils.getInputData();
-    createTableWithColTypesAndNames(names, types, new String[0]);
-    insertIntoTable(names, types, inputData.get(0));
-    insertIntoTable(names, types, inputData.get(1));
-    insertIntoTable(names, types, inputData.get(2));
-  }
+    protected void createTestTable() {
+        String[] names = {"ID",  "NAME", "SALARY", "DEPT"};
+        String[] types = { "INT", "VARCHAR(24)", "DECIMAL(20,5)", "VARCHAR(32)"};
+        List<String[]> inputData = AvroTestUtils.getInputData();
+        createTableWithColTypesAndNames(names, types, new String[0]);
+        insertIntoTable(names, types, inputData.get(0));
+        insertIntoTable(names, types, inputData.get(1));
+        insertIntoTable(names, types, inputData.get(2));
+    }
 
-  protected ArgumentArrayBuilder getArgumentArrayBuilder() {
-    ArgumentArrayBuilder builder = AvroTestUtils.getBuilderForAvroPaddingTest(this);
-    builder.withOption("connect", getConnectString());
-    return builder;
-  }
+    protected ArgumentArrayBuilder getArgumentArrayBuilder() {
+        ArgumentArrayBuilder builder = AvroTestUtils.getBuilderForAvroPaddingTest(this);
+        builder.withOption("connect", getConnectString());
+        return builder;
+    }
 
-  @Test
-  public void testAvroImportWithoutPaddingFails() throws IOException {
-    thrown.expect(IOException.class);
-    thrown.expectMessage("Failure during job; return status 1");
-    String[] args = getArgumentArrayBuilder().build();
-    runImport(args);
-  }
+    @Test
+    public void testAvroImportWithoutPaddingFails() throws IOException {
+        thrown.expect(IOException.class);
+        thrown.expectMessage("Failure during job; return status 1");
+        String[] args = getArgumentArrayBuilder().build();
+        runImport(args);
+    }
 
-  @Test
-  public void testAvroImportWithPadding() throws IOException {
-    ArgumentArrayBuilder builder = getArgumentArrayBuilder();
-    builder.withProperty("sqoop.avro.decimal_padding.enable", "true");
-    String[] args = builder.build();
-    runImport(args);
-    AvroTestUtils.registerDecimalConversionUsageForVerification();
-    AvroTestUtils.verify(AvroTestUtils.getExpectedResults(), getConf(), getTablePath());
-  }
+    @Test
+    public void testAvroImportWithPadding() throws IOException {
+        ArgumentArrayBuilder builder = getArgumentArrayBuilder();
+        builder.withProperty("sqoop.avro.decimal_padding.enable", "true");
+        String[] args = builder.build();
+        runImport(args);
+        AvroTestUtils.registerDecimalConversionUsageForVerification();
+        AvroTestUtils.verify(AvroTestUtils.getExpectedResults(), getConf(), getTablePath());
+    }
 }

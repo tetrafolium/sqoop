@@ -25,24 +25,24 @@ import org.apache.sqoop.manager.mysql.MySQLTestUtils;
 import java.sql.SQLException;
 
 public class MysqlDatabaseAdapter implements DatabaseAdapter {
-  private MySQLTestUtils mySQLTestUtils = new MySQLTestUtils();
+    private MySQLTestUtils mySQLTestUtils = new MySQLTestUtils();
 
-  public SqoopOptions injectConnectionParameters(SqoopOptions options) {
-    options.setUsername(mySQLTestUtils.getUserName());
-    mySQLTestUtils.addPasswordIfIsSet(options);
-    return options;
-  }
+    public SqoopOptions injectConnectionParameters(SqoopOptions options) {
+        options.setUsername(mySQLTestUtils.getUserName());
+        mySQLTestUtils.addPasswordIfIsSet(options);
+        return options;
+    }
 
-  public void dropTableIfExists(String tableName, ConnManager manager) throws SQLException {
-    mySQLTestUtils.dropTableIfExists(tableName, manager);
-  }
+    public void dropTableIfExists(String tableName, ConnManager manager) throws SQLException {
+        mySQLTestUtils.dropTableIfExists(tableName, manager);
+    }
 
-  public String getConnectionString() {
-    return mySQLTestUtils.getMySqlConnectString();
-  }
+    public String getConnectionString() {
+        return mySQLTestUtils.getMySqlConnectString();
+    }
 
-  @Override
-  public String toString() {
-    return getClass().getSimpleName();
-  }
+    @Override
+    public String toString() {
+        return getClass().getSimpleName();
+    }
 }

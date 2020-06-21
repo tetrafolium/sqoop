@@ -24,42 +24,42 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 public class Argument {
 
-  private final String name;
+    private final String name;
 
-  private final String value;
+    private final String value;
 
-  public Argument(String name) {
-    this(name, "");
-  }
-
-  public Argument(String name, String value) {
-    Objects.requireNonNull(name);
-    this.name = name;
-    this.value = value;
-  }
-
-  public String getName() {
-    return name;
-  }
-
-  public String getValue() {
-    return value;
-  }
-
-  public static Argument fromPair(String name, String value) {
-    return new Argument(name, value);
-  }
-
-  public static Argument from(String name) {
-    return new Argument(name);
-  }
-
-  @Override
-  public String toString() {
-    if (isEmpty(value)) {
-      return name;
-    } else {
-      return String.format("%s=%s", name, value);
+    public Argument(String name) {
+        this(name, "");
     }
-  }
+
+    public Argument(String name, String value) {
+        Objects.requireNonNull(name);
+        this.name = name;
+        this.value = value;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    public static Argument fromPair(String name, String value) {
+        return new Argument(name, value);
+    }
+
+    public static Argument from(String name) {
+        return new Argument(name);
+    }
+
+    @Override
+    public String toString() {
+        if (isEmpty(value)) {
+            return name;
+        } else {
+            return String.format("%s=%s", name, value);
+        }
+    }
 }

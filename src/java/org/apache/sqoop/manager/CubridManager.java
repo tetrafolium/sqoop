@@ -41,147 +41,147 @@ import org.apache.sqoop.util.ImportException;
 public class CubridManager extends
     CatalogQueryManager {
 
-  public static final Log LOG = LogFactory
-      .getLog(CubridManager.class.getName());
+    public static final Log LOG = LogFactory
+                                  .getLog(CubridManager.class.getName());
 
-  public CubridManager(final SqoopOptions opts) {
-    super(CUBRID.getDriverClass(), opts);
-  }
-
-  @Override
-  public void importTable(
-      org.apache.sqoop.manager.ImportJobContext context)
-      throws IOException, ImportException {
-
-    // Then run the normal importTable() method.
-    super.importTable(context);
-  }
-
-  /**
-   * Export data stored in HDFS into a table in a database.
-   */
-  public void exportTable(
-      org.apache.sqoop.manager.ExportJobContext context)
-      throws IOException, ExportException {
-    context.setConnManager(this);
-    JdbcExportJob exportJob = new JdbcExportJob(context, null, null,
-        ExportBatchOutputFormat.class, getParquetJobConfigurator().createParquetExportJobConfigurator());
-
-    exportJob.runExport();
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public void upsertTable(
-      org.apache.sqoop.manager.ExportJobContext context)
-      throws IOException, ExportException {
-    context.setConnManager(this);
-
-    JdbcUpsertExportJob exportJob = new JdbcUpsertExportJob(context,
-        CubridUpsertOutputFormat.class, getParquetJobConfigurator().createParquetExportJobConfigurator());
-    exportJob.runExport();
-  }
-
-  @Override
-  /**
-   * {@inheritDoc}
-   */
-  public void configureDbOutputColumns(SqoopOptions options) {
-    // In case that we're running upsert, we do not want to
-    // change column order as we're actually going to use
-    // INSERT INTO ... ON DUPLICATE KEY UPDATE
-    // clause.
-    if (options.getUpdateMode()
-        == SqoopOptions.UpdateMode.AllowInsert) {
-      return;
+    public CubridManager(final SqoopOptions opts) {
+        super(CUBRID.getDriverClass(), opts);
     }
 
-    super.configureDbOutputColumns(options);
-  }
+    @Override
+    public void importTable(
+        org.apache.sqoop.manager.ImportJobContext context)
+    throws IOException, ImportException {
 
-  @Override
-  public String getColNamesQuery(String tableName) {
-    // Use LIMIT to return fast
-    return "SELECT t.* FROM " + escapeTableName(tableName)
-        + " AS t LIMIT 1";
-  }
-
-  @Override
-  public String getInputBoundsQuery(String splitByCol,
-      String sanitizedQuery) {
-    return "SELECT MIN(" + splitByCol + "), MAX("
-      + splitByCol + ") FROM ("
-      + sanitizedQuery + ") t1";
-  }
-
-  private Map<String, String> colTypeNames;
-  private static final int YEAR_TYPE_OVERWRITE = Types.SMALLINT;
-
-  private int overrideSqlType(String tableName, String columnName,
-      int sqlType) {
-
-    if (colTypeNames == null) {
-      colTypeNames = getColumnTypeNames(tableName,
-          options.getCall(),
-          options.getSqlQuery());
+        // Then run the normal importTable() method.
+        super.importTable(context);
     }
 
-    if ("YEAR".equalsIgnoreCase(colTypeNames.get(columnName))) {
-      sqlType = YEAR_TYPE_OVERWRITE;
+    /**
+     * Export data stored in HDFS into a table in a database.
+     */
+    public void exportTable(
+        org.apache.sqoop.manager.ExportJobContext context)
+    throws IOException, ExportException {
+        context.setConnManager(this);
+        JdbcExportJob exportJob = new JdbcExportJob(context, null, null,
+                ExportBatchOutputFormat.class, getParquetJobConfigurator().createParquetExportJobConfigurator());
+
+        exportJob.runExport();
     }
-    return sqlType;
-  }
 
-  @Override
-  public String toJavaType(String tableName, String columnName,
-      int sqlType) {
-    sqlType = overrideSqlType(tableName, columnName, sqlType);
-    String javaType = super.toJavaType(tableName,
-        columnName, sqlType);
-    return javaType;
-  }
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void upsertTable(
+        org.apache.sqoop.manager.ExportJobContext context)
+    throws IOException, ExportException {
+        context.setConnManager(this);
 
-  @Override
-  public String toHiveType(String tableName, String columnName,
-      int sqlType) {
-    sqlType = overrideSqlType(tableName, columnName, sqlType);
-    return super.toHiveType(tableName, columnName, sqlType);
-  }
+        JdbcUpsertExportJob exportJob = new JdbcUpsertExportJob(context,
+                CubridUpsertOutputFormat.class, getParquetJobConfigurator().createParquetExportJobConfigurator());
+        exportJob.runExport();
+    }
 
-  @Override
-  public Type toAvroType(String tableName, String columnName,
-      int sqlType) {
-    sqlType = overrideSqlType(tableName, columnName, sqlType);
-    return super.toAvroType(tableName, columnName, sqlType);
-  }
+    @Override
+    /**
+     * {@inheritDoc}
+     */
+    public void configureDbOutputColumns(SqoopOptions options) {
+        // In case that we're running upsert, we do not want to
+        // change column order as we're actually going to use
+        // INSERT INTO ... ON DUPLICATE KEY UPDATE
+        // clause.
+        if (options.getUpdateMode()
+                == SqoopOptions.UpdateMode.AllowInsert) {
+            return;
+        }
 
-  @Override
-  protected String getListDatabasesQuery() {
-    return null;
-  }
+        super.configureDbOutputColumns(options);
+    }
 
-  @Override
-  protected String getListTablesQuery() {
-    return "SELECT CLASS_NAME FROM DB_CLASS WHERE"
-      + " IS_SYSTEM_CLASS = 'NO'";
-  }
+    @Override
+    public String getColNamesQuery(String tableName) {
+        // Use LIMIT to return fast
+        return "SELECT t.* FROM " + escapeTableName(tableName)
+               + " AS t LIMIT 1";
+    }
 
-  @Override
-  protected String getListColumnsQuery(String tableName) {
-    tableName = tableName.toLowerCase();
-    return "SELECT ATTR_NAME FROM DB_ATTRIBUTE WHERE"
-        + " CLASS_NAME = '"
-        + tableName + "'  ORDER BY def_order";
-  }
+    @Override
+    public String getInputBoundsQuery(String splitByCol,
+                                      String sanitizedQuery) {
+        return "SELECT MIN(" + splitByCol + "), MAX("
+               + splitByCol + ") FROM ("
+               + sanitizedQuery + ") t1";
+    }
 
-  @Override
-  protected String getPrimaryKeyQuery(String tableName) {
-    tableName = tableName.toLowerCase();
-    return "SELECT KEY_ATTR_NAME FROM DB_INDEX_KEY WHERE"
-        + " CLASS_NAME = '"
-        + tableName + "' ";
-  }
+    private Map<String, String> colTypeNames;
+    private static final int YEAR_TYPE_OVERWRITE = Types.SMALLINT;
+
+    private int overrideSqlType(String tableName, String columnName,
+                                int sqlType) {
+
+        if (colTypeNames == null) {
+            colTypeNames = getColumnTypeNames(tableName,
+                                              options.getCall(),
+                                              options.getSqlQuery());
+        }
+
+        if ("YEAR".equalsIgnoreCase(colTypeNames.get(columnName))) {
+            sqlType = YEAR_TYPE_OVERWRITE;
+        }
+        return sqlType;
+    }
+
+    @Override
+    public String toJavaType(String tableName, String columnName,
+                             int sqlType) {
+        sqlType = overrideSqlType(tableName, columnName, sqlType);
+        String javaType = super.toJavaType(tableName,
+                                           columnName, sqlType);
+        return javaType;
+    }
+
+    @Override
+    public String toHiveType(String tableName, String columnName,
+                             int sqlType) {
+        sqlType = overrideSqlType(tableName, columnName, sqlType);
+        return super.toHiveType(tableName, columnName, sqlType);
+    }
+
+    @Override
+    public Type toAvroType(String tableName, String columnName,
+                           int sqlType) {
+        sqlType = overrideSqlType(tableName, columnName, sqlType);
+        return super.toAvroType(tableName, columnName, sqlType);
+    }
+
+    @Override
+    protected String getListDatabasesQuery() {
+        return null;
+    }
+
+    @Override
+    protected String getListTablesQuery() {
+        return "SELECT CLASS_NAME FROM DB_CLASS WHERE"
+               + " IS_SYSTEM_CLASS = 'NO'";
+    }
+
+    @Override
+    protected String getListColumnsQuery(String tableName) {
+        tableName = tableName.toLowerCase();
+        return "SELECT ATTR_NAME FROM DB_ATTRIBUTE WHERE"
+               + " CLASS_NAME = '"
+               + tableName + "'  ORDER BY def_order";
+    }
+
+    @Override
+    protected String getPrimaryKeyQuery(String tableName) {
+        tableName = tableName.toLowerCase();
+        return "SELECT KEY_ATTR_NAME FROM DB_INDEX_KEY WHERE"
+               + " CLASS_NAME = '"
+               + tableName + "' ";
+    }
 
 }

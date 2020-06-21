@@ -18,7 +18,7 @@
 
 package org.apache.sqoop.importjob.configuration;
 
-public interface ParquetTestConfiguration extends ImportJobTestConfiguration{
+public interface ParquetTestConfiguration extends ImportJobTestConfiguration {
 
-  String[] getExpectedResultsForParquet();
+    String[] getExpectedResultsForParquet();
 }

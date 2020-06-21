@@ -34,71 +34,71 @@ import java.util.List;
 
 public abstract class AbstractTestIncrementalAppendParquetImport extends CloudImportJobTestCase {
 
-  public static final Log LOG = LogFactory.getLog(AbstractTestIncrementalAppendParquetImport.class.getName());
+    public static final Log LOG = LogFactory.getLog(AbstractTestIncrementalAppendParquetImport.class.getName());
 
-  @Rule
-  public ExpectedException thrown = ExpectedException.none();
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
 
-  protected AbstractTestIncrementalAppendParquetImport(CloudCredentialsRule credentialsRule) {
-    super(credentialsRule);
-  }
-
-  @Test
-  public void testIncrementalAppendAsParquetFileWhenNoNewRowIsImported() throws Exception {
-    String[] args = getArgsWithAsParquetFileOption(false);
-    runImport(args);
-
-    args = getIncrementalAppendArgsWithAsParquetFileOption(false);
-    runImport(args);
-
-    List<String> result = new ParquetReader(fileSystemRule.getTargetDirPath(), fileSystemRule.getCloudFileSystem().getConf()).readAllInCsvSorted();
-    assertEquals(getDataSet().getExpectedParquetOutput(), result);
-  }
-
-  @Test
-  public void testIncrementalAppendAsParquetFile() throws Exception {
-    String[] args = getArgsWithAsParquetFileOption(false);
-    runImport(args);
-
-    insertInputDataIntoTable(getDataSet().getExtraInputData());
-
-    args = getIncrementalAppendArgsWithAsParquetFileOption(false);
-    runImport(args);
-
-    List<String> result = new ParquetReader(fileSystemRule.getTargetDirPath(), fileSystemRule.getCloudFileSystem().getConf()).readAllInCsvSorted();
-    assertEquals(getDataSet().getExpectedParquetOutputAfterAppend(), result);
-  }
-
-  @Test
-  public void testIncrementalAppendAsParquetFileWithMapreduceOutputBasenameProperty() throws Exception {
-    String[] args = getArgsWithAsParquetFileOption(true);
-    runImport(args);
-
-    insertInputDataIntoTable(getDataSet().getExtraInputData());
-
-    args = getIncrementalAppendArgsWithAsParquetFileOption(true);
-    runImport(args);
-
-    failIfOutputFilePathContainingPatternDoesNotExists(fileSystemRule.getCloudFileSystem(), fileSystemRule.getTargetDirPath(), MAPREDUCE_OUTPUT_BASENAME);
-
-    List<String> result = new ParquetReader(fileSystemRule.getTargetDirPath(), fileSystemRule.getCloudFileSystem().getConf()).readAllInCsvSorted();
-    assertEquals(getDataSet().getExpectedParquetOutputAfterAppend(), result);
-  }
-
-  private String[] getArgsWithAsParquetFileOption(boolean withMapreduceOutputBasenameProperty) {
-    ArgumentArrayBuilder builder = getArgumentArrayBuilderForUnitTestsWithFileFormatOption(fileSystemRule.getTargetDirPath().toString(), "as-parquetfile");
-    if (withMapreduceOutputBasenameProperty) {
-      builder.withProperty(MAPREDUCE_OUTPUT_BASENAME_PROPERTY, MAPREDUCE_OUTPUT_BASENAME);
+    protected AbstractTestIncrementalAppendParquetImport(CloudCredentialsRule credentialsRule) {
+        super(credentialsRule);
     }
-    return builder.build();
-  }
 
-  private String[] getIncrementalAppendArgsWithAsParquetFileOption(boolean withMapreduceOutputBasenameProperty) {
-    ArgumentArrayBuilder builder = getArgumentArrayBuilderForUnitTestsWithFileFormatOption(fileSystemRule.getTargetDirPath().toString(), "as-parquetfile");
-    builder = addIncrementalAppendImportArgs(builder, fileSystemRule.getTemporaryRootDirPath().toString());
-    if (withMapreduceOutputBasenameProperty) {
-      builder.withProperty(MAPREDUCE_OUTPUT_BASENAME_PROPERTY, MAPREDUCE_OUTPUT_BASENAME);
+    @Test
+    public void testIncrementalAppendAsParquetFileWhenNoNewRowIsImported() throws Exception {
+        String[] args = getArgsWithAsParquetFileOption(false);
+        runImport(args);
+
+        args = getIncrementalAppendArgsWithAsParquetFileOption(false);
+        runImport(args);
+
+        List<String> result = new ParquetReader(fileSystemRule.getTargetDirPath(), fileSystemRule.getCloudFileSystem().getConf()).readAllInCsvSorted();
+        assertEquals(getDataSet().getExpectedParquetOutput(), result);
     }
-    return builder.build();
-  }
+
+    @Test
+    public void testIncrementalAppendAsParquetFile() throws Exception {
+        String[] args = getArgsWithAsParquetFileOption(false);
+        runImport(args);
+
+        insertInputDataIntoTable(getDataSet().getExtraInputData());
+
+        args = getIncrementalAppendArgsWithAsParquetFileOption(false);
+        runImport(args);
+
+        List<String> result = new ParquetReader(fileSystemRule.getTargetDirPath(), fileSystemRule.getCloudFileSystem().getConf()).readAllInCsvSorted();
+        assertEquals(getDataSet().getExpectedParquetOutputAfterAppend(), result);
+    }
+
+    @Test
+    public void testIncrementalAppendAsParquetFileWithMapreduceOutputBasenameProperty() throws Exception {
+        String[] args = getArgsWithAsParquetFileOption(true);
+        runImport(args);
+
+        insertInputDataIntoTable(getDataSet().getExtraInputData());
+
+        args = getIncrementalAppendArgsWithAsParquetFileOption(true);
+        runImport(args);
+
+        failIfOutputFilePathContainingPatternDoesNotExists(fileSystemRule.getCloudFileSystem(), fileSystemRule.getTargetDirPath(), MAPREDUCE_OUTPUT_BASENAME);
+
+        List<String> result = new ParquetReader(fileSystemRule.getTargetDirPath(), fileSystemRule.getCloudFileSystem().getConf()).readAllInCsvSorted();
+        assertEquals(getDataSet().getExpectedParquetOutputAfterAppend(), result);
+    }
+
+    private String[] getArgsWithAsParquetFileOption(boolean withMapreduceOutputBasenameProperty) {
+        ArgumentArrayBuilder builder = getArgumentArrayBuilderForUnitTestsWithFileFormatOption(fileSystemRule.getTargetDirPath().toString(), "as-parquetfile");
+        if (withMapreduceOutputBasenameProperty) {
+            builder.withProperty(MAPREDUCE_OUTPUT_BASENAME_PROPERTY, MAPREDUCE_OUTPUT_BASENAME);
+        }
+        return builder.build();
+    }
+
+    private String[] getIncrementalAppendArgsWithAsParquetFileOption(boolean withMapreduceOutputBasenameProperty) {
+        ArgumentArrayBuilder builder = getArgumentArrayBuilderForUnitTestsWithFileFormatOption(fileSystemRule.getTargetDirPath().toString(), "as-parquetfile");
+        builder = addIncrementalAppendImportArgs(builder, fileSystemRule.getTemporaryRootDirPath().toString());
+        if (withMapreduceOutputBasenameProperty) {
+            builder.withProperty(MAPREDUCE_OUTPUT_BASENAME_PROPERTY, MAPREDUCE_OUTPUT_BASENAME);
+        }
+        return builder.build();
+    }
 }

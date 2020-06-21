@@ -25,36 +25,36 @@ import java.io.IOException;
 
 public class KerberosAuthenticator {
 
-  private final Configuration configuration;
+    private final Configuration configuration;
 
-  private final String principal;
+    private final String principal;
 
-  private final String keytabLocation;
+    private final String keytabLocation;
 
-  public KerberosAuthenticator(Configuration configuration, String principal, String keytabLocation) {
-    this.configuration = configuration;
-    this.principal = principal;
-    this.keytabLocation = keytabLocation;
-  }
-
-  public UserGroupInformation authenticate() {
-    UserGroupInformation.setConfiguration(configuration);
-    try {
-      return UserGroupInformation.loginUserFromKeytabAndReturnUGI(principal, keytabLocation);
-    } catch (IOException e) {
-      throw new RuntimeException("Kerberos authentication failed!", e);
+    public KerberosAuthenticator(Configuration configuration, String principal, String keytabLocation) {
+        this.configuration = configuration;
+        this.principal = principal;
+        this.keytabLocation = keytabLocation;
     }
-  }
 
-  public Configuration getConfiguration() {
-    return configuration;
-  }
+    public UserGroupInformation authenticate() {
+        UserGroupInformation.setConfiguration(configuration);
+        try {
+            return UserGroupInformation.loginUserFromKeytabAndReturnUGI(principal, keytabLocation);
+        } catch (IOException e) {
+            throw new RuntimeException("Kerberos authentication failed!", e);
+        }
+    }
 
-  public String getPrincipal() {
-    return principal;
-  }
+    public Configuration getConfiguration() {
+        return configuration;
+    }
 
-  public String getKeytabLocation() {
-    return keytabLocation;
-  }
+    public String getPrincipal() {
+        return principal;
+    }
+
+    public String getKeytabLocation() {
+        return keytabLocation;
+    }
 }

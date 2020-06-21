@@ -30,44 +30,44 @@ import org.apache.sqoop.config.ConfigurationHelper;
  */
 public class JobStorageFactory {
 
-  private Configuration conf;
+    private Configuration conf;
 
-  /**
-   * Configuration key describing the list of JobStorage implementations
-   * to use to handle jobs.
-   */
-  public static final String AVAILABLE_STORAGES_KEY =
-      "sqoop.job.storage.implementations";
+    /**
+     * Configuration key describing the list of JobStorage implementations
+     * to use to handle jobs.
+     */
+    public static final String AVAILABLE_STORAGES_KEY =
+        "sqoop.job.storage.implementations";
 
-  /** The default list of available JobStorage implementations. */
-  private static final String DEFAULT_AVAILABLE_STORAGES =
-      "org.apache.sqoop.metastore.GenericJobStorage,"
-      + "org.apache.sqoop.metastore.AutoGenericJobStorage";
+    /** The default list of available JobStorage implementations. */
+    private static final String DEFAULT_AVAILABLE_STORAGES =
+        "org.apache.sqoop.metastore.GenericJobStorage,"
+        + "org.apache.sqoop.metastore.AutoGenericJobStorage";
 
-  public JobStorageFactory(Configuration config) {
-    this.conf = config;
+    public JobStorageFactory(Configuration config) {
+        this.conf = config;
 
-    // Ensure that we always have an available storages list.
-    if (this.conf.get(AVAILABLE_STORAGES_KEY) == null) {
-      this.conf.set(AVAILABLE_STORAGES_KEY, DEFAULT_AVAILABLE_STORAGES);
-    }
-  }
-
-  /**
-   * Given a storage descriptor, determine the correct JobStorage
-   * implementation to use to connect to the storage resource and return an
-   * instance of it -- or null if no JobStorage instance is appropriate.
-   */
-  public JobStorage getJobStorage(Map<String, String> descriptor) {
-    List<JobStorage> storages = ConfigurationHelper.getInstances(
-        conf, AVAILABLE_STORAGES_KEY, JobStorage.class);
-    for (JobStorage stor : storages) {
-      if (stor.canAccept(descriptor)) {
-        return stor;
-      }
+        // Ensure that we always have an available storages list.
+        if (this.conf.get(AVAILABLE_STORAGES_KEY) == null) {
+            this.conf.set(AVAILABLE_STORAGES_KEY, DEFAULT_AVAILABLE_STORAGES);
+        }
     }
 
-    return null;
-  }
+    /**
+     * Given a storage descriptor, determine the correct JobStorage
+     * implementation to use to connect to the storage resource and return an
+     * instance of it -- or null if no JobStorage instance is appropriate.
+     */
+    public JobStorage getJobStorage(Map<String, String> descriptor) {
+        List<JobStorage> storages = ConfigurationHelper.getInstances(
+                                        conf, AVAILABLE_STORAGES_KEY, JobStorage.class);
+        for (JobStorage stor : storages) {
+            if (stor.canAccept(descriptor)) {
+                return stor;
+            }
+        }
+
+        return null;
+    }
 }
 

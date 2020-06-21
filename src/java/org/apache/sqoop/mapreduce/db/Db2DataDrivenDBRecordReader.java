@@ -29,13 +29,13 @@ import org.apache.sqoop.mapreduce.DBWritable;
 public class Db2DataDrivenDBRecordReader<T extends DBWritable>
     extends DataDrivenDBRecordReader<T>  {
 
-  // CHECKSTYLE:OFF
-  public Db2DataDrivenDBRecordReader(DBInputFormat.DBInputSplit split,
-      Class<T> inputClass, Configuration conf, Connection conn,
-      DBConfiguration dbConfig, String cond, String [] fields,
-      String table) throws SQLException {
+    // CHECKSTYLE:OFF
+    public Db2DataDrivenDBRecordReader(DBInputFormat.DBInputSplit split,
+                                       Class<T> inputClass, Configuration conf, Connection conn,
+                                       DBConfiguration dbConfig, String cond, String [] fields,
+                                       String table) throws SQLException {
 
-    super(split, inputClass, conf, conn, dbConfig, cond, fields, table, "DB2");
-  }
-  // CHECKSTYLE:ON
+        super(split, inputClass, conf, conn, dbConfig, cond, fields, table, "DB2");
+    }
+    // CHECKSTYLE:ON
 }

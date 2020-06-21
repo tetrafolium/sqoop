@@ -30,91 +30,91 @@ import org.apache.sqoop.SqoopOptions;
  */
 public class TableClassName {
 
-  public static final Log LOG = LogFactory.getLog(
-      TableClassName.class.getName());
+    public static final Log LOG = LogFactory.getLog(
+                                      TableClassName.class.getName());
 
-  public static final String QUERY_RESULT = "QueryResult";
+    public static final String QUERY_RESULT = "QueryResult";
 
-  private final SqoopOptions options;
+    private final SqoopOptions options;
 
-  public TableClassName(final SqoopOptions opts) {
-    if (null == opts) {
-      throw new NullPointerException(
-          "Cannot instantiate a TableClassName on null options.");
-    } else {
-      this.options = opts;
-    }
-  }
-
-  /**
-   * Taking into account --class-name and --package-name, return the actual
-   * package-part which will be used for a class. The actual table name being
-   * generated-for is irrelevant; so not an argument.
-   *
-   * @return the package where generated ORM classes go. Will be null for
-   * top-level.
-   */
-  public String getPackageForTable() {
-    String predefinedClass = options.getClassName();
-    if (null != predefinedClass) {
-      // If the predefined classname contains a package-part, return that.
-      int lastDot = predefinedClass.lastIndexOf('.');
-      if (-1 == lastDot) {
-        // No package part.
-        return null;
-      } else {
-        // Return the string up to but not including the last dot.
-        return predefinedClass.substring(0, lastDot);
-      }
-    } else {
-      // If the user has specified a package name, return it.
-      // This will be null if the user hasn't specified one -- as we expect.
-      return options.getPackageName();
-    }
-  }
-
-  /**
-   * @param tableName the name of the table being imported.
-   * @return the full name of the class to generate/use to import a table.
-   */
-  public String getClassForTable(String tableName) {
-    String predefinedClass = options.getClassName();
-    if (predefinedClass != null) {
-      // The user's chosen a specific class name for this job.
-      return predefinedClass;
+    public TableClassName(final SqoopOptions opts) {
+        if (null == opts) {
+            throw new NullPointerException(
+                "Cannot instantiate a TableClassName on null options.");
+        } else {
+            this.options = opts;
+        }
     }
 
-    String queryName = tableName;
-    if (null == queryName) {
-      queryName = QUERY_RESULT;
+    /**
+     * Taking into account --class-name and --package-name, return the actual
+     * package-part which will be used for a class. The actual table name being
+     * generated-for is irrelevant; so not an argument.
+     *
+     * @return the package where generated ORM classes go. Will be null for
+     * top-level.
+     */
+    public String getPackageForTable() {
+        String predefinedClass = options.getClassName();
+        if (null != predefinedClass) {
+            // If the predefined classname contains a package-part, return that.
+            int lastDot = predefinedClass.lastIndexOf('.');
+            if (-1 == lastDot) {
+                // No package part.
+                return null;
+            } else {
+                // Return the string up to but not including the last dot.
+                return predefinedClass.substring(0, lastDot);
+            }
+        } else {
+            // If the user has specified a package name, return it.
+            // This will be null if the user hasn't specified one -- as we expect.
+            return options.getPackageName();
+        }
     }
 
-    String packageName = options.getPackageName();
-    if (null != packageName) {
-      // return packageName.queryName.
-      return packageName + "." + queryName;
+    /**
+     * @param tableName the name of the table being imported.
+     * @return the full name of the class to generate/use to import a table.
+     */
+    public String getClassForTable(String tableName) {
+        String predefinedClass = options.getClassName();
+        if (predefinedClass != null) {
+            // The user's chosen a specific class name for this job.
+            return predefinedClass;
+        }
+
+        String queryName = tableName;
+        if (null == queryName) {
+            queryName = QUERY_RESULT;
+        }
+
+        String packageName = options.getPackageName();
+        if (null != packageName) {
+            // return packageName.queryName.
+            return packageName + "." + queryName;
+        }
+
+        // no specific class; no specific package.
+        // Just make sure it's a legal identifier.
+        return ClassWriter.toJavaIdentifier(queryName);
     }
 
-    // no specific class; no specific package.
-    // Just make sure it's a legal identifier.
-    return ClassWriter.toJavaIdentifier(queryName);
-  }
+    /**
+     * @return just the last segment of the class name -- all package info
+     * stripped.
+     */
+    public String getShortClassForTable(String tableName) {
+        String fullClass = getClassForTable(tableName);
+        if (null == fullClass) {
+            return null;
+        }
 
-  /**
-   * @return just the last segment of the class name -- all package info
-   * stripped.
-   */
-  public String getShortClassForTable(String tableName) {
-    String fullClass = getClassForTable(tableName);
-    if (null == fullClass) {
-      return null;
+        int lastDot = fullClass.lastIndexOf('.');
+        if (-1 == lastDot) {
+            return fullClass;
+        } else {
+            return fullClass.substring(lastDot + 1, fullClass.length());
+        }
     }
-
-    int lastDot = fullClass.lastIndexOf('.');
-    if (-1 == lastDot) {
-      return fullClass;
-    } else {
-      return fullClass.substring(lastDot + 1, fullClass.length());
-    }
-  }
 }

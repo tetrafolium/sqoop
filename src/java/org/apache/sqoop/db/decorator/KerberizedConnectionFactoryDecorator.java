@@ -27,25 +27,25 @@ import java.sql.Connection;
 
 public class KerberizedConnectionFactoryDecorator extends JdbcConnectionFactoryDecorator {
 
-  private final KerberosAuthenticator authenticator;
+    private final KerberosAuthenticator authenticator;
 
-  public KerberizedConnectionFactoryDecorator(JdbcConnectionFactory decorated, KerberosAuthenticator authenticator) {
-    super(decorated);
-    this.authenticator = authenticator;
-  }
+    public KerberizedConnectionFactoryDecorator(JdbcConnectionFactory decorated, KerberosAuthenticator authenticator) {
+        super(decorated);
+        this.authenticator = authenticator;
+    }
 
-  @Override
-  public Connection createConnection() {
-    UserGroupInformation ugi = authenticator.authenticate();
-    return ugi.doAs(new PrivilegedAction<Connection>() {
-      @Override
-      public Connection run() {
-        return decorated.createConnection();
-      }
-    });
-  }
+    @Override
+    public Connection createConnection() {
+        UserGroupInformation ugi = authenticator.authenticate();
+        return ugi.doAs(new PrivilegedAction<Connection>() {
+            @Override
+            public Connection run() {
+                return decorated.createConnection();
+            }
+        });
+    }
 
-  public KerberosAuthenticator getAuthenticator() {
-    return authenticator;
-  }
+    public KerberosAuthenticator getAuthenticator() {
+        return authenticator;
+    }
 }

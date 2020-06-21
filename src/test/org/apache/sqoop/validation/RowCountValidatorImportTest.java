@@ -37,161 +37,161 @@ import static org.junit.Assert.fail;
  */
 public class RowCountValidatorImportTest extends ImportJobTestCase {
 
-  protected List<String> getExtraArgs(Configuration conf) {
-    ArrayList<String> list = new ArrayList<String>(1);
-    list.add("--validate");
-    return list;
-  }
-
-  /**
-   * Test if the --validate flag actually made it through the options.
-   *
-   * @throws Exception
-   */
-  @Test
-  public void testValidateOptionIsEnabledInCLI() throws Exception {
-    String[] types = {"INT NOT NULL PRIMARY KEY", "VARCHAR(32)", "VARCHAR(32)"};
-    String[] insertVals = {"1", "'Bob'", "'sales'"};
-
-    try {
-      createTableWithColTypes(types, insertVals);
-
-      String[] args = getArgv(true, null, getConf());
-      ArrayList<String> argsList = new ArrayList<String>();
-      Collections.addAll(argsList, args);
-      assertTrue("Validate option missing.", argsList.contains("--validate"));
-    } finally {
-      dropTableIfExists(getTableName());
+    protected List<String> getExtraArgs(Configuration conf) {
+        ArrayList<String> list = new ArrayList<String>(1);
+        list.add("--validate");
+        return list;
     }
-  }
 
-  @Test
-  public void testValidationOptionsParsedCorrectly() throws Exception {
-    String[] types = {"INT NOT NULL PRIMARY KEY", "VARCHAR(32)", "VARCHAR(32)"};
-    String[] insertVals = {"1", "'Bob'", "'sales'"};
+    /**
+     * Test if the --validate flag actually made it through the options.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testValidateOptionIsEnabledInCLI() throws Exception {
+        String[] types = {"INT NOT NULL PRIMARY KEY", "VARCHAR(32)", "VARCHAR(32)"};
+        String[] insertVals = {"1", "'Bob'", "'sales'"};
 
-    try {
-      createTableWithColTypes(types, insertVals);
+        try {
+            createTableWithColTypes(types, insertVals);
 
-      String[] args = getArgv(true, null, getConf());
-      ArrayList<String> argsList = new ArrayList<String>();
-      argsList.add("--validator");
-      argsList.add("org.apache.sqoop.validation.RowCountValidator");
-      argsList.add("--validation-threshold");
-      argsList.add("org.apache.sqoop.validation.AbsoluteValidationThreshold");
-      argsList.add("--validation-failurehandler");
-      argsList.add("org.apache.sqoop.validation.AbortOnFailureHandler");
-      Collections.addAll(argsList, args);
-
-      assertTrue("Validate option missing.", argsList.contains("--validate"));
-      assertTrue("Validator option missing.", argsList.contains("--validator"));
-
-      String[] optionArgs = toStringArray(argsList);
-
-      SqoopOptions validationOptions = new ImportTool().parseArguments(
-        optionArgs, getConf(), getSqoopOptions(getConf()), true);
-      assertEquals(RowCountValidator.class,
-        validationOptions.getValidatorClass());
-      assertEquals(AbsoluteValidationThreshold.class,
-        validationOptions.getValidationThresholdClass());
-      assertEquals(AbortOnFailureHandler.class,
-        validationOptions.getValidationFailureHandlerClass());
-    } catch (Exception e) {
-      fail("The validation options are passed correctly: " + e.getMessage());
-    } finally {
-      dropTableIfExists(getTableName());
+            String[] args = getArgv(true, null, getConf());
+            ArrayList<String> argsList = new ArrayList<String>();
+            Collections.addAll(argsList, args);
+            assertTrue("Validate option missing.", argsList.contains("--validate"));
+        } finally {
+            dropTableIfExists(getTableName());
+        }
     }
-  }
 
-  @Test
-  public void testInvalidValidationOptions() throws Exception {
-    String[] types = {"INT NOT NULL PRIMARY KEY", "VARCHAR(32)", "VARCHAR(32)"};
-    String[] insertVals = {"1", "'Bob'", "'sales'"};
+    @Test
+    public void testValidationOptionsParsedCorrectly() throws Exception {
+        String[] types = {"INT NOT NULL PRIMARY KEY", "VARCHAR(32)", "VARCHAR(32)"};
+        String[] insertVals = {"1", "'Bob'", "'sales'"};
 
-    try {
-      createTableWithColTypes(types, insertVals);
+        try {
+            createTableWithColTypes(types, insertVals);
 
-      String[] args = getArgv(true, null, getConf());
-      ArrayList<String> argsList = new ArrayList<String>();
-      argsList.add("--validator");
-      argsList.add("org.apache.sqoop.validation.NullValidator");
-      argsList.add("--validation-threshold");
-      argsList.add("org.apache.sqoop.validation.NullValidationThreshold");
-      argsList.add("--validation-failurehandler");
-      argsList.add("org.apache.sqoop.validation.NullFailureHandler");
-      Collections.addAll(argsList, args);
+            String[] args = getArgv(true, null, getConf());
+            ArrayList<String> argsList = new ArrayList<String>();
+            argsList.add("--validator");
+            argsList.add("org.apache.sqoop.validation.RowCountValidator");
+            argsList.add("--validation-threshold");
+            argsList.add("org.apache.sqoop.validation.AbsoluteValidationThreshold");
+            argsList.add("--validation-failurehandler");
+            argsList.add("org.apache.sqoop.validation.AbortOnFailureHandler");
+            Collections.addAll(argsList, args);
 
-      String[] optionArgs = toStringArray(argsList);
+            assertTrue("Validate option missing.", argsList.contains("--validate"));
+            assertTrue("Validator option missing.", argsList.contains("--validator"));
 
-      new ImportTool().parseArguments(optionArgs, getConf(),
-        getSqoopOptions(getConf()), true);
-      fail("The validation options are incorrect and must throw an exception");
-    } catch (Exception e) {
-      System.out.println("e.getMessage() = " + e.getMessage());
-      System.out.println("e.getClass() = " + e.getClass());
-      assertEquals(SqoopOptions.InvalidOptionsException.class,
-        e.getClass());
-    } finally {
-      dropTableIfExists(getTableName());
+            String[] optionArgs = toStringArray(argsList);
+
+            SqoopOptions validationOptions = new ImportTool().parseArguments(
+                optionArgs, getConf(), getSqoopOptions(getConf()), true);
+            assertEquals(RowCountValidator.class,
+                         validationOptions.getValidatorClass());
+            assertEquals(AbsoluteValidationThreshold.class,
+                         validationOptions.getValidationThresholdClass());
+            assertEquals(AbortOnFailureHandler.class,
+                         validationOptions.getValidationFailureHandlerClass());
+        } catch (Exception e) {
+            fail("The validation options are passed correctly: " + e.getMessage());
+        } finally {
+            dropTableIfExists(getTableName());
+        }
     }
-  }
 
-  private String[] toStringArray(ArrayList<String> argsList) {
-    String[] optionArgs = new String[argsList.size()];
-    for (int i = 0; i < argsList.size(); i++) {
-      optionArgs[i] = argsList.get(i);
+    @Test
+    public void testInvalidValidationOptions() throws Exception {
+        String[] types = {"INT NOT NULL PRIMARY KEY", "VARCHAR(32)", "VARCHAR(32)"};
+        String[] insertVals = {"1", "'Bob'", "'sales'"};
+
+        try {
+            createTableWithColTypes(types, insertVals);
+
+            String[] args = getArgv(true, null, getConf());
+            ArrayList<String> argsList = new ArrayList<String>();
+            argsList.add("--validator");
+            argsList.add("org.apache.sqoop.validation.NullValidator");
+            argsList.add("--validation-threshold");
+            argsList.add("org.apache.sqoop.validation.NullValidationThreshold");
+            argsList.add("--validation-failurehandler");
+            argsList.add("org.apache.sqoop.validation.NullFailureHandler");
+            Collections.addAll(argsList, args);
+
+            String[] optionArgs = toStringArray(argsList);
+
+            new ImportTool().parseArguments(optionArgs, getConf(),
+                                            getSqoopOptions(getConf()), true);
+            fail("The validation options are incorrect and must throw an exception");
+        } catch (Exception e) {
+            System.out.println("e.getMessage() = " + e.getMessage());
+            System.out.println("e.getClass() = " + e.getClass());
+            assertEquals(SqoopOptions.InvalidOptionsException.class,
+                         e.getClass());
+        } finally {
+            dropTableIfExists(getTableName());
+        }
     }
-    return optionArgs;
-  }
 
-  /**
-   * Negative case where the row counts do NOT match.
-   */
-  @Test
-  public void testValidatorWithDifferentRowCounts() {
-    try {
-      Validator validator = new RowCountValidator();
-      validator.validate(new ValidationContext(100, 90));
-      fail("FailureHandler should have thrown an exception");
-    } catch (ValidationException e) {
-      assertEquals("Validation failed by RowCountValidator. "
-        + "Reason: The expected counter value was 100 but the actual value "
-        + "was 90, Row Count at Source: 100, Row Count at Target: 90",
-        e.getMessage());
+    private String[] toStringArray(ArrayList<String> argsList) {
+        String[] optionArgs = new String[argsList.size()];
+        for (int i = 0; i < argsList.size(); i++) {
+            optionArgs[i] = argsList.get(i);
+        }
+        return optionArgs;
     }
-  }
 
-  /**
-   * Positive case where the row counts match.
-   */
-  @Test
-  public void testValidatorWithMatchingRowCounts() {
-    try {
-      Validator validator = new RowCountValidator();
-      validator.validate(new ValidationContext(100, 100));
-    } catch (ValidationException e) {
-      fail("FailureHandler should NOT have thrown an exception");
+    /**
+     * Negative case where the row counts do NOT match.
+     */
+    @Test
+    public void testValidatorWithDifferentRowCounts() {
+        try {
+            Validator validator = new RowCountValidator();
+            validator.validate(new ValidationContext(100, 90));
+            fail("FailureHandler should have thrown an exception");
+        } catch (ValidationException e) {
+            assertEquals("Validation failed by RowCountValidator. "
+                         + "Reason: The expected counter value was 100 but the actual value "
+                         + "was 90, Row Count at Source: 100, Row Count at Target: 90",
+                         e.getMessage());
+        }
     }
-  }
 
-  /**
-   * Test the validation for a sample import, positive case.
-   *
-   * @throws Exception
-   */
-  @Test
-  public void testValidatorForImportTable() throws Exception {
-    String[] types = {"INT NOT NULL PRIMARY KEY", "VARCHAR(32)", "VARCHAR(32)"};
-    String[] insertVals = {"1", "'Bob'", "'sales'"};
-    String validateLine = "1,Bob,sales";
-
-    try {
-      createTableWithColTypes(types, insertVals);
-
-      verifyImport(validateLine, null);
-      LOG.debug("Verified input line as " + validateLine + " -- ok!");
-    } finally {
-      dropTableIfExists(getTableName());
+    /**
+     * Positive case where the row counts match.
+     */
+    @Test
+    public void testValidatorWithMatchingRowCounts() {
+        try {
+            Validator validator = new RowCountValidator();
+            validator.validate(new ValidationContext(100, 100));
+        } catch (ValidationException e) {
+            fail("FailureHandler should NOT have thrown an exception");
+        }
     }
-  }
+
+    /**
+     * Test the validation for a sample import, positive case.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testValidatorForImportTable() throws Exception {
+        String[] types = {"INT NOT NULL PRIMARY KEY", "VARCHAR(32)", "VARCHAR(32)"};
+        String[] insertVals = {"1", "'Bob'", "'sales'"};
+        String validateLine = "1,Bob,sales";
+
+        try {
+            createTableWithColTypes(types, insertVals);
+
+            verifyImport(validateLine, null);
+            LOG.debug("Verified input line as " + validateLine + " -- ok!");
+        } finally {
+            dropTableIfExists(getTableName());
+        }
+    }
 }

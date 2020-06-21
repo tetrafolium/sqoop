@@ -111,9 +111,9 @@ public class TestSqoopJobDataPublisher extends ImportJobTestCase {
         String hiveHome = options.getHiveHome();
         assertNotNull("hive.home was not set", hiveHome);
         String testDataPath = new Path(new Path(hiveHome),
-                "scripts/" + verificationScript).toString();
+                                       "scripts/" + verificationScript).toString();
         System.setProperty("expected.script",
-                new File(testDataPath).getAbsolutePath());
+                           new File(testDataPath).getAbsolutePath());
 
         // verify that we can import it correctly into hive.
         runImport(tool, args);
@@ -148,7 +148,7 @@ public class TestSqoopJobDataPublisher extends ImportJobTestCase {
         String [] types = { "VARCHAR(32)", "INTEGER", "CHAR(64)" };
         String [] vals = { "'test'", "42", "'somestring'" };
         runImportTest(TABLE_NAME, types, vals, "normalImport.q",
-                getArgv(false, null), new ImportTool());
+                      getArgv(false, null), new ImportTool());
         assert (DummyDataPublisher.hiveTable.equals("NORMAL_HIVE_IMPORT"));
         assert (DummyDataPublisher.storeTable.equals("NORMAL_HIVE_IMPORT"));
         assert (DummyDataPublisher.storeType.equals("hsqldb"));

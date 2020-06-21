@@ -38,98 +38,98 @@ import java.util.UUID;
  */
 public class CloudFileSystemRule implements TestRule {
 
-  private static final Log LOG = LogFactory.getLog(CloudFileSystemRule.class.getName());
+    private static final Log LOG = LogFactory.getLog(CloudFileSystemRule.class.getName());
 
-  private static final String TARGET_DIR_NAME_PREFIX = "testdir";
+    private static final String TARGET_DIR_NAME_PREFIX = "testdir";
 
-  private static final String HIVE_EXTERNAL_DIR_NAME_PREFIX = "externaldir";
+    private static final String HIVE_EXTERNAL_DIR_NAME_PREFIX = "externaldir";
 
-  private static final String TEMP_DIR = "tmp";
+    private static final String TEMP_DIR = "tmp";
 
-  private static final String TEMPORARY_ROOTDIR_SUFFIX = "_temprootdir";
+    private static final String TEMPORARY_ROOTDIR_SUFFIX = "_temprootdir";
 
-  private final CloudCredentialsRule credentialsRule;
+    private final CloudCredentialsRule credentialsRule;
 
-  private FileSystem fileSystem;
+    private FileSystem fileSystem;
 
-  private String targetDirName;
+    private String targetDirName;
 
-  private String hiveExternalTableDirName;
+    private String hiveExternalTableDirName;
 
-  public CloudFileSystemRule(CloudCredentialsRule credentialsRule) {
-    this.credentialsRule = credentialsRule;
-  }
-
-  @Override
-  public Statement apply(Statement base, Description description) {
-    return new Statement() {
-      @Override
-      public void evaluate() throws Throwable {
-        setUp();
-        try {
-          base.evaluate();
-        } finally {
-          tearDown();
-        }
-      }
-    };
-  }
-
-  public FileSystem getCloudFileSystem() {
-    return fileSystem;
-  }
-
-  public Path getTargetDirPath() {
-    return new Path(getCloudTempDirPath(), targetDirName);
-  }
-
-  public Path getTemporaryRootDirPath() {
-    return new Path(getTargetDirPath().toString() + TEMPORARY_ROOTDIR_SUFFIX);
-  }
-
-  public Path getExternalTableDirPath() {
-    return new Path(getCloudTempDirPath(), hiveExternalTableDirName);
-  }
-
-  private void setUp() throws IOException {
-    initializeCloudFileSystem();
-    initializeTestDirectoryNames();
-  }
-
-  private void initializeCloudFileSystem() throws IOException {
-    Configuration hadoopConf = new Configuration();
-    credentialsRule.addCloudCredentialProperties(hadoopConf);
-
-    fileSystem = FileSystem.get(hadoopConf);
-  }
-
-  private void initializeTestDirectoryNames() {
-    targetDirName = generateUniqueDirName(TARGET_DIR_NAME_PREFIX);
-    hiveExternalTableDirName = generateUniqueDirName(HIVE_EXTERNAL_DIR_NAME_PREFIX);
-  }
-
-  private String generateUniqueDirName(String dirPrefix) {
-    String uuid = UUID.randomUUID().toString();
-    return dirPrefix + "-" + uuid;
-  }
-
-  private void cleanUpDirectory(Path directoryPath) {
-    try {
-      if (fileSystem.exists(directoryPath)) {
-        fileSystem.delete(directoryPath, true);
-      }
-    } catch (Exception e) {
-      LOG.error("Issue with cleaning up directory", e);
+    public CloudFileSystemRule(CloudCredentialsRule credentialsRule) {
+        this.credentialsRule = credentialsRule;
     }
-  }
 
-  private Path getCloudTempDirPath() {
-    return new Path(credentialsRule.getBaseCloudDirectoryUrl(), TEMP_DIR);
-  }
+    @Override
+    public Statement apply(Statement base, Description description) {
+        return new Statement() {
+            @Override
+            public void evaluate() throws Throwable {
+                setUp();
+                try {
+                    base.evaluate();
+                } finally {
+                    tearDown();
+                }
+            }
+        };
+    }
 
-  private void tearDown() {
-    cleanUpDirectory(getTemporaryRootDirPath());
-    cleanUpDirectory(getTargetDirPath());
-    cleanUpDirectory(getExternalTableDirPath());
-  }
+    public FileSystem getCloudFileSystem() {
+        return fileSystem;
+    }
+
+    public Path getTargetDirPath() {
+        return new Path(getCloudTempDirPath(), targetDirName);
+    }
+
+    public Path getTemporaryRootDirPath() {
+        return new Path(getTargetDirPath().toString() + TEMPORARY_ROOTDIR_SUFFIX);
+    }
+
+    public Path getExternalTableDirPath() {
+        return new Path(getCloudTempDirPath(), hiveExternalTableDirName);
+    }
+
+    private void setUp() throws IOException {
+        initializeCloudFileSystem();
+        initializeTestDirectoryNames();
+    }
+
+    private void initializeCloudFileSystem() throws IOException {
+        Configuration hadoopConf = new Configuration();
+        credentialsRule.addCloudCredentialProperties(hadoopConf);
+
+        fileSystem = FileSystem.get(hadoopConf);
+    }
+
+    private void initializeTestDirectoryNames() {
+        targetDirName = generateUniqueDirName(TARGET_DIR_NAME_PREFIX);
+        hiveExternalTableDirName = generateUniqueDirName(HIVE_EXTERNAL_DIR_NAME_PREFIX);
+    }
+
+    private String generateUniqueDirName(String dirPrefix) {
+        String uuid = UUID.randomUUID().toString();
+        return dirPrefix + "-" + uuid;
+    }
+
+    private void cleanUpDirectory(Path directoryPath) {
+        try {
+            if (fileSystem.exists(directoryPath)) {
+                fileSystem.delete(directoryPath, true);
+            }
+        } catch (Exception e) {
+            LOG.error("Issue with cleaning up directory", e);
+        }
+    }
+
+    private Path getCloudTempDirPath() {
+        return new Path(credentialsRule.getBaseCloudDirectoryUrl(), TEMP_DIR);
+    }
+
+    private void tearDown() {
+        cleanUpDirectory(getTemporaryRootDirPath());
+        cleanUpDirectory(getTargetDirPath());
+        cleanUpDirectory(getExternalTableDirPath());
+    }
 }

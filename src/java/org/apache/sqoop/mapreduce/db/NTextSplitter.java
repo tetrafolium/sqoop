@@ -22,7 +22,7 @@ package org.apache.sqoop.mapreduce.db;
  */
 public class NTextSplitter extends TextSplitter {
 
-  public NTextSplitter() {
-    setUseNCharStrings(true);
-  }
+    public NTextSplitter() {
+        setUseNCharStrings(true);
+    }
 }

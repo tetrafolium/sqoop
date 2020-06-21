@@ -50,159 +50,159 @@ import static org.apache.sqoop.util.FileSystemUtil.listFiles;
 
 public class ParquetReader implements AutoCloseable {
 
-  private final Path pathToRead;
+    private final Path pathToRead;
 
-  private final Configuration configuration;
+    private final Configuration configuration;
 
-  private final Deque<Path> filesToRead;
+    private final Deque<Path> filesToRead;
 
-  private org.apache.parquet.hadoop.ParquetReader<GenericRecord> reader;
+    private org.apache.parquet.hadoop.ParquetReader<GenericRecord> reader;
 
-  public ParquetReader(Path pathToRead, Configuration configuration) {
-    this.pathToRead = pathToRead;
-    this.configuration = configuration;
-    this.filesToRead = new ArrayDeque<>(determineFilesToRead());
-    initReader(filesToRead.removeFirst());
-  }
-
-  public ParquetReader(Path pathToRead) {
-    this(pathToRead, new Configuration());
-  }
-
-  private GenericRecord next() throws IOException {
-    GenericRecord result = reader.read();
-    if (result != null) {
-      return result;
-    }
-    if (!filesToRead.isEmpty()) {
-      initReader(filesToRead.removeFirst());
-      return next();
+    public ParquetReader(Path pathToRead, Configuration configuration) {
+        this.pathToRead = pathToRead;
+        this.configuration = configuration;
+        this.filesToRead = new ArrayDeque<>(determineFilesToRead());
+        initReader(filesToRead.removeFirst());
     }
 
-    return null;
-  }
-
-  public List<GenericRecord> readAll() {
-    List<GenericRecord> result = new ArrayList<>();
-
-    GenericRecord record;
-    try {
-      while ((record = next()) != null) {
-        result.add(record);
-      }
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    } finally {
-      close();
+    public ParquetReader(Path pathToRead) {
+        this(pathToRead, new Configuration());
     }
 
-    return result;
-  }
+    private GenericRecord next() throws IOException {
+        GenericRecord result = reader.read();
+        if (result != null) {
+            return result;
+        }
+        if (!filesToRead.isEmpty()) {
+            initReader(filesToRead.removeFirst());
+            return next();
+        }
 
-  public List<String> readAllInCsv() {
-    List<String> result = new ArrayList<>();
-
-    for (GenericRecord record : readAll()) {
-      result.add(convertToCsv(record));
+        return null;
     }
 
-    return result;
-  }
+    public List<GenericRecord> readAll() {
+        List<GenericRecord> result = new ArrayList<>();
 
-  public List<String> readAllInCsvSorted() {
-    List<String> result = readAllInCsv();
-    Collections.sort(result);
+        GenericRecord record;
+        try {
+            while ((record = next()) != null) {
+                result.add(record);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } finally {
+            close();
+        }
 
-    return result;
-  }
-
-  public CompressionCodecName getCodec() {
-    ParquetMetadata parquetMetadata = getParquetMetadata();
-
-    Iterator<BlockMetaData> blockMetaDataIterator = parquetMetadata.getBlocks().iterator();
-    if (blockMetaDataIterator.hasNext()) {
-      BlockMetaData blockMetaData = blockMetaDataIterator.next();
-
-      Iterator<ColumnChunkMetaData> columnChunkMetaDataIterator = blockMetaData.getColumns().iterator();
-
-      if (columnChunkMetaDataIterator.hasNext()) {
-        ColumnChunkMetaData columnChunkMetaData = columnChunkMetaDataIterator.next();
-
-        return columnChunkMetaData.getCodec();
-      }
+        return result;
     }
 
-    return null;
-  }
+    public List<String> readAllInCsv() {
+        List<String> result = new ArrayList<>();
 
-  public MessageType readParquetSchema() {
-    try {
-      ParquetMetadata parquetMetadata = getParquetMetadata();
+        for (GenericRecord record : readAll()) {
+            result.add(convertToCsv(record));
+        }
 
-      return parquetMetadata.getFileMetaData().getSchema();
-    } finally {
-      close();
+        return result;
     }
-  }
 
-  private ParquetMetadata getParquetMetadata() {
-    return getFooters().stream().findFirst().get().getParquetMetadata();
-  }
+    public List<String> readAllInCsvSorted() {
+        List<String> result = readAllInCsv();
+        Collections.sort(result);
 
-  private List<Footer> getFooters() {
-    final List<Footer> footers;
-    try {
-      FileSystem fs = pathToRead.getFileSystem(configuration);
-      List<FileStatus> statuses = asList(fs.listStatus(pathToRead, HiddenFileFilter.INSTANCE));
-      footers = ParquetFileReader.readAllFootersInParallelUsingSummaryFiles(configuration, statuses, false);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
+        return result;
     }
-    return footers;
-  }
 
-  private String convertToCsv(GenericRecord record) {
-    StringBuilder result = new StringBuilder();
-    for (int i = 0; i < record.getSchema().getFields().size(); i++) {
-      result.append(record.get(i));
-      result.append(",");
+    public CompressionCodecName getCodec() {
+        ParquetMetadata parquetMetadata = getParquetMetadata();
+
+        Iterator<BlockMetaData> blockMetaDataIterator = parquetMetadata.getBlocks().iterator();
+        if (blockMetaDataIterator.hasNext()) {
+            BlockMetaData blockMetaData = blockMetaDataIterator.next();
+
+            Iterator<ColumnChunkMetaData> columnChunkMetaDataIterator = blockMetaData.getColumns().iterator();
+
+            if (columnChunkMetaDataIterator.hasNext()) {
+                ColumnChunkMetaData columnChunkMetaData = columnChunkMetaDataIterator.next();
+
+                return columnChunkMetaData.getCodec();
+            }
+        }
+
+        return null;
     }
-    result.deleteCharAt(result.length() - 1);
-    return result.toString();
-  }
 
-  private void initReader(Path file) {
-    try {
-      if (reader != null) {
-        reader.close();
-      }
-      GenericData.get().addLogicalTypeConversion(new Conversions.DecimalConversion());
-      this.reader = AvroParquetReader.<GenericRecord>builder(file).withDataModel(GenericData.get()).build();
-    } catch (IOException e) {
-      throw new RuntimeException(e);
+    public MessageType readParquetSchema() {
+        try {
+            ParquetMetadata parquetMetadata = getParquetMetadata();
+
+            return parquetMetadata.getFileMetaData().getSchema();
+        } finally {
+            close();
+        }
     }
-  }
 
-  private Collection<Path> determineFilesToRead() {
-    try {
-      if (isFile(pathToRead, configuration)) {
-        return Collections.singletonList(pathToRead);
-      }
-
-      return listFiles(pathToRead, configuration);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
+    private ParquetMetadata getParquetMetadata() {
+        return getFooters().stream().findFirst().get().getParquetMetadata();
     }
-  }
 
-  @Override
-  public void close() {
-    if (reader != null) {
-      try {
-        reader.close();
-      } catch (IOException e) {
-        throw new RuntimeException(e);
-      }
+    private List<Footer> getFooters() {
+        final List<Footer> footers;
+        try {
+            FileSystem fs = pathToRead.getFileSystem(configuration);
+            List<FileStatus> statuses = asList(fs.listStatus(pathToRead, HiddenFileFilter.INSTANCE));
+            footers = ParquetFileReader.readAllFootersInParallelUsingSummaryFiles(configuration, statuses, false);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return footers;
     }
-  }
+
+    private String convertToCsv(GenericRecord record) {
+        StringBuilder result = new StringBuilder();
+        for (int i = 0; i < record.getSchema().getFields().size(); i++) {
+            result.append(record.get(i));
+            result.append(",");
+        }
+        result.deleteCharAt(result.length() - 1);
+        return result.toString();
+    }
+
+    private void initReader(Path file) {
+        try {
+            if (reader != null) {
+                reader.close();
+            }
+            GenericData.get().addLogicalTypeConversion(new Conversions.DecimalConversion());
+            this.reader = AvroParquetReader.<GenericRecord>builder(file).withDataModel(GenericData.get()).build();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private Collection<Path> determineFilesToRead() {
+        try {
+            if (isFile(pathToRead, configuration)) {
+                return Collections.singletonList(pathToRead);
+            }
+
+            return listFiles(pathToRead, configuration);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void close() {
+        if (reader != null) {
+            try {
+                reader.close();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
 }

@@ -32,18 +32,18 @@ import java.io.IOException;
  */
 public class HadoopParquetExportJobConfigurator implements ParquetExportJobConfigurator {
 
-  @Override
-  public void configureInputFormat(Job job, Path inputPath) throws IOException {
-    // do nothing
-  }
+    @Override
+    public void configureInputFormat(Job job, Path inputPath) throws IOException {
+        // do nothing
+    }
 
-  @Override
-  public Class<? extends Mapper> getMapperClass() {
-    return HadoopParquetExportMapper.class;
-  }
+    @Override
+    public Class<? extends Mapper> getMapperClass() {
+        return HadoopParquetExportMapper.class;
+    }
 
-  @Override
-  public Class<? extends InputFormat> getInputFormatClass() {
-    return AvroParquetInputFormat.class;
-  }
+    @Override
+    public Class<? extends InputFormat> getInputFormatClass() {
+        return AvroParquetInputFormat.class;
+    }
 }

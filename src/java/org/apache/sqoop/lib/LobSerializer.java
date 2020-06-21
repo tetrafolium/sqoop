@@ -26,29 +26,29 @@ import java.io.IOException;
  */
 public final class LobSerializer {
 
-  private LobSerializer() { }
+    private LobSerializer() { }
 
-  public static void writeClob(
-      org.apache.sqoop.lib.ClobRef clob, DataOutput out) throws IOException {
-    clob.write(out);
-  }
+    public static void writeClob(
+        org.apache.sqoop.lib.ClobRef clob, DataOutput out) throws IOException {
+        clob.write(out);
+    }
 
-  public static void writeBlob(
-      org.apache.sqoop.lib.BlobRef blob, DataOutput out) throws IOException {
-    blob.write(out);
-  }
+    public static void writeBlob(
+        org.apache.sqoop.lib.BlobRef blob, DataOutput out) throws IOException {
+        blob.write(out);
+    }
 
-  public static org.apache.sqoop.lib.ClobRef readClobFields(
-      DataInput in) throws IOException {
-    org.apache.sqoop.lib.ClobRef clob = new org.apache.sqoop.lib.ClobRef();
-    clob.readFields(in);
-    return clob;
-  }
+    public static org.apache.sqoop.lib.ClobRef readClobFields(
+        DataInput in) throws IOException {
+        org.apache.sqoop.lib.ClobRef clob = new org.apache.sqoop.lib.ClobRef();
+        clob.readFields(in);
+        return clob;
+    }
 
-  public static org.apache.sqoop.lib.BlobRef readBlobFields(
-      DataInput in) throws IOException {
-    org.apache.sqoop.lib.BlobRef blob = new org.apache.sqoop.lib.BlobRef();
-    blob.readFields(in);
-    return blob;
-  }
+    public static org.apache.sqoop.lib.BlobRef readBlobFields(
+        DataInput in) throws IOException {
+        org.apache.sqoop.lib.BlobRef blob = new org.apache.sqoop.lib.BlobRef();
+        blob.readFields(in);
+        return blob;
+    }
 }

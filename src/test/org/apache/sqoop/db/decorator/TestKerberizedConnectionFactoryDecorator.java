@@ -42,60 +42,60 @@ import static org.mockito.Mockito.when;
 @Category(UnitTest.class)
 public class TestKerberizedConnectionFactoryDecorator {
 
-  private KerberizedConnectionFactoryDecorator kerberizedConnectionFactoryDecorator;
+    private KerberizedConnectionFactoryDecorator kerberizedConnectionFactoryDecorator;
 
-  private KerberosAuthenticator kerberosAuthenticator;
+    private KerberosAuthenticator kerberosAuthenticator;
 
-  private JdbcConnectionFactory decoratedFactory;
+    private JdbcConnectionFactory decoratedFactory;
 
-  private UserGroupInformation testUser;
+    private UserGroupInformation testUser;
 
-  private UserGroupInformation capturedCurrentUser;
+    private UserGroupInformation capturedCurrentUser;
 
-  @Rule
-  public ExpectedException expectedException = ExpectedException.none();
+    @Rule
+    public ExpectedException expectedException = ExpectedException.none();
 
-  @Before
-  public void before() throws Exception {
-    decoratedFactory = mock(JdbcConnectionFactory.class);
-    kerberosAuthenticator = mock(KerberosAuthenticator.class);
-    testUser = UserGroupInformation.createUserForTesting("testUser", new String[]{});
-    when(kerberosAuthenticator.authenticate()).thenReturn(testUser);
+    @Before
+    public void before() throws Exception {
+        decoratedFactory = mock(JdbcConnectionFactory.class);
+        kerberosAuthenticator = mock(KerberosAuthenticator.class);
+        testUser = UserGroupInformation.createUserForTesting("testUser", new String[] {});
+        when(kerberosAuthenticator.authenticate()).thenReturn(testUser);
 
-    kerberizedConnectionFactoryDecorator = new KerberizedConnectionFactoryDecorator(decoratedFactory, kerberosAuthenticator);
-  }
+        kerberizedConnectionFactoryDecorator = new KerberizedConnectionFactoryDecorator(decoratedFactory, kerberosAuthenticator);
+    }
 
-  @Test
-  public void testCreateConnectionIsInvokedAsAuthenticatedUser() throws Exception {
-    // We want to capture the current user when the createConnection() method is invoked on the decorated factory.
-    doAnswer(new Answer() {
-      @Override
-      public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-        capturedCurrentUser = UserGroupInformation.getCurrentUser();
-        return null;
-      }
-    }).when(decoratedFactory).createConnection();
+    @Test
+    public void testCreateConnectionIsInvokedAsAuthenticatedUser() throws Exception {
+        // We want to capture the current user when the createConnection() method is invoked on the decorated factory.
+        doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+                capturedCurrentUser = UserGroupInformation.getCurrentUser();
+                return null;
+            }
+        }).when(decoratedFactory).createConnection();
 
-    kerberizedConnectionFactoryDecorator.createConnection();
+        kerberizedConnectionFactoryDecorator.createConnection();
 
-    assertEquals(testUser, capturedCurrentUser);
-  }
+        assertEquals(testUser, capturedCurrentUser);
+    }
 
-  @Test
-  public void testCreateConnectionReturnsConnectionCreatedByDecoratedFactory() throws Exception {
-    Connection expected = mock(Connection.class);
-    when(decoratedFactory.createConnection()).thenReturn(expected);
+    @Test
+    public void testCreateConnectionReturnsConnectionCreatedByDecoratedFactory() throws Exception {
+        Connection expected = mock(Connection.class);
+        when(decoratedFactory.createConnection()).thenReturn(expected);
 
-    assertSame(expected, kerberizedConnectionFactoryDecorator.createConnection());
-  }
+        assertSame(expected, kerberizedConnectionFactoryDecorator.createConnection());
+    }
 
-  @Test
-  public void testCreateConnectionThrowsTheSameExceptionDecoratedFactoryThrows() throws Exception {
-    RuntimeException expected = mock(RuntimeException.class);
-    when(decoratedFactory.createConnection()).thenThrow(expected);
+    @Test
+    public void testCreateConnectionThrowsTheSameExceptionDecoratedFactoryThrows() throws Exception {
+        RuntimeException expected = mock(RuntimeException.class);
+        when(decoratedFactory.createConnection()).thenThrow(expected);
 
-    expectedException.expect(equalTo(expected));
-    kerberizedConnectionFactoryDecorator.createConnection();
-  }
+        expectedException.expect(equalTo(expected));
+        kerberizedConnectionFactoryDecorator.createConnection();
+    }
 
 }

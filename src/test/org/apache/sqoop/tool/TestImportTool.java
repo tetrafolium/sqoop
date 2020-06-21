@@ -53,92 +53,92 @@ import org.junit.runner.RunWith;
 @RunWith(Theories.class)
 @Category(UnitTest.class)
 public class TestImportTool {
-  @DataPoints
-  public static final Object[][] TRANSACTION_ISOLATION_LEVEL_NAMES_AND_VALUES = {
-    {"TRANSACTION_NONE", Connection.TRANSACTION_NONE},
-    {"TRANSACTION_READ_COMMITTED",Connection.TRANSACTION_READ_COMMITTED},
-    {"TRANSACTION_READ_UNCOMMITTED",Connection.TRANSACTION_READ_UNCOMMITTED},
-    {"TRANSACTION_REPEATABLE_READ",Connection.TRANSACTION_REPEATABLE_READ},
-    {"TRANSACTION_SERIALIZABLE",Connection.TRANSACTION_SERIALIZABLE}
-  };
+    @DataPoints
+    public static final Object[][] TRANSACTION_ISOLATION_LEVEL_NAMES_AND_VALUES = {
+        {"TRANSACTION_NONE", Connection.TRANSACTION_NONE},
+        {"TRANSACTION_READ_COMMITTED",Connection.TRANSACTION_READ_COMMITTED},
+        {"TRANSACTION_READ_UNCOMMITTED",Connection.TRANSACTION_READ_UNCOMMITTED},
+        {"TRANSACTION_REPEATABLE_READ",Connection.TRANSACTION_REPEATABLE_READ},
+        {"TRANSACTION_SERIALIZABLE",Connection.TRANSACTION_SERIALIZABLE}
+    };
 
-  @Rule
-  public ExpectedLogMessage logMessage = new ExpectedLogMessage();
+    @Rule
+    public ExpectedLogMessage logMessage = new ExpectedLogMessage();
 
-  private ImportTool importTool;
+    private ImportTool importTool;
 
-  private ImportTool importToolSpy;
+    private ImportTool importToolSpy;
 
-  private CodeGenTool codeGenTool;
+    private CodeGenTool codeGenTool;
 
-  private HiveClientFactory hiveClientFactory;
+    private HiveClientFactory hiveClientFactory;
 
-  @Before
-  public void before() {
-    codeGenTool = mock(CodeGenTool.class);
-    hiveClientFactory = mock(HiveClientFactory.class);
+    @Before
+    public void before() {
+        codeGenTool = mock(CodeGenTool.class);
+        hiveClientFactory = mock(HiveClientFactory.class);
 
-    importTool = new ImportTool("import", codeGenTool, false, hiveClientFactory);
-    importToolSpy = spy(importTool);
-  }
+        importTool = new ImportTool("import", codeGenTool, false, hiveClientFactory);
+        importToolSpy = spy(importTool);
+    }
 
-  @Theory
-  public void esnureTransactionIsolationLevelsAreMappedToTheRightValues(Object[] values)
-      throws Exception {
-    ImportTool importTool = new ImportTool();
-    String[] args = { "--" + BaseSqoopTool.METADATA_TRANSACTION_ISOLATION_LEVEL, values[0].toString() };
-    SqoopOptions options = importTool.parseArguments(args, null, null, true);
-    assertThat(options.getMetadataTransactionIsolationLevel(), is(equalTo(values[1])));
-  }
+    @Theory
+    public void esnureTransactionIsolationLevelsAreMappedToTheRightValues(Object[] values)
+    throws Exception {
+        ImportTool importTool = new ImportTool();
+        String[] args = { "--" + BaseSqoopTool.METADATA_TRANSACTION_ISOLATION_LEVEL, values[0].toString() };
+        SqoopOptions options = importTool.parseArguments(args, null, null, true);
+        assertThat(options.getMetadataTransactionIsolationLevel(), is(equalTo(values[1])));
+    }
 
-  @Test
-  public void testImportToolHandlesAvroSchemaMismatchExceptionProperly() throws Exception {
-    final String writtenWithSchemaString = "writtenWithSchema";
-    final String actualSchemaString = "actualSchema";
-    final String errorMessage = "Import failed";
+    @Test
+    public void testImportToolHandlesAvroSchemaMismatchExceptionProperly() throws Exception {
+        final String writtenWithSchemaString = "writtenWithSchema";
+        final String actualSchemaString = "actualSchema";
+        final String errorMessage = "Import failed";
 
-    doReturn(true).when(importToolSpy).init(any(SqoopOptions.class));
+        doReturn(true).when(importToolSpy).init(any(SqoopOptions.class));
 
-    Schema writtenWithSchema = mock(Schema.class);
-    when(writtenWithSchema.toString()).thenReturn(writtenWithSchemaString);
-    Schema actualSchema = mock(Schema.class);
-    when(actualSchema.toString()).thenReturn(actualSchemaString);
+        Schema writtenWithSchema = mock(Schema.class);
+        when(writtenWithSchema.toString()).thenReturn(writtenWithSchemaString);
+        Schema actualSchema = mock(Schema.class);
+        when(actualSchema.toString()).thenReturn(actualSchemaString);
 
-    AvroSchemaMismatchException expectedException = new AvroSchemaMismatchException(errorMessage, writtenWithSchema, actualSchema);
-    doThrow(expectedException).when(importToolSpy).importTable(any(SqoopOptions.class));
+        AvroSchemaMismatchException expectedException = new AvroSchemaMismatchException(errorMessage, writtenWithSchema, actualSchema);
+        doThrow(expectedException).when(importToolSpy).importTable(any(SqoopOptions.class));
 
-    SqoopOptions sqoopOptions = mock(SqoopOptions.class);
-    when(sqoopOptions.doHiveImport()).thenReturn(true);
+        SqoopOptions sqoopOptions = mock(SqoopOptions.class);
+        when(sqoopOptions.doHiveImport()).thenReturn(true);
 
-    logMessage.expectError(expectedException.getMessage());
-    int result = importToolSpy.run(sqoopOptions);
-    assertEquals(1, result);
-  }
+        logMessage.expectError(expectedException.getMessage());
+        int result = importToolSpy.run(sqoopOptions);
+        assertEquals(1, result);
+    }
 
-  // If --external-table-dir is set and --hive-import is not, check an exception
-  // is thrown
-  @Test (expected = InvalidOptionsException.class)
-  public void testExternalTableNoHiveImportThrowsException() throws InvalidOptionsException {
-    String hdfsTableDir = "/data/movielens/genre";
-    SqoopOptions options = new SqoopOptions("jdbc:postgresql://localhost/movielens", "genres");
-    options.setHiveExternalTableDir(hdfsTableDir);
-    ImportTool tool = new ImportTool("Import Tool", false);
-    tool.validateHiveOptions(options);
-    Assert.fail("testExternalTableNoHiveImportThrowsException unit test failed!");
-  }
+    // If --external-table-dir is set and --hive-import is not, check an exception
+    // is thrown
+    @Test (expected = InvalidOptionsException.class)
+    public void testExternalTableNoHiveImportThrowsException() throws InvalidOptionsException {
+        String hdfsTableDir = "/data/movielens/genre";
+        SqoopOptions options = new SqoopOptions("jdbc:postgresql://localhost/movielens", "genres");
+        options.setHiveExternalTableDir(hdfsTableDir);
+        ImportTool tool = new ImportTool("Import Tool", false);
+        tool.validateHiveOptions(options);
+        Assert.fail("testExternalTableNoHiveImportThrowsException unit test failed!");
+    }
 
-  @Test
-  public void testShouldCheckExistingOutputDirectoryReturnsFalseForHBaseImport() {
-    SqoopOptions sqoopOptions = mock(SqoopOptions.class);
-    when(sqoopOptions.getHBaseTable()).thenReturn("hbasetable");
+    @Test
+    public void testShouldCheckExistingOutputDirectoryReturnsFalseForHBaseImport() {
+        SqoopOptions sqoopOptions = mock(SqoopOptions.class);
+        when(sqoopOptions.getHBaseTable()).thenReturn("hbasetable");
 
-    assertFalse(importTool.shouldCheckExistingOutputDirectory(sqoopOptions));
-  }
+        assertFalse(importTool.shouldCheckExistingOutputDirectory(sqoopOptions));
+    }
 
-  @Test
-  public void testShouldCheckExistingOutputDirectoryReturnsTrueForNonHBaseImport() {
-    SqoopOptions sqoopOptions = mock(SqoopOptions.class);
+    @Test
+    public void testShouldCheckExistingOutputDirectoryReturnsTrueForNonHBaseImport() {
+        SqoopOptions sqoopOptions = mock(SqoopOptions.class);
 
-    assertTrue(importTool.shouldCheckExistingOutputDirectory(sqoopOptions));
-  }
+        assertTrue(importTool.shouldCheckExistingOutputDirectory(sqoopOptions));
+    }
 }

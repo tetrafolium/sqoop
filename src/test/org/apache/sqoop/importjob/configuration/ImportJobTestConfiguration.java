@@ -22,9 +22,9 @@ import java.util.List;
 
 public interface ImportJobTestConfiguration {
 
-  String[] getTypes();
+    String[] getTypes();
 
-  String[] getNames();
+    String[] getNames();
 
-  List<String[]> getSampleData();
+    List<String[]> getSampleData();
 }

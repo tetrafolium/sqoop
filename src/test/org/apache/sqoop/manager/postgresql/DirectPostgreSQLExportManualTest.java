@@ -63,124 +63,124 @@ import org.junit.experimental.categories.Category;
 @Category({ManualTest.class, PostgresqlTest.class})
 public class DirectPostgreSQLExportManualTest extends TestExport {
 
-  public static final Log LOG =
-      LogFactory.getLog(DirectPostgreSQLExportManualTest.class.getName());
-  private DBConfiguration dbConf;
+    public static final Log LOG =
+        LogFactory.getLog(DirectPostgreSQLExportManualTest.class.getName());
+    private DBConfiguration dbConf;
 
-  public DirectPostgreSQLExportManualTest() {
-    JobConf conf = new JobConf(getConf());
-    DBConfiguration.configureDB(conf,
-                                "org.postgresql.Driver",
-                                getConnectString(),
-                                getUserName(),
-                                PASSWORD, (Integer) null);
-    dbConf = new DBConfiguration(conf);
-  }
-
-  @Override
-  protected boolean useHsqldbTestServer() {
-    return false;
-  }
-
-  @Override
-  protected String getConnectString() {
-    return CONNECT_STRING;
-  }
-
-  protected String getUserName() {
-    return DATABASE_USER;
-  }
-
-  @Override
-  protected String getTablePrefix() {
-    return super.getTablePrefix().toLowerCase();
-  }
-
-  @Override
-  protected String getTableName() {
-    return super.getTableName().toLowerCase();
-  }
-
-  @Override
-  public String getStagingTableName() {
-    return super.getStagingTableName().toLowerCase();
-  }
-
-  @Override
-  protected Connection getConnection() {
-    try {
-      Connection conn = dbConf.getConnection();
-      conn.setAutoCommit(false);
-      PreparedStatement stmt =
-          conn.prepareStatement("SET extra_float_digits TO 0");
-      stmt.executeUpdate();
-      conn.commit();
-      return conn;
-    } catch (SQLException sqlE) {
-      LOG.error("Could not get connection to test server: " + sqlE);
-      return null;
-    } catch (ClassNotFoundException cnfE) {
-      LOG.error("Could not find driver class: " + cnfE);
-      return null;
+    public DirectPostgreSQLExportManualTest() {
+        JobConf conf = new JobConf(getConf());
+        DBConfiguration.configureDB(conf,
+                                    "org.postgresql.Driver",
+                                    getConnectString(),
+                                    getUserName(),
+                                    PASSWORD, (Integer) null);
+        dbConf = new DBConfiguration(conf);
     }
-  }
 
-  @Override
-  protected String getDropTableStatement(String tableName) {
-    return "DROP TABLE IF EXISTS " + tableName;
-  }
+    @Override
+    protected boolean useHsqldbTestServer() {
+        return false;
+    }
 
-  @Override
-  protected String[] getArgv(boolean includeHadoopFlags,
-                             int rowsPerStatement,
-                             int statementsPerTx,
-                             String... additionalArgv) {
-    ArrayList<String> args =
-        new ArrayList<String>(Arrays.asList(additionalArgv));
-    args.add("--username");
-    args.add(getUserName());
-    args.add("--password");
-    args.add(PASSWORD);
-    args.add("--direct");
-    return super.getArgv(includeHadoopFlags,
-                         rowsPerStatement,
-                         statementsPerTx,
-                         args.toArray(new String[0]));
-  }
+    @Override
+    protected String getConnectString() {
+        return CONNECT_STRING;
+    }
 
-  @Override
-  protected String [] getCodeGenArgv(String... extraArgs) {
-    ArrayList<String> args = new ArrayList<String>(Arrays.asList(extraArgs));
-    args.add("--username");
-    args.add(getUserName());
-    args.add("--password");
-    args.add(PASSWORD);
-    return super.getCodeGenArgv(args.toArray(new String[0]));
-  }
+    protected String getUserName() {
+        return DATABASE_USER;
+    }
 
-  @Ignore("Ignoring this test case as direct export does not support --columns option.")
-  @Override
-  @Test
-  public void testColumnsExport() throws IOException, SQLException {
-  }
+    @Override
+    protected String getTablePrefix() {
+        return super.getTablePrefix().toLowerCase();
+    }
 
-  @Ignore("Ignoring this test case as the scenario is not supported with direct export.")
-  @Override
-  @Test
-  public void testLessColumnsInFileThanInTable() throws IOException, SQLException {
-  }
+    @Override
+    protected String getTableName() {
+        return super.getTableName().toLowerCase();
+    }
 
-  @Ignore("Ignoring this test case as the scenario is not supported with direct export.")
-  @Override
-  @Test
-  public void testLessColumnsInFileThanInTableInputNullIntPassed() throws IOException, SQLException {
-  }
+    @Override
+    public String getStagingTableName() {
+        return super.getStagingTableName().toLowerCase();
+    }
 
-  @Ignore("Ignoring this test case as the scenario is not supported with direct export.")
-  @Override
-  @Test
-  public void testLessColumnsInFileThanInTableInputNullStringPassed() throws IOException, SQLException {
-  }
+    @Override
+    protected Connection getConnection() {
+        try {
+            Connection conn = dbConf.getConnection();
+            conn.setAutoCommit(false);
+            PreparedStatement stmt =
+                conn.prepareStatement("SET extra_float_digits TO 0");
+            stmt.executeUpdate();
+            conn.commit();
+            return conn;
+        } catch (SQLException sqlE) {
+            LOG.error("Could not get connection to test server: " + sqlE);
+            return null;
+        } catch (ClassNotFoundException cnfE) {
+            LOG.error("Could not find driver class: " + cnfE);
+            return null;
+        }
+    }
+
+    @Override
+    protected String getDropTableStatement(String tableName) {
+        return "DROP TABLE IF EXISTS " + tableName;
+    }
+
+    @Override
+    protected String[] getArgv(boolean includeHadoopFlags,
+                               int rowsPerStatement,
+                               int statementsPerTx,
+                               String... additionalArgv) {
+        ArrayList<String> args =
+            new ArrayList<String>(Arrays.asList(additionalArgv));
+        args.add("--username");
+        args.add(getUserName());
+        args.add("--password");
+        args.add(PASSWORD);
+        args.add("--direct");
+        return super.getArgv(includeHadoopFlags,
+                             rowsPerStatement,
+                             statementsPerTx,
+                             args.toArray(new String[0]));
+    }
+
+    @Override
+    protected String [] getCodeGenArgv(String... extraArgs) {
+        ArrayList<String> args = new ArrayList<String>(Arrays.asList(extraArgs));
+        args.add("--username");
+        args.add(getUserName());
+        args.add("--password");
+        args.add(PASSWORD);
+        return super.getCodeGenArgv(args.toArray(new String[0]));
+    }
+
+    @Ignore("Ignoring this test case as direct export does not support --columns option.")
+    @Override
+    @Test
+    public void testColumnsExport() throws IOException, SQLException {
+    }
+
+    @Ignore("Ignoring this test case as the scenario is not supported with direct export.")
+    @Override
+    @Test
+    public void testLessColumnsInFileThanInTable() throws IOException, SQLException {
+    }
+
+    @Ignore("Ignoring this test case as the scenario is not supported with direct export.")
+    @Override
+    @Test
+    public void testLessColumnsInFileThanInTableInputNullIntPassed() throws IOException, SQLException {
+    }
+
+    @Ignore("Ignoring this test case as the scenario is not supported with direct export.")
+    @Override
+    @Test
+    public void testLessColumnsInFileThanInTableInputNullStringPassed() throws IOException, SQLException {
+    }
 
 
 }

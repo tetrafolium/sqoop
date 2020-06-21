@@ -30,31 +30,31 @@ import static org.apache.commons.lang3.StringUtils.EMPTY;
 
 public class HiveServer2ConnectionFactory extends DriverManagerJdbcConnectionFactory {
 
-  private static final Log LOG = LogFactory.getLog(HiveServer2ConnectionFactory.class.getName());
+    private static final Log LOG = LogFactory.getLog(HiveServer2ConnectionFactory.class.getName());
 
-  private static final String HS2_DRIVER_CLASS = "org.apache.hive.jdbc.HiveDriver";
+    private static final String HS2_DRIVER_CLASS = "org.apache.hive.jdbc.HiveDriver";
 
-  public HiveServer2ConnectionFactory(String connectionString, String username, String password) {
-    super(HS2_DRIVER_CLASS, connectionString, username, password);
-  }
-
-  public HiveServer2ConnectionFactory(String connectionString, String username) {
-    this(connectionString, username, null);
-  }
-
-  @Override
-  public Connection createConnection() {
-    LOG.info("Creating connection to HiveServer2 as: " + getCurrentUser());
-    return super.createConnection();
-  }
-
-  private String getCurrentUser() {
-    try {
-      return UserGroupInformation.getCurrentUser().toString();
-    } catch (IOException e) {
-      LOG.error("Unable to determine current user.", e);
+    public HiveServer2ConnectionFactory(String connectionString, String username, String password) {
+        super(HS2_DRIVER_CLASS, connectionString, username, password);
     }
-    return EMPTY;
-  }
+
+    public HiveServer2ConnectionFactory(String connectionString, String username) {
+        this(connectionString, username, null);
+    }
+
+    @Override
+    public Connection createConnection() {
+        LOG.info("Creating connection to HiveServer2 as: " + getCurrentUser());
+        return super.createConnection();
+    }
+
+    private String getCurrentUser() {
+        try {
+            return UserGroupInformation.getCurrentUser().toString();
+        } catch (IOException e) {
+            LOG.error("Unable to determine current user.", e);
+        }
+        return EMPTY;
+    }
 
 }

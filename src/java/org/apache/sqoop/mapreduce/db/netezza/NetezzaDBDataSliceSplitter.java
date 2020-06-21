@@ -25,7 +25,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.sqoop.mapreduce.db.DBSplitter;
 import
-  org.apache.sqoop.mapreduce.db.DataDrivenDBInputFormat.DataDrivenDBInputSplit;
+org.apache.sqoop.mapreduce.db.DataDrivenDBInputFormat.DataDrivenDBInputSplit;
 
 import org.apache.sqoop.config.ConfigurationHelper;
 
@@ -34,27 +34,27 @@ import org.apache.sqoop.config.ConfigurationHelper;
  */
 public class NetezzaDBDataSliceSplitter implements DBSplitter {
 
-  // Note: We have removed the throws SQLException clause as there is no
-  // SQL work done in this method
-  @Override
-  public List<InputSplit> split(Configuration conf, ResultSet results,
-      String colName) {
-    // For each map we will add a split such that
-    // the datasliceid % the mapper index equals the mapper index.
-    // The query will only be on the lower bound where clause.
-    // For upper bounds, we will specify a constant clause which always
-    // evaluates to true
+    // Note: We have removed the throws SQLException clause as there is no
+    // SQL work done in this method
+    @Override
+    public List<InputSplit> split(Configuration conf, ResultSet results,
+                                  String colName) {
+        // For each map we will add a split such that
+        // the datasliceid % the mapper index equals the mapper index.
+        // The query will only be on the lower bound where clause.
+        // For upper bounds, we will specify a constant clause which always
+        // evaluates to true
 
-    int numSplits = ConfigurationHelper.getConfNumMaps(conf);
-    List<InputSplit> splitList = new ArrayList<InputSplit>(numSplits);
-    for (int i = 0; i < numSplits; ++i) {
-      StringBuilder lowerBoundClause = new StringBuilder(128);
-      lowerBoundClause.append(" datasliceid % ").append(numSplits)
-          .append(" = ").append(i);
-      splitList.add(new DataDrivenDBInputSplit(lowerBoundClause.toString(),
-          "1 = 1"));
+        int numSplits = ConfigurationHelper.getConfNumMaps(conf);
+        List<InputSplit> splitList = new ArrayList<InputSplit>(numSplits);
+        for (int i = 0; i < numSplits; ++i) {
+            StringBuilder lowerBoundClause = new StringBuilder(128);
+            lowerBoundClause.append(" datasliceid % ").append(numSplits)
+            .append(" = ").append(i);
+            splitList.add(new DataDrivenDBInputSplit(lowerBoundClause.toString(),
+                          "1 = 1"));
+        }
+        return splitList;
     }
-    return splitList;
-  }
 
 }

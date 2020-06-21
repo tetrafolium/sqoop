@@ -36,83 +36,83 @@ import static org.mockito.Mockito.when;
 @Category(UnitTest.class)
 public class TestHiveClientFactory {
 
-  private static final String TEST_HS2_URL = "jdbc:hive2://myhost:10000/default";
+    private static final String TEST_HS2_URL = "jdbc:hive2://myhost:10000/default";
 
-  private static final String TEST_TABLE_NAME = "testTableName";
+    private static final String TEST_TABLE_NAME = "testTableName";
 
-  private static final String TEST_HIVE_TABLE_NAME = "testHiveTableName";
+    private static final String TEST_HIVE_TABLE_NAME = "testHiveTableName";
 
-  private HiveClientFactory hiveClientFactory;
+    private HiveClientFactory hiveClientFactory;
 
-  private ConnManager connectionManager;
+    private ConnManager connectionManager;
 
-  private SqoopOptions sqoopOptions;
+    private SqoopOptions sqoopOptions;
 
-  private Configuration configuration;
+    private Configuration configuration;
 
-  private JdbcConnectionFactory jdbcConnectionFactory;
+    private JdbcConnectionFactory jdbcConnectionFactory;
 
-  private HiveServer2ConnectionFactoryInitializer connectionFactoryInitializer;
+    private HiveServer2ConnectionFactoryInitializer connectionFactoryInitializer;
 
-  private SoftAssertions softly;
+    private SoftAssertions softly;
 
-  @Before
-  public void before() {
-    connectionFactoryInitializer = mock(HiveServer2ConnectionFactoryInitializer.class);
-    hiveClientFactory = new HiveClientFactory(connectionFactoryInitializer);
-    softly = new SoftAssertions();
+    @Before
+    public void before() {
+        connectionFactoryInitializer = mock(HiveServer2ConnectionFactoryInitializer.class);
+        hiveClientFactory = new HiveClientFactory(connectionFactoryInitializer);
+        softly = new SoftAssertions();
 
-    connectionManager = mock(ConnManager.class);
-    sqoopOptions = mock(SqoopOptions.class);
-    configuration = mock(Configuration.class);
-    jdbcConnectionFactory = mock(JdbcConnectionFactory.class);
+        connectionManager = mock(ConnManager.class);
+        sqoopOptions = mock(SqoopOptions.class);
+        configuration = mock(Configuration.class);
+        jdbcConnectionFactory = mock(JdbcConnectionFactory.class);
 
-    when(sqoopOptions.getConf()).thenReturn(configuration);
-    when(sqoopOptions.getTableName()).thenReturn(TEST_TABLE_NAME);
-    when(sqoopOptions.getHiveTableName()).thenReturn(TEST_HIVE_TABLE_NAME);
-  }
+        when(sqoopOptions.getConf()).thenReturn(configuration);
+        when(sqoopOptions.getTableName()).thenReturn(TEST_TABLE_NAME);
+        when(sqoopOptions.getHiveTableName()).thenReturn(TEST_HIVE_TABLE_NAME);
+    }
 
-  @Test
-  public void testCreateHiveClientCreatesHiveImportWhenHs2UrlIsNotProvided() throws Exception {
-    HiveClient hiveClient = hiveClientFactory.createHiveClient(sqoopOptions, connectionManager);
-    assertThat(hiveClient, instanceOf(HiveImport.class));
-  }
+    @Test
+    public void testCreateHiveClientCreatesHiveImportWhenHs2UrlIsNotProvided() throws Exception {
+        HiveClient hiveClient = hiveClientFactory.createHiveClient(sqoopOptions, connectionManager);
+        assertThat(hiveClient, instanceOf(HiveImport.class));
+    }
 
-  @Test
-  public void testCreateHiveClientInitializesHiveImportProperly() throws Exception {
-    HiveImport hiveImport = (HiveImport) hiveClientFactory.createHiveClient(sqoopOptions, connectionManager);
+    @Test
+    public void testCreateHiveClientInitializesHiveImportProperly() throws Exception {
+        HiveImport hiveImport = (HiveImport) hiveClientFactory.createHiveClient(sqoopOptions, connectionManager);
 
-    softly.assertThat(hiveImport.getOptions()).isSameAs(sqoopOptions);
-    softly.assertThat(hiveImport.getConnManager()).isSameAs(connectionManager);
-    softly.assertThat(hiveImport.getConfiguration()).isSameAs(configuration);
-    softly.assertThat(hiveImport.isGenerateOnly()).isFalse();
-    softly.assertAll();
-  }
+        softly.assertThat(hiveImport.getOptions()).isSameAs(sqoopOptions);
+        softly.assertThat(hiveImport.getConnManager()).isSameAs(connectionManager);
+        softly.assertThat(hiveImport.getConfiguration()).isSameAs(configuration);
+        softly.assertThat(hiveImport.isGenerateOnly()).isFalse();
+        softly.assertAll();
+    }
 
-  @Test
-  public void testCreateHiveClientCreatesHiveServer2ClientWhenHs2UrlIsProvided() throws Exception {
-    when(sqoopOptions.getHs2Url()).thenReturn(TEST_HS2_URL);
-    HiveClient hiveClient = hiveClientFactory.createHiveClient(sqoopOptions, connectionManager);
-    assertThat(hiveClient, instanceOf(HiveServer2Client.class));
-  }
+    @Test
+    public void testCreateHiveClientCreatesHiveServer2ClientWhenHs2UrlIsProvided() throws Exception {
+        when(sqoopOptions.getHs2Url()).thenReturn(TEST_HS2_URL);
+        HiveClient hiveClient = hiveClientFactory.createHiveClient(sqoopOptions, connectionManager);
+        assertThat(hiveClient, instanceOf(HiveServer2Client.class));
+    }
 
-  @Test
-  public void testCreateHiveClientInitializesHiveServer2ClientProperly() throws Exception {
-    when(sqoopOptions.getHs2Url()).thenReturn(TEST_HS2_URL);
-    when(connectionFactoryInitializer.createJdbcConnectionFactory(sqoopOptions)).thenReturn(jdbcConnectionFactory);
+    @Test
+    public void testCreateHiveClientInitializesHiveServer2ClientProperly() throws Exception {
+        when(sqoopOptions.getHs2Url()).thenReturn(TEST_HS2_URL);
+        when(connectionFactoryInitializer.createJdbcConnectionFactory(sqoopOptions)).thenReturn(jdbcConnectionFactory);
 
-    HiveServer2Client hs2Client = (HiveServer2Client) hiveClientFactory.createHiveClient(sqoopOptions, connectionManager);
+        HiveServer2Client hs2Client = (HiveServer2Client) hiveClientFactory.createHiveClient(sqoopOptions, connectionManager);
 
-    softly.assertThat(hs2Client.getSqoopOptions()).isSameAs(sqoopOptions);
-    softly.assertThat(hs2Client.getHs2ConnectionFactory()).isSameAs(jdbcConnectionFactory);
-    softly.assertThat(hs2Client.getTableDefWriter().getOptions()).isSameAs(sqoopOptions);
-    softly.assertThat(hs2Client.getTableDefWriter().getConnManager()).isSameAs(connectionManager);
-    softly.assertThat(hs2Client.getTableDefWriter().getInputTableName()).isEqualTo(TEST_TABLE_NAME);
-    softly.assertThat(hs2Client.getTableDefWriter().getOutputTableName()).isEqualTo(TEST_HIVE_TABLE_NAME);
-    softly.assertThat(hs2Client.getTableDefWriter().getConfiguration()).isSameAs(configuration);
-    softly.assertThat(hs2Client.getTableDefWriter().isCommentsEnabled()).isFalse();
+        softly.assertThat(hs2Client.getSqoopOptions()).isSameAs(sqoopOptions);
+        softly.assertThat(hs2Client.getHs2ConnectionFactory()).isSameAs(jdbcConnectionFactory);
+        softly.assertThat(hs2Client.getTableDefWriter().getOptions()).isSameAs(sqoopOptions);
+        softly.assertThat(hs2Client.getTableDefWriter().getConnManager()).isSameAs(connectionManager);
+        softly.assertThat(hs2Client.getTableDefWriter().getInputTableName()).isEqualTo(TEST_TABLE_NAME);
+        softly.assertThat(hs2Client.getTableDefWriter().getOutputTableName()).isEqualTo(TEST_HIVE_TABLE_NAME);
+        softly.assertThat(hs2Client.getTableDefWriter().getConfiguration()).isSameAs(configuration);
+        softly.assertThat(hs2Client.getTableDefWriter().isCommentsEnabled()).isFalse();
 
-    softly.assertAll();
-  }
+        softly.assertAll();
+    }
 
 }

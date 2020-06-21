@@ -27,41 +27,41 @@ import java.util.Random;
  *          The type that will be generated
  */
 public abstract class OraOopTestDataGenerator<T> {
-  protected Random rng;
-  private long seed;
+    protected Random rng;
+    private long seed;
 
-  /**
-   * Initialise with a default seed for the random number generator.
-   */
-  public OraOopTestDataGenerator() {
-    this(0);
-  }
-
-  /**
-   * Initialise with a given seed for the random number generator.
-   *
-   * @param seed
-   *          The seed to initialise the rng with.
-   */
-  public OraOopTestDataGenerator(long seed) {
-    this.seed = seed;
-    if (seed == 0) {
-      rng = new Random();
-    } else {
-      rng = new Random(seed);
+    /**
+     * Initialise with a default seed for the random number generator.
+     */
+    public OraOopTestDataGenerator() {
+        this(0);
     }
-  }
 
-  /**
-   * Reset the rng to its initial state.
-   */
-  public void reset() {
-    rng = new Random(seed);
-  }
+    /**
+     * Initialise with a given seed for the random number generator.
+     *
+     * @param seed
+     *          The seed to initialise the rng with.
+     */
+    public OraOopTestDataGenerator(long seed) {
+        this.seed = seed;
+        if (seed == 0) {
+            rng = new Random();
+        } else {
+            rng = new Random(seed);
+        }
+    }
 
-  /**
-   * @return The next item of test data. The same sequence will be re-generated
-   *         after a call to reset.
-   */
-  public abstract T next();
+    /**
+     * Reset the rng to its initial state.
+     */
+    public void reset() {
+        rng = new Random(seed);
+    }
+
+    /**
+     * @return The next item of test data. The same sequence will be re-generated
+     *         after a call to reset.
+     */
+    public abstract T next();
 }

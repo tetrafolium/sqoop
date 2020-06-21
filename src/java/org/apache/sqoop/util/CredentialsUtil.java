@@ -32,78 +32,78 @@ import java.io.IOException;
  */
 public final class CredentialsUtil {
 
-  /**
-   * Property for specifying which loader should be used to fetch the password.
-   */
-  private static String PROPERTY_LOADER_CLASSS = "org.apache.sqoop.credentials.loader.class";
+    /**
+     * Property for specifying which loader should be used to fetch the password.
+     */
+    private static String PROPERTY_LOADER_CLASSS = "org.apache.sqoop.credentials.loader.class";
 
-  /**
-   * The default loader is a FilePasswordLoader that will fetch the password from a file.
-   */
-  private static String DEFAULT_PASSWORD_LOADER = FilePasswordLoader.class.getCanonicalName();
+    /**
+     * The default loader is a FilePasswordLoader that will fetch the password from a file.
+     */
+    private static String DEFAULT_PASSWORD_LOADER = FilePasswordLoader.class.getCanonicalName();
 
-  public static final Log LOG = LogFactory.getLog(CredentialsUtil.class.getName());
+    public static final Log LOG = LogFactory.getLog(CredentialsUtil.class.getName());
 
-  private CredentialsUtil() {
-  }
+    private CredentialsUtil() {
+    }
 
-  /**
-   * Return password that was specified (either on command line or via other facilities).
-   *
-   * @param options Sqoop Options
-   * @return Password
-   * @throws IOException
-   */
-  public static String fetchPassword(SqoopOptions options)
+    /**
+     * Return password that was specified (either on command line or via other facilities).
+     *
+     * @param options Sqoop Options
+     * @return Password
+     * @throws IOException
+     */
+    public static String fetchPassword(SqoopOptions options)
     throws IOException {
-    String passwordFilePath = options.getPasswordFilePath();
-    if (passwordFilePath == null) {
-      return options.getPassword();
+        String passwordFilePath = options.getPasswordFilePath();
+        if (passwordFilePath == null) {
+            return options.getPassword();
+        }
+
+        return fetchPasswordFromLoader(options.getPasswordFilePath(), options.getConf());
     }
 
-    return fetchPasswordFromLoader(options.getPasswordFilePath(), options.getConf());
-  }
-
-  /**
-   * Return password via --password-file argument.
-   *
-   * Given loader can be overridden using PROPERTY_LOADER_CLASSS.
-   *
-   * @param path Path with the password file.
-   * @param conf Configuration
-   * @return Password
-   * @throws IOException
-   */
-  public static String fetchPasswordFromLoader(String path, Configuration conf) throws IOException {
-    PasswordLoader loader = getLoader(conf);
-    return loader.loadPassword(path, conf);
-  }
-
-  /**
-   * Remove any potentially sensitive information from the configuration object.
-   *
-   * @param configuration Associated configuration object.
-   * @throws IOException
-   */
-  public static void cleanUpSensitiveProperties(Configuration configuration) throws IOException {
-    PasswordLoader loader = getLoader(configuration);
-    loader.cleanUpConfiguration(configuration);
-  }
-
-  /**
-   * Instantiate configured PasswordLoader class.
-   *
-   * @param configuration Associated configuration object.
-   * @return
-   * @throws IOException
-   */
-  public static PasswordLoader getLoader(Configuration configuration) throws IOException {
-    String loaderClass = configuration.get(PROPERTY_LOADER_CLASSS, DEFAULT_PASSWORD_LOADER);
-
-    try {
-      return (PasswordLoader) Class.forName(loaderClass).newInstance();
-    } catch (Exception e) {
-      throw new IOException(e);
+    /**
+     * Return password via --password-file argument.
+     *
+     * Given loader can be overridden using PROPERTY_LOADER_CLASSS.
+     *
+     * @param path Path with the password file.
+     * @param conf Configuration
+     * @return Password
+     * @throws IOException
+     */
+    public static String fetchPasswordFromLoader(String path, Configuration conf) throws IOException {
+        PasswordLoader loader = getLoader(conf);
+        return loader.loadPassword(path, conf);
     }
-  }
+
+    /**
+     * Remove any potentially sensitive information from the configuration object.
+     *
+     * @param configuration Associated configuration object.
+     * @throws IOException
+     */
+    public static void cleanUpSensitiveProperties(Configuration configuration) throws IOException {
+        PasswordLoader loader = getLoader(configuration);
+        loader.cleanUpConfiguration(configuration);
+    }
+
+    /**
+     * Instantiate configured PasswordLoader class.
+     *
+     * @param configuration Associated configuration object.
+     * @return
+     * @throws IOException
+     */
+    public static PasswordLoader getLoader(Configuration configuration) throws IOException {
+        String loaderClass = configuration.get(PROPERTY_LOADER_CLASSS, DEFAULT_PASSWORD_LOADER);
+
+        try {
+            return (PasswordLoader) Class.forName(loaderClass).newInstance();
+        } catch (Exception e) {
+            throw new IOException(e);
+        }
+    }
 }

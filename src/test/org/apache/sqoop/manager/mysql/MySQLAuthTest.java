@@ -82,199 +82,199 @@ import static org.junit.Assert.fail;
 @Category(MysqlTest.class)
 public class MySQLAuthTest extends ImportJobTestCase {
 
-  public static final Log LOG = LogFactory.getLog(
-      MySQLAuthTest.class.getName());
+    public static final Log LOG = LogFactory.getLog(
+                                      MySQLAuthTest.class.getName());
 
-  private MySQLTestUtils mySQLTestUtils = new MySQLTestUtils();
+    private MySQLTestUtils mySQLTestUtils = new MySQLTestUtils();
 
-  private List<String> createdTableNames = new ArrayList<>();
+    private List<String> createdTableNames = new ArrayList<>();
 
-  @Override
-  protected boolean useHsqldbTestServer() {
-    return false;
-  }
-
-  @Before
-  public void setUp() {
-    super.setUp();
-    SqoopOptions options = new SqoopOptions(mySQLTestUtils.getMySqlConnectString(),
-        getTableName());
-    options.setUsername(mySQLTestUtils.getUserName());
-    options.setPassword(mySQLTestUtils.getUserPass());
-
-    LOG.debug("Setting up another MySQLAuthTest: " + mySQLTestUtils.getMySqlConnectString());
-
-    setManager(new DirectMySQLManager(options));
-  }
-
-  @After
-  public void tearDown() {
-    dropAllCreatedTables();
-    super.tearDown();
-  }
-
-  private String [] getArgv(boolean includeHadoopFlags,
-      boolean useDirect, String connectString, String tableName) {
-    ArrayList<String> args = new ArrayList<String>();
-
-    if (includeHadoopFlags) {
-      CommonArgs.addHadoopFlags(args);
+    @Override
+    protected boolean useHsqldbTestServer() {
+        return false;
     }
 
-    args.add("--table");
-    args.add(tableName);
-    args.add("--warehouse-dir");
-    args.add(getWarehouseDir());
-    args.add("--connect");
-    args.add(connectString);
-    if (useDirect) {
-      args.add("--direct");
-    }
-    args.add("--username");
-    args.add(mySQLTestUtils.getUserName());
-    args.add("--password");
-    args.add(mySQLTestUtils.getUserPass());
-    args.add("--mysql-delimiters");
-    args.add("--num-mappers");
-    args.add("1");
+    @Before
+    public void setUp() {
+        super.setUp();
+        SqoopOptions options = new SqoopOptions(mySQLTestUtils.getMySqlConnectString(),
+                                                getTableName());
+        options.setUsername(mySQLTestUtils.getUserName());
+        options.setPassword(mySQLTestUtils.getUserPass());
 
-    return args.toArray(new String[0]);
-  }
+        LOG.debug("Setting up another MySQLAuthTest: " + mySQLTestUtils.getMySqlConnectString());
 
-  /**
-   * Connect to a db and ensure that password-based authentication
-   * succeeds.
-   */
-  @Test
-  public void testAuthAccess() {
-    createAndPopulateAuthTable();
-    String [] argv = getArgv(true, true, mySQLTestUtils.getMySqlConnectString(), getTableName());
-    try {
-      runImport(argv);
-    } catch (IOException ioe) {
-      LOG.error("Got IOException during import: " + ioe.toString());
-      ioe.printStackTrace();
-      fail(ioe.toString());
+        setManager(new DirectMySQLManager(options));
     }
 
-    Path warehousePath = new Path(this.getWarehouseDir());
-    Path tablePath = new Path(warehousePath, getTableName());
-    Path filePath = new Path(tablePath, "part-m-00000");
-
-    File f = new File(filePath.toString());
-    assertTrue("Could not find imported data file", f.exists());
-    BufferedReader r = null;
-    try {
-      // Read through the file and make sure it's all there.
-      r = new BufferedReader(new InputStreamReader(new FileInputStream(f)));
-      assertEquals("1,'Aaron'", r.readLine());
-    } catch (IOException ioe) {
-      LOG.error("Got IOException verifying results: " + ioe.toString());
-      ioe.printStackTrace();
-      fail(ioe.toString());
-    } finally {
-      IOUtils.closeStream(r);
-    }
-  }
-
-  @Test
-  public void testZeroTimestamp() throws IOException, SQLException {
-    // MySQL timestamps can hold values whose range causes problems
-    // for java.sql.Timestamp. The MySQLManager adds settings to the
-    // connect string which configure the driver's handling of
-    // zero-valued timestamps. Check that all of these modifications
-    // to the connect string are successful.
-
-    // A connect string with a null 'query' component.
-    doZeroTimestampTest(0, true, mySQLTestUtils.getMySqlConnectString());
-
-    // A connect string with a zero-length query component.
-    doZeroTimestampTest(1, true, mySQLTestUtils.getMySqlConnectString() + "?");
-
-    // A connect string with another argument
-    doZeroTimestampTest(2, true, mySQLTestUtils.getMySqlConnectString() + "?connectTimeout=0");
-    doZeroTimestampTest(3, true, mySQLTestUtils.getMySqlConnectString() + "?connectTimeout=0&");
-
-    // A connect string with the zero-timestamp behavior already
-    // configured.
-    doZeroTimestampTest(4, true, mySQLTestUtils.getMySqlConnectString()
-        + "?zeroDateTimeBehavior=convertToNull");
-
-    // And finally, behavior already configured in such a way as to
-    // cause the timestamp import to fail.
-    doZeroTimestampTest(5, false, mySQLTestUtils.getMySqlConnectString()
-        + "?zeroDateTimeBehavior=exception");
-  }
-
-  public void doZeroTimestampTest(int testNum, boolean expectSuccess,
-      String connectString) throws IOException, SQLException {
-
-    LOG.info("Beginning zero-timestamp test #" + testNum);
-
-    final String tableName = "mysqlTimestampTable" + Integer.toString(testNum);
-
-    createAndPopulateZeroTimestampTable(tableName);
-
-    // Run the import.
-    String [] argv = getArgv(true, false, connectString, tableName);
-    try {
-      runImport(argv);
-    } catch (Exception e) {
-      if (expectSuccess) {
-        // This is unexpected. rethrow.
-        throw new RuntimeException(e);
-      } else {
-        // We expected an error.
-        LOG.info("Got exception running import (expected). msg: " + e);
-      }
+    @After
+    public void tearDown() {
+        dropAllCreatedTables();
+        super.tearDown();
     }
 
-    // Make sure the result file is there.
-    Path warehousePath = new Path(this.getWarehouseDir());
-    Path tablePath = new Path(warehousePath, tableName);
-    Path filePath = new Path(tablePath, "part-m-00000");
+    private String [] getArgv(boolean includeHadoopFlags,
+                              boolean useDirect, String connectString, String tableName) {
+        ArrayList<String> args = new ArrayList<String>();
 
-    File f = new File(filePath.toString());
-    if (expectSuccess) {
-      assertTrue("Could not find imported data file", f.exists());
-      BufferedReader r = new BufferedReader(new InputStreamReader(
-          new FileInputStream(f)));
-      assertEquals("1,null", r.readLine());
-      IOUtils.closeStream(r);
-    } else {
-      assertFalse("Imported data when expected failure", f.exists());
+        if (includeHadoopFlags) {
+            CommonArgs.addHadoopFlags(args);
+        }
+
+        args.add("--table");
+        args.add(tableName);
+        args.add("--warehouse-dir");
+        args.add(getWarehouseDir());
+        args.add("--connect");
+        args.add(connectString);
+        if (useDirect) {
+            args.add("--direct");
+        }
+        args.add("--username");
+        args.add(mySQLTestUtils.getUserName());
+        args.add("--password");
+        args.add(mySQLTestUtils.getUserPass());
+        args.add("--mysql-delimiters");
+        args.add("--num-mappers");
+        args.add("1");
+
+        return args.toArray(new String[0]);
     }
-  }
 
-  private void createAndPopulateZeroTimestampTable(String tableName) {
-    String[] colNames = { "id", "ts" };
-    String[] colTypes = { "INT NOT NULL PRIMARY KEY AUTO_INCREMENT", "TIMESTAMP NOT NULL" };
-    String[] colValues = { "NULL", "'0000-00-00 00:00:00.0'" };
-    createTableWithColTypesAndNames(tableName, colNames, colTypes, colValues);
-    createdTableNames.add(tableName);
-  }
+    /**
+     * Connect to a db and ensure that password-based authentication
+     * succeeds.
+     */
+    @Test
+    public void testAuthAccess() {
+        createAndPopulateAuthTable();
+        String [] argv = getArgv(true, true, mySQLTestUtils.getMySqlConnectString(), getTableName());
+        try {
+            runImport(argv);
+        } catch (IOException ioe) {
+            LOG.error("Got IOException during import: " + ioe.toString());
+            ioe.printStackTrace();
+            fail(ioe.toString());
+        }
 
-  private void dropAllCreatedTables() {
-    try {
-      for (String createdTableName : createdTableNames) {
-        dropTableIfExists(createdTableName);
-      }
-    } catch (SQLException e) {
-      throw new RuntimeException(e);
+        Path warehousePath = new Path(this.getWarehouseDir());
+        Path tablePath = new Path(warehousePath, getTableName());
+        Path filePath = new Path(tablePath, "part-m-00000");
+
+        File f = new File(filePath.toString());
+        assertTrue("Could not find imported data file", f.exists());
+        BufferedReader r = null;
+        try {
+            // Read through the file and make sure it's all there.
+            r = new BufferedReader(new InputStreamReader(new FileInputStream(f)));
+            assertEquals("1,'Aaron'", r.readLine());
+        } catch (IOException ioe) {
+            LOG.error("Got IOException verifying results: " + ioe.toString());
+            ioe.printStackTrace();
+            fail(ioe.toString());
+        } finally {
+            IOUtils.closeStream(r);
+        }
     }
-  }
 
-  private void createAndPopulateAuthTable() {
-    String[] colNames = { "id", "name" };
-    String[] colTypes = { "INT NOT NULL PRIMARY KEY AUTO_INCREMENT", "VARCHAR(24) NOT NULL" };
-    String[] colValues = { "NULL", "'Aaron'" };
+    @Test
+    public void testZeroTimestamp() throws IOException, SQLException {
+        // MySQL timestamps can hold values whose range causes problems
+        // for java.sql.Timestamp. The MySQLManager adds settings to the
+        // connect string which configure the driver's handling of
+        // zero-valued timestamps. Check that all of these modifications
+        // to the connect string are successful.
 
-    createTableWithColTypesAndNames(colNames, colTypes, colValues);
-    createdTableNames.add(getTableName());
-  }
+        // A connect string with a null 'query' component.
+        doZeroTimestampTest(0, true, mySQLTestUtils.getMySqlConnectString());
 
-  protected String dropTableIfExistsCommand(String tableName) {
-    return String.format("DROP TABLE IF EXISTS %s", tableName);
-  }
+        // A connect string with a zero-length query component.
+        doZeroTimestampTest(1, true, mySQLTestUtils.getMySqlConnectString() + "?");
+
+        // A connect string with another argument
+        doZeroTimestampTest(2, true, mySQLTestUtils.getMySqlConnectString() + "?connectTimeout=0");
+        doZeroTimestampTest(3, true, mySQLTestUtils.getMySqlConnectString() + "?connectTimeout=0&");
+
+        // A connect string with the zero-timestamp behavior already
+        // configured.
+        doZeroTimestampTest(4, true, mySQLTestUtils.getMySqlConnectString()
+                            + "?zeroDateTimeBehavior=convertToNull");
+
+        // And finally, behavior already configured in such a way as to
+        // cause the timestamp import to fail.
+        doZeroTimestampTest(5, false, mySQLTestUtils.getMySqlConnectString()
+                            + "?zeroDateTimeBehavior=exception");
+    }
+
+    public void doZeroTimestampTest(int testNum, boolean expectSuccess,
+                                    String connectString) throws IOException, SQLException {
+
+        LOG.info("Beginning zero-timestamp test #" + testNum);
+
+        final String tableName = "mysqlTimestampTable" + Integer.toString(testNum);
+
+        createAndPopulateZeroTimestampTable(tableName);
+
+        // Run the import.
+        String [] argv = getArgv(true, false, connectString, tableName);
+        try {
+            runImport(argv);
+        } catch (Exception e) {
+            if (expectSuccess) {
+                // This is unexpected. rethrow.
+                throw new RuntimeException(e);
+            } else {
+                // We expected an error.
+                LOG.info("Got exception running import (expected). msg: " + e);
+            }
+        }
+
+        // Make sure the result file is there.
+        Path warehousePath = new Path(this.getWarehouseDir());
+        Path tablePath = new Path(warehousePath, tableName);
+        Path filePath = new Path(tablePath, "part-m-00000");
+
+        File f = new File(filePath.toString());
+        if (expectSuccess) {
+            assertTrue("Could not find imported data file", f.exists());
+            BufferedReader r = new BufferedReader(new InputStreamReader(
+                    new FileInputStream(f)));
+            assertEquals("1,null", r.readLine());
+            IOUtils.closeStream(r);
+        } else {
+            assertFalse("Imported data when expected failure", f.exists());
+        }
+    }
+
+    private void createAndPopulateZeroTimestampTable(String tableName) {
+        String[] colNames = { "id", "ts" };
+        String[] colTypes = { "INT NOT NULL PRIMARY KEY AUTO_INCREMENT", "TIMESTAMP NOT NULL" };
+        String[] colValues = { "NULL", "'0000-00-00 00:00:00.0'" };
+        createTableWithColTypesAndNames(tableName, colNames, colTypes, colValues);
+        createdTableNames.add(tableName);
+    }
+
+    private void dropAllCreatedTables() {
+        try {
+            for (String createdTableName : createdTableNames) {
+                dropTableIfExists(createdTableName);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void createAndPopulateAuthTable() {
+        String[] colNames = { "id", "name" };
+        String[] colTypes = { "INT NOT NULL PRIMARY KEY AUTO_INCREMENT", "VARCHAR(24) NOT NULL" };
+        String[] colValues = { "NULL", "'Aaron'" };
+
+        createTableWithColTypesAndNames(colNames, colTypes, colValues);
+        createdTableNames.add(getTableName());
+    }
+
+    protected String dropTableIfExistsCommand(String tableName) {
+        return String.format("DROP TABLE IF EXISTS %s", tableName);
+    }
 
 }

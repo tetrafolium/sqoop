@@ -30,20 +30,20 @@ import static org.junit.Assert.assertTrue;
 
 public abstract class NumericTypesHiveImportTestBase<T extends HiveTestConfiguration> extends NumericTypesImportTestBase<T> {
 
-  public NumericTypesHiveImportTestBase(T configuration, boolean failWithoutExtraArgs, boolean failWithPaddingOnly,
-                                        HiveMiniCluster hiveMiniCluster, HiveServer2TestUtil hiveServer2TestUtil) {
-    super(configuration, failWithoutExtraArgs, failWithPaddingOnly);
-    this.hiveServer2TestUtil = hiveServer2TestUtil;
-    this.hiveMiniCluster = hiveMiniCluster;
-  }
+    public NumericTypesHiveImportTestBase(T configuration, boolean failWithoutExtraArgs, boolean failWithPaddingOnly,
+                                          HiveMiniCluster hiveMiniCluster, HiveServer2TestUtil hiveServer2TestUtil) {
+        super(configuration, failWithoutExtraArgs, failWithPaddingOnly);
+        this.hiveServer2TestUtil = hiveServer2TestUtil;
+        this.hiveMiniCluster = hiveMiniCluster;
+    }
 
-  private final HiveMiniCluster hiveMiniCluster;
+    private final HiveMiniCluster hiveMiniCluster;
 
-  private final HiveServer2TestUtil hiveServer2TestUtil;
+    private final HiveServer2TestUtil hiveServer2TestUtil;
 
-  @Override
-  public ArgumentArrayBuilder getArgsBuilder() {
-    ArgumentArrayBuilder builder = new ArgumentArrayBuilder()
+    @Override
+    public ArgumentArrayBuilder getArgsBuilder() {
+        ArgumentArrayBuilder builder = new ArgumentArrayBuilder()
         .withCommonHadoopFlags()
         .withProperty("parquetjob.configurator.implementation", "hadoop")
         .withOption("connect", getAdapter().getConnectionString())
@@ -53,15 +53,15 @@ public abstract class NumericTypesHiveImportTestBase<T extends HiveTestConfigura
         .withOption("num-mappers", "1")
         .withOption("as-parquetfile")
         .withOption("delete-target-dir");
-    NumericTypesTestUtils.addEnableParquetDecimal(builder);
-    return builder;
-  }
+        NumericTypesTestUtils.addEnableParquetDecimal(builder);
+        return builder;
+    }
 
-  @Override
-  public void verify() {
-    // The result contains a byte[] so we have to use Arrays.deepEquals() to assert.
-    Object[] firstRow = hiveServer2TestUtil.loadRawRowsFromTable(getTableName()).iterator().next().toArray();
-    Object[] expectedResultsForHive = getConfiguration().getExpectedResultsForHive();
-    assertTrue(deepEquals(expectedResultsForHive, firstRow));
-  }
+    @Override
+    public void verify() {
+        // The result contains a byte[] so we have to use Arrays.deepEquals() to assert.
+        Object[] firstRow = hiveServer2TestUtil.loadRawRowsFromTable(getTableName()).iterator().next().toArray();
+        Object[] expectedResultsForHive = getConfiguration().getExpectedResultsForHive();
+        assertTrue(deepEquals(expectedResultsForHive, firstRow));
+    }
 }

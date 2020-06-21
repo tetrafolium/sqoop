@@ -53,46 +53,46 @@ public class TestOraOopDBInputSplitGetDebugDetails {
         OraOopOracleDataChunkPartition thirdDataChunkPartition = new OraOopOracleDataChunkPartition("thirdPartition",
                 false, 43);
         dataChunkList.addAll(Arrays.asList(firstDataChunkExtent, secondDataChunkExtent, thirdDataChunkExtent,
-                fourthDataChunkExtent, firstDataChunkPartition, secondDataChunkPartition, thirdDataChunkPartition));
+                                           fourthDataChunkExtent, firstDataChunkPartition, secondDataChunkPartition, thirdDataChunkPartition));
         firstSplit = new OraOopDBInputSplit(dataChunkList);
         secondSplit = new OraOopDBInputSplit();
         firstSplitResult = "Split[0] includes the Oracle data-chunks:" +
-                "\n\t Data chunk info:" +
-                "\n\t\t id = firstExtent" +
-                "\n\t\t oracleDataObjectId = 666" +
-                "\n\t\t relativeDatafileNumber = 1" +
-                "\n\t\t startBlockNumber = 10500" +
-                "\n\t\t finishBlockNumber = 10507" +
-                "\n\t Data chunk info:" +
-                "\n\t\t id = secondExtent" +
-                "\n\t\t oracleDataObjectId = 666" +
-                "\n\t\t relativeDatafileNumber = 1" +
-                "\n\t\t startBlockNumber = 10508" +
-                "\n\t\t finishBlockNumber = 10515" +
-                "\n\t Data chunk info:" +
-                "\n\t\t id = thirdExtent" +
-                "\n\t\t oracleDataObjectId = 666" +
-                "\n\t\t relativeDatafileNumber = 1" +
-                "\n\t\t startBlockNumber = 10516" +
-                "\n\t\t finishBlockNumber = 10523" +
-                "\n\t Data chunk info:" +
-                "\n\t\t id = fourthExtent" +
-                "\n\t\t oracleDataObjectId = 787" +
-                "\n\t\t relativeDatafileNumber = 2" +
-                "\n\t\t startBlockNumber = 11434" +
-                "\n\t\t finishBlockNumber = 11450" +
-                "\n\t Data chunk info:" +
-                "\n\t\t id = firstPartition" +
-                "\n\t\t isSubPartition = true" +
-                "\n\t\t blocks = 14" +
-                "\n\t Data chunk info:" +
-                "\n\t\t id = secondPartition" +
-                "\n\t\t isSubPartition = false" +
-                "\n\t\t blocks = 4" +
-                "\n\t Data chunk info:" +
-                "\n\t\t id = thirdPartition" +
-                "\n\t\t isSubPartition = false" +
-                "\n\t\t blocks = 43";
+                           "\n\t Data chunk info:" +
+                           "\n\t\t id = firstExtent" +
+                           "\n\t\t oracleDataObjectId = 666" +
+                           "\n\t\t relativeDatafileNumber = 1" +
+                           "\n\t\t startBlockNumber = 10500" +
+                           "\n\t\t finishBlockNumber = 10507" +
+                           "\n\t Data chunk info:" +
+                           "\n\t\t id = secondExtent" +
+                           "\n\t\t oracleDataObjectId = 666" +
+                           "\n\t\t relativeDatafileNumber = 1" +
+                           "\n\t\t startBlockNumber = 10508" +
+                           "\n\t\t finishBlockNumber = 10515" +
+                           "\n\t Data chunk info:" +
+                           "\n\t\t id = thirdExtent" +
+                           "\n\t\t oracleDataObjectId = 666" +
+                           "\n\t\t relativeDatafileNumber = 1" +
+                           "\n\t\t startBlockNumber = 10516" +
+                           "\n\t\t finishBlockNumber = 10523" +
+                           "\n\t Data chunk info:" +
+                           "\n\t\t id = fourthExtent" +
+                           "\n\t\t oracleDataObjectId = 787" +
+                           "\n\t\t relativeDatafileNumber = 2" +
+                           "\n\t\t startBlockNumber = 11434" +
+                           "\n\t\t finishBlockNumber = 11450" +
+                           "\n\t Data chunk info:" +
+                           "\n\t\t id = firstPartition" +
+                           "\n\t\t isSubPartition = true" +
+                           "\n\t\t blocks = 14" +
+                           "\n\t Data chunk info:" +
+                           "\n\t\t id = secondPartition" +
+                           "\n\t\t isSubPartition = false" +
+                           "\n\t\t blocks = 4" +
+                           "\n\t Data chunk info:" +
+                           "\n\t\t id = thirdPartition" +
+                           "\n\t\t isSubPartition = false" +
+                           "\n\t\t blocks = 43";
     }
 
     @Test
@@ -101,7 +101,7 @@ public class TestOraOopDBInputSplitGetDebugDetails {
     }
 
     @Test
-    public void testEmptySplitDebugDetails(){
+    public void testEmptySplitDebugDetails() {
         assertEquals("Split[-1] does not contain any Oracle data-chunks.", secondSplit.getDebugDetails());
     }
 }

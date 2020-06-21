@@ -32,61 +32,61 @@ import org.apache.hadoop.mapreduce.InputSplit;
  *
  */
 public class MainframeDatasetInputSplit extends InputSplit implements Writable {
-  private List<String> mainframeDatasets;
-  private String currentDataset;
-  private int currentIndex;
+    private List<String> mainframeDatasets;
+    private String currentDataset;
+    private int currentIndex;
 
-  public MainframeDatasetInputSplit() {
-    mainframeDatasets = new ArrayList<String>();
-    currentDataset = null;
-    currentIndex = -1;
-  }
-
-  public void addDataset(String mainframeDataset) {
-    mainframeDatasets.add(mainframeDataset);
-  }
-
-  public String getCurrentDataset() {
-    return currentDataset;
-  }
-
-  public String getNextDataset() {
-    if (hasMore()) {
-      currentIndex++;
-      currentDataset = mainframeDatasets.get(currentIndex);
-    } else {
-      currentDataset = null;
+    public MainframeDatasetInputSplit() {
+        mainframeDatasets = new ArrayList<String>();
+        currentDataset = null;
+        currentIndex = -1;
     }
-    return currentDataset;
-  }
 
-  public boolean hasMore() {
-    return currentIndex < (mainframeDatasets.size() -1);
-  }
-
-  @Override
-  public long getLength() throws IOException, InterruptedException {
-    return mainframeDatasets.size();
-  }
-
-  @Override
-  public String[] getLocations() throws IOException, InterruptedException {
-    return new String[0]; // No locations
-  }
-
-  @Override
-  public void write(DataOutput dataOutput) throws IOException {
-    dataOutput.writeInt(mainframeDatasets.size());
-    for (String ds : mainframeDatasets) {
-      dataOutput.writeUTF(ds);
+    public void addDataset(String mainframeDataset) {
+        mainframeDatasets.add(mainframeDataset);
     }
-  }
 
-  @Override
-  public void readFields(DataInput dataInput) throws IOException {
-    int numberOfDatasets = dataInput.readInt();
-    for (int i = 0; i < numberOfDatasets; i++) {
-      mainframeDatasets.add(dataInput.readUTF());
+    public String getCurrentDataset() {
+        return currentDataset;
     }
-  }
+
+    public String getNextDataset() {
+        if (hasMore()) {
+            currentIndex++;
+            currentDataset = mainframeDatasets.get(currentIndex);
+        } else {
+            currentDataset = null;
+        }
+        return currentDataset;
+    }
+
+    public boolean hasMore() {
+        return currentIndex < (mainframeDatasets.size() -1);
+    }
+
+    @Override
+    public long getLength() throws IOException, InterruptedException {
+        return mainframeDatasets.size();
+    }
+
+    @Override
+    public String[] getLocations() throws IOException, InterruptedException {
+        return new String[0]; // No locations
+    }
+
+    @Override
+    public void write(DataOutput dataOutput) throws IOException {
+        dataOutput.writeInt(mainframeDatasets.size());
+        for (String ds : mainframeDatasets) {
+            dataOutput.writeUTF(ds);
+        }
+    }
+
+    @Override
+    public void readFields(DataInput dataInput) throws IOException {
+        int numberOfDatasets = dataInput.readInt();
+        for (int i = 0; i < numberOfDatasets; i++) {
+            mainframeDatasets.add(dataInput.readUTF());
+        }
+    }
 }

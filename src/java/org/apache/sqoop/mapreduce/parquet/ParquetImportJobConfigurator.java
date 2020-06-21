@@ -33,11 +33,11 @@ import java.io.IOException;
  */
 public interface ParquetImportJobConfigurator {
 
-  void configureMapper(Job job, Schema schema, SqoopOptions options, String tableName, Path destination) throws IOException;
+    void configureMapper(Job job, Schema schema, SqoopOptions options, String tableName, Path destination) throws IOException;
 
-  Class<? extends Mapper> getMapperClass();
+    Class<? extends Mapper> getMapperClass();
 
-  Class<? extends OutputFormat> getOutputFormatClass();
+    Class<? extends OutputFormat> getOutputFormatClass();
 
-  boolean isHiveImportNeeded();
+    boolean isHiveImportNeeded();
 }

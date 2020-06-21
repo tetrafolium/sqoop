@@ -28,75 +28,75 @@ import org.apache.hadoop.io.Text;
  */
 public class OraOopOracleDataChunkExtent extends OraOopOracleDataChunk {
 
-  private int oracleDataObjectId;
-  private int relativeDatafileNumber;
-  private long startBlockNumber;
-  private long finishBlockNumber;
+    private int oracleDataObjectId;
+    private int relativeDatafileNumber;
+    private long startBlockNumber;
+    private long finishBlockNumber;
 
-  OraOopOracleDataChunkExtent() {
+    OraOopOracleDataChunkExtent() {
 
-  }
-
-  OraOopOracleDataChunkExtent(String id, int oracleDataObjectId,
-      int relativeDatafileNumber, long startBlockNumber,
-      long finishBlockNumber) {
-
-    this.setId(id);
-    this.oracleDataObjectId = oracleDataObjectId;
-    this.relativeDatafileNumber = relativeDatafileNumber;
-    this.startBlockNumber = startBlockNumber;
-    this.finishBlockNumber = finishBlockNumber;
-  }
-
-  @Override
-  public String getWhereClause() {
-    return String.format(
-        "(rowid >= dbms_rowid.rowid_create(%d, %d, %d, %d, %d)",
-        OraOopConstants.Oracle.ROWID_EXTENDED_ROWID_TYPE,
-        this.oracleDataObjectId, this.relativeDatafileNumber,
-        this.startBlockNumber, 0)
-        + String.format(
-            " AND rowid <= dbms_rowid.rowid_create(%d, %d, %d, %d, %d))",
-            OraOopConstants.Oracle.ROWID_EXTENDED_ROWID_TYPE,
-            this.oracleDataObjectId, this.relativeDatafileNumber,
-            this.finishBlockNumber,
-            OraOopConstants.Oracle.ROWID_MAX_ROW_NUMBER_PER_BLOCK);
-  }
-
-  @Override
-  public void write(DataOutput output) throws IOException {
-    Text.writeString(output, this.getId());
-    output.writeInt(this.oracleDataObjectId);
-    output.writeInt(this.relativeDatafileNumber);
-    output.writeLong(this.startBlockNumber);
-    output.writeLong(this.finishBlockNumber);
-  }
-
-  @Override
-  public void readFields(DataInput input) throws IOException {
-    this.setId(Text.readString(input));
-    this.oracleDataObjectId = input.readInt();
-    this.relativeDatafileNumber = input.readInt();
-    this.startBlockNumber = input.readLong();
-    this.finishBlockNumber = input.readLong();
-  }
-
-  @Override
-  public long getNumberOfBlocks() {
-    if (this.finishBlockNumber == 0L && this.startBlockNumber == 0L) {
-      return 0;
-    } else {
-      return (this.finishBlockNumber - this.startBlockNumber) + 1L;
     }
-  }
 
-  public String toString(){
-    StringBuilder result = new StringBuilder();
-    result.append("\n\t\t id = ").append(getId());
-    result.append("\n\t\t oracleDataObjectId = ").append(oracleDataObjectId);
-    result.append("\n\t\t relativeDatafileNumber = ").append(relativeDatafileNumber);
-    result.append("\n\t\t startBlockNumber = ").append(startBlockNumber);
-    result.append("\n\t\t finishBlockNumber = ").append(finishBlockNumber);
-    return result.toString();
-  }
+    OraOopOracleDataChunkExtent(String id, int oracleDataObjectId,
+                                int relativeDatafileNumber, long startBlockNumber,
+                                long finishBlockNumber) {
+
+        this.setId(id);
+        this.oracleDataObjectId = oracleDataObjectId;
+        this.relativeDatafileNumber = relativeDatafileNumber;
+        this.startBlockNumber = startBlockNumber;
+        this.finishBlockNumber = finishBlockNumber;
+    }
+
+    @Override
+    public String getWhereClause() {
+        return String.format(
+                   "(rowid >= dbms_rowid.rowid_create(%d, %d, %d, %d, %d)",
+                   OraOopConstants.Oracle.ROWID_EXTENDED_ROWID_TYPE,
+                   this.oracleDataObjectId, this.relativeDatafileNumber,
+                   this.startBlockNumber, 0)
+               + String.format(
+                   " AND rowid <= dbms_rowid.rowid_create(%d, %d, %d, %d, %d))",
+                   OraOopConstants.Oracle.ROWID_EXTENDED_ROWID_TYPE,
+                   this.oracleDataObjectId, this.relativeDatafileNumber,
+                   this.finishBlockNumber,
+                   OraOopConstants.Oracle.ROWID_MAX_ROW_NUMBER_PER_BLOCK);
+    }
+
+    @Override
+    public void write(DataOutput output) throws IOException {
+        Text.writeString(output, this.getId());
+        output.writeInt(this.oracleDataObjectId);
+        output.writeInt(this.relativeDatafileNumber);
+        output.writeLong(this.startBlockNumber);
+        output.writeLong(this.finishBlockNumber);
+    }
+
+    @Override
+    public void readFields(DataInput input) throws IOException {
+        this.setId(Text.readString(input));
+        this.oracleDataObjectId = input.readInt();
+        this.relativeDatafileNumber = input.readInt();
+        this.startBlockNumber = input.readLong();
+        this.finishBlockNumber = input.readLong();
+    }
+
+    @Override
+    public long getNumberOfBlocks() {
+        if (this.finishBlockNumber == 0L && this.startBlockNumber == 0L) {
+            return 0;
+        } else {
+            return (this.finishBlockNumber - this.startBlockNumber) + 1L;
+        }
+    }
+
+    public String toString() {
+        StringBuilder result = new StringBuilder();
+        result.append("\n\t\t id = ").append(getId());
+        result.append("\n\t\t oracleDataObjectId = ").append(oracleDataObjectId);
+        result.append("\n\t\t relativeDatafileNumber = ").append(relativeDatafileNumber);
+        result.append("\n\t\t startBlockNumber = ").append(startBlockNumber);
+        result.append("\n\t\t finishBlockNumber = ").append(finishBlockNumber);
+        return result.toString();
+    }
 }

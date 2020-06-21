@@ -30,13 +30,13 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
  */
 public class ByteKeyOutputFormat<K, V> extends RawKeyTextOutputFormat<K, V> {
 
-  // currently don't support compression
-  private static final String FILE_EXTENSION = "";
+    // currently don't support compression
+    private static final String FILE_EXTENSION = "";
 
-  public RecordWriter<K, V> getRecordWriter(TaskAttemptContext context)
-      throws IOException {
-    DataOutputStream ostream = getFSDataOutputStream(context,FILE_EXTENSION);
-    return new KeyRecordWriters.BinaryKeyRecordWriter<K,V>(ostream);
-  }
+    public RecordWriter<K, V> getRecordWriter(TaskAttemptContext context)
+    throws IOException {
+        DataOutputStream ostream = getFSDataOutputStream(context,FILE_EXTENSION);
+        return new KeyRecordWriters.BinaryKeyRecordWriter<K,V>(ostream);
+    }
 
 }

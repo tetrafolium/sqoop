@@ -34,7 +34,7 @@ public enum SupportedManagers {
 
     private final boolean hasDirectConnector;
     private static final Log LOG
-            = LogFactory.getLog(SupportedManagers.class);
+    = LogFactory.getLog(SupportedManagers.class);
 
     SupportedManagers(String schemePrefix, boolean hasDirectConnector) {
         this.schemePrefix = schemePrefix;

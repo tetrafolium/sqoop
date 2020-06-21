@@ -58,105 +58,105 @@ import static org.apache.sqoop.testutil.NumericTypesTestUtils.SUCCEED_WITH_PADDI
 @RunWith(Enclosed.class)
 public class NumericTypesHiveImportTest {
 
-  @Rule
-  public ExpectedException expectedException = ExpectedException.none();
+    @Rule
+    public ExpectedException expectedException = ExpectedException.none();
 
-  private static HiveMiniCluster hiveMiniCluster;
+    private static HiveMiniCluster hiveMiniCluster;
 
-  private static HiveServer2TestUtil hiveServer2TestUtil;
+    private static HiveServer2TestUtil hiveServer2TestUtil;
 
-  @BeforeClass
-  public static void beforeClass() {
-    startHiveMiniCluster();
-  }
-
-  @AfterClass
-  public static void afterClass() {
-    stopHiveMiniCluster();
-  }
-
-  public static void startHiveMiniCluster() {
-    hiveMiniCluster = new HiveMiniCluster(new NoAuthenticationConfiguration());
-    hiveMiniCluster.start();
-    hiveServer2TestUtil = new HiveServer2TestUtil(hiveMiniCluster.getUrl());
-  }
-
-  public static void stopHiveMiniCluster() {
-    hiveMiniCluster.stop();
-  }
-
-  @Category(MysqlTest.class)
-  public static class MysqlNumericTypesHiveImportTest extends NumericTypesHiveImportTestBase {
-
-    public MysqlNumericTypesHiveImportTest() {
-      super(new MysqlImportJobTestConfiguration(), NumericTypesTestUtils.SUCCEED_WITHOUT_EXTRA_ARGS, NumericTypesTestUtils.SUCCEED_WITH_PADDING_ONLY,
-          hiveMiniCluster, hiveServer2TestUtil);
+    @BeforeClass
+    public static void beforeClass() {
+        startHiveMiniCluster();
     }
 
-    @Override
-    public DatabaseAdapter createAdapter() {
-      return new MysqlDatabaseAdapter();
-    }
-  }
-
-  @Category(OracleTest.class)
-  @RunWith(Parameterized.class)
-  @Parameterized.UseParametersRunnerFactory(BlockJUnit4ClassRunnerWithParametersFactory.class)
-  public static class OracleNumericTypesHiveImportTest extends NumericTypesHiveImportTestBase {
-
-    @Override
-    public DatabaseAdapter createAdapter() {
-      return new OracleDatabaseAdapter();
+    @AfterClass
+    public static void afterClass() {
+        stopHiveMiniCluster();
     }
 
-    @Parameterized.Parameters(name = "Config: {0}| failWithoutExtraArgs: {1}| failWithPadding: {2}")
-    public static Iterable<? extends Object> testConfigurations() {
-      return Arrays.asList(
-          new Object[]{new OracleImportJobTestConfigurationForNumber(), FAIL_WITHOUT_EXTRA_ARGS, FAIL_WITH_PADDING_ONLY},
-          new Object[]{new OracleImportJobTestConfiguration(), FAIL_WITHOUT_EXTRA_ARGS, SUCCEED_WITH_PADDING_ONLY}
-      );
+    public static void startHiveMiniCluster() {
+        hiveMiniCluster = new HiveMiniCluster(new NoAuthenticationConfiguration());
+        hiveMiniCluster.start();
+        hiveServer2TestUtil = new HiveServer2TestUtil(hiveMiniCluster.getUrl());
     }
 
-    public OracleNumericTypesHiveImportTest(HiveTestConfiguration configuration, boolean failWithoutExtraArgs, boolean failWithPaddingOnly) {
-      super(configuration, failWithoutExtraArgs, failWithPaddingOnly, hiveMiniCluster, hiveServer2TestUtil);
-    }
-  }
-
-  @Category(PostgresqlTest.class)
-  @RunWith(Parameterized.class)
-  @Parameterized.UseParametersRunnerFactory(BlockJUnit4ClassRunnerWithParametersFactory.class)
-  public static class PostgresNumericTypesHiveImportTest extends NumericTypesHiveImportTestBase {
-
-    @Override
-    public DatabaseAdapter createAdapter() {
-      return new PostgresDatabaseAdapter();
+    public static void stopHiveMiniCluster() {
+        hiveMiniCluster.stop();
     }
 
-    @Parameterized.Parameters(name = "Config: {0}| failWithoutExtraArgs: {1}| failWithPadding: {2}")
-    public static Iterable<? extends Object> testConfigurations() {
-      return Arrays.asList(
-          new Object[]{new PostgresqlImportJobTestConfigurationForNumeric(), FAIL_WITHOUT_EXTRA_ARGS, FAIL_WITH_PADDING_ONLY},
-          new Object[]{new PostgresqlImportJobTestConfigurationPaddingShouldSucceed(), SUCCEED_WITHOUT_EXTRA_ARGS, SUCCEED_WITH_PADDING_ONLY}
-      );
+    @Category(MysqlTest.class)
+    public static class MysqlNumericTypesHiveImportTest extends NumericTypesHiveImportTestBase {
+
+        public MysqlNumericTypesHiveImportTest() {
+            super(new MysqlImportJobTestConfiguration(), NumericTypesTestUtils.SUCCEED_WITHOUT_EXTRA_ARGS, NumericTypesTestUtils.SUCCEED_WITH_PADDING_ONLY,
+                  hiveMiniCluster, hiveServer2TestUtil);
+        }
+
+        @Override
+        public DatabaseAdapter createAdapter() {
+            return new MysqlDatabaseAdapter();
+        }
     }
 
-    public PostgresNumericTypesHiveImportTest(HiveTestConfiguration configuration, boolean failWithoutExtraArgs, boolean failWithPaddingOnly) {
-      super(configuration, failWithoutExtraArgs, failWithPaddingOnly, hiveMiniCluster, hiveServer2TestUtil);
-    }
-  }
+    @Category(OracleTest.class)
+    @RunWith(Parameterized.class)
+    @Parameterized.UseParametersRunnerFactory(BlockJUnit4ClassRunnerWithParametersFactory.class)
+    public static class OracleNumericTypesHiveImportTest extends NumericTypesHiveImportTestBase {
 
-  @Category(SqlServerTest.class)
-  public static class SqlServerNumericTypesHiveImportTest extends NumericTypesHiveImportTestBase {
+        @Override
+        public DatabaseAdapter createAdapter() {
+            return new OracleDatabaseAdapter();
+        }
 
-    public SqlServerNumericTypesHiveImportTest() {
-      super(new SqlServerImportJobTestConfiguration(), SUCCEED_WITHOUT_EXTRA_ARGS, SUCCEED_WITH_PADDING_ONLY,
-          hiveMiniCluster, hiveServer2TestUtil);
+        @Parameterized.Parameters(name = "Config: {0}| failWithoutExtraArgs: {1}| failWithPadding: {2}")
+        public static Iterable<? extends Object> testConfigurations() {
+            return Arrays.asList(
+            new Object[] {new OracleImportJobTestConfigurationForNumber(), FAIL_WITHOUT_EXTRA_ARGS, FAIL_WITH_PADDING_ONLY},
+            new Object[] {new OracleImportJobTestConfiguration(), FAIL_WITHOUT_EXTRA_ARGS, SUCCEED_WITH_PADDING_ONLY}
+                   );
+        }
+
+        public OracleNumericTypesHiveImportTest(HiveTestConfiguration configuration, boolean failWithoutExtraArgs, boolean failWithPaddingOnly) {
+            super(configuration, failWithoutExtraArgs, failWithPaddingOnly, hiveMiniCluster, hiveServer2TestUtil);
+        }
     }
 
-    @Override
-    public DatabaseAdapter createAdapter() {
-      return new SqlServerDatabaseAdapter();
+    @Category(PostgresqlTest.class)
+    @RunWith(Parameterized.class)
+    @Parameterized.UseParametersRunnerFactory(BlockJUnit4ClassRunnerWithParametersFactory.class)
+    public static class PostgresNumericTypesHiveImportTest extends NumericTypesHiveImportTestBase {
+
+        @Override
+        public DatabaseAdapter createAdapter() {
+            return new PostgresDatabaseAdapter();
+        }
+
+        @Parameterized.Parameters(name = "Config: {0}| failWithoutExtraArgs: {1}| failWithPadding: {2}")
+        public static Iterable<? extends Object> testConfigurations() {
+            return Arrays.asList(
+            new Object[] {new PostgresqlImportJobTestConfigurationForNumeric(), FAIL_WITHOUT_EXTRA_ARGS, FAIL_WITH_PADDING_ONLY},
+            new Object[] {new PostgresqlImportJobTestConfigurationPaddingShouldSucceed(), SUCCEED_WITHOUT_EXTRA_ARGS, SUCCEED_WITH_PADDING_ONLY}
+                   );
+        }
+
+        public PostgresNumericTypesHiveImportTest(HiveTestConfiguration configuration, boolean failWithoutExtraArgs, boolean failWithPaddingOnly) {
+            super(configuration, failWithoutExtraArgs, failWithPaddingOnly, hiveMiniCluster, hiveServer2TestUtil);
+        }
     }
-  }
+
+    @Category(SqlServerTest.class)
+    public static class SqlServerNumericTypesHiveImportTest extends NumericTypesHiveImportTestBase {
+
+        public SqlServerNumericTypesHiveImportTest() {
+            super(new SqlServerImportJobTestConfiguration(), SUCCEED_WITHOUT_EXTRA_ARGS, SUCCEED_WITH_PADDING_ONLY,
+                  hiveMiniCluster, hiveServer2TestUtil);
+        }
+
+        @Override
+        public DatabaseAdapter createAdapter() {
+            return new SqlServerDatabaseAdapter();
+        }
+    }
 
 }

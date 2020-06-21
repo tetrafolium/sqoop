@@ -24,13 +24,13 @@ package org.apache.sqoop.validation;
  */
 public class ValidationException extends Exception {
 
-  public ValidationException(String message) {
-    super(message);
-  }
+    public ValidationException(String message) {
+        super(message);
+    }
 
-  @Override
-  public String toString() {
-    String msg = getMessage();
-    return (null == msg) ? "ValidationException" : msg;
-  }
+    @Override
+    public String toString() {
+        String msg = getMessage();
+        return (null == msg) ? "ValidationException" : msg;
+    }
 }

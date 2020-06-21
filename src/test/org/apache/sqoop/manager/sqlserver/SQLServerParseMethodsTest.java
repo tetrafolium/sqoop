@@ -79,210 +79,213 @@ import static org.junit.Assert.fail;
 @Category(SqlServerTest.class)
 public class SQLServerParseMethodsTest extends ImportJobTestCase {
 
-  @Before
-  public void setUp() {
-    super.setUp();
-    Path p = new Path(getWarehouseDir());
-    try {
-      FileSystem fs = FileSystem.get(new Configuration());
-      fs.delete(p);
-    } catch (IOException e) {
-      LOG.error("Setup fail with IOException: " + StringUtils.stringifyException(e));
-      fail("Setup fail with IOException: " + StringUtils.stringifyException(e));
-    }
-  }
-
-  @After
-  public void tearDown() {
-    try {
-      dropTableIfExists(getTableName());
-    } catch (SQLException sqle) {
-      LOG.info("Table clean-up failed: " + sqle);
-    } finally {
-      super.tearDown();
-    }
-  }
-
-  /**
-   * Create the argv to pass to Sqoop.
-   *
-   * @return the argv as an array of strings.
-   */
-  private String[] getArgv(boolean includeHadoopFlags,
-      String fieldTerminator, String lineTerminator, String encloser,
-      String escape, boolean encloserRequired) {
-
-    ArrayList<String> args = new ArrayList<String>();
-
-    if (includeHadoopFlags) {
-      CommonArgs.addHadoopFlags(args);
+    @Before
+    public void setUp() {
+        super.setUp();
+        Path p = new Path(getWarehouseDir());
+        try {
+            FileSystem fs = FileSystem.get(new Configuration());
+            fs.delete(p);
+        } catch (IOException e) {
+            LOG.error("Setup fail with IOException: " + StringUtils.stringifyException(e));
+            fail("Setup fail with IOException: " + StringUtils.stringifyException(e));
+        }
     }
 
-    args.add("--table");
-    args.add(getTableName());
-    args.add("--warehouse-dir");
-    args.add(getWarehouseDir());
-    args.add("--connect");
-    args.add(getConnectString());
-    args.add("--as-textfile");
-    args.add("--split-by");
-    args.add("DATA_COL0"); // always split by first column.
-    args.add("--fields-terminated-by");
-    args.add(fieldTerminator);
-    args.add("--lines-terminated-by");
-    args.add(lineTerminator);
-    args.add("--escaped-by");
-    args.add(escape);
-    if (encloserRequired) {
-      args.add("--enclosed-by");
-    } else {
-      args.add("--optionally-enclosed-by");
+    @After
+    public void tearDown() {
+        try {
+            dropTableIfExists(getTableName());
+        } catch (SQLException sqle) {
+            LOG.info("Table clean-up failed: " + sqle);
+        } finally {
+            super.tearDown();
+        }
     }
-    args.add(encloser);
-    args.add("--num-mappers");
-    args.add("1");
 
-    return args.toArray(new String[0]);
-  }
+    /**
+     * Create the argv to pass to Sqoop.
+     *
+     * @return the argv as an array of strings.
+     */
+    private String[] getArgv(boolean includeHadoopFlags,
+                             String fieldTerminator, String lineTerminator, String encloser,
+                             String escape, boolean encloserRequired) {
 
-  public void runParseTest(String fieldTerminator, String lineTerminator,
-      String encloser, String escape, boolean encloseRequired)
-      throws IOException {
+        ArrayList<String> args = new ArrayList<String>();
 
-    ClassLoader prevClassLoader = null;
+        if (includeHadoopFlags) {
+            CommonArgs.addHadoopFlags(args);
+        }
 
-    String[] argv = getArgv(true, fieldTerminator, lineTerminator,
-        encloser, escape, encloseRequired);
-    runImport(argv);
-    try {
-      String tableClassName = getTableName();
+        args.add("--table");
+        args.add(getTableName());
+        args.add("--warehouse-dir");
+        args.add(getWarehouseDir());
+        args.add("--connect");
+        args.add(getConnectString());
+        args.add("--as-textfile");
+        args.add("--split-by");
+        args.add("DATA_COL0"); // always split by first column.
+        args.add("--fields-terminated-by");
+        args.add(fieldTerminator);
+        args.add("--lines-terminated-by");
+        args.add(lineTerminator);
+        args.add("--escaped-by");
+        args.add(escape);
+        if (encloserRequired) {
+            args.add("--enclosed-by");
+        } else {
+            args.add("--optionally-enclosed-by");
+        }
+        args.add(encloser);
+        args.add("--num-mappers");
+        args.add("1");
 
-      argv = getArgv(false, fieldTerminator, lineTerminator, encloser,
-          escape, encloseRequired);
-      SqoopOptions opts = new ImportTool().parseArguments(argv, null,
-          null, true);
-
-      CompilationManager compileMgr = new CompilationManager(opts);
-      String jarFileName = compileMgr.getJarFilename();
-
-      // Make sure the user's class is loaded into our address space.
-      prevClassLoader = ClassLoaderStack.addJarFile(jarFileName,
-          tableClassName);
-
-      JobConf job = new JobConf();
-      job.setJar(jarFileName);
-
-      // Tell the job what class we're testing.
-      job.set(ReparseMapper.USER_TYPE_NAME_KEY, tableClassName);
-
-      job.set("fs.default.name", "file:///");
-
-      String warehouseDir = getWarehouseDir();
-      Path warehousePath = new Path(warehouseDir);
-      Path inputPath = new Path(warehousePath, getTableName());
-      Path outputPath = new Path(warehousePath, getTableName() + "-out");
-
-      job.setMapperClass(ReparseMapper.class);
-      job.setNumReduceTasks(0);
-      FileInputFormat.addInputPath(job, inputPath);
-      FileOutputFormat.setOutputPath(job, outputPath);
-
-      job.setOutputKeyClass(Text.class);
-      job.setOutputValueClass(NullWritable.class);
-
-      JobClient.runJob(job);
-    } catch (InvalidOptionsException ioe) {
-      LOG.error(StringUtils.stringifyException(ioe));
-      fail(ioe.toString());
-    } catch (ParseException pe) {
-      LOG.error(StringUtils.stringifyException(pe));
-      fail(pe.toString());
-    } finally {
-      if (null != prevClassLoader) {
-        ClassLoaderStack.setCurrentClassLoader(prevClassLoader);
-      }
+        return args.toArray(new String[0]);
     }
-  }
 
-  @Test
-  public void testDefaults() throws IOException {
-    String[] types = { "INTEGER", "VARCHAR(32)", "INTEGER" };
-    String[] vals = { "64", "'foo'", "128" };
+    public void runParseTest(String fieldTerminator, String lineTerminator,
+                             String encloser, String escape, boolean encloseRequired)
+    throws IOException {
 
-    createTableWithColTypes(types, vals);
-    runParseTest(",", "\\n", "\\\"", "\\", false);
-  }
+        ClassLoader prevClassLoader = null;
 
-  @Test
-  public void testRequiredEnclose() throws IOException {
-    String[] types = { "INTEGER", "VARCHAR(32)", "INTEGER" };
-    String[] vals = { "64", "'foo'", "128" };
+        String[] argv = getArgv(true, fieldTerminator, lineTerminator,
+                                encloser, escape, encloseRequired);
+        runImport(argv);
+        try {
+            String tableClassName = getTableName();
 
-    createTableWithColTypes(types, vals);
-    runParseTest(",", "\\n", "\\\"", "\\", true);
-  }
+            argv = getArgv(false, fieldTerminator, lineTerminator, encloser,
+                           escape, encloseRequired);
+            SqoopOptions opts = new ImportTool().parseArguments(argv, null,
+                    null, true);
 
-  @Test
-  public void testStringEscapes() throws IOException {
-    String[] types = { "VARCHAR(32)", "VARCHAR(32)", "VARCHAR(32)",
-        "VARCHAR(32)", "VARCHAR(32)", };
-    String[] vals = { "'foo'", "'foo,bar'", "'foo''bar'", "'foo\\bar'",
-        "'foo,bar''baz'", };
+            CompilationManager compileMgr = new CompilationManager(opts);
+            String jarFileName = compileMgr.getJarFilename();
 
-    createTableWithColTypes(types, vals);
-    runParseTest(",", "\\n", "\\\'", "\\", false);
-  }
+            // Make sure the user's class is loaded into our address space.
+            prevClassLoader = ClassLoaderStack.addJarFile(jarFileName,
+                              tableClassName);
 
-  @Test
-  public void testNumericTypes() throws IOException {
-    String[] types = { "INTEGER", "REAL", "FLOAT", "DATE", "TIME", "BIT", };
-    String[] vals = { "42", "36.0", "127.1", "'2009-07-02'", "'11:24:00'",
+            JobConf job = new JobConf();
+            job.setJar(jarFileName);
 
-    "1", };
+            // Tell the job what class we're testing.
+            job.set(ReparseMapper.USER_TYPE_NAME_KEY, tableClassName);
 
-    createTableWithColTypes(types, vals);
-    runParseTest(",", "\\n", "\\\'", "\\", false);
-  }
+            job.set("fs.default.name", "file:///");
 
-  protected boolean useHsqldbTestServer() {
-    return false;
-  }
+            String warehouseDir = getWarehouseDir();
+            Path warehousePath = new Path(warehouseDir);
+            Path inputPath = new Path(warehousePath, getTableName());
+            Path outputPath = new Path(warehousePath, getTableName() + "-out");
 
-  protected String getConnectString() {
-    return MSSQLTestUtils.getDBConnectString();
-  }
+            job.setMapperClass(ReparseMapper.class);
+            job.setNumReduceTasks(0);
+            FileInputFormat.addInputPath(job, inputPath);
+            FileOutputFormat.setOutputPath(job, outputPath);
 
-  /**
-   * Drop a table if it already exists in the database.
-   *
-   * @param table
-   *            the name of the table to drop.
-   * @throws SQLException
-   *             if something goes wrong.
-   */
-  protected void dropTableIfExists(String table) throws SQLException {
-    Connection conn = getManager().getConnection();
-    String sqlStmt = "IF OBJECT_ID('" + table
-        + "') IS NOT NULL  DROP TABLE " + table;
+            job.setOutputKeyClass(Text.class);
+            job.setOutputValueClass(NullWritable.class);
 
-    PreparedStatement statement = conn.prepareStatement(sqlStmt,
-        ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-    try {
-      statement.executeUpdate();
-      conn.commit();
-    } finally {
-      statement.close();
+            JobClient.runJob(job);
+        } catch (InvalidOptionsException ioe) {
+            LOG.error(StringUtils.stringifyException(ioe));
+            fail(ioe.toString());
+        } catch (ParseException pe) {
+            LOG.error(StringUtils.stringifyException(pe));
+            fail(pe.toString());
+        } finally {
+            if (null != prevClassLoader) {
+                ClassLoaderStack.setCurrentClassLoader(prevClassLoader);
+            }
+        }
     }
-  }
 
-  protected SqoopOptions getSqoopOptions(Configuration conf) {
+    @Test
+    public void testDefaults() throws IOException {
+        String[] types = { "INTEGER", "VARCHAR(32)", "INTEGER" };
+        String[] vals = { "64", "'foo'", "128" };
 
-    String username = MSSQLTestUtils.getDBUserName();
-    String password = MSSQLTestUtils.getDBPassWord();
-    SqoopOptions opts = new SqoopOptions(conf);
-    opts.setUsername(username);
-    opts.setPassword(password);
-    return opts;
+        createTableWithColTypes(types, vals);
+        runParseTest(",", "\\n", "\\\"", "\\", false);
+    }
 
-  }
+    @Test
+    public void testRequiredEnclose() throws IOException {
+        String[] types = { "INTEGER", "VARCHAR(32)", "INTEGER" };
+        String[] vals = { "64", "'foo'", "128" };
+
+        createTableWithColTypes(types, vals);
+        runParseTest(",", "\\n", "\\\"", "\\", true);
+    }
+
+    @Test
+    public void testStringEscapes() throws IOException {
+        String[] types = { "VARCHAR(32)", "VARCHAR(32)", "VARCHAR(32)",
+                           "VARCHAR(32)", "VARCHAR(32)",
+                         };
+        String[] vals = { "'foo'", "'foo,bar'", "'foo''bar'", "'foo\\bar'",
+                          "'foo,bar''baz'",
+                        };
+
+        createTableWithColTypes(types, vals);
+        runParseTest(",", "\\n", "\\\'", "\\", false);
+    }
+
+    @Test
+    public void testNumericTypes() throws IOException {
+        String[] types = { "INTEGER", "REAL", "FLOAT", "DATE", "TIME", "BIT", };
+        String[] vals = { "42", "36.0", "127.1", "'2009-07-02'", "'11:24:00'",
+
+                          "1",
+                        };
+
+        createTableWithColTypes(types, vals);
+        runParseTest(",", "\\n", "\\\'", "\\", false);
+    }
+
+    protected boolean useHsqldbTestServer() {
+        return false;
+    }
+
+    protected String getConnectString() {
+        return MSSQLTestUtils.getDBConnectString();
+    }
+
+    /**
+     * Drop a table if it already exists in the database.
+     *
+     * @param table
+     *            the name of the table to drop.
+     * @throws SQLException
+     *             if something goes wrong.
+     */
+    protected void dropTableIfExists(String table) throws SQLException {
+        Connection conn = getManager().getConnection();
+        String sqlStmt = "IF OBJECT_ID('" + table
+                         + "') IS NOT NULL  DROP TABLE " + table;
+
+        PreparedStatement statement = conn.prepareStatement(sqlStmt,
+                                      ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+        try {
+            statement.executeUpdate();
+            conn.commit();
+        } finally {
+            statement.close();
+        }
+    }
+
+    protected SqoopOptions getSqoopOptions(Configuration conf) {
+
+        String username = MSSQLTestUtils.getDBUserName();
+        String password = MSSQLTestUtils.getDBPassWord();
+        SqoopOptions opts = new SqoopOptions(conf);
+        opts.setUsername(username);
+        opts.setPassword(password);
+        return opts;
+
+    }
 }

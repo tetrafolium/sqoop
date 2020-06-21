@@ -23,25 +23,25 @@ package org.apache.sqoop.lib;
 @SuppressWarnings("serial")
 public class ProcessingException extends Exception  {
 
-  public ProcessingException() {
-    super("ProcessingException");
-  }
+    public ProcessingException() {
+        super("ProcessingException");
+    }
 
-  public ProcessingException(final String message) {
-    super(message);
-  }
+    public ProcessingException(final String message) {
+        super(message);
+    }
 
-  public ProcessingException(final Throwable cause) {
-    super(cause);
-  }
+    public ProcessingException(final Throwable cause) {
+        super(cause);
+    }
 
-  public ProcessingException(final String message, final Throwable cause) {
-    super(message, cause);
-  }
+    public ProcessingException(final String message, final Throwable cause) {
+        super(message, cause);
+    }
 
-  @Override
-  public String toString() {
-    String msg = getMessage();
-    return (null == msg) ? "ProcessingException" : msg;
-  }
+    @Override
+    public String toString() {
+        String msg = getMessage();
+        return (null == msg) ? "ProcessingException" : msg;
+    }
 }

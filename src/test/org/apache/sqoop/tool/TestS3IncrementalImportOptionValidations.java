@@ -65,7 +65,9 @@ public class TestS3IncrementalImportOptionValidations {
 
     private ImportTool importTool;
 
-    public TestS3IncrementalImportOptionValidations(SqoopOptions.IncrementalMode incrementalMode) {this.incrementalMode = incrementalMode;}
+    public TestS3IncrementalImportOptionValidations(SqoopOptions.IncrementalMode incrementalMode) {
+        this.incrementalMode = incrementalMode;
+    }
 
     @Before
     public void before() {
@@ -84,7 +86,7 @@ public class TestS3IncrementalImportOptionValidations {
     public void testValidateOptionsThrowsWhenS3IncrementalImportIsPerformedWithoutTemporaryRootdir() throws Exception {
         expectedException.expect(SqoopOptions.InvalidOptionsException.class);
         expectedException.expectMessage("For an " + INCREMENT_TYPE_ARG + " import into an S3 bucket --"
-                + TEMP_ROOTDIR_ARG + " option must be always set to a location in S3.");
+                                        + TEMP_ROOTDIR_ARG + " option must be always set to a location in S3.");
 
         when(sqoopOptions.getIncrementalMode()).thenReturn(incrementalMode);
 
@@ -95,7 +97,7 @@ public class TestS3IncrementalImportOptionValidations {
     public void testValidateOptionsThrowsWhenS3IncrementalImportIsPerformedWithNotS3TemporaryRootdir() throws Exception {
         expectedException.expect(SqoopOptions.InvalidOptionsException.class);
         expectedException.expectMessage("For an " + INCREMENT_TYPE_ARG + " import into an S3 bucket --"
-                + TEMP_ROOTDIR_ARG + " option must be always set to a location in S3.");
+                                        + TEMP_ROOTDIR_ARG + " option must be always set to a location in S3.");
 
         when(sqoopOptions.getIncrementalMode()).thenReturn(incrementalMode);
         when(sqoopOptions.getTempRootDir()).thenReturn(TEST_NOT_S3_TEMPORARY_ROOTDIR);

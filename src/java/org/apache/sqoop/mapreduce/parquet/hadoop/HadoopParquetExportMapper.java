@@ -29,9 +29,9 @@ import java.io.IOException;
  */
 public class HadoopParquetExportMapper extends GenericRecordExportMapper<Void, GenericRecord> {
 
-  @Override
-  protected void map(Void key, GenericRecord val, Context context) throws IOException, InterruptedException {
-    context.write(toSqoopRecord(val), NullWritable.get());
-  }
+    @Override
+    protected void map(Void key, GenericRecord val, Context context) throws IOException, InterruptedException {
+        context.write(toSqoopRecord(val), NullWritable.get());
+    }
 
 }

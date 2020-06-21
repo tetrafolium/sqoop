@@ -26,24 +26,24 @@ import org.apache.commons.cli.Options;
  */
 public class RelatedOptions extends Options {
 
-  private String relatedTitle;
+    private String relatedTitle;
 
-  public RelatedOptions() {
-    this("");
-  }
+    public RelatedOptions() {
+        this("");
+    }
 
-  public RelatedOptions(final String title) {
-    super();
-    this.relatedTitle = title;
-  }
+    public RelatedOptions(final String title) {
+        super();
+        this.relatedTitle = title;
+    }
 
-  public String getTitle() {
-    return relatedTitle;
-  }
+    public String getTitle() {
+        return relatedTitle;
+    }
 
-  @Override
-  public String toString() {
-    return relatedTitle + "\n" + super.toString();
-  }
+    @Override
+    public String toString() {
+        return relatedTitle + "\n" + super.toString();
+    }
 }
 

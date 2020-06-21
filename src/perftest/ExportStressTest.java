@@ -39,114 +39,114 @@ import org.apache.sqoop.tool.SqoopTool;
  */
 public class ExportStressTest extends Configured implements Tool {
 
-  // Export 10 GB of data. Each record is ~100 bytes.
-  public static final int NUM_FILES = 10;
-  public static final int RECORDS_PER_FILE = 10 * 1024 * 1024;
+    // Export 10 GB of data. Each record is ~100 bytes.
+    public static final int NUM_FILES = 10;
+    public static final int RECORDS_PER_FILE = 10 * 1024 * 1024;
 
-  public static final String ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    public static final String ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-  public ExportStressTest() {
-  }
-
-  public void createFile(int fileId) throws IOException {
-    Configuration conf = getConf();
-    FileSystem fs = FileSystem.get(conf);
-    Path dirPath = new Path("ExportStressTest");
-    fs.mkdirs(dirPath);
-    Path filePath = new Path(dirPath, "input-" + fileId);
-
-    OutputStream os = fs.create(filePath);
-    Writer w = new BufferedWriter(new OutputStreamWriter(os));
-    for (int i = 0; i < RECORDS_PER_FILE; i++) {
-      long v = (long) i + ((long) RECORDS_PER_FILE * (long) fileId);
-      w.write("" + v + "," + ALPHABET + ALPHABET + ALPHABET + ALPHABET + "\n");
-
-    }
-    w.close();
-    os.close();
-  }
-
-  /** Create a set of data files to export. */
-  public void createData() throws IOException {
-    Configuration conf = getConf();
-    FileSystem fs = FileSystem.get(conf);
-    Path dirPath = new Path("ExportStressTest");
-    if (fs.exists(dirPath)) {
-      System.out.println(
-          "Export directory appears to already exist. Skipping data-gen.");
-      return;
+    public ExportStressTest() {
     }
 
-    for (int i = 0; i < NUM_FILES; i++) {
-      createFile(i);
-    }
-  }
+    public void createFile(int fileId) throws IOException {
+        Configuration conf = getConf();
+        FileSystem fs = FileSystem.get(conf);
+        Path dirPath = new Path("ExportStressTest");
+        fs.mkdirs(dirPath);
+        Path filePath = new Path(dirPath, "input-" + fileId);
 
-  /** Create a table to hold our results. Drop any existing definition. */
-  public void createTable(String connectStr, String username) throws Exception {
-    Class.forName("com.mysql.jdbc.Driver"); // Load mysql driver.
+        OutputStream os = fs.create(filePath);
+        Writer w = new BufferedWriter(new OutputStreamWriter(os));
+        for (int i = 0; i < RECORDS_PER_FILE; i++) {
+            long v = (long) i + ((long) RECORDS_PER_FILE * (long) fileId);
+            w.write("" + v + "," + ALPHABET + ALPHABET + ALPHABET + ALPHABET + "\n");
 
-    Connection conn = DriverManager.getConnection(connectStr, username, null);
-    conn.setAutoCommit(false);
-    PreparedStatement stmt = conn.prepareStatement(
-        "DROP TABLE IF EXISTS ExportStressTestTable",
-        ResultSet.TYPE_FORWARD_ONLY,
-        ResultSet.CONCUR_READ_ONLY);
-    stmt.executeUpdate();
-    stmt.close();
-
-    stmt = conn.prepareStatement(
-        "CREATE TABLE ExportStressTestTable(id INT NOT NULL PRIMARY KEY, "
-        + "msg VARCHAR(110)) Engine=InnoDB", ResultSet.TYPE_FORWARD_ONLY,
-        ResultSet.CONCUR_READ_ONLY);
-    stmt.executeUpdate();
-    stmt.close();
-    conn.commit();
-    conn.close();
-  }
-
-  /**
-   * Actually run the export of the generated data to the user-created table.
-   */
-  public void runExport(String connectStr, String username) throws Exception {
-    SqoopOptions options = new SqoopOptions(getConf());
-    options.setConnectString(connectStr);
-    options.setTableName("ExportStressTestTable");
-    options.setUsername(username);
-    options.setExportDir("ExportStressTest");
-    options.setNumMappers(4);
-    options.setLinesTerminatedBy('\n');
-    options.setFieldsTerminatedBy(',');
-    options.setExplicitOutputDelims(true);
-
-    SqoopTool exportTool = new ExportTool();
-    Sqoop sqoop = new Sqoop(exportTool, getConf(), options);
-    int ret = Sqoop.runSqoop(sqoop, new String[0]);
-    if (0 != ret) {
-      throw new Exception("Error doing export; ret=" + ret);
-    }
-  }
-
-  @Override
-  public int run(String [] args) {
-    String connectStr = args[0];
-    String username = args[1];
-
-    try {
-      createData();
-      createTable(connectStr, username);
-      runExport(connectStr, username);
-    } catch (Exception e) {
-      System.err.println("Error: " + StringUtils.stringifyException(e));
-      return 1;
+        }
+        w.close();
+        os.close();
     }
 
-    return 0;
-  }
+    /** Create a set of data files to export. */
+    public void createData() throws IOException {
+        Configuration conf = getConf();
+        FileSystem fs = FileSystem.get(conf);
+        Path dirPath = new Path("ExportStressTest");
+        if (fs.exists(dirPath)) {
+            System.out.println(
+                "Export directory appears to already exist. Skipping data-gen.");
+            return;
+        }
 
-  public static void main(String [] args) throws Exception {
-    ExportStressTest test = new ExportStressTest();
-    int ret = ToolRunner.run(test, args);
-    System.exit(ret);
-  }
+        for (int i = 0; i < NUM_FILES; i++) {
+            createFile(i);
+        }
+    }
+
+    /** Create a table to hold our results. Drop any existing definition. */
+    public void createTable(String connectStr, String username) throws Exception {
+        Class.forName("com.mysql.jdbc.Driver"); // Load mysql driver.
+
+        Connection conn = DriverManager.getConnection(connectStr, username, null);
+        conn.setAutoCommit(false);
+        PreparedStatement stmt = conn.prepareStatement(
+                                     "DROP TABLE IF EXISTS ExportStressTestTable",
+                                     ResultSet.TYPE_FORWARD_ONLY,
+                                     ResultSet.CONCUR_READ_ONLY);
+        stmt.executeUpdate();
+        stmt.close();
+
+        stmt = conn.prepareStatement(
+                   "CREATE TABLE ExportStressTestTable(id INT NOT NULL PRIMARY KEY, "
+                   + "msg VARCHAR(110)) Engine=InnoDB", ResultSet.TYPE_FORWARD_ONLY,
+                   ResultSet.CONCUR_READ_ONLY);
+        stmt.executeUpdate();
+        stmt.close();
+        conn.commit();
+        conn.close();
+    }
+
+    /**
+     * Actually run the export of the generated data to the user-created table.
+     */
+    public void runExport(String connectStr, String username) throws Exception {
+        SqoopOptions options = new SqoopOptions(getConf());
+        options.setConnectString(connectStr);
+        options.setTableName("ExportStressTestTable");
+        options.setUsername(username);
+        options.setExportDir("ExportStressTest");
+        options.setNumMappers(4);
+        options.setLinesTerminatedBy('\n');
+        options.setFieldsTerminatedBy(',');
+        options.setExplicitOutputDelims(true);
+
+        SqoopTool exportTool = new ExportTool();
+        Sqoop sqoop = new Sqoop(exportTool, getConf(), options);
+        int ret = Sqoop.runSqoop(sqoop, new String[0]);
+        if (0 != ret) {
+            throw new Exception("Error doing export; ret=" + ret);
+        }
+    }
+
+    @Override
+    public int run(String [] args) {
+        String connectStr = args[0];
+        String username = args[1];
+
+        try {
+            createData();
+            createTable(connectStr, username);
+            runExport(connectStr, username);
+        } catch (Exception e) {
+            System.err.println("Error: " + StringUtils.stringifyException(e));
+            return 1;
+        }
+
+        return 0;
+    }
+
+    public static void main(String [] args) throws Exception {
+        ExportStressTest test = new ExportStressTest();
+        int ret = ToolRunner.run(test, args);
+        System.exit(ret);
+    }
 }

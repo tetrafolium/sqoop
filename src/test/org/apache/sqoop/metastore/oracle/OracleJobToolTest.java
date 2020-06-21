@@ -47,7 +47,7 @@ public class OracleJobToolTest extends JobToolTestBase {
 
     public OracleJobToolTest() {
         super(OracleUtils.CONNECT_STRING,
-                OracleUtils.ORACLE_USER_NAME,
-                OracleUtils.ORACLE_USER_PASS);
+              OracleUtils.ORACLE_USER_NAME,
+              OracleUtils.ORACLE_USER_PASS);
     }
 }

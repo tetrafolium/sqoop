@@ -28,19 +28,19 @@ import java.io.InputStream;
  */
 public abstract class AsyncSink {
 
-  /**
-   * Create and run a thread to handle input from the provided InputStream.
-   * When processStream returns, the thread should be running; it should
-   * continue to run until the InputStream is exhausted.
-   */
-  public abstract void processStream(InputStream is);
+    /**
+     * Create and run a thread to handle input from the provided InputStream.
+     * When processStream returns, the thread should be running; it should
+     * continue to run until the InputStream is exhausted.
+     */
+    public abstract void processStream(InputStream is);
 
-  /**
-   * Wait until the stream has been processed.
-   * @return a status code indicating success or failure. 0 is typical for
-   * success.
-   */
-  public abstract int join() throws InterruptedException;
+    /**
+     * Wait until the stream has been processed.
+     * @return a status code indicating success or failure. 0 is typical for
+     * success.
+     */
+    public abstract int join() throws InterruptedException;
 
 }
 

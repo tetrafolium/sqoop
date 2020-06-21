@@ -42,53 +42,53 @@ import static org.apache.sqoop.mapreduce.parquet.ParquetConstants.SQOOP_PARQUET_
  */
 public class HadoopParquetImportJobConfigurator implements ParquetImportJobConfigurator {
 
-  private static final Log LOG = LogFactory.getLog(HadoopParquetImportJobConfigurator.class.getName());
+    private static final Log LOG = LogFactory.getLog(HadoopParquetImportJobConfigurator.class.getName());
 
-  @Override
-  public void configureMapper(Job job, Schema schema, SqoopOptions options, String tableName, Path destination) throws IOException {
-    configureAvroSchema(job, schema);
-    configureOutputCodec(job);
-    configureLogicalTypeSupport(job, options);
-  }
-
-  /**
-   * Configurations needed for logical types, i.e. decimal in parquet.
-   * @param job
-   * @param options
-   */
-  private void configureLogicalTypeSupport(Job job, SqoopOptions options) {
-    if (options.getConf().getBoolean(ConfigurationConstants.PROP_ENABLE_PARQUET_LOGICAL_TYPE_DECIMAL, false)) {
-      AvroParquetOutputFormat.setAvroDataSupplier(job, GenericDataSupplier.class);
+    @Override
+    public void configureMapper(Job job, Schema schema, SqoopOptions options, String tableName, Path destination) throws IOException {
+        configureAvroSchema(job, schema);
+        configureOutputCodec(job);
+        configureLogicalTypeSupport(job, options);
     }
-  }
 
-  @Override
-  public Class<? extends Mapper> getMapperClass() {
-    return HadoopParquetImportMapper.class;
-  }
-
-  @Override
-  public Class<? extends OutputFormat> getOutputFormatClass() {
-    return AvroParquetOutputFormat.class;
-  }
-
-  @Override
-  public boolean isHiveImportNeeded() {
-    return true;
-  }
-
-  void configureOutputCodec(Job job) {
-    String outputCodec = job.getConfiguration().get(SQOOP_PARQUET_OUTPUT_CODEC_KEY);
-    if (outputCodec != null) {
-      LOG.info("Using output codec: " + outputCodec);
-      ParquetOutputFormat.setCompression(job, CompressionCodecName.fromConf(outputCodec));
+    /**
+     * Configurations needed for logical types, i.e. decimal in parquet.
+     * @param job
+     * @param options
+     */
+    private void configureLogicalTypeSupport(Job job, SqoopOptions options) {
+        if (options.getConf().getBoolean(ConfigurationConstants.PROP_ENABLE_PARQUET_LOGICAL_TYPE_DECIMAL, false)) {
+            AvroParquetOutputFormat.setAvroDataSupplier(job, GenericDataSupplier.class);
+        }
     }
-  }
 
-  void configureAvroSchema(Job job, Schema schema) {
-    if (LOG.isDebugEnabled()) {
-      LOG.debug("Using Avro schema: " + schema);
+    @Override
+    public Class<? extends Mapper> getMapperClass() {
+        return HadoopParquetImportMapper.class;
     }
-    AvroParquetOutputFormat.setSchema(job, schema);
-  }
+
+    @Override
+    public Class<? extends OutputFormat> getOutputFormatClass() {
+        return AvroParquetOutputFormat.class;
+    }
+
+    @Override
+    public boolean isHiveImportNeeded() {
+        return true;
+    }
+
+    void configureOutputCodec(Job job) {
+        String outputCodec = job.getConfiguration().get(SQOOP_PARQUET_OUTPUT_CODEC_KEY);
+        if (outputCodec != null) {
+            LOG.info("Using output codec: " + outputCodec);
+            ParquetOutputFormat.setCompression(job, CompressionCodecName.fromConf(outputCodec));
+        }
+    }
+
+    void configureAvroSchema(Job job, Schema schema) {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Using Avro schema: " + schema);
+        }
+        AvroParquetOutputFormat.setSchema(job, schema);
+    }
 }

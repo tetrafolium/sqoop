@@ -25,33 +25,33 @@ import java.math.BigInteger;
  * Generates BigDecimal test data.
  */
 public class BigDecimalGenerator extends OraOopTestDataGenerator<BigDecimal> {
-  private final int precision;
-  private final int scale;
+    private final int precision;
+    private final int scale;
 
-  /**
-   * Create a BigDecimalGenerator suitable for populating an Oracle
-   * NUMBER(precision,scale) field.
-   *
-   * @param precision
-   *          Maximum number of decimal digits in generated BigDecimals
-   * @param scale
-   *          Number of decimal digits to the right of the decimal point in
-   *          generated BigDecimals
-   */
-  public BigDecimalGenerator(int precision, int scale) {
-    super();
-    this.precision = precision;
-    this.scale = scale;
-  }
-
-  @Override
-  public BigDecimal next() {
-    BigInteger unscaled =
-        BigInteger.valueOf(rng.nextInt((int) Math.pow(10, precision)));
-    BigDecimal value = new BigDecimal(unscaled, scale);
-    if (rng.nextBoolean()) {
-      value = value.negate();
+    /**
+     * Create a BigDecimalGenerator suitable for populating an Oracle
+     * NUMBER(precision,scale) field.
+     *
+     * @param precision
+     *          Maximum number of decimal digits in generated BigDecimals
+     * @param scale
+     *          Number of decimal digits to the right of the decimal point in
+     *          generated BigDecimals
+     */
+    public BigDecimalGenerator(int precision, int scale) {
+        super();
+        this.precision = precision;
+        this.scale = scale;
     }
-    return value;
-  }
+
+    @Override
+    public BigDecimal next() {
+        BigInteger unscaled =
+            BigInteger.valueOf(rng.nextInt((int) Math.pow(10, precision)));
+        BigDecimal value = new BigDecimal(unscaled, scale);
+        if (rng.nextBoolean()) {
+            value = value.negate();
+        }
+        return value;
+    }
 }
