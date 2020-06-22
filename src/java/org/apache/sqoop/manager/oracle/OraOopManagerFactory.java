@@ -19,7 +19,7 @@
 package org.apache.sqoop.manager.oracle;
 
 import org.apache.sqoop.manager.oracle.OraOopUtilities.JdbcOracleThinConnectionParsingError;
-import static org.apache.sqoop.mapreduce.JobBase.HADOOP_MAP_TASK_MAX_ATTEMTPS;
+import static org.apache.sqoop.mapreduce.JobBase.HADOOP_MAP_TASK_MAX_ATTEMPTS;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -796,7 +796,7 @@ private void showUserTheOraOopWelcomeMessage() {
 private void showUserTheOracleCommandToKillOraOop(SqoopOptions sqoopOptions) {
 
 	int taskAttempts =
-		sqoopOptions.getConf().getInt(HADOOP_MAP_TASK_MAX_ATTEMTPS, -1);
+		sqoopOptions.getConf().getInt(HADOOP_MAP_TASK_MAX_ATTEMPTS, -1);
 
 	// If killing the Oracle session if futile - because the job will be
 	// reattempted, then don't
@@ -1159,7 +1159,7 @@ private void checkForOldOraOopTemporaryOracleTables(
 	} catch (Exception ex) {
 		messagesToDisplayAfterWelcome.add(new OraOopLogMessage(
 							  OraOopConstants.Logging.Level.WARN,
-							  String.format("%s was unable to check for the existance of old "
+							  String.format("%s was unable to check for the existence of old "
 							                + "temporary Oracle tables.\n"
 							                + "Error:\n%s",
 							                OraOopConstants.ORAOOP_PRODUCT_NAME, ex.toString())));

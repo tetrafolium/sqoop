@@ -346,7 +346,7 @@ public void printHelp(ToolOptions opts) {
 
 	System.out.println("");
 	System.out.println("Generic Hadoop command-line arguments:");
-	System.out.println("(must preceed any tool-specific arguments)");
+	System.out.println("(must precede any tool-specific arguments)");
 	ToolRunner.printGenericCommandUsage(System.out);
 }
 

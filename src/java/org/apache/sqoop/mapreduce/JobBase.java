@@ -56,9 +56,9 @@ public static final Log LOG = LogFactory.getLog(JobBase.class.getName());
 public static final String SERIALIZE_SQOOPOPTIONS =
 	"sqoop.jobbase.serialize.sqoopoptions";
 public static final boolean SERIALIZE_SQOOPOPTIONS_DEFAULT = false;
-public static final String HADOOP_MAP_TASK_MAX_ATTEMTPS =
+public static final String HADOOP_MAP_TASK_MAX_ATTEMPTS =
 	"mapreduce.map.maxattempts";
-public static final String HADOOP_REDUCE_TASK_MAX_ATTEMTPS =
+public static final String HADOOP_REDUCE_TASK_MAX_ATTEMPTS =
 	"mapreduce.reduce.maxattempts";
 
 protected SqoopOptions options;

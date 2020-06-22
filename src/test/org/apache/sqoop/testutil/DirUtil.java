@@ -35,7 +35,7 @@ public static final Log LOG = LogFactory.getLog(DirUtil.class.getName());
 /**
  * recursively delete a dir and its children.
  * @param dir
- * @return true on succesful removal of a dir
+ * @return true on successful removal of a dir
  */
 public static boolean deleteDir(File dir) {
 	if (dir.isDirectory()) {

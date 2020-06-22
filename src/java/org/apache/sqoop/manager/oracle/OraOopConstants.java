@@ -18,7 +18,7 @@
 
 package org.apache.sqoop.manager.oracle;
 
-import static org.apache.sqoop.mapreduce.JobBase.HADOOP_MAP_TASK_MAX_ATTEMTPS;
+import static org.apache.sqoop.mapreduce.JobBase.HADOOP_MAP_TASK_MAX_ATTEMPTS;
 
 /**
  * Constants for OraOop.
@@ -181,7 +181,7 @@ public static final String ORAOOP_ORACLE_DATA_CHUNK_METHOD =
  */
 public enum OraOopOracleDataChunkMethod { ROWID, PARTITION }
 
-// List of partitions to be imported, comma seperated list
+// List of partitions to be imported, comma separated list
 public static final String ORAOOP_IMPORT_PARTITION_LIST =
 	"oraoop.import.partitions";
 

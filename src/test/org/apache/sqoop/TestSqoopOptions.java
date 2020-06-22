@@ -746,7 +746,7 @@ private void validateImportOptions(String[] extraArgs) throws Exception {
 	importTool.validateOptions(opts);
 }
 
-// test compatability of --detele-target-dir with import
+// test compatibility of --detele-target-dir with import
 @Test
 public void testDeteleTargetDir() throws Exception {
 	String[] extraArgs = {
@@ -759,7 +759,7 @@ public void testDeteleTargetDir() throws Exception {
 	}
 }
 
-// test incompatability of --delete-target-dir & --append with import
+// test incompatibility of --delete-target-dir & --append with import
 @Test
 public void testDeleteTargetDirWithAppend() throws Exception {
 	String[] extraArgs = {
@@ -774,7 +774,7 @@ public void testDeleteTargetDirWithAppend() throws Exception {
 	validateImportOptions(extraArgs);
 }
 
-// test incompatability of --delete-target-dir with incremental import
+// test incompatibility of --delete-target-dir with incremental import
 @Test
 public void testDeleteWithIncrementalImport() throws Exception {
 	String[] extraArgs = {

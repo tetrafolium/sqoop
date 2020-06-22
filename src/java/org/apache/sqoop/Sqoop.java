@@ -144,7 +144,7 @@ public int run(String[] args) {
 
 /**
  * SqoopTools sometimes pass arguments to a child program (e.g., mysqldump).
- * Users can specify additional args to these programs by preceeding the
+ * Users can specify additional args to these programs by preceding the
  * additional arguments with a standalone '--'; but
  * ToolRunner/GenericOptionsParser will cull out this argument. We remove
  * the child-program arguments in advance, and store them to be readded

@@ -33,8 +33,8 @@ import org.apache.sqoop.mapreduce.db.DBConfiguration;
 import org.apache.sqoop.util.LoggingUtils;
 
 /**
- * Reducer for transfering data from temporary table to destination.
- * Reducer drops all temporary tables if all data successfully transfered.
+ * Reducer for transferring data from temporary table to destination.
+ * Reducer drops all temporary tables if all data successfully transferred.
  * Temporary tables is not dropptd in error case for manual retry.
  */
 public class PGBulkloadExportReducer

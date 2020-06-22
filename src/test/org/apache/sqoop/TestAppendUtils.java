@@ -192,7 +192,7 @@ throws IOException {
 }
 
 /**
- * Test for ouput path file-count increase, current files untouched and new
+ * Test for output path file-count increase, current files untouched and new
  * correct partition number.
  *
  * @throws IOException
