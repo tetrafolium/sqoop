@@ -198,9 +198,9 @@ class OraOopDBRecordReader<T extends SqoopRecord> extends
                 OraOopOracleQueries.getTableColumns(getConnection(), tableContext,
                                                     OraOopUtilities.omitLobAndLongColumnsDuringImport(conf),
                                                     OraOopUtilities.recallSqoopJobType(conf)
-                                                    , true // <- onlyOraOopSupportedTypes
-                                                    , true // <- omitOraOopPseudoColumns
-                                                    , OracleUtils.isOracleEscapingDisabled(conf)
+, true // <- onlyOraOopSupportedTypes
+, true // <- omitOraOopPseudoColumns
+, OracleUtils.isOracleEscapingDisabled(conf)
                                                    );
         } catch (SQLException ex) {
             LOG.error(String.format(

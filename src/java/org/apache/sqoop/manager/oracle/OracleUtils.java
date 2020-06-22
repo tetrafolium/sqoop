@@ -68,7 +68,7 @@ public final class OracleUtils {
                 if (StringUtils.isNotBlank(escapedIdentifier)) {
                     escapedIdentifier.append(PERIOD_DELIMITER);
                 }
-                escapedIdentifier.append("\"" ).append(part).append("\"");
+                escapedIdentifier.append("\"").append(part).append("\"");
             }
             return StringUtils.isNotBlank(escapedIdentifier) ? escapedIdentifier.toString() : null;
         }
@@ -99,8 +99,8 @@ public final class OracleUtils {
             Integer configuredScale = ConfigurationHelper.getIntegerConfigIfExists(
                                           conf, ConfigurationConstants.PROP_AVRO_DECIMAL_SCALE);
             if (!isValidScale(scale) && configuredScale == null) {
-                throw new RuntimeException("Invalid scale for Avro Schema. Please specify a default scale with the -D" +
-                                           ConfigurationConstants.PROP_AVRO_DECIMAL_SCALE + " flag to avoid this issue.");
+                throw new RuntimeException("Invalid scale for Avro Schema. Please specify a default scale with the -D"
+                                           + ConfigurationConstants.PROP_AVRO_DECIMAL_SCALE + " flag to avoid this issue.");
             }
 
             // AvroUtil will take care of a precision that's 0.

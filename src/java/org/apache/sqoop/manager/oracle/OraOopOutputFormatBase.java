@@ -279,8 +279,8 @@ abstract class OraOopOutputFormatBase<K extends SqoopRecord, V> extends
                                   .getConnection(), this.oracleTable, OraOopUtilities
                                   .omitLobAndLongColumnsDuringImport(conf), OraOopUtilities
                                   .recallSqoopJobType(conf), true // <- onlyOraOopSupportedTypes
-                                  , false // <- omitOraOopPseudoColumns
-                                  , OracleUtils.isOracleEscapingDisabled(conf)
+, false // <- omitOraOopPseudoColumns
+, OracleUtils.isOracleEscapingDisabled(conf)
                                                                      ));
         }
 
@@ -664,7 +664,7 @@ abstract class OraOopOutputFormatBase<K extends SqoopRecord, V> extends
 
             OraOopOracleQueries.createExportTableForMapper(this.getConnection(),
                     mapperTable, temporaryTableStorageClause, templateTable
-                    , false); // <- addOraOopPartitionColumns
+, false); // <- addOraOopPartitionColumns
 
             LOG.debug(String.format("Created temporary mapper table %s", mapperTable
                                     .toString()));

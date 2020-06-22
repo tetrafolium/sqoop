@@ -393,8 +393,8 @@ public class TestPassingSecurePassword extends BaseSqoopTestCase {
             File credDir = new File(".");
 
             Configuration conf = getConf();
-            String ourUrl =  CredentialProviderHelper.SCHEME_NAME +
-                             "://file/" + credDir.getAbsolutePath() + "/" + jksFile;
+            String ourUrl =  CredentialProviderHelper.SCHEME_NAME
+                             + "://file/" + credDir.getAbsolutePath() + "/" + jksFile;
             File file = new File(credDir, jksFile);
             file.delete();
             conf.set(CredentialProviderHelper.HADOOP_CREDENTIAL_PROVIDER_PATH,
@@ -435,8 +435,8 @@ public class TestPassingSecurePassword extends BaseSqoopTestCase {
             File credDir = new File(".");
 
             Configuration conf = getConf();
-            String ourUrl =  CredentialProviderHelper.SCHEME_NAME +
-                             "://file/" + credDir.getAbsolutePath() + "/" + jksFile;
+            String ourUrl =  CredentialProviderHelper.SCHEME_NAME
+                             + "://file/" + credDir.getAbsolutePath() + "/" + jksFile;
             File file = new File(credDir, jksFile);
             file.delete();
             conf.set(CredentialProviderHelper.HADOOP_CREDENTIAL_PROVIDER_PATH,
@@ -459,7 +459,7 @@ public class TestPassingSecurePassword extends BaseSqoopTestCase {
     }
 
     public void executeCipherTest(String password, String passphrase, String cipher, int keySize) throws Exception {
-        LOG.info("Using cipher: " + cipher + " with keySize " + keySize + " and passphrase " + passphrase );
+        LOG.info("Using cipher: " + cipher + " with keySize " + keySize + " and passphrase " + passphrase);
         String passwordFilePath = BaseSqoopTestCase.getTempBaseDir() + ".pwd";
         createTempFile(passwordFilePath);
         writeToFile(passwordFilePath, encryptPassword(password, passphrase, cipher, 10000, keySize));

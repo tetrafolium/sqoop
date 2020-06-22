@@ -66,7 +66,7 @@ public class MainframeDatasetInputFormat<T extends SqoopRecord>
         LOG.info("Dataset on tape?: " + dsTape);
         List<String> datasets = retrieveDatasets(dsName, conf);
         if (datasets.isEmpty()) {
-            throw new IOException ("No datasets retrieved from " + dsName);
+            throw new IOException("No datasets retrieved from " + dsName);
         } else {
             int count = datasets.size();
             int chunks = Math.min(count, ConfigurationHelper.getJobNumMaps(job));

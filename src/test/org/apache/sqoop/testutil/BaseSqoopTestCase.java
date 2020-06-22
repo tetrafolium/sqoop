@@ -375,7 +375,7 @@ public abstract class BaseSqoopTestCase {
             }
 
             for (int count=0; vals != null && count < vals.length/colTypes.length;
-                    ++count ) {
+                    ++count) {
                 String columnListStr = "";
                 String valueListStr = "";
                 for (int i = 0; i < colTypes.length; i++) {
@@ -458,18 +458,17 @@ public abstract class BaseSqoopTestCase {
         String[] colNames;
         if (columns == null) {
             colNames = new String[vals.length];
-            for( int i = 0; i < vals.length; i++) {
+            for(int i = 0; i < vals.length; i++) {
                 colNames[i] = BASE_COL_NAME + Integer.toString(i);
             }
-        }
-        else {
+        } else {
             colNames = columns;
         }
 
         try {
             conn = getManager().getConnection();
             for (int count=0; vals != null && count < vals.length/colTypes.length;
-                    ++count ) {
+                    ++count) {
                 String columnListStr = "";
                 String valueListStr = "";
                 for (int i = 0; i < colTypes.length; i++) {
@@ -531,14 +530,14 @@ public abstract class BaseSqoopTestCase {
         PreparedStatement statement = null;
 
         String[] colNames = new String[vals.length];
-        for( int i = 0; i < vals.length; i++) {
+        for(int i = 0; i < vals.length; i++) {
             colNames[i] = BASE_COL_NAME + Integer.toString(i);
         }
 
         try {
             conn = getManager().getConnection();
             for (int count=0; vals != null && count < vals.length/colNames.length;
-                    ++count ) {
+                    ++count) {
                 String updateStr = "";
                 for (int i = 1; i < colNames.length; i++) {
                     updateStr += manager.escapeColName(colNames[i].toUpperCase()) + " = "+vals[count * colNames.length + i];
@@ -590,7 +589,7 @@ public abstract class BaseSqoopTestCase {
      */
     protected void createTableWithColTypes(String [] colTypes, String [] vals) {
         String[] colNames = new String[colTypes.length];
-        for( int i = 0; i < colTypes.length; i++) {
+        for(int i = 0; i < colTypes.length; i++) {
             colNames[i] = BASE_COL_NAME + Integer.toString(i);
         }
         createTableWithColTypesAndNames(colNames, colTypes, vals);

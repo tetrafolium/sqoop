@@ -153,8 +153,7 @@ public class TestDefaultManagerFactory {
         //Workaround as Oracle Direct Connector creation is not handled by the DefaultManagerFactory
         if (supportedManagers.hasDirectConnector() && !supportedManagers.equals(SupportedManagers.ORACLE)) {
             verify(mockoptions).isDirect();
-        }
-        else
+        } else
             verify(mockoptions, never()).isDirect();
 
     }

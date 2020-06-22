@@ -76,7 +76,7 @@ public class MainframeManagerImportTest extends ImportJobTestCase {
      * @throws IOException if it fails to delete the directory or read the file
      * @throws RuntimeException if it fails to run the mainframe import
      */
-    private void doImportAndVerify(String datasetName, String datasetType, HashMap<String,String> fileHashes, String ... extraArgs) throws IOException, RuntimeException {
+    private void doImportAndVerify(String datasetName, String datasetType, HashMap<String,String> fileHashes, String... extraArgs) throws IOException, RuntimeException {
         Path tablePath = new Path(datasetName);
 
         File tableFile = new File(tablePath.toString());
@@ -158,7 +158,7 @@ public class MainframeManagerImportTest extends ImportJobTestCase {
         doImportAndVerify(MainframeTestUtil.MIXED_BINARY_DATASET_NAME, MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE_GDG, files, "--as-binaryfile", "--buffersize", "64000");
     }
 
-    private String [] getArgv(String datasetName, String datasetType, String ... extraArgs) {
+    private String [] getArgv(String datasetName, String datasetType, String... extraArgs) {
         ArrayList<String> args = new ArrayList<String>();
 
         CommonArgs.addHadoopFlags(args);

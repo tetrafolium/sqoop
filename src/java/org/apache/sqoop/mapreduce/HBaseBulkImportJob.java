@@ -81,8 +81,8 @@ public class HBaseBulkImportJob extends HBaseImportJob {
         // we shouldn't have gotten here if bulk load dir is not set
         // so let's throw a ImportException
         if(getContext().getDestination() == null) {
-            throw new ImportException("Can't run HBaseBulkImportJob without a " +
-                                      "valid destination directory.");
+            throw new ImportException("Can't run HBaseBulkImportJob without a "
+                                      + "valid destination directory.");
         }
 
         TableMapReduceUtil.addDependencyJars(job.getConfiguration(), Preconditions.class);
@@ -128,8 +128,8 @@ public class HBaseBulkImportJob extends HBaseImportJob {
             LoadIncrementalHFiles loader = new LoadIncrementalHFiles(job.getConfiguration());
             loader.doBulkLoad(bulkLoadDir, hbaseAdmin, hbaseTable, hbaseConnection.getRegionLocator(hbaseTableName));
         } catch (Exception e) {
-            String errorMessage = String.format("Unrecoverable error while " +
-                                                "performing the bulk load of files in [%s]",
+            String errorMessage = String.format("Unrecoverable error while "
+                                                + "performing the bulk load of files in [%s]",
                                                 bulkLoadDir.toString());
             throw new ImportException(errorMessage, e);
         }

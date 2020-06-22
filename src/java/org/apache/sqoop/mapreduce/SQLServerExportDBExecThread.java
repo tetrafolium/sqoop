@@ -96,8 +96,8 @@ public class SQLServerExportDBExecThread extends
             stmt.executeBatch();
         } catch (SQLException execSqlEx) {
             LOG.warn("Error executing statement: " + execSqlEx);
-            if (failedCommit &&
-                    canIgnoreForFailedCommit(execSqlEx.getSQLState())) {
+            if (failedCommit
+                    && canIgnoreForFailedCommit(execSqlEx.getSQLState())) {
                 LOG.info("Ignoring error after failed commit");
             } else {
                 throw execSqlEx;

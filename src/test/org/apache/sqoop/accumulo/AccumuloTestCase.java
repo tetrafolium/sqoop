@@ -198,8 +198,7 @@ public abstract class AccumuloTestCase extends ImportJobTestCase {
         for(int i = 0; i < entries.length; i++) {
             try {
                 result[i] = Paths.get(entries[i]).toAbsolutePath().toUri().toURL();
-            }
-            catch (MalformedURLException ex) {
+            } catch (MalformedURLException ex) {
                 throw new RuntimeException(ex);
             }
         }

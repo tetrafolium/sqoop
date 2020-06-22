@@ -84,8 +84,7 @@ public class MainframeDatasetPath {
             // if not found, it is probably in the root
             if (lastDotIndex == -1) {
                 this.datasetName = "";
-            }
-            else {
+            } else {
                 // if found, return the truncated name
                 dsFolderName = this.datasetName.substring(0, lastDotIndex);
                 if (lastDotIndex + 1 < this.datasetName.length()) {
@@ -112,14 +111,11 @@ public class MainframeDatasetPath {
     public void setMainframeDatasetType(String dsType) throws ParseException {
         if (dsType.equals("s")) {
             this.datasetType = MainframeDatasetType.SEQUENTIAL;
-        }
-        else if (dsType.equals("p")) {
+        } else if (dsType.equals("p")) {
             this.datasetType = MainframeDatasetType.PARTITIONED;
-        }
-        else if (dsType.equals("g")) {
+        } else if (dsType.equals("g")) {
             this.datasetType = MainframeDatasetType.GDG;
-        }
-        else {
+        } else {
             throw new ParseException(String.format("Invalid data set type specified: %s",dsType), 0);
         }
     }

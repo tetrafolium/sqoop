@@ -1597,8 +1597,8 @@ public abstract class BaseSqoopTool extends org.apache.sqoop.tool.SqoopTool {
                                               + " option." + HELP_STR);
         }
 
-        if(options.isHCatTableExternal() &&
-                !(options.doCreateHCatalogTable() || options.doDropAndCreateHCatalogTable())) {
+        if(options.isHCatTableExternal()
+                && !(options.doCreateHCatalogTable() || options.doDropAndCreateHCatalogTable())) {
             throw new InvalidOptionsException(String.format(
                                                   "Using --%s only takes effect when --%s or --%s is present",
                                                   HCATALOG_EXTERNAL_TABLE_ARG, CREATE_HCATALOG_TABLE_ARG, DROP_AND_CREATE_HCATALOG_TABLE));
@@ -1861,11 +1861,11 @@ public abstract class BaseSqoopTool extends org.apache.sqoop.tool.SqoopTool {
                                                   + "these options should be omitted");
             }
         }
-        if (options.doCreateHCatalogTable() &&
-                options.doDropAndCreateHCatalogTable()) {
-            throw new InvalidOptionsException("Options --create-hcatalog-table" +
-                                              " and --drop-and-create-hcatalog-table are mutually exclusive." +
-                                              " Use any one of them");
+        if (options.doCreateHCatalogTable()
+                && options.doDropAndCreateHCatalogTable()) {
+            throw new InvalidOptionsException("Options --create-hcatalog-table"
+                                              + " and --drop-and-create-hcatalog-table are mutually exclusive."
+                                              + " Use any one of them");
         }
     }
 

@@ -497,8 +497,8 @@ public class TestHiveImport extends ImportJobTestCase {
         ImportTool tool = new ImportTool();
 
         thrown.expect(InvalidOptionsException.class);
-        thrown.reportMissingExceptionWithMessage("Expected InvalidOptionsException with conflicting Hive delimiter " +
-                "drop/replace options");
+        thrown.reportMissingExceptionWithMessage("Expected InvalidOptionsException with conflicting Hive delimiter "
+                + "drop/replace options");
         tool.validateOptions(tool.parseArguments(getArgv(false, moreArgs), null,
                              null, true));
     }
@@ -557,22 +557,22 @@ public class TestHiveImport extends ImportJobTestCase {
 
         // Test hive-import with the 1st args.
         thrown.expect(IOException.class);
-        thrown.reportMissingExceptionWithMessage("Expected IOException during Hive import with partition key " +
-                "as importing column");
+        thrown.reportMissingExceptionWithMessage("Expected IOException during Hive import with partition key "
+                + "as importing column");
         runImportTest(TABLE_NAME, types, vals, "partitionImport.q",
                       getArgv(false, moreArgs1), new ImportTool());
 
         // Test hive-import with the 2nd args.
         thrown.expect(IOException.class);
-        thrown.reportMissingExceptionWithMessage("Expected IOException during Hive import with partition key " +
-                "as importing column");
+        thrown.reportMissingExceptionWithMessage("Expected IOException during Hive import with partition key "
+                + "as importing column");
         runImportTest(TABLE_NAME, types, vals, "partitionImport.q",
                       getArgv(false, moreArgs2), new ImportTool());
 
         // Test create-hive-table with the 1st args.
         thrown.expect(IOException.class);
-        thrown.reportMissingExceptionWithMessage("Expected IOException during Hive table creation with partition key " +
-                "as importing column");
+        thrown.reportMissingExceptionWithMessage("Expected IOException during Hive table creation with partition key "
+                + "as importing column");
         runImportTest(TABLE_NAME, types, vals, "partitionImport.q",
                       getCreateTableArgv(false, moreArgs1), new CreateHiveTableTool());
     }

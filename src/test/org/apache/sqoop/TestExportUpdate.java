@@ -313,7 +313,7 @@ public class TestExportUpdate extends ExportJobTestCase {
     }
 
     private void verifyMultiKeyRow(String[] keyColumnNames, int[] keyValues,
-                                   Object ...expectedVals) throws SQLException {
+                                   Object...expectedVals) throws SQLException {
         StringBuilder querySb = new StringBuilder("SELECT A, B, C FROM ");
         querySb.append(getTableName()).append(" WHERE ");
         boolean first = true;
