@@ -24,26 +24,19 @@ package org.apache.sqoop.util;
 @SuppressWarnings("serial")
 public class ImportException extends Exception {
 
-    public ImportException() {
-        super("ImportException");
-    }
+  public ImportException() { super("ImportException"); }
 
-    public ImportException(final String message) {
-        super(message);
-    }
+  public ImportException(final String message) { super(message); }
 
-    public ImportException(final Throwable cause) {
-        super(cause);
-    }
+  public ImportException(final Throwable cause) { super(cause); }
 
-    public ImportException(final String message, final Throwable cause) {
-        super(message, cause);
-    }
+  public ImportException(final String message, final Throwable cause) {
+    super(message, cause);
+  }
 
-    @Override
-    public String toString() {
-        String msg = getMessage();
-        return (null == msg) ? "ImportException" : msg;
-    }
-
+  @Override
+  public String toString() {
+    String msg = getMessage();
+    return (null == msg) ? "ImportException" : msg;
+  }
 }

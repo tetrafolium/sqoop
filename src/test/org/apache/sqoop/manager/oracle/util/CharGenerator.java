@@ -23,32 +23,31 @@ package org.apache.sqoop.manager.oracle.util;
  * US-ASCII.
  */
 public class CharGenerator extends OraOopTestDataGenerator<String> {
-    private int minLength;
-    private int maxLength;
+  private int minLength;
+  private int maxLength;
 
-    /**
-     * Create a CharGenerator that will generate Strings between minLength and
-     * maxLength in length.
-     *
-     * @param minLength
-     *          Minimum length for generated strings
-     * @param maxLength
-     *          Maximum length for generated strings
-     */
-    public CharGenerator(int minLength, int maxLength) {
-        super();
-        this.minLength = minLength;
-        this.maxLength = maxLength;
+  /**
+   * Create a CharGenerator that will generate Strings between minLength and
+   * maxLength in length.
+   *
+   * @param minLength
+   *          Minimum length for generated strings
+   * @param maxLength
+   *          Maximum length for generated strings
+   */
+  public CharGenerator(int minLength, int maxLength) {
+    super();
+    this.minLength = minLength;
+    this.maxLength = maxLength;
+  }
+
+  @Override
+  public String next() {
+    int length = minLength + rng.nextInt(maxLength - minLength + 1);
+    StringBuilder sb = new StringBuilder();
+    while (sb.length() < length) {
+      sb.append(Character.toChars(rng.nextInt(128)));
     }
-
-    @Override
-    public String next() {
-        int length = minLength + rng.nextInt(maxLength - minLength + 1);
-        StringBuilder sb = new StringBuilder();
-        while (sb.length() < length) {
-            sb.append(Character.toChars(rng.nextInt(128)));
-        }
-        return sb.toString().substring(0, length);
-    }
-
+    return sb.toString().substring(0, length);
+  }
 }

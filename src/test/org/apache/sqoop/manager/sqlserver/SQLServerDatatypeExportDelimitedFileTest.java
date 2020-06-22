@@ -17,18 +17,16 @@
  */
 package org.apache.sqoop.manager.sqlserver;
 
+import java.io.BufferedWriter;
 import java.io.IOException;
-
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.sqoop.manager.sqlserver.MSSQLTestDataFileParser.DATATYPES;
 import org.apache.sqoop.testcategories.thirdpartytest.SqlServerTest;
 import org.junit.experimental.categories.Category;
-
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.BufferedWriter;
 
 /**
  * Test to export delimited file to SQL Server.
@@ -42,54 +40,53 @@ import java.io.BufferedWriter;
  *
  * You need to put SQL Server JDBC driver library (sqljdbc4.jar) in a location
  * where Sqoop will be able to access it (since this library cannot be checked
- * into Apache's tree for licensing reasons) and set it's path through -Dsqoop.thirdparty.lib.dir.
+ * into Apache's tree for licensing reasons) and set it's path through
+ * -Dsqoop.thirdparty.lib.dir.
  *
  * To set up your test environment:
  *   Install SQL Server Express 2012
  *   Create a database SQOOPTEST
  *   Create a login SQOOPUSER with password PASSWORD and grant all
  *   access for SQOOPTEST to SQOOPUSER.
- *   Set these through -Dsqoop.test.sqlserver.connectstring.host_url, -Dsqoop.test.sqlserver.database and
- *   -Dms.sqlserver.password
+ *   Set these through -Dsqoop.test.sqlserver.connectstring.host_url,
+ * -Dsqoop.test.sqlserver.database and -Dms.sqlserver.password
  */
 @Category(SqlServerTest.class)
 public class SQLServerDatatypeExportDelimitedFileTest
     extends ManagerCompatExport {
 
-    @Override
-    public void createFile(DATATYPES dt, String[] data) throws IOException {
-        Path tablePath = getTablePath(dt);
-        Path filePath = new Path(tablePath, "part0000");
+  @Override
+  public void createFile(DATATYPES dt, String[] data) throws IOException {
+    Path tablePath = getTablePath(dt);
+    Path filePath = new Path(tablePath, "part0000");
 
-        Configuration conf = new Configuration();
-        String hdfsroot;
-        hdfsroot = System.getProperty("ms.datatype.test.hdfsprefix");
-        if (hdfsroot == null) {
-            hdfsroot = "hdfs://localhost/";
-        }
-        conf.set("fs.default.name", hdfsroot);
-        FileSystem fs = FileSystem.get(conf);
-        fs.mkdirs(tablePath);
-        System.out.println("-----------------------------------Path : "
-                           + filePath);
-        OutputStream os = fs.create(filePath);
-
-        BufferedWriter w = new BufferedWriter(new OutputStreamWriter(os));
-        for (int i = 0; i < data.length; i++) {
-            w.write(data[i] + "\n");
-        }
-        w.close();
-        os.close();
+    Configuration conf = new Configuration();
+    String hdfsroot;
+    hdfsroot = System.getProperty("ms.datatype.test.hdfsprefix");
+    if (hdfsroot == null) {
+      hdfsroot = "hdfs://localhost/";
     }
+    conf.set("fs.default.name", hdfsroot);
+    FileSystem fs = FileSystem.get(conf);
+    fs.mkdirs(tablePath);
+    System.out.println("-----------------------------------Path : " + filePath);
+    OutputStream os = fs.create(filePath);
 
-    @Override
-    public void createFile(DATATYPES dt, String data) throws IOException {
-        createFile(dt, new String[] { data });
+    BufferedWriter w = new BufferedWriter(new OutputStreamWriter(os));
+    for (int i = 0; i < data.length; i++) {
+      w.write(data[i] + "\n");
     }
+    w.close();
+    os.close();
+  }
 
-    @Override
-    public String getOutputFileName() {
-        return "ManagerCompatExportDelim.txt";
-    }
+  @Override
+  public void createFile(DATATYPES dt, String data) throws IOException {
+    createFile(dt, new String[] {data});
+  }
 
+  @Override
+  public String getOutputFileName() {
+    return "ManagerCompatExportDelim.txt";
+  }
 }

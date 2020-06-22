@@ -17,35 +17,36 @@
  */
 package org.apache.sqoop.testutil.adapter;
 
+import java.sql.SQLException;
 import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.manager.ConnManager;
 import org.apache.sqoop.manager.postgresql.PostgresqlTestUtil;
 import org.apache.sqoop.testutil.SqlUtil;
 
-import java.sql.SQLException;
-
 public class PostgresDatabaseAdapter implements DatabaseAdapter {
 
-    @Override
-    public SqoopOptions injectConnectionParameters(SqoopOptions options) {
-        options.setUsername(PostgresqlTestUtil.DATABASE_USER);
-        options.setPassword(PostgresqlTestUtil.PASSWORD);
-        return options;
-    }
+  @Override
+  public SqoopOptions injectConnectionParameters(SqoopOptions options) {
+    options.setUsername(PostgresqlTestUtil.DATABASE_USER);
+    options.setPassword(PostgresqlTestUtil.PASSWORD);
+    return options;
+  }
 
-    @Override
-    public void dropTableIfExists(String tableName, ConnManager manager) throws SQLException {
-        String dropTableStatement = PostgresqlTestUtil.getDropTableStatement(tableName, PostgresqlTestUtil.SCHEMA_PUBLIC);
-        SqlUtil.executeStatement(dropTableStatement, manager);
-    }
+  @Override
+  public void dropTableIfExists(String tableName, ConnManager manager)
+      throws SQLException {
+    String dropTableStatement = PostgresqlTestUtil.getDropTableStatement(
+        tableName, PostgresqlTestUtil.SCHEMA_PUBLIC);
+    SqlUtil.executeStatement(dropTableStatement, manager);
+  }
 
-    @Override
-    public String getConnectionString() {
-        return PostgresqlTestUtil.CONNECT_STRING;
-    }
+  @Override
+  public String getConnectionString() {
+    return PostgresqlTestUtil.CONNECT_STRING;
+  }
 
-    @Override
-    public String toString() {
-        return getClass().getSimpleName();
-    }
+  @Override
+  public String toString() {
+    return getClass().getSimpleName();
+  }
 }

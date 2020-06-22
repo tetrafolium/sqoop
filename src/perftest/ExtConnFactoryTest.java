@@ -19,7 +19,6 @@
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
 import org.apache.sqoop.Sqoop;
 import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.manager.ExportJobContext;
@@ -42,51 +41,45 @@ import org.apache.sqoop.util.ImportException;
  *     (normal sqoop arguments)
  */
 public final class ExtConnFactoryTest {
-    private ExtConnFactoryTest() {
+  private ExtConnFactoryTest() {}
+
+  /**
+   * A ConnManager that cannot satisfy any connection requests;
+   * all operations fail with an error message.
+   */
+  public static class FailingManager extends SqlManager {
+
+    public FailingManager(SqoopOptions options) { super(options); }
+
+    @Override
+    public Connection getConnection() throws SQLException {
+      throw new SQLException("This manager cannot create a connection");
     }
 
-    /**
-     * A ConnManager that cannot satisfy any connection requests;
-     * all operations fail with an error message.
-     */
-    public static class FailingManager extends SqlManager {
+    @Override
+    public void importTable(ImportJobContext context) throws ImportException {
+      throw new ImportException("This manager cannot read tables.");
+    }
 
-        public FailingManager(SqoopOptions options) {
-            super(options);
-        }
-
-        @Override
-        public Connection getConnection() throws SQLException {
-            throw new SQLException("This manager cannot create a connection");
-        }
-
-        @Override
-        public void importTable(ImportJobContext context)
-        throws ImportException {
-            throw new ImportException("This manager cannot read tables.");
-        }
-
-        @Override
-        protected ResultSet execute(String stmt, Object... args)
+    @Override
+    protected ResultSet execute(String stmt, Object... args)
         throws SQLException {
-            throw new SQLException("This manager cannot execute SQL statements");
-        }
-
-        @Override
-        public void exportTable(ExportJobContext context) throws ExportException {
-            throw new ExportException("This manager cannot write tables.");
-        }
-
-        @Override
-        public String getDriverClass() {
-            return null;
-        }
+      throw new SQLException("This manager cannot execute SQL statements");
     }
 
-    /**
-     * Run the connection factory test.
-     */
-    public static void main(String [] args) throws Exception {
-        Sqoop.main(args);
+    @Override
+    public void exportTable(ExportJobContext context) throws ExportException {
+      throw new ExportException("This manager cannot write tables.");
     }
+
+    @Override
+    public String getDriverClass() {
+      return null;
+    }
+  }
+
+  /**
+   * Run the connection factory test.
+   */
+  public static void main(String[] args) throws Exception { Sqoop.main(args); }
 }

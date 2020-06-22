@@ -18,38 +18,36 @@
 
 package org.apache.sqoop.manager.postgresql;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.FileInputStream;
-import java.io.File;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.sqoop.testcategories.thirdpartytest.PostgresqlTest;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IOUtils;
+import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.manager.ConnManager;
 import org.apache.sqoop.manager.PostgresqlManager;
-import org.apache.sqoop.SqoopOptions;
+import org.apache.sqoop.testcategories.thirdpartytest.PostgresqlTest;
 import org.apache.sqoop.testutil.CommonArgs;
 import org.apache.sqoop.testutil.ImportJobTestCase;
 import org.apache.sqoop.util.FileListing;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.junit.experimental.categories.Category;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * Test the PostgresqlManager and DirectPostgresqlManager implementations.
@@ -92,352 +90,388 @@ import static org.junit.Assert.fail;
 @Category(PostgresqlTest.class)
 public class PostgresqlImportTest extends ImportJobTestCase {
 
-    public static final Log LOG = LogFactory.getLog(
-                                      PostgresqlImportTest.class.getName());
+  public static final Log LOG =
+      LogFactory.getLog(PostgresqlImportTest.class.getName());
 
-    protected Connection connection;
+  protected Connection connection;
 
-    @Override
-    protected boolean useHsqldbTestServer() {
-        return false;
+  @Override
+  protected boolean useHsqldbTestServer() {
+    return false;
+  }
+
+  @Before
+  public void setUp() {
+    super.setUp();
+
+    LOG.debug("Setting up another postgresql test: " +
+              PostgresqlTestUtil.CONNECT_STRING);
+
+    setUpData(PostgresqlTestUtil.TABLE_NAME, PostgresqlTestUtil.SCHEMA_PUBLIC,
+              false);
+    setUpData(PostgresqlTestUtil.NULL_TABLE_NAME,
+              PostgresqlTestUtil.SCHEMA_PUBLIC, true);
+    setUpData(PostgresqlTestUtil.SPECIAL_TABLE_NAME,
+              PostgresqlTestUtil.SCHEMA_PUBLIC, false);
+    setUpData(PostgresqlTestUtil.DIFFERENT_TABLE_NAME,
+              PostgresqlTestUtil.SCHEMA_SPECIAL, false);
+
+    LOG.debug("setUp complete.");
+  }
+
+  @After
+  public void tearDown() {
+    try {
+      Statement stmt = connection.createStatement();
+      stmt.executeUpdate(PostgresqlTestUtil.getDropTableStatement(
+          PostgresqlTestUtil.TABLE_NAME, PostgresqlTestUtil.SCHEMA_PUBLIC));
+      stmt.executeUpdate(PostgresqlTestUtil.getDropTableStatement(
+          PostgresqlTestUtil.NULL_TABLE_NAME,
+          PostgresqlTestUtil.SCHEMA_PUBLIC));
+      stmt.executeUpdate(PostgresqlTestUtil.getDropTableStatement(
+          PostgresqlTestUtil.SPECIAL_TABLE_NAME,
+          PostgresqlTestUtil.SCHEMA_PUBLIC));
+      stmt.executeUpdate(PostgresqlTestUtil.getDropTableStatement(
+          PostgresqlTestUtil.DIFFERENT_TABLE_NAME,
+          PostgresqlTestUtil.SCHEMA_SPECIAL));
+    } catch (SQLException e) {
+      LOG.error("Can't clean up the database:", e);
     }
 
-    @Before
-    public void setUp() {
-        super.setUp();
+    super.tearDown();
 
-        LOG.debug("Setting up another postgresql test: " + PostgresqlTestUtil.CONNECT_STRING);
-
-        setUpData(PostgresqlTestUtil.TABLE_NAME, PostgresqlTestUtil.SCHEMA_PUBLIC, false);
-        setUpData(PostgresqlTestUtil.NULL_TABLE_NAME, PostgresqlTestUtil.SCHEMA_PUBLIC, true);
-        setUpData(PostgresqlTestUtil.SPECIAL_TABLE_NAME, PostgresqlTestUtil.SCHEMA_PUBLIC, false);
-        setUpData(PostgresqlTestUtil.DIFFERENT_TABLE_NAME, PostgresqlTestUtil.SCHEMA_SPECIAL, false);
-
-        LOG.debug("setUp complete.");
+    try {
+      connection.close();
+    } catch (SQLException e) {
+      LOG.error("Ignoring exception in tearDown", e);
     }
+  }
 
-    @After
-    public void tearDown() {
-        try {
-            Statement stmt = connection.createStatement();
-            stmt.executeUpdate(PostgresqlTestUtil.getDropTableStatement(PostgresqlTestUtil.TABLE_NAME, PostgresqlTestUtil.SCHEMA_PUBLIC));
-            stmt.executeUpdate(PostgresqlTestUtil.getDropTableStatement(PostgresqlTestUtil.NULL_TABLE_NAME, PostgresqlTestUtil.SCHEMA_PUBLIC));
-            stmt.executeUpdate(PostgresqlTestUtil.getDropTableStatement(PostgresqlTestUtil.SPECIAL_TABLE_NAME, PostgresqlTestUtil.SCHEMA_PUBLIC));
-            stmt.executeUpdate(PostgresqlTestUtil.getDropTableStatement(PostgresqlTestUtil.DIFFERENT_TABLE_NAME, PostgresqlTestUtil.SCHEMA_SPECIAL));
-        } catch (SQLException e) {
-            LOG.error("Can't clean up the database:", e);
+  public void setUpData(String tableName, String schema, boolean nullEntry) {
+    SqoopOptions options =
+        new SqoopOptions(PostgresqlTestUtil.CONNECT_STRING, tableName);
+    options.setUsername(PostgresqlTestUtil.DATABASE_USER);
+    options.setPassword(PostgresqlTestUtil.PASSWORD);
+
+    ConnManager manager = null;
+    Statement st = null;
+
+    try {
+      manager = new PostgresqlManager(options);
+      connection = manager.getConnection();
+      connection.setAutoCommit(false);
+      st = connection.createStatement();
+
+      // Create schema if not exists in dummy way (always create and ignore
+      // errors.
+      try {
+        st.executeUpdate("CREATE SCHEMA " + manager.escapeTableName(schema));
+        connection.commit();
+      } catch (SQLException e) {
+        LOG.info("Couldn't create schema " + schema + " (is o.k. as long as"
+                 + "the schema already exists.");
+        connection.rollback();
+      }
+
+      String fullTableName = manager.escapeTableName(schema) + "." +
+                             manager.escapeTableName(tableName);
+      LOG.info("Creating table: " + fullTableName);
+
+      try {
+        // Try to remove the table first. DROP TABLE IF EXISTS didn't
+        // get added until pg 8.3, so we just use "DROP TABLE" and ignore
+        // any exception here if one occurs.
+        st.executeUpdate("DROP TABLE " + fullTableName);
+      } catch (SQLException e) {
+        LOG.info("Couldn't drop table " + schema + "." + tableName + " (ok)");
+        // Now we need to reset the transaction.
+        connection.rollback();
+      }
+
+      st.executeUpdate(
+          "CREATE TABLE " + fullTableName + " (" + manager.escapeColName("id") +
+          " INT NOT NULL PRIMARY KEY, " + manager.escapeColName("name") +
+          " VARCHAR(24) NOT NULL, " + manager.escapeColName("start_date") +
+          " DATE, " + manager.escapeColName("Salary") + " FLOAT, " +
+          manager.escapeColName("Fired") + " BOOL, " +
+          manager.escapeColName("dept") + " VARCHAR(32))");
+
+      st.executeUpdate(
+          "INSERT INTO " + fullTableName +
+          " VALUES(1,'Aaron','2009-05-14',1000000.00,TRUE,'engineering')");
+      st.executeUpdate("INSERT INTO " + fullTableName +
+                       " VALUES(2,'Bob','2009-04-20',400.00,TRUE,'sales')");
+      st.executeUpdate(
+          "INSERT INTO " + fullTableName +
+          " VALUES(3,'Fred','2009-01-23',15.00,FALSE,'marketing')");
+      if (nullEntry) {
+        st.executeUpdate("INSERT INTO " + fullTableName +
+                         " VALUES(4,'Mike',NULL,NULL,NULL,NULL)");
+      }
+      connection.commit();
+    } catch (SQLException sqlE) {
+      LOG.error("Encountered SQL Exception: " + sqlE);
+      sqlE.printStackTrace();
+      fail("SQLException when running test setUp(): " + sqlE);
+    } finally {
+      try {
+        if (null != st) {
+          st.close();
         }
 
-        super.tearDown();
-
-        try {
-            connection.close();
-        } catch (SQLException e) {
-            LOG.error("Ignoring exception in tearDown", e);
+        if (null != manager) {
+          manager.close();
         }
+      } catch (SQLException sqlE) {
+        LOG.warn("Got SQLException when closing connection: " + sqlE);
+      }
     }
 
+    LOG.debug("setUp complete.");
+  }
 
+  private String[] getArgv(boolean isDirect, String tableName,
+                           String... extraArgs) {
+    ArrayList<String> args = new ArrayList<String>();
 
-    public void setUpData(String tableName, String schema, boolean nullEntry) {
-        SqoopOptions options = new SqoopOptions(PostgresqlTestUtil.CONNECT_STRING, tableName);
-        options.setUsername(PostgresqlTestUtil.DATABASE_USER);
-        options.setPassword(PostgresqlTestUtil.PASSWORD);
+    CommonArgs.addHadoopFlags(args);
 
-        ConnManager manager = null;
-        Statement st = null;
+    args.add("--table");
+    args.add(tableName);
+    args.add("--warehouse-dir");
+    args.add(getWarehouseDir());
+    args.add("--connect");
+    args.add(PostgresqlTestUtil.CONNECT_STRING);
+    args.add("--username");
+    args.add(PostgresqlTestUtil.DATABASE_USER);
+    args.add("--password");
+    args.add(PostgresqlTestUtil.PASSWORD);
+    args.add("--where");
+    args.add("id > 1");
+    args.add("-m");
+    args.add("1");
 
-        try {
-            manager = new PostgresqlManager(options);
-            connection = manager.getConnection();
-            connection.setAutoCommit(false);
-            st = connection.createStatement();
-
-            // Create schema if not exists in dummy way (always create and ignore
-            // errors.
-            try {
-                st.executeUpdate("CREATE SCHEMA " + manager.escapeTableName(schema));
-                connection.commit();
-            } catch (SQLException e) {
-                LOG.info("Couldn't create schema " + schema + " (is o.k. as long as"
-                         + "the schema already exists.");
-                connection.rollback();
-            }
-
-            String fullTableName = manager.escapeTableName(schema)
-                                   + "." + manager.escapeTableName(tableName);
-            LOG.info("Creating table: " + fullTableName);
-
-            try {
-                // Try to remove the table first. DROP TABLE IF EXISTS didn't
-                // get added until pg 8.3, so we just use "DROP TABLE" and ignore
-                // any exception here if one occurs.
-                st.executeUpdate("DROP TABLE " + fullTableName);
-            } catch (SQLException e) {
-                LOG.info("Couldn't drop table " + schema + "." + tableName + " (ok)");
-                // Now we need to reset the transaction.
-                connection.rollback();
-            }
-
-            st.executeUpdate("CREATE TABLE " + fullTableName + " ("
-                             + manager.escapeColName("id") + " INT NOT NULL PRIMARY KEY, "
-                             + manager.escapeColName("name") + " VARCHAR(24) NOT NULL, "
-                             + manager.escapeColName("start_date") + " DATE, "
-                             + manager.escapeColName("Salary") + " FLOAT, "
-                             + manager.escapeColName("Fired") + " BOOL, "
-                             + manager.escapeColName("dept") + " VARCHAR(32))");
-
-            st.executeUpdate("INSERT INTO " + fullTableName
-                             + " VALUES(1,'Aaron','2009-05-14',1000000.00,TRUE,'engineering')");
-            st.executeUpdate("INSERT INTO " + fullTableName
-                             + " VALUES(2,'Bob','2009-04-20',400.00,TRUE,'sales')");
-            st.executeUpdate("INSERT INTO " + fullTableName
-                             + " VALUES(3,'Fred','2009-01-23',15.00,FALSE,'marketing')");
-            if (nullEntry) {
-                st.executeUpdate("INSERT INTO " + fullTableName
-                                 + " VALUES(4,'Mike',NULL,NULL,NULL,NULL)");
-
-            }
-            connection.commit();
-        } catch (SQLException sqlE) {
-            LOG.error("Encountered SQL Exception: " + sqlE);
-            sqlE.printStackTrace();
-            fail("SQLException when running test setUp(): " + sqlE);
-        } finally {
-            try {
-                if (null != st) {
-                    st.close();
-                }
-
-                if (null != manager) {
-                    manager.close();
-                }
-            } catch (SQLException sqlE) {
-                LOG.warn("Got SQLException when closing connection: " + sqlE);
-            }
-        }
-
-        LOG.debug("setUp complete.");
+    if (isDirect) {
+      args.add("--direct");
     }
 
-
-    private String [] getArgv(boolean isDirect, String tableName,
-                              String... extraArgs) {
-        ArrayList<String> args = new ArrayList<String>();
-
-        CommonArgs.addHadoopFlags(args);
-
-        args.add("--table");
-        args.add(tableName);
-        args.add("--warehouse-dir");
-        args.add(getWarehouseDir());
-        args.add("--connect");
-        args.add(PostgresqlTestUtil.CONNECT_STRING);
-        args.add("--username");
-        args.add(PostgresqlTestUtil.DATABASE_USER);
-        args.add("--password");
-        args.add(PostgresqlTestUtil.PASSWORD);
-        args.add("--where");
-        args.add("id > 1");
-        args.add("-m");
-        args.add("1");
-
-        if (isDirect) {
-            args.add("--direct");
-        }
-
-        for (String arg : extraArgs) {
-            args.add(arg);
-        }
-
-        return args.toArray(new String[0]);
+    for (String arg : extraArgs) {
+      args.add(arg);
     }
 
-    private void doImportAndVerify(boolean isDirect, String[] expectedResults,
-                                   String tableName, String... extraArgs) throws IOException {
+    return args.toArray(new String[0]);
+  }
 
-        Path warehousePath = new Path(this.getWarehouseDir());
-        Path tablePath = new Path(warehousePath, tableName);
+  private void doImportAndVerify(boolean isDirect, String[] expectedResults,
+                                 String tableName, String... extraArgs)
+      throws IOException {
 
-        // if importing with merge step, directory should exist and output should be from a reducer
-        boolean isMerge = Arrays.asList(extraArgs).contains("--merge-key");
-        Path filePath = new Path(tablePath, isMerge ? "part-r-00000" : "part-m-00000");
+    Path warehousePath = new Path(this.getWarehouseDir());
+    Path tablePath = new Path(warehousePath, tableName);
 
-        File tableFile = new File(tablePath.toString());
-        if (tableFile.exists() && tableFile.isDirectory() && !isMerge) {
-            // remove the directory before running the import.
-            FileListing.recursiveDeleteDir(tableFile);
-        }
+    // if importing with merge step, directory should exist and output should be
+    // from a reducer
+    boolean isMerge = Arrays.asList(extraArgs).contains("--merge-key");
+    Path filePath =
+        new Path(tablePath, isMerge ? "part-r-00000" : "part-m-00000");
 
-        String [] argv = getArgv(isDirect, tableName, extraArgs);
-        try {
-            runImport(argv);
-        } catch (IOException ioe) {
-            LOG.error("Got IOException during import: " + ioe.toString());
-            ioe.printStackTrace();
-            fail(ioe.toString());
-        }
-
-        File f = new File(filePath.toString());
-        assertTrue("Could not find imported data file, " + f, f.exists());
-        BufferedReader r = null;
-        try {
-            // Read through the file and make sure it's all there.
-            r = new BufferedReader(new InputStreamReader(new FileInputStream(f)));
-            for (String expectedLine : expectedResults) {
-                assertEquals(expectedLine, r.readLine());
-            }
-        } catch (IOException ioe) {
-            LOG.error("Got IOException verifying results: " + ioe.toString());
-            ioe.printStackTrace();
-            fail(ioe.toString());
-        } finally {
-            IOUtils.closeStream(r);
-        }
+    File tableFile = new File(tablePath.toString());
+    if (tableFile.exists() && tableFile.isDirectory() && !isMerge) {
+      // remove the directory before running the import.
+      FileListing.recursiveDeleteDir(tableFile);
     }
 
-    @Test
-    public void testJdbcBasedImport() throws IOException {
-        String [] expectedResults = {
-            "2,Bob,2009-04-20,400.0,true,sales",
-            "3,Fred,2009-01-23,15.0,false,marketing",
-        };
-
-        doImportAndVerify(false, expectedResults, PostgresqlTestUtil.TABLE_NAME);
+    String[] argv = getArgv(isDirect, tableName, extraArgs);
+    try {
+      runImport(argv);
+    } catch (IOException ioe) {
+      LOG.error("Got IOException during import: " + ioe.toString());
+      ioe.printStackTrace();
+      fail(ioe.toString());
     }
 
-    @Test
-    public void testDirectImport() throws IOException {
-        String [] expectedResults = {
-            "2,Bob,2009-04-20,400,TRUE,sales",
-            "3,Fred,2009-01-23,15,FALSE,marketing",
-        };
-
-        doImportAndVerify(true, expectedResults, PostgresqlTestUtil.TABLE_NAME);
+    File f = new File(filePath.toString());
+    assertTrue("Could not find imported data file, " + f, f.exists());
+    BufferedReader r = null;
+    try {
+      // Read through the file and make sure it's all there.
+      r = new BufferedReader(new InputStreamReader(new FileInputStream(f)));
+      for (String expectedLine : expectedResults) {
+        assertEquals(expectedLine, r.readLine());
+      }
+    } catch (IOException ioe) {
+      LOG.error("Got IOException verifying results: " + ioe.toString());
+      ioe.printStackTrace();
+      fail(ioe.toString());
+    } finally {
+      IOUtils.closeStream(r);
     }
+  }
 
-    @Test
-    public void testListTables() throws IOException {
-        SqoopOptions options = new SqoopOptions(new Configuration());
-        options.setConnectString(PostgresqlTestUtil.CONNECT_STRING);
-        options.setUsername(PostgresqlTestUtil.DATABASE_USER);
-        options.setPassword(PostgresqlTestUtil.PASSWORD);
+  @Test
+  public void testJdbcBasedImport() throws IOException {
+    String[] expectedResults = {
+        "2,Bob,2009-04-20,400.0,true,sales",
+        "3,Fred,2009-01-23,15.0,false,marketing",
+    };
 
-        ConnManager mgr = new PostgresqlManager(options);
-        String[] tables = mgr.listTables();
-        Arrays.sort(tables);
-        assertTrue(PostgresqlTestUtil.TABLE_NAME + " is not found!",
-                   Arrays.binarySearch(tables, PostgresqlTestUtil.TABLE_NAME) >= 0);
-    }
+    doImportAndVerify(false, expectedResults, PostgresqlTestUtil.TABLE_NAME);
+  }
 
-    @Test
-    public void testTableNameWithSpecialCharacter() throws IOException {
-        String [] expectedResults = {
-            "2,Bob,2009-04-20,400.0,true,sales",
-            "3,Fred,2009-01-23,15.0,false,marketing",
-        };
+  @Test
+  public void testDirectImport() throws IOException {
+    String[] expectedResults = {
+        "2,Bob,2009-04-20,400,TRUE,sales",
+        "3,Fred,2009-01-23,15,FALSE,marketing",
+    };
 
-        doImportAndVerify(false, expectedResults, PostgresqlTestUtil.SPECIAL_TABLE_NAME);
-    }
+    doImportAndVerify(true, expectedResults, PostgresqlTestUtil.TABLE_NAME);
+  }
 
-    @Test
-    public void testIncrementalImport() throws IOException {
-        String [] expectedResults = { };
+  @Test
+  public void testListTables() throws IOException {
+    SqoopOptions options = new SqoopOptions(new Configuration());
+    options.setConnectString(PostgresqlTestUtil.CONNECT_STRING);
+    options.setUsername(PostgresqlTestUtil.DATABASE_USER);
+    options.setPassword(PostgresqlTestUtil.PASSWORD);
 
-        String [] extraArgs = { "--incremental", "lastmodified",
-                                "--check-column", "start_date",
-                              };
+    ConnManager mgr = new PostgresqlManager(options);
+    String[] tables = mgr.listTables();
+    Arrays.sort(tables);
+    assertTrue(PostgresqlTestUtil.TABLE_NAME + " is not found!",
+               Arrays.binarySearch(tables, PostgresqlTestUtil.TABLE_NAME) >= 0);
+  }
 
-        doImportAndVerify(false, expectedResults, PostgresqlTestUtil.TABLE_NAME, extraArgs);
-    }
+  @Test
+  public void testTableNameWithSpecialCharacter() throws IOException {
+    String[] expectedResults = {
+        "2,Bob,2009-04-20,400.0,true,sales",
+        "3,Fred,2009-01-23,15.0,false,marketing",
+    };
 
-    @Test
-    public void testDirectIncrementalImport() throws IOException {
-        String [] expectedResults = { };
+    doImportAndVerify(false, expectedResults,
+                      PostgresqlTestUtil.SPECIAL_TABLE_NAME);
+  }
 
-        String [] extraArgs = { "--incremental", "lastmodified",
-                                "--check-column", "start_date",
-                              };
+  @Test
+  public void testIncrementalImport() throws IOException {
+    String[] expectedResults = {};
 
-        doImportAndVerify(true, expectedResults, PostgresqlTestUtil.TABLE_NAME, extraArgs);
-    }
+    String[] extraArgs = {
+        "--incremental",
+        "lastmodified",
+        "--check-column",
+        "start_date",
+    };
 
-    @Test
-    public void testDirectIncrementalImportMerge() throws IOException {
-        String [] expectedResults = { };
+    doImportAndVerify(false, expectedResults, PostgresqlTestUtil.TABLE_NAME,
+                      extraArgs);
+  }
 
-        String [] extraArgs = { "--incremental", "lastmodified",
-                                "--check-column", "start_date",
-                              };
+  @Test
+  public void testDirectIncrementalImport() throws IOException {
+    String[] expectedResults = {};
 
-        doImportAndVerify(true, expectedResults, PostgresqlTestUtil.TABLE_NAME, extraArgs);
+    String[] extraArgs = {
+        "--incremental",
+        "lastmodified",
+        "--check-column",
+        "start_date",
+    };
 
-        extraArgs = new String[] { "--incremental", "lastmodified",
-                                   "--check-column", "start_date",
-                                   "--merge-key", "id",
-                                   "--last-value", "2009-04-20"
-                                 };
+    doImportAndVerify(true, expectedResults, PostgresqlTestUtil.TABLE_NAME,
+                      extraArgs);
+  }
 
-        doImportAndVerify(true, expectedResults, PostgresqlTestUtil.TABLE_NAME, extraArgs);
-    }
+  @Test
+  public void testDirectIncrementalImportMerge() throws IOException {
+    String[] expectedResults = {};
 
-    @Test
-    public void testDifferentSchemaImport() throws IOException {
-        String [] expectedResults = {
-            "2,Bob,2009-04-20,400.0,true,sales",
-            "3,Fred,2009-01-23,15.0,false,marketing",
-        };
+    String[] extraArgs = {
+        "--incremental",
+        "lastmodified",
+        "--check-column",
+        "start_date",
+    };
 
-        String [] extraArgs = { "--",
-                                "--schema", PostgresqlTestUtil.SCHEMA_SPECIAL,
-                              };
+    doImportAndVerify(true, expectedResults, PostgresqlTestUtil.TABLE_NAME,
+                      extraArgs);
 
-        doImportAndVerify(false, expectedResults, PostgresqlTestUtil.DIFFERENT_TABLE_NAME, extraArgs);
-    }
+    extraArgs = new String[] {"--incremental", "lastmodified", "--check-column",
+                              "start_date",    "--merge-key",  "id",
+                              "--last-value",  "2009-04-20"};
 
-    @Test
-    public void testDifferentSchemaImportDirect() throws IOException {
-        String [] expectedResults = {
-            "2,Bob,2009-04-20,400,TRUE,sales",
-            "3,Fred,2009-01-23,15,FALSE,marketing",
-        };
+    doImportAndVerify(true, expectedResults, PostgresqlTestUtil.TABLE_NAME,
+                      extraArgs);
+  }
 
-        String [] extraArgs = { "--",
-                                "--schema", PostgresqlTestUtil.SCHEMA_SPECIAL,
-                              };
+  @Test
+  public void testDifferentSchemaImport() throws IOException {
+    String[] expectedResults = {
+        "2,Bob,2009-04-20,400.0,true,sales",
+        "3,Fred,2009-01-23,15.0,false,marketing",
+    };
 
-        doImportAndVerify(true, expectedResults, PostgresqlTestUtil.DIFFERENT_TABLE_NAME, extraArgs);
-    }
+    String[] extraArgs = {
+        "--",
+        "--schema",
+        PostgresqlTestUtil.SCHEMA_SPECIAL,
+    };
 
-    @Test
-    public void testNullEscapeCharacters() throws Exception {
-        String [] expectedResults = {
-            "2,Bob,2009-04-20,400,TRUE,sales",
-            "3,Fred,2009-01-23,15,FALSE,marketing",
-            "4,Mike,\\N,\\N,\\N,\\N",
-        };
+    doImportAndVerify(false, expectedResults,
+                      PostgresqlTestUtil.DIFFERENT_TABLE_NAME, extraArgs);
+  }
 
-        String [] extraArgs = {
-            "--null-string", "\\\\\\\\N",
-            "--null-non-string", "\\\\\\\\N",
-        };
+  @Test
+  public void testDifferentSchemaImportDirect() throws IOException {
+    String[] expectedResults = {
+        "2,Bob,2009-04-20,400,TRUE,sales",
+        "3,Fred,2009-01-23,15,FALSE,marketing",
+    };
 
-        doImportAndVerify(true, expectedResults, PostgresqlTestUtil.NULL_TABLE_NAME, extraArgs);
-    }
+    String[] extraArgs = {
+        "--",
+        "--schema",
+        PostgresqlTestUtil.SCHEMA_SPECIAL,
+    };
 
-    @Test
-    public void testDifferentBooleanValues() throws Exception {
-        String [] expectedResults = {
-            "2,Bob,2009-04-20,400,REAL_TRUE,sales",
-            "3,Fred,2009-01-23,15,REAL_FALSE,marketing",
-        };
+    doImportAndVerify(true, expectedResults,
+                      PostgresqlTestUtil.DIFFERENT_TABLE_NAME, extraArgs);
+  }
 
-        String [] extraArgs = {
-            "--",
-            "--boolean-true-string", "REAL_TRUE",
-            "--boolean-false-string", "REAL_FALSE",
-        };
+  @Test
+  public void testNullEscapeCharacters() throws Exception {
+    String[] expectedResults = {
+        "2,Bob,2009-04-20,400,TRUE,sales",
+        "3,Fred,2009-01-23,15,FALSE,marketing",
+        "4,Mike,\\N,\\N,\\N,\\N",
+    };
 
-        doImportAndVerify(true, expectedResults, PostgresqlTestUtil.TABLE_NAME, extraArgs);
-    }
+    String[] extraArgs = {
+        "--null-string",
+        "\\\\\\\\N",
+        "--null-non-string",
+        "\\\\\\\\N",
+    };
+
+    doImportAndVerify(true, expectedResults, PostgresqlTestUtil.NULL_TABLE_NAME,
+                      extraArgs);
+  }
+
+  @Test
+  public void testDifferentBooleanValues() throws Exception {
+    String[] expectedResults = {
+        "2,Bob,2009-04-20,400,REAL_TRUE,sales",
+        "3,Fred,2009-01-23,15,REAL_FALSE,marketing",
+    };
+
+    String[] extraArgs = {
+        "--",         "--boolean-true-string",
+        "REAL_TRUE",  "--boolean-false-string",
+        "REAL_FALSE",
+    };
+
+    doImportAndVerify(true, expectedResults, PostgresqlTestUtil.TABLE_NAME,
+                      extraArgs);
+  }
 }

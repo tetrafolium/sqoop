@@ -20,6 +20,7 @@ package org.apache.sqoop.cloud;
 
 import static org.apache.sqoop.util.AppendUtils.MAPREDUCE_OUTPUT_BASENAME_PROPERTY;
 
+import java.io.IOException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.sqoop.cloud.tools.CloudCredentialsRule;
@@ -29,70 +30,87 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import java.io.IOException;
+public abstract class AbstractTestIncrementalAppendTextImport
+    extends CloudImportJobTestCase {
 
-public abstract class AbstractTestIncrementalAppendTextImport extends CloudImportJobTestCase {
+  public static final Log LOG = LogFactory.getLog(
+      AbstractTestIncrementalAppendTextImport.class.getName());
 
-    public static final Log LOG = LogFactory.getLog(AbstractTestIncrementalAppendTextImport.class.getName());
+  @Rule public ExpectedException thrown = ExpectedException.none();
 
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
+  protected AbstractTestIncrementalAppendTextImport(
+      CloudCredentialsRule credentialsRule) {
+    super(credentialsRule);
+  }
 
-    protected AbstractTestIncrementalAppendTextImport(CloudCredentialsRule credentialsRule) {
-        super(credentialsRule);
+  @Test
+  public void testIncrementalAppendAsTextFileWhenNoNewRowIsImported()
+      throws IOException {
+    String[] args = getArgs(false);
+    runImport(args);
+
+    args = getIncrementalAppendArgs(false);
+    runImport(args);
+
+    failIfOutputFilePathContainingPatternExists(
+        fileSystemRule.getCloudFileSystem(), fileSystemRule.getTargetDirPath(),
+        MAP_OUTPUT_FILE_00001);
+  }
+
+  @Test
+  public void testIncrementalAppendAsTextFile() throws IOException {
+    String[] args = getArgs(false);
+    runImport(args);
+
+    insertInputDataIntoTable(getDataSet().getExtraInputData());
+
+    args = getIncrementalAppendArgs(false);
+    runImport(args);
+
+    TextFileTestUtils.verify(getDataSet().getExpectedExtraTextOutput(),
+                             fileSystemRule.getCloudFileSystem(),
+                             fileSystemRule.getTargetDirPath(),
+                             MAP_OUTPUT_FILE_00001);
+  }
+
+  @Test
+  public void
+  testIncrementalAppendAsTextFileWithMapreduceOutputBasenameProperty()
+      throws IOException {
+    String[] args = getArgs(true);
+    runImport(args);
+
+    insertInputDataIntoTable(getDataSet().getExtraInputData());
+
+    args = getIncrementalAppendArgs(true);
+    runImport(args);
+
+    TextFileTestUtils.verify(getDataSet().getExpectedExtraTextOutput(),
+                             fileSystemRule.getCloudFileSystem(),
+                             fileSystemRule.getTargetDirPath(),
+                             CUSTOM_MAP_OUTPUT_FILE_00001);
+  }
+
+  private String[] getArgs(boolean withMapreduceOutputBasenameProperty) {
+    ArgumentArrayBuilder builder = getArgumentArrayBuilderForUnitTests(
+        fileSystemRule.getTargetDirPath().toString());
+    if (withMapreduceOutputBasenameProperty) {
+      builder.withProperty(MAPREDUCE_OUTPUT_BASENAME_PROPERTY,
+                           MAPREDUCE_OUTPUT_BASENAME);
     }
+    return builder.build();
+  }
 
-    @Test
-    public void testIncrementalAppendAsTextFileWhenNoNewRowIsImported() throws IOException {
-        String[] args = getArgs(false);
-        runImport(args);
-
-        args = getIncrementalAppendArgs(false);
-        runImport(args);
-
-        failIfOutputFilePathContainingPatternExists(fileSystemRule.getCloudFileSystem(), fileSystemRule.getTargetDirPath(), MAP_OUTPUT_FILE_00001);
+  private String[] getIncrementalAppendArgs(
+      boolean withMapreduceOutputBasenameProperty) {
+    ArgumentArrayBuilder builder = getArgumentArrayBuilderForUnitTests(
+        fileSystemRule.getTargetDirPath().toString());
+    builder = addIncrementalAppendImportArgs(
+        builder, fileSystemRule.getTemporaryRootDirPath().toString());
+    if (withMapreduceOutputBasenameProperty) {
+      builder.withProperty(MAPREDUCE_OUTPUT_BASENAME_PROPERTY,
+                           MAPREDUCE_OUTPUT_BASENAME);
     }
-
-    @Test
-    public void testIncrementalAppendAsTextFile() throws IOException {
-        String[] args = getArgs(false);
-        runImport(args);
-
-        insertInputDataIntoTable(getDataSet().getExtraInputData());
-
-        args = getIncrementalAppendArgs(false);
-        runImport(args);
-
-        TextFileTestUtils.verify(getDataSet().getExpectedExtraTextOutput(), fileSystemRule.getCloudFileSystem(), fileSystemRule.getTargetDirPath(), MAP_OUTPUT_FILE_00001);
-    }
-
-    @Test
-    public void testIncrementalAppendAsTextFileWithMapreduceOutputBasenameProperty() throws IOException {
-        String[] args = getArgs(true);
-        runImport(args);
-
-        insertInputDataIntoTable(getDataSet().getExtraInputData());
-
-        args = getIncrementalAppendArgs(true);
-        runImport(args);
-
-        TextFileTestUtils.verify(getDataSet().getExpectedExtraTextOutput(), fileSystemRule.getCloudFileSystem(), fileSystemRule.getTargetDirPath(), CUSTOM_MAP_OUTPUT_FILE_00001);
-    }
-
-    private String[] getArgs(boolean withMapreduceOutputBasenameProperty) {
-        ArgumentArrayBuilder builder = getArgumentArrayBuilderForUnitTests(fileSystemRule.getTargetDirPath().toString());
-        if (withMapreduceOutputBasenameProperty) {
-            builder.withProperty(MAPREDUCE_OUTPUT_BASENAME_PROPERTY, MAPREDUCE_OUTPUT_BASENAME);
-        }
-        return builder.build();
-    }
-
-    private String[] getIncrementalAppendArgs(boolean withMapreduceOutputBasenameProperty) {
-        ArgumentArrayBuilder builder = getArgumentArrayBuilderForUnitTests(fileSystemRule.getTargetDirPath().toString());
-        builder = addIncrementalAppendImportArgs(builder, fileSystemRule.getTemporaryRootDirPath().toString());
-        if (withMapreduceOutputBasenameProperty) {
-            builder.withProperty(MAPREDUCE_OUTPUT_BASENAME_PROPERTY, MAPREDUCE_OUTPUT_BASENAME);
-        }
-        return builder.build();
-    }
+    return builder.build();
+  }
 }

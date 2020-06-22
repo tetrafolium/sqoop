@@ -35,7 +35,8 @@ import org.junit.experimental.categories.Category;
  *
  * You need to put Oracle JDBC driver library (ojdbc6.jar) in a location
  * where Sqoop will be able to access it (since this library cannot be checked
- * into Apache's tree for licensing reasons) and set it's path through -Dsqoop.thirdparty.lib.dir.
+ * into Apache's tree for licensing reasons) and set it's path through
+ * -Dsqoop.thirdparty.lib.dir.
  *
  *   Once you have a running Oracle database,
  *   Set server URL, username, and password with system variables
@@ -45,9 +46,8 @@ import org.junit.experimental.categories.Category;
 @Category(OracleTest.class)
 public class OracleJobToolTest extends JobToolTestBase {
 
-    public OracleJobToolTest() {
-        super(OracleUtils.CONNECT_STRING,
-              OracleUtils.ORACLE_USER_NAME,
-              OracleUtils.ORACLE_USER_PASS);
-    }
+  public OracleJobToolTest() {
+    super(OracleUtils.CONNECT_STRING, OracleUtils.ORACLE_USER_NAME,
+          OracleUtils.ORACLE_USER_PASS);
+  }
 }

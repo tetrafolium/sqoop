@@ -26,11 +26,8 @@ import org.junit.experimental.categories.Category;
 @Category(S3Test.class)
 public class TestS3AvroImport extends AbstractTestAvroImport {
 
-    @ClassRule
-    public static S3CredentialsRule credentialsRule = new S3CredentialsRule();
+  @ClassRule
+  public static S3CredentialsRule credentialsRule = new S3CredentialsRule();
 
-    public TestS3AvroImport() {
-        super(credentialsRule);
-    }
-
+  public TestS3AvroImport() { super(credentialsRule); }
 }

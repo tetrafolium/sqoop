@@ -19,12 +19,10 @@ package org.apache.sqoop.mapreduce.cubrid;
 
 import java.io.IOException;
 import java.sql.SQLException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
-
 import org.apache.sqoop.lib.SqoopRecord;
 import org.apache.sqoop.mapreduce.UpdateOutputFormat;
 
@@ -33,78 +31,78 @@ import org.apache.sqoop.mapreduce.UpdateOutputFormat;
  * clause INSERT INTO ... ON DUPLICATE KEY UPDATE, for more info please see
  * official CUBRID documentation.
  */
-public class CubridUpsertOutputFormat<K extends SqoopRecord, V> extends
-    UpdateOutputFormat<K, V> {
+public class CubridUpsertOutputFormat<K extends SqoopRecord, V>
+    extends UpdateOutputFormat<K, V> {
 
-    private final Log log = LogFactory.getLog(getClass());
+  private final Log log = LogFactory.getLog(getClass());
 
-    @Override
-    /** {@inheritDoc} */
-    public RecordWriter<K, V> getRecordWriter(TaskAttemptContext context)
-    throws IOException {
-        try {
-            return new CubridUpsertRecordWriter(context);
-        } catch (Exception e) {
-            throw new IOException(e);
-        }
+  @Override
+  /** {@inheritDoc} */
+  public RecordWriter<K, V> getRecordWriter(TaskAttemptContext context)
+      throws IOException {
+    try {
+      return new CubridUpsertRecordWriter(context);
+    } catch (Exception e) {
+      throw new IOException(e);
+    }
+  }
+
+  /**
+   * RecordWriter to write the output to UPDATE/INSERT statements.
+   */
+  public class CubridUpsertRecordWriter extends UpdateRecordWriter {
+
+    public CubridUpsertRecordWriter(TaskAttemptContext context)
+        throws ClassNotFoundException, SQLException {
+      super(context);
     }
 
     /**
-     * RecordWriter to write the output to UPDATE/INSERT statements.
+     * {@inheritDoc}
      */
-    public class CubridUpsertRecordWriter extends UpdateRecordWriter {
-
-        public CubridUpsertRecordWriter(TaskAttemptContext context)
-        throws ClassNotFoundException, SQLException {
-            super(context);
+    @Override
+    protected String getUpdateStatement() {
+      boolean first;
+      StringBuilder sb = new StringBuilder();
+      sb.append("INSERT INTO ");
+      sb.append(tableName);
+      sb.append("(");
+      first = true;
+      for (String column : columnNames) {
+        if (first) {
+          first = false;
+        } else {
+          sb.append(", ");
         }
+        sb.append(column);
+      }
 
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        protected String getUpdateStatement() {
-            boolean first;
-            StringBuilder sb = new StringBuilder();
-            sb.append("INSERT INTO ");
-            sb.append(tableName);
-            sb.append("(");
-            first = true;
-            for (String column : columnNames) {
-                if (first) {
-                    first = false;
-                } else {
-                    sb.append(", ");
-                }
-                sb.append(column);
-            }
-
-            sb.append(") VALUES(");
-            first = true;
-            for (int i = 0; i < columnNames.length; i++) {
-                if (first) {
-                    first = false;
-                } else {
-                    sb.append(", ");
-                }
-                sb.append("?");
-            }
-
-            sb.append(") ON DUPLICATE KEY UPDATE ");
-
-            first = true;
-            for (String column : columnNames) {
-                if (first) {
-                    first = false;
-                } else {
-                    sb.append(", ");
-                }
-                sb.append(column).append("=").append(column);
-            }
-
-            String query = sb.toString();
-            log.debug("Using upsert query: " + query);
-            return query;
+      sb.append(") VALUES(");
+      first = true;
+      for (int i = 0; i < columnNames.length; i++) {
+        if (first) {
+          first = false;
+        } else {
+          sb.append(", ");
         }
+        sb.append("?");
+      }
+
+      sb.append(") ON DUPLICATE KEY UPDATE ");
+
+      first = true;
+      for (String column : columnNames) {
+        if (first) {
+          first = false;
+        } else {
+          sb.append(", ");
+        }
+        sb.append(column).append("=").append(column);
+      }
+
+      String query = sb.toString();
+      log.debug("Using upsert query: " + query);
+      return query;
     }
+  }
 }

@@ -19,47 +19,36 @@
 package org.apache.sqoop.manager;
 
 import java.io.IOException;
-import org.apache.sqoop.SqoopOptions;
-import org.apache.sqoop.util.ExportException;
-import org.apache.hadoop.mapreduce.lib.output.NullOutputFormat;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.mapreduce.lib.output.NullOutputFormat;
+import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.mapreduce.ExportInputFormat;
 import org.apache.sqoop.mapreduce.postgresql.PGBulkloadExportJob;
-
-
+import org.apache.sqoop.util.ExportException;
 
 /**
  * Manages connections to Postgresql databases.
  */
 public class PGBulkloadManager extends PostgresqlManager {
 
-    public static final Log LOG =
-        LogFactory.getLog(PGBulkloadManager.class.getName());
+  public static final Log LOG =
+      LogFactory.getLog(PGBulkloadManager.class.getName());
 
+  public PGBulkloadManager(final SqoopOptions opts) { super(opts); }
 
-    public PGBulkloadManager(final SqoopOptions opts) {
-        super(opts);
-    }
+  @Override
+  public void exportTable(ExportJobContext context)
+      throws IOException, ExportException {
+    context.setConnManager(this);
+    options.setStagingTableName(null);
+    PGBulkloadExportJob jobbase = new PGBulkloadExportJob(
+        context, null, ExportInputFormat.class, NullOutputFormat.class);
+    jobbase.runExport();
+  }
 
-
-    @Override
-    public void exportTable(ExportJobContext context)
-    throws IOException, ExportException {
-        context.setConnManager(this);
-        options.setStagingTableName(null);
-        PGBulkloadExportJob jobbase =
-            new PGBulkloadExportJob(context,
-                                    null,
-                                    ExportInputFormat.class,
-                                    NullOutputFormat.class);
-        jobbase.runExport();
-    }
-
-
-    @Override
-    public boolean supportsStagingForExport() {
-        return false;
-    }
-
+  @Override
+  public boolean supportsStagingForExport() {
+    return false;
+  }
 }

@@ -30,81 +30,81 @@ import org.apache.sqoop.lib.SqoopRecord;
 public class OracleExportOutputFormat<K extends SqoopRecord, V>
     extends ExportOutputFormat<K, V> {
 
-    @Override
-    /** {@inheritDoc} */
-    public RecordWriter<K, V> getRecordWriter(TaskAttemptContext context)
-    throws IOException {
-        try {
-            return new OracleExportRecordWriter<K, V>(context);
-        } catch (Exception e) {
-            throw new IOException(e);
-        }
+  @Override
+  /** {@inheritDoc} */
+  public RecordWriter<K, V> getRecordWriter(TaskAttemptContext context)
+      throws IOException {
+    try {
+      return new OracleExportRecordWriter<K, V>(context);
+    } catch (Exception e) {
+      throw new IOException(e);
     }
+  }
 
-    /**
-     * RecordWriter to write the output to a row in a database table.
-     * The actual database updates are executed in a second thread.
-     */
-    public class OracleExportRecordWriter<K extends SqoopRecord, V>
-        extends ExportRecordWriter {
+  /**
+   * RecordWriter to write the output to a row in a database table.
+   * The actual database updates are executed in a second thread.
+   */
+  public class OracleExportRecordWriter<K extends SqoopRecord, V>
+      extends ExportRecordWriter {
 
-        public OracleExportRecordWriter(TaskAttemptContext context)
+    public OracleExportRecordWriter(TaskAttemptContext context)
         throws ClassNotFoundException, SQLException {
-            super(context);
-        }
-
-        @Override
-        /**
-         * @return an INSERT statement suitable for inserting 'numRows' rows.
-         */
-        protected String getInsertStatement(int numRows) {
-            StringBuilder sb = new StringBuilder();
-
-            sb.append("INSERT INTO " + getTableName() + " ");
-
-            int numSlots;
-            String [] colNames = getColumnNames();
-            if (colNames != null) {
-                numSlots = colNames.length;
-
-                sb.append("(");
-                boolean first = true;
-                for (String col : colNames) {
-                    if (!first) {
-                        sb.append(", ");
-                    }
-
-                    sb.append(col);
-                    first = false;
-                }
-
-                sb.append(") ");
-            } else {
-                numSlots = getColumnCount(); // set if columnNames is null.
-            }
-
-            // generates the (?, ?, ?...) used for each row.
-            StringBuilder sbRow = new StringBuilder();
-            sbRow.append("SELECT ");
-            for (int i = 0; i < numSlots; i++) {
-                if (i != 0) {
-                    sbRow.append(", ");
-                }
-
-                sbRow.append("?");
-            }
-            sbRow.append(" FROM DUAL ");
-
-            // Now append that numRows times.
-            for (int i = 0; i < numRows; i++) {
-                if (i != 0) {
-                    sb.append("UNION ALL ");
-                }
-
-                sb.append(sbRow);
-            }
-
-            return sb.toString();
-        }
+      super(context);
     }
+
+    @Override
+    /**
+     * @return an INSERT statement suitable for inserting 'numRows' rows.
+     */
+    protected String getInsertStatement(int numRows) {
+      StringBuilder sb = new StringBuilder();
+
+      sb.append("INSERT INTO " + getTableName() + " ");
+
+      int numSlots;
+      String[] colNames = getColumnNames();
+      if (colNames != null) {
+        numSlots = colNames.length;
+
+        sb.append("(");
+        boolean first = true;
+        for (String col : colNames) {
+          if (!first) {
+            sb.append(", ");
+          }
+
+          sb.append(col);
+          first = false;
+        }
+
+        sb.append(") ");
+      } else {
+        numSlots = getColumnCount(); // set if columnNames is null.
+      }
+
+      // generates the (?, ?, ?...) used for each row.
+      StringBuilder sbRow = new StringBuilder();
+      sbRow.append("SELECT ");
+      for (int i = 0; i < numSlots; i++) {
+        if (i != 0) {
+          sbRow.append(", ");
+        }
+
+        sbRow.append("?");
+      }
+      sbRow.append(" FROM DUAL ");
+
+      // Now append that numRows times.
+      for (int i = 0; i < numRows; i++) {
+        if (i != 0) {
+          sb.append("UNION ALL ");
+        }
+
+        sb.append(sbRow);
+      }
+
+      return sb.toString();
+    }
+  }
 }

@@ -18,8 +18,7 @@
 package org.apache.sqoop.testcategories.thirdpartytest;
 
 /**
- * A third party test shall test a scenario where a third party side is required such as a JDBC driver or an external
- * RDBMS instance.
+ * A third party test shall test a scenario where a third party side is required
+ * such as a JDBC driver or an external RDBMS instance.
  */
-public interface ThirdPartyTest {
-}
+public interface ThirdPartyTest {}

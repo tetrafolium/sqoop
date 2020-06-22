@@ -23,76 +23,75 @@ import static org.mockito.Mockito.mock;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.sqoop.SqoopOptions;
+import org.apache.sqoop.manager.ImportJobContext;
 import org.apache.sqoop.mapreduce.parquet.ParquetImportJobConfigurator;
 import org.apache.sqoop.testcategories.sqooptest.UnitTest;
 import org.junit.Before;
 import org.junit.Test;
-
-import org.apache.sqoop.SqoopOptions;
-import org.apache.sqoop.manager.ImportJobContext;
 import org.junit.experimental.categories.Category;
 
 @Category(UnitTest.class)
 public class TestMainframeImportJob {
 
-    private MainframeImportJob mfImportJob;
+  private MainframeImportJob mfImportJob;
 
-    private MainframeImportJob avroImportJob;
+  private MainframeImportJob avroImportJob;
 
-    private SqoopOptions options;
+  private SqoopOptions options;
 
-    @Before
-    public void setUp() {
-        options = new SqoopOptions();
-    }
+  @Before
+  public void setUp() {
+    options = new SqoopOptions();
+  }
 
-    @Test
-    public void testGetMainframeDatasetImportMapperClass()
-    throws SecurityException, NoSuchMethodException,
-               IllegalArgumentException, IllegalAccessException,
-        InvocationTargetException {
-        String jarFile = "dummyJarFile";
-        String tableName = "dummyTableName";
-        Path path = new Path("dummyPath");
-        ImportJobContext context = new ImportJobContext(tableName, jarFile,
-                options, path);
-        mfImportJob = new MainframeImportJob(options, context, mock(ParquetImportJobConfigurator.class));
+  @Test
+  public void testGetMainframeDatasetImportMapperClass()
+      throws SecurityException, NoSuchMethodException, IllegalArgumentException,
+             IllegalAccessException, InvocationTargetException {
+    String jarFile = "dummyJarFile";
+    String tableName = "dummyTableName";
+    Path path = new Path("dummyPath");
+    ImportJobContext context =
+        new ImportJobContext(tableName, jarFile, options, path);
+    mfImportJob = new MainframeImportJob(
+        options, context, mock(ParquetImportJobConfigurator.class));
 
-        // To access protected method by means of reflection
-        Class[] types = {};
-        Method m_getMapperClass = MainframeImportJob.class.getDeclaredMethod(
-                                      "getMapperClass", types);
-        m_getMapperClass.setAccessible(true);
-        Class<? extends Mapper> mapper = (Class<? extends Mapper>) m_getMapperClass
-                                         .invoke(mfImportJob);
-        assertEquals(mapper,
-                     org.apache.sqoop.mapreduce.mainframe.MainframeDatasetImportMapper.class);
-    }
+    // To access protected method by means of reflection
+    Class[] types = {};
+    Method m_getMapperClass =
+        MainframeImportJob.class.getDeclaredMethod("getMapperClass", types);
+    m_getMapperClass.setAccessible(true);
+    Class<? extends Mapper> mapper =
+        (Class<? extends Mapper>)m_getMapperClass.invoke(mfImportJob);
+    assertEquals(mapper, org.apache.sqoop.mapreduce.mainframe
+                             .MainframeDatasetImportMapper.class);
+  }
 
-    @Test
-    public void testSuperMapperClass() throws SecurityException,
-        NoSuchMethodException, IllegalArgumentException, IllegalAccessException,
-        InvocationTargetException {
-        String jarFile = "dummyJarFile";
-        String tableName = "dummyTableName";
-        Path path = new Path("dummyPath");
-        options.setFileLayout(SqoopOptions.FileLayout.AvroDataFile);
-        ImportJobContext context = new ImportJobContext(tableName, jarFile,
-                options, path);
-        avroImportJob = new MainframeImportJob(options, context, mock(ParquetImportJobConfigurator.class));
+  @Test
+  public void testSuperMapperClass()
+      throws SecurityException, NoSuchMethodException, IllegalArgumentException,
+             IllegalAccessException, InvocationTargetException {
+    String jarFile = "dummyJarFile";
+    String tableName = "dummyTableName";
+    Path path = new Path("dummyPath");
+    options.setFileLayout(SqoopOptions.FileLayout.AvroDataFile);
+    ImportJobContext context =
+        new ImportJobContext(tableName, jarFile, options, path);
+    avroImportJob = new MainframeImportJob(
+        options, context, mock(ParquetImportJobConfigurator.class));
 
-        // To access protected method by means of reflection
-        Class[] types = {};
-        Method m_getMapperClass = MainframeImportJob.class.getDeclaredMethod(
-                                      "getMapperClass", types);
-        m_getMapperClass.setAccessible(true);
-        Class<? extends Mapper> mapper = (Class<? extends Mapper>) m_getMapperClass
-                                         .invoke(avroImportJob);
-        assertEquals(mapper, org.apache.sqoop.mapreduce.AvroImportMapper.class);
-    }
+    // To access protected method by means of reflection
+    Class[] types = {};
+    Method m_getMapperClass =
+        MainframeImportJob.class.getDeclaredMethod("getMapperClass", types);
+    m_getMapperClass.setAccessible(true);
+    Class<? extends Mapper> mapper =
+        (Class<? extends Mapper>)m_getMapperClass.invoke(avroImportJob);
+    assertEquals(mapper, org.apache.sqoop.mapreduce.AvroImportMapper.class);
+  }
 }

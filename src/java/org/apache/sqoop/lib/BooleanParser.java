@@ -23,19 +23,19 @@ package org.apache.sqoop.lib;
  */
 public final class BooleanParser {
 
-    /**
-     * Return a boolean based on the value contained in the string.
-     *
-     * <p>The following values are considered true:
-     * "true", "t", "yes", "on", "1".</p>
-     * <p>All other values, including 'null', are false.</p>
-     * <p>All comparisons are case-insensitive.</p>
-     */
-    public static boolean valueOf(final String s) {
-        return s != null && ("true".equalsIgnoreCase(s) || "t".equalsIgnoreCase(s)
-                             || "1".equals(s) || "on".equalsIgnoreCase(s)
-                             || "yes".equalsIgnoreCase(s));
-    }
+  /**
+   * Return a boolean based on the value contained in the string.
+   *
+   * <p>The following values are considered true:
+   * "true", "t", "yes", "on", "1".</p>
+   * <p>All other values, including 'null', are false.</p>
+   * <p>All comparisons are case-insensitive.</p>
+   */
+  public static boolean valueOf(final String s) {
+    return s != null && ("true".equalsIgnoreCase(s) ||
+                         "t".equalsIgnoreCase(s) || "1".equals(s) ||
+                         "on".equalsIgnoreCase(s) || "yes".equalsIgnoreCase(s));
+  }
 
-    private BooleanParser() { }
+  private BooleanParser() {}
 }

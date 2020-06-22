@@ -18,7 +18,7 @@
 package org.apache.sqoop.testcategories.thirdpartytest;
 
 /**
- * A Netezza test shall test scenarios where a Netezza driver and/or external instance is required.
+ * A Netezza test shall test scenarios where a Netezza driver and/or external
+ * instance is required.
  */
-public interface NetezzaTest extends ThirdPartyTest {
-}
+public interface NetezzaTest extends ThirdPartyTest {}

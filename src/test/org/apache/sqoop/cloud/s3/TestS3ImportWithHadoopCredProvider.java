@@ -18,6 +18,7 @@
 
 package org.apache.sqoop.cloud.s3;
 
+import java.util.Arrays;
 import org.apache.sqoop.cloud.AbstractTestImportWithHadoopCredProvider;
 import org.apache.sqoop.testcategories.thirdpartytest.S3Test;
 import org.apache.sqoop.util.BlockJUnit4ClassRunnerWithParametersFactory;
@@ -27,27 +28,30 @@ import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import java.util.Arrays;
-
 @Category(S3Test.class)
 @RunWith(Parameterized.class)
-@Parameterized.UseParametersRunnerFactory(BlockJUnit4ClassRunnerWithParametersFactory.class)
-public class TestS3ImportWithHadoopCredProvider extends AbstractTestImportWithHadoopCredProvider {
+@Parameterized.
+UseParametersRunnerFactory(BlockJUnit4ClassRunnerWithParametersFactory.class)
+public class TestS3ImportWithHadoopCredProvider
+    extends AbstractTestImportWithHadoopCredProvider {
 
-    @Parameterized.Parameters(name = "credentialProviderPathProperty = {0}")
-    public static Iterable<? extends Object> parameters() {
-        return Arrays.asList(CredentialProviderHelper.HADOOP_CREDENTIAL_PROVIDER_PATH,
-                             CredentialProviderHelper.S3A_CREDENTIAL_PROVIDER_PATH);
-    }
+  @Parameterized.Parameters(name = "credentialProviderPathProperty = {0}")
+  public static Iterable<? extends Object> parameters() {
+    return Arrays.asList(
+        CredentialProviderHelper.HADOOP_CREDENTIAL_PROVIDER_PATH,
+        CredentialProviderHelper.S3A_CREDENTIAL_PROVIDER_PATH);
+  }
 
-    @ClassRule
-    public static S3CredentialsRule s3CredentialsRule = new S3CredentialsRule();
+  @ClassRule
+  public static S3CredentialsRule s3CredentialsRule = new S3CredentialsRule();
 
-    static {
-        AbstractTestImportWithHadoopCredProvider.credentialsRule = s3CredentialsRule;
-    }
+  static {
+    AbstractTestImportWithHadoopCredProvider.credentialsRule =
+        s3CredentialsRule;
+  }
 
-    public TestS3ImportWithHadoopCredProvider(String credentialProviderPathProperty) {
-        super(credentialProviderPathProperty);
-    }
+  public TestS3ImportWithHadoopCredProvider(
+      String credentialProviderPathProperty) {
+    super(credentialProviderPathProperty);
+  }
 }

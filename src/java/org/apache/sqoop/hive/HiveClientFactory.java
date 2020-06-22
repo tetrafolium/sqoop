@@ -18,6 +18,10 @@
 
 package org.apache.sqoop.hive;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+
+import java.io.IOException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.sqoop.SqoopOptions;
@@ -26,47 +30,53 @@ import org.apache.sqoop.db.JdbcConnectionFactory;
 import org.apache.sqoop.db.decorator.KerberizedConnectionFactoryDecorator;
 import org.apache.sqoop.manager.ConnManager;
 
-import java.io.IOException;
-
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isEmpty;
-
 public class HiveClientFactory {
 
-    private final HiveServer2ConnectionFactoryInitializer connectionFactoryInitializer;
+  private final HiveServer2ConnectionFactoryInitializer
+      connectionFactoryInitializer;
 
-    public HiveClientFactory(HiveServer2ConnectionFactoryInitializer connectionFactoryInitializer) {
-        this.connectionFactoryInitializer = connectionFactoryInitializer;
+  public HiveClientFactory(
+      HiveServer2ConnectionFactoryInitializer connectionFactoryInitializer) {
+    this.connectionFactoryInitializer = connectionFactoryInitializer;
+  }
+
+  public HiveClientFactory() {
+    this(new HiveServer2ConnectionFactoryInitializer());
+  }
+
+  public HiveClient createHiveClient(SqoopOptions sqoopOptions,
+                                     ConnManager connManager) {
+    if (useHiveCli(sqoopOptions)) {
+      return createHiveImport(sqoopOptions, connManager);
+    } else {
+      return createHiveServer2Client(sqoopOptions, connManager);
     }
+  }
 
-    public HiveClientFactory() {
-        this(new HiveServer2ConnectionFactoryInitializer());
-    }
+  private HiveClient createHiveImport(SqoopOptions sqoopOptions,
+                                      ConnManager connManager) {
+    return new HiveImport(sqoopOptions, connManager, sqoopOptions.getConf(),
+                          false);
+  }
 
-    public HiveClient createHiveClient(SqoopOptions sqoopOptions, ConnManager connManager) {
-        if (useHiveCli(sqoopOptions)) {
-            return createHiveImport(sqoopOptions, connManager);
-        } else {
-            return createHiveServer2Client(sqoopOptions, connManager);
-        }
-    }
+  private HiveClient createHiveServer2Client(SqoopOptions sqoopOptions,
+                                             ConnManager connManager) {
+    TableDefWriter tableDefWriter =
+        createTableDefWriter(sqoopOptions, connManager);
+    JdbcConnectionFactory hs2JdbcConnectionFactory =
+        connectionFactoryInitializer.createJdbcConnectionFactory(sqoopOptions);
+    return new HiveServer2Client(sqoopOptions, tableDefWriter,
+                                 hs2JdbcConnectionFactory);
+  }
 
-    private HiveClient createHiveImport(SqoopOptions sqoopOptions, ConnManager connManager) {
-        return new HiveImport(sqoopOptions, connManager, sqoopOptions.getConf(), false);
-    }
+  TableDefWriter createTableDefWriter(SqoopOptions sqoopOptions,
+                                      ConnManager connManager) {
+    return new TableDefWriter(
+        sqoopOptions, connManager, sqoopOptions.getTableName(),
+        sqoopOptions.getHiveTableName(), sqoopOptions.getConf(), false);
+  }
 
-    private HiveClient createHiveServer2Client(SqoopOptions sqoopOptions, ConnManager connManager) {
-        TableDefWriter tableDefWriter = createTableDefWriter(sqoopOptions, connManager);
-        JdbcConnectionFactory hs2JdbcConnectionFactory = connectionFactoryInitializer.createJdbcConnectionFactory(sqoopOptions);
-        return new HiveServer2Client(sqoopOptions, tableDefWriter, hs2JdbcConnectionFactory);
-    }
-
-    TableDefWriter createTableDefWriter(SqoopOptions sqoopOptions, ConnManager connManager) {
-        return new TableDefWriter(sqoopOptions, connManager, sqoopOptions.getTableName(), sqoopOptions.getHiveTableName(), sqoopOptions.getConf(), false);
-    }
-
-    private boolean useHiveCli(SqoopOptions sqoopOptions) {
-        return StringUtils.isEmpty(sqoopOptions.getHs2Url());
-    }
-
+  private boolean useHiveCli(SqoopOptions sqoopOptions) {
+    return StringUtils.isEmpty(sqoopOptions.getHs2Url());
+  }
 }

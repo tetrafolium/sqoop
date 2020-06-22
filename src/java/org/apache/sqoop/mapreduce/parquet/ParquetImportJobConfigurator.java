@@ -18,6 +18,7 @@
 
 package org.apache.sqoop.mapreduce.parquet;
 
+import java.io.IOException;
 import org.apache.avro.Schema;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.Job;
@@ -25,19 +26,19 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.sqoop.SqoopOptions;
 
-import java.io.IOException;
-
 /**
- * This interface defines the type of a product of {@link ParquetJobConfiguratorFactory}.
- * The implementations of the methods of this interface help to configure Sqoop Parquet import jobs.
+ * This interface defines the type of a product of {@link
+ * ParquetJobConfiguratorFactory}. The implementations of the methods of this
+ * interface help to configure Sqoop Parquet import jobs.
  */
 public interface ParquetImportJobConfigurator {
 
-    void configureMapper(Job job, Schema schema, SqoopOptions options, String tableName, Path destination) throws IOException;
+  void configureMapper(Job job, Schema schema, SqoopOptions options,
+                       String tableName, Path destination) throws IOException;
 
-    Class<? extends Mapper> getMapperClass();
+  Class<? extends Mapper> getMapperClass();
 
-    Class<? extends OutputFormat> getOutputFormatClass();
+  Class<? extends OutputFormat> getOutputFormatClass();
 
-    boolean isHiveImportNeeded();
+  boolean isHiveImportNeeded();
 }

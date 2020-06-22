@@ -17,15 +17,14 @@
  */
 package org.apache.sqoop.util.password;
 
-import org.apache.hadoop.conf.Configuration;
-
+import java.io.IOException;
+import java.io.InputStream;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import java.io.IOException;
-import org.apache.commons.io.IOUtils;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import java.io.InputStream;
 
 /**
  * Simple password loader that will load file from file system.
@@ -37,52 +36,54 @@ import java.io.InputStream;
  */
 public class FilePasswordLoader extends PasswordLoader {
 
-    public static final Log LOG = LogFactory.getLog(FilePasswordLoader.class.getName());
+  public static final Log LOG =
+      LogFactory.getLog(FilePasswordLoader.class.getName());
 
-    /**
-     * Verify that given path leads to a file that we can read.
-     *
-     * @param fs Associated FileSystem
-     * @param path Path
-     * @throws IOException
-     */
-    protected void verifyPath(FileSystem fs, Path path) throws IOException {
-        if (!fs.exists(path)) {
-            throw new IOException("The provided password file " + path
-                                  + " does not exist!");
-        }
-
-        if (!fs.isFile(path)) {
-            throw new IOException("The provided password file " + path
-                                  + " is a directory!");
-        }
+  /**
+   * Verify that given path leads to a file that we can read.
+   *
+   * @param fs Associated FileSystem
+   * @param path Path
+   * @throws IOException
+   */
+  protected void verifyPath(FileSystem fs, Path path) throws IOException {
+    if (!fs.exists(path)) {
+      throw new IOException("The provided password file " + path +
+                            " does not exist!");
     }
 
-    /**
-     * Read bytes from given file.
-     *
-     * @param fs Associated FileSystem
-     * @param path Path
-     * @return
-     * @throws IOException
-     */
-    protected byte [] readBytes(FileSystem fs, Path path) throws IOException {
-        InputStream is = fs.open(path);
-        try {
-            return IOUtils.toByteArray(is);
-        } finally {
-            IOUtils.closeQuietly(is);
-        }
+    if (!fs.isFile(path)) {
+      throw new IOException("The provided password file " + path +
+                            " is a directory!");
     }
+  }
 
-    @Override
-    public String loadPassword(String p, Configuration configuration) throws IOException {
-        LOG.debug("Fetching password from specified path: " + p);
-        Path path = new Path(p);
-        FileSystem fs = path.getFileSystem(configuration);
-
-        // Not closing FileSystem object because of SQOOP-1226
-        verifyPath(fs, path);
-        return new String(readBytes(fs, path));
+  /**
+   * Read bytes from given file.
+   *
+   * @param fs Associated FileSystem
+   * @param path Path
+   * @return
+   * @throws IOException
+   */
+  protected byte[] readBytes(FileSystem fs, Path path) throws IOException {
+    InputStream is = fs.open(path);
+    try {
+      return IOUtils.toByteArray(is);
+    } finally {
+      IOUtils.closeQuietly(is);
     }
+  }
+
+  @Override
+  public String loadPassword(String p, Configuration configuration)
+      throws IOException {
+    LOG.debug("Fetching password from specified path: " + p);
+    Path path = new Path(p);
+    FileSystem fs = path.getFileSystem(configuration);
+
+    // Not closing FileSystem object because of SQOOP-1226
+    verifyPath(fs, path);
+    return new String(readBytes(fs, path));
+  }
 }

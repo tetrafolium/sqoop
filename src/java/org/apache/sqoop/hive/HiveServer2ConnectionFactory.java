@@ -18,43 +18,46 @@
 
 package org.apache.sqoop.hive;
 
+import static org.apache.commons.lang3.StringUtils.EMPTY;
+
+import java.io.IOException;
+import java.sql.Connection;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.sqoop.db.DriverManagerJdbcConnectionFactory;
 
-import java.io.IOException;
-import java.sql.Connection;
+public class HiveServer2ConnectionFactory
+    extends DriverManagerJdbcConnectionFactory {
 
-import static org.apache.commons.lang3.StringUtils.EMPTY;
+  private static final Log LOG =
+      LogFactory.getLog(HiveServer2ConnectionFactory.class.getName());
 
-public class HiveServer2ConnectionFactory extends DriverManagerJdbcConnectionFactory {
+  private static final String HS2_DRIVER_CLASS =
+      "org.apache.hive.jdbc.HiveDriver";
 
-    private static final Log LOG = LogFactory.getLog(HiveServer2ConnectionFactory.class.getName());
+  public HiveServer2ConnectionFactory(String connectionString, String username,
+                                      String password) {
+    super(HS2_DRIVER_CLASS, connectionString, username, password);
+  }
 
-    private static final String HS2_DRIVER_CLASS = "org.apache.hive.jdbc.HiveDriver";
+  public HiveServer2ConnectionFactory(String connectionString,
+                                      String username) {
+    this(connectionString, username, null);
+  }
 
-    public HiveServer2ConnectionFactory(String connectionString, String username, String password) {
-        super(HS2_DRIVER_CLASS, connectionString, username, password);
+  @Override
+  public Connection createConnection() {
+    LOG.info("Creating connection to HiveServer2 as: " + getCurrentUser());
+    return super.createConnection();
+  }
+
+  private String getCurrentUser() {
+    try {
+      return UserGroupInformation.getCurrentUser().toString();
+    } catch (IOException e) {
+      LOG.error("Unable to determine current user.", e);
     }
-
-    public HiveServer2ConnectionFactory(String connectionString, String username) {
-        this(connectionString, username, null);
-    }
-
-    @Override
-    public Connection createConnection() {
-        LOG.info("Creating connection to HiveServer2 as: " + getCurrentUser());
-        return super.createConnection();
-    }
-
-    private String getCurrentUser() {
-        try {
-            return UserGroupInformation.getCurrentUser().toString();
-        } catch (IOException e) {
-            LOG.error("Unable to determine current user.", e);
-        }
-        return EMPTY;
-    }
-
+    return EMPTY;
+  }
 }

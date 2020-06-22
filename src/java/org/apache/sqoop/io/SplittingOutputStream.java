@@ -20,7 +20,6 @@ package org.apache.sqoop.io;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Formatter;
-
 import org.apache.commons.io.output.CountingOutputStream;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -37,123 +36,117 @@ import org.apache.sqoop.util.FileSystemUtil;
  */
 public class SplittingOutputStream extends OutputStream {
 
-    public static final Log LOG = LogFactory.getLog(
-                                      SplittingOutputStream.class.getName());
+  public static final Log LOG =
+      LogFactory.getLog(SplittingOutputStream.class.getName());
 
-    private OutputStream writeStream;
-    private CountingOutputStream countingFilterStream;
-    private Configuration conf;
-    private Path destDir;
-    private String filePrefix;
-    private long cutoffBytes;
-    private CompressionCodec codec;
-    private int fileNum;
+  private OutputStream writeStream;
+  private CountingOutputStream countingFilterStream;
+  private Configuration conf;
+  private Path destDir;
+  private String filePrefix;
+  private long cutoffBytes;
+  private CompressionCodec codec;
+  private int fileNum;
 
-    /**
-     * Create a new SplittingOutputStream.
-     * @param conf the Configuration to use to interface with HDFS
-     * @param destDir the directory where the files will go (should already
-     *     exist).
-     * @param filePrefix the first part of the filename, which will be appended
-     *    by a number. This file will be placed inside destDir.
-     * @param cutoff the approximate number of bytes to use per file
-     * @param doGzip if true, then output files will be gzipped and have a .gz
-     *   suffix.
-     */
-    public SplittingOutputStream(final Configuration conf, final Path destDir,
-                                 final String filePrefix, final long cutoff, final CompressionCodec codec)
-    throws IOException {
+  /**
+   * Create a new SplittingOutputStream.
+   * @param conf the Configuration to use to interface with HDFS
+   * @param destDir the directory where the files will go (should already
+   *     exist).
+   * @param filePrefix the first part of the filename, which will be appended
+   *    by a number. This file will be placed inside destDir.
+   * @param cutoff the approximate number of bytes to use per file
+   * @param doGzip if true, then output files will be gzipped and have a .gz
+   *   suffix.
+   */
+  public SplittingOutputStream(final Configuration conf, final Path destDir,
+                               final String filePrefix, final long cutoff,
+                               final CompressionCodec codec)
+      throws IOException {
 
-        this.conf = conf;
-        this.destDir = destDir;
-        this.filePrefix = filePrefix;
-        this.cutoffBytes = cutoff;
-        if (this.cutoffBytes < 0) {
-            this.cutoffBytes = 0; // splitting disabled.
-        }
-        this.codec = codec;
-        this.fileNum = 0;
+    this.conf = conf;
+    this.destDir = destDir;
+    this.filePrefix = filePrefix;
+    this.cutoffBytes = cutoff;
+    if (this.cutoffBytes < 0) {
+      this.cutoffBytes = 0; // splitting disabled.
+    }
+    this.codec = codec;
+    this.fileNum = 0;
 
-        openNextFile();
+    openNextFile();
+  }
+
+  /**
+   * Initialize the OutputStream to the next file to write to.
+   */
+  private void openNextFile() throws IOException {
+    StringBuffer sb = new StringBuffer();
+    Formatter fmt = new Formatter(sb);
+    fmt.format("%05d", this.fileNum++);
+    String filename = filePrefix + fmt.toString();
+    if (codec != null) {
+      filename = filename + codec.getDefaultExtension();
+    }
+    Path destFile = new Path(destDir, filename);
+    FileSystem fs = destFile.getFileSystem(conf);
+    LOG.debug("Opening next output file: " + destFile);
+    if (fs.exists(destFile)) {
+      Path canonicalDest = fs.makeQualified(destFile);
+      throw new IOException("Destination file " + canonicalDest +
+                            " already exists");
     }
 
-    /** Initialize the OutputStream to the next file to write to.
-     */
-    private void openNextFile() throws IOException {
-        StringBuffer sb = new StringBuffer();
-        Formatter fmt = new Formatter(sb);
-        fmt.format("%05d", this.fileNum++);
-        String filename = filePrefix + fmt.toString();
-        if (codec != null) {
-            filename = filename + codec.getDefaultExtension();
-        }
-        Path destFile = new Path(destDir, filename);
-        FileSystem fs = destFile.getFileSystem(conf);
-        LOG.debug("Opening next output file: " + destFile);
-        if (fs.exists(destFile)) {
-            Path canonicalDest = fs.makeQualified(destFile);
-            throw new IOException("Destination file " + canonicalDest
-                                  + " already exists");
-        }
+    OutputStream fsOut = fs.create(destFile);
 
-        OutputStream fsOut = fs.create(destFile);
+    // Count how many actual bytes hit HDFS.
+    this.countingFilterStream = new CountingOutputStream(fsOut);
 
-        // Count how many actual bytes hit HDFS.
-        this.countingFilterStream = new CountingOutputStream(fsOut);
-
-        if (codec != null) {
-            // Wrap that in a compressing stream.
-            this.writeStream = codec.createOutputStream(this.countingFilterStream);
-        } else {
-            // Write to the counting stream directly.
-            this.writeStream = this.countingFilterStream;
-        }
+    if (codec != null) {
+      // Wrap that in a compressing stream.
+      this.writeStream = codec.createOutputStream(this.countingFilterStream);
+    } else {
+      // Write to the counting stream directly.
+      this.writeStream = this.countingFilterStream;
     }
+  }
 
-    /**
-     * @return true if allowSplit() would actually cause a split.
-     */
-    public boolean wouldSplit() {
-        return this.cutoffBytes > 0
-               && this.countingFilterStream.getByteCount() >= this.cutoffBytes;
-    }
+  /**
+   * @return true if allowSplit() would actually cause a split.
+   */
+  public boolean wouldSplit() {
+    return this.cutoffBytes > 0 &&
+        this.countingFilterStream.getByteCount() >= this.cutoffBytes;
+  }
 
-    /** If we've written more to the disk than the user's split size,
-     * open the next file.
-     */
-    private void checkForNextFile() throws IOException {
-        if (wouldSplit()) {
-            LOG.debug("Starting new split");
-            this.writeStream.flush();
-            this.writeStream.close();
-            openNextFile();
-        }
+  /**
+   * If we've written more to the disk than the user's split size,
+   * open the next file.
+   */
+  private void checkForNextFile() throws IOException {
+    if (wouldSplit()) {
+      LOG.debug("Starting new split");
+      this.writeStream.flush();
+      this.writeStream.close();
+      openNextFile();
     }
+  }
 
-    /** Defines a point in the stream when it is acceptable to split to a new
-        file; e.g., the end of a record.
-      */
-    public void allowSplit() throws IOException {
-        checkForNextFile();
-    }
+  /**
+     Defines a point in the stream when it is acceptable to split to a new
+      file; e.g., the end of a record.
+    */
+  public void allowSplit() throws IOException { checkForNextFile(); }
 
-    public void close() throws IOException {
-        this.writeStream.close();
-    }
+  public void close() throws IOException { this.writeStream.close(); }
 
-    public void flush() throws IOException {
-        this.writeStream.flush();
-    }
+  public void flush() throws IOException { this.writeStream.flush(); }
 
-    public void write(byte [] b) throws IOException {
-        this.writeStream.write(b);
-    }
+  public void write(byte[] b) throws IOException { this.writeStream.write(b); }
 
-    public void write(byte [] b, int off, int len) throws IOException {
-        this.writeStream.write(b, off, len);
-    }
+  public void write(byte[] b, int off, int len) throws IOException {
+    this.writeStream.write(b, off, len);
+  }
 
-    public void write(int b) throws IOException {
-        this.writeStream.write(b);
-    }
+  public void write(int b) throws IOException { this.writeStream.write(b); }
 }

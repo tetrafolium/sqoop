@@ -19,7 +19,6 @@
 package org.apache.sqoop.testutil;
 
 import java.io.File;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -28,32 +27,30 @@ import org.apache.commons.logging.LogFactory;
  */
 public final class DirUtil {
 
-    private DirUtil() {
-    }
+  private DirUtil() {}
 
-    public static final Log LOG = LogFactory.getLog(DirUtil.class.getName());
+  public static final Log LOG = LogFactory.getLog(DirUtil.class.getName());
 
-    /**
-     * recursively delete a dir and its children.
-     * @param dir
-     * @return true on succesful removal of a dir
-     */
-    public static boolean deleteDir(File dir) {
-        if (dir.isDirectory()) {
-            String [] children = dir.list();
-            for (int i = 0; i < children.length; i++) {
-                File f = new File(dir, children[i]);
-                boolean success = deleteDir(f);
-                if (!success) {
-                    LOG.warn("Could not delete " + f.getAbsolutePath());
-                    return false;
-                }
-            }
+  /**
+   * recursively delete a dir and its children.
+   * @param dir
+   * @return true on succesful removal of a dir
+   */
+  public static boolean deleteDir(File dir) {
+    if (dir.isDirectory()) {
+      String[] children = dir.list();
+      for (int i = 0; i < children.length; i++) {
+        File f = new File(dir, children[i]);
+        boolean success = deleteDir(f);
+        if (!success) {
+          LOG.warn("Could not delete " + f.getAbsolutePath());
+          return false;
         }
-
-        // The directory is now empty so delete it too.
-        LOG.debug("Removing: " + dir);
-        return dir.delete();
+      }
     }
 
+    // The directory is now empty so delete it too.
+    LOG.debug("Removing: " + dir);
+    return dir.delete();
+  }
 }

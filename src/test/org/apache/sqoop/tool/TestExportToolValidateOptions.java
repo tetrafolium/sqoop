@@ -18,16 +18,16 @@
 
 package org.apache.sqoop.tool;
 
-import org.apache.sqoop.SqoopOptions;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import org.apache.hadoop.conf.Configuration;
+import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.manager.SupportedManagers;
 import org.apache.sqoop.testcategories.sqooptest.UnitTest;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
-
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -48,56 +48,64 @@ import static org.mockito.Mockito.when;
  */
 @Category(UnitTest.class)
 public class TestExportToolValidateOptions {
-    ExportTool exportTool = new ExportTool();
+  ExportTool exportTool = new ExportTool();
 
+  @Test
+  public void givenDirectImportHasDirectConnectorValidationPasses()
+      throws SqoopOptions.InvalidOptionsException {
+    SqoopOptions options = stubDirectOptions(SupportedManagers.NETEZZA);
+    exportTool.vaildateDirectExportOptions(options);
+  }
 
-    @Test
-    public void givenDirectImportHasDirectConnectorValidationPasses() throws SqoopOptions.InvalidOptionsException {
-        SqoopOptions options = stubDirectOptions(SupportedManagers.NETEZZA);
-        exportTool.vaildateDirectExportOptions(options);
-    }
+  @Test(expected = org.apache.sqoop.SqoopOptions.InvalidOptionsException.class)
+  public void givenDirectImportNoDirectConnectorValidationThrows()
+      throws SqoopOptions.InvalidOptionsException {
+    SqoopOptions options = stubDirectOptions(SupportedManagers.HSQLDB);
+    exportTool.vaildateDirectExportOptions(options);
+  }
 
-    @Test(expected = org.apache.sqoop.SqoopOptions.InvalidOptionsException.class)
-    public void givenDirectImportNoDirectConnectorValidationThrows() throws SqoopOptions.InvalidOptionsException {
-        SqoopOptions options = stubDirectOptions(SupportedManagers.HSQLDB);
-        exportTool.vaildateDirectExportOptions(options);
-    }
+  @Test
+  public void
+  givenNoDirectOptionWhenNoDirectConnectorAvailableValidationPasses()
+      throws SqoopOptions.InvalidOptionsException {
+    SqoopOptions options = stubNotDirectOptions(SupportedManagers.HSQLDB);
+    exportTool.vaildateDirectExportOptions(options);
+  }
 
-    @Test
-    public void givenNoDirectOptionWhenNoDirectConnectorAvailableValidationPasses() throws SqoopOptions.InvalidOptionsException {
-        SqoopOptions options = stubNotDirectOptions(SupportedManagers.HSQLDB);
-        exportTool.vaildateDirectExportOptions(options);
-    }
+  @Test(expected = SqoopOptions.InvalidOptionsException.class)
+  public void givenDirectImportInputNullStringThrows()
+      throws SqoopOptions.InvalidOptionsException {
+    SqoopOptions options = stubDirectOptions(SupportedManagers.MYSQL);
+    when(options.getInNullNonStringValue()).thenReturn("abc");
 
-    @Test(expected = SqoopOptions.InvalidOptionsException.class)
-    public void givenDirectImportInputNullStringThrows() throws SqoopOptions.InvalidOptionsException {
-        SqoopOptions options = stubDirectOptions(SupportedManagers.MYSQL);
-        when(options.getInNullNonStringValue()).thenReturn("abc");
+    exportTool.validateDirectMysqlOptions(options);
+  }
 
-        exportTool.validateDirectMysqlOptions(options);
-    }
+  @Test(expected = SqoopOptions.InvalidOptionsException.class)
+  public void givenDirectImportInputNullNonStringThrows()
+      throws SqoopOptions.InvalidOptionsException {
+    SqoopOptions options = stubDirectOptions(SupportedManagers.MYSQL);
+    when(options.getInNullNonStringValue()).thenReturn("abc");
 
-    @Test(expected = SqoopOptions.InvalidOptionsException.class)
-    public void givenDirectImportInputNullNonStringThrows() throws SqoopOptions.InvalidOptionsException {
-        SqoopOptions options = stubDirectOptions(SupportedManagers.MYSQL);
-        when(options.getInNullNonStringValue()).thenReturn("abc");
+    exportTool.validateDirectMysqlOptions(options);
+  }
 
-        exportTool.validateDirectMysqlOptions(options);
-    }
+  private SqoopOptions stubDirectOptions(SupportedManagers supportedManagers) {
+    return stubOptions(supportedManagers, true);
+  }
 
-    private SqoopOptions stubDirectOptions(SupportedManagers supportedManagers) {
-        return stubOptions(supportedManagers, true);
-    }
+  private SqoopOptions
+  stubNotDirectOptions(SupportedManagers supportedManagers) {
+    return stubOptions(supportedManagers, false);
+  }
 
-    private SqoopOptions stubNotDirectOptions(SupportedManagers supportedManagers) {
-        return stubOptions(supportedManagers, false);
-    }
-
-    private SqoopOptions stubOptions(SupportedManagers supportedManagers, boolean isDirect) {
-        SqoopOptions options = mock(SqoopOptions.class);
-        when(options.getConnectString()).thenReturn(supportedManagers.getSchemePrefix() + "//localhost");
-        when(options.isDirect()).thenReturn(isDirect);
-        when(options.getConf()).thenReturn(mock(Configuration.class));
-        return options;
-    }
+  private SqoopOptions stubOptions(SupportedManagers supportedManagers,
+                                   boolean isDirect) {
+    SqoopOptions options = mock(SqoopOptions.class);
+    when(options.getConnectString())
+        .thenReturn(supportedManagers.getSchemePrefix() + "//localhost");
+    when(options.isDirect()).thenReturn(isDirect);
+    when(options.getConf()).thenReturn(mock(Configuration.class));
+    return options;
+  }
 }

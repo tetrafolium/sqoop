@@ -20,6 +20,8 @@ package org.apache.sqoop.cloud;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.IOException;
+import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.sqoop.cloud.tools.CloudCredentialsRule;
@@ -29,57 +31,69 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import java.io.IOException;
-import java.util.List;
-
 public abstract class AbstractTestParquetImport extends CloudImportJobTestCase {
 
-    public static final Log LOG = LogFactory.getLog(AbstractTestParquetImport.class.getName());
+  public static final Log LOG =
+      LogFactory.getLog(AbstractTestParquetImport.class.getName());
 
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
+  @Rule public ExpectedException thrown = ExpectedException.none();
 
-    protected AbstractTestParquetImport(CloudCredentialsRule credentialsRule) {
-        super(credentialsRule);
-    }
+  protected AbstractTestParquetImport(CloudCredentialsRule credentialsRule) {
+    super(credentialsRule);
+  }
 
-    @Test
-    public void testImportAsParquetFileWithoutDeleteTargetDirOptionWhenTargetDirDoesNotExist() throws Exception {
-        String[] args = getArgsWithAsParquetFileOption();
-        runImport(args);
+  @Test
+  public void
+  testImportAsParquetFileWithoutDeleteTargetDirOptionWhenTargetDirDoesNotExist()
+      throws Exception {
+    String[] args = getArgsWithAsParquetFileOption();
+    runImport(args);
 
-        List<String> result = new ParquetReader(fileSystemRule.getTargetDirPath(), fileSystemRule.getCloudFileSystem().getConf()).readAllInCsvSorted();
-        assertEquals(getDataSet().getExpectedParquetOutput(), result);
-    }
+    List<String> result =
+        new ParquetReader(fileSystemRule.getTargetDirPath(),
+                          fileSystemRule.getCloudFileSystem().getConf())
+            .readAllInCsvSorted();
+    assertEquals(getDataSet().getExpectedParquetOutput(), result);
+  }
 
-    @Test
-    public void testImportAsParquetFileWithDeleteTargetDirOptionWhenTargetDirAlreadyExists() throws Exception {
-        String[] args = getArgsWithAsParquetFileOption();
-        runImport(args);
+  @Test
+  public void
+  testImportAsParquetFileWithDeleteTargetDirOptionWhenTargetDirAlreadyExists()
+      throws Exception {
+    String[] args = getArgsWithAsParquetFileOption();
+    runImport(args);
 
-        args = getArgsWithAsParquetFileAndDeleteTargetDirOption();
-        runImport(args);
+    args = getArgsWithAsParquetFileAndDeleteTargetDirOption();
+    runImport(args);
 
-        List<String> result = new ParquetReader(fileSystemRule.getTargetDirPath(), fileSystemRule.getCloudFileSystem().getConf()).readAllInCsvSorted();
-        assertEquals(getDataSet().getExpectedParquetOutput(), result);
-    }
+    List<String> result =
+        new ParquetReader(fileSystemRule.getTargetDirPath(),
+                          fileSystemRule.getCloudFileSystem().getConf())
+            .readAllInCsvSorted();
+    assertEquals(getDataSet().getExpectedParquetOutput(), result);
+  }
 
-    @Test
-    public void testImportAsParquetFileWithoutDeleteTargetDirOptionWhenTargetDirAlreadyExists() throws Exception {
-        String[] args = getArgsWithAsParquetFileOption();
-        runImport(args);
+  @Test
+  public void
+  testImportAsParquetFileWithoutDeleteTargetDirOptionWhenTargetDirAlreadyExists()
+      throws Exception {
+    String[] args = getArgsWithAsParquetFileOption();
+    runImport(args);
 
-        thrown.expect(IOException.class);
-        runImport(args);
-    }
+    thrown.expect(IOException.class);
+    runImport(args);
+  }
 
-    private String[] getArgsWithAsParquetFileOption() {
-        return getArgsForUnitTestsWithFileFormatOption(fileSystemRule.getTargetDirPath().toString(), "as-parquetfile");
-    }
+  private String[] getArgsWithAsParquetFileOption() {
+    return getArgsForUnitTestsWithFileFormatOption(
+        fileSystemRule.getTargetDirPath().toString(), "as-parquetfile");
+  }
 
-    private String[] getArgsWithAsParquetFileAndDeleteTargetDirOption() {
-        ArgumentArrayBuilder builder = getArgumentArrayBuilderForUnitTestsWithFileFormatOption(fileSystemRule.getTargetDirPath().toString(), "as-parquetfile");
-        builder.withOption("delete-target-dir");
-        return builder.build();
-    }
+  private String[] getArgsWithAsParquetFileAndDeleteTargetDirOption() {
+    ArgumentArrayBuilder builder =
+        getArgumentArrayBuilderForUnitTestsWithFileFormatOption(
+            fileSystemRule.getTargetDirPath().toString(), "as-parquetfile");
+    builder.withOption("delete-target-dir");
+    return builder.build();
+  }
 }

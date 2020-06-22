@@ -21,6 +21,7 @@ package org.apache.sqoop.cloud;
 import static org.apache.sqoop.util.AppendUtils.MAPREDUCE_OUTPUT_BASENAME_PROPERTY;
 import static org.junit.Assert.assertEquals;
 
+import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.sqoop.cloud.tools.CloudCredentialsRule;
@@ -31,88 +32,116 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import java.util.List;
+public abstract class AbstractTestIncrementalMergeParquetImport
+    extends CloudImportJobTestCase {
 
-public abstract class AbstractTestIncrementalMergeParquetImport extends CloudImportJobTestCase {
+  public static final Log LOG = LogFactory.getLog(
+      AbstractTestIncrementalMergeParquetImport.class.getName());
 
-    public static final Log LOG = LogFactory.getLog(AbstractTestIncrementalMergeParquetImport.class.getName());
+  @Rule public ExpectedException thrown = ExpectedException.none();
 
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
+  @Override
+  @Before
+  public void setUp() {
+    super.setUp();
+    createTestTableFromInitialInputDataForMerge();
+  }
 
-    @Override
-    @Before
-    public void setUp() {
-        super.setUp();
-        createTestTableFromInitialInputDataForMerge();
+  protected AbstractTestIncrementalMergeParquetImport(
+      CloudCredentialsRule credentialsRule) {
+    super(credentialsRule);
+  }
+
+  @Test
+  public void testIncrementalMergeAsParquetFileWhenNoNewRowIsImported()
+      throws Exception {
+    String[] args = getArgsWithAsParquetFileOption(false);
+    runImport(args);
+
+    clearTable(getTableName());
+
+    args = getIncrementalMergeArgsWithAsParquetFileOption(false);
+    runImport(args);
+
+    List<String> result =
+        new ParquetReader(fileSystemRule.getTargetDirPath(),
+                          fileSystemRule.getCloudFileSystem().getConf())
+            .readAllInCsvSorted();
+    assertEquals(getDataSet().getExpectedParquetOutputWithTimestampColumn(),
+                 result);
+  }
+
+  @Test
+  public void testIncrementalMergeAsParquetFile() throws Exception {
+    String[] args = getArgsWithAsParquetFileOption(false);
+    runImport(args);
+
+    clearTable(getTableName());
+
+    insertInputDataIntoTableForMerge(getDataSet().getNewInputDataForMerge());
+
+    args = getIncrementalMergeArgsWithAsParquetFileOption(false);
+    runImport(args);
+
+    List<String> result =
+        new ParquetReader(fileSystemRule.getTargetDirPath(),
+                          fileSystemRule.getCloudFileSystem().getConf())
+            .readAllInCsvSorted();
+    assertEquals(
+        getDataSet().getExpectedParquetOutputWithTimestampColumnAfterMerge(),
+        result);
+  }
+
+  @Test
+  public void
+  testIncrementalMergeAsParquetFileWithMapreduceOutputBasenameProperty()
+      throws Exception {
+    String[] args = getArgsWithAsParquetFileOption(true);
+    runImport(args);
+
+    clearTable(getTableName());
+
+    insertInputDataIntoTableForMerge(getDataSet().getNewInputDataForMerge());
+
+    args = getIncrementalMergeArgsWithAsParquetFileOption(true);
+    runImport(args);
+
+    failIfOutputFilePathContainingPatternDoesNotExists(
+        fileSystemRule.getCloudFileSystem(), fileSystemRule.getTargetDirPath(),
+        MAPREDUCE_OUTPUT_BASENAME);
+
+    List<String> result =
+        new ParquetReader(fileSystemRule.getTargetDirPath(),
+                          fileSystemRule.getCloudFileSystem().getConf())
+            .readAllInCsvSorted();
+    assertEquals(
+        getDataSet().getExpectedParquetOutputWithTimestampColumnAfterMerge(),
+        result);
+  }
+
+  private String[] getArgsWithAsParquetFileOption(
+      boolean withMapreduceOutputBasenameProperty) {
+    ArgumentArrayBuilder builder =
+        getArgumentArrayBuilderForUnitTestsWithFileFormatOption(
+            fileSystemRule.getTargetDirPath().toString(), "as-parquetfile");
+    if (withMapreduceOutputBasenameProperty) {
+      builder.withProperty(MAPREDUCE_OUTPUT_BASENAME_PROPERTY,
+                           MAPREDUCE_OUTPUT_BASENAME);
     }
+    return builder.build();
+  }
 
-    protected AbstractTestIncrementalMergeParquetImport(CloudCredentialsRule credentialsRule) {
-        super(credentialsRule);
+  private String[] getIncrementalMergeArgsWithAsParquetFileOption(
+      boolean withMapreduceOutputBasenameProperty) {
+    ArgumentArrayBuilder builder =
+        getArgumentArrayBuilderForUnitTestsWithFileFormatOption(
+            fileSystemRule.getTargetDirPath().toString(), "as-parquetfile");
+    builder = addIncrementalMergeImportArgs(
+        builder, fileSystemRule.getTemporaryRootDirPath().toString());
+    if (withMapreduceOutputBasenameProperty) {
+      builder.withProperty(MAPREDUCE_OUTPUT_BASENAME_PROPERTY,
+                           MAPREDUCE_OUTPUT_BASENAME);
     }
-
-    @Test
-    public void testIncrementalMergeAsParquetFileWhenNoNewRowIsImported() throws Exception {
-        String[] args = getArgsWithAsParquetFileOption(false);
-        runImport(args);
-
-        clearTable(getTableName());
-
-        args = getIncrementalMergeArgsWithAsParquetFileOption(false);
-        runImport(args);
-
-        List<String> result = new ParquetReader(fileSystemRule.getTargetDirPath(), fileSystemRule.getCloudFileSystem().getConf()).readAllInCsvSorted();
-        assertEquals(getDataSet().getExpectedParquetOutputWithTimestampColumn(), result);
-    }
-
-    @Test
-    public void testIncrementalMergeAsParquetFile() throws Exception {
-        String[] args = getArgsWithAsParquetFileOption(false);
-        runImport(args);
-
-        clearTable(getTableName());
-
-        insertInputDataIntoTableForMerge(getDataSet().getNewInputDataForMerge());
-
-        args = getIncrementalMergeArgsWithAsParquetFileOption(false);
-        runImport(args);
-
-        List<String> result = new ParquetReader(fileSystemRule.getTargetDirPath(), fileSystemRule.getCloudFileSystem().getConf()).readAllInCsvSorted();
-        assertEquals(getDataSet().getExpectedParquetOutputWithTimestampColumnAfterMerge(), result);
-    }
-
-    @Test
-    public void testIncrementalMergeAsParquetFileWithMapreduceOutputBasenameProperty() throws Exception {
-        String[] args = getArgsWithAsParquetFileOption(true);
-        runImport(args);
-
-        clearTable(getTableName());
-
-        insertInputDataIntoTableForMerge(getDataSet().getNewInputDataForMerge());
-
-        args = getIncrementalMergeArgsWithAsParquetFileOption(true);
-        runImport(args);
-
-        failIfOutputFilePathContainingPatternDoesNotExists(fileSystemRule.getCloudFileSystem(), fileSystemRule.getTargetDirPath(), MAPREDUCE_OUTPUT_BASENAME);
-
-        List<String> result = new ParquetReader(fileSystemRule.getTargetDirPath(), fileSystemRule.getCloudFileSystem().getConf()).readAllInCsvSorted();
-        assertEquals(getDataSet().getExpectedParquetOutputWithTimestampColumnAfterMerge(), result);
-    }
-
-    private String[] getArgsWithAsParquetFileOption(boolean withMapreduceOutputBasenameProperty) {
-        ArgumentArrayBuilder builder = getArgumentArrayBuilderForUnitTestsWithFileFormatOption(fileSystemRule.getTargetDirPath().toString(), "as-parquetfile");
-        if (withMapreduceOutputBasenameProperty) {
-            builder.withProperty(MAPREDUCE_OUTPUT_BASENAME_PROPERTY, MAPREDUCE_OUTPUT_BASENAME);
-        }
-        return builder.build();
-    }
-
-    private String[] getIncrementalMergeArgsWithAsParquetFileOption(boolean withMapreduceOutputBasenameProperty) {
-        ArgumentArrayBuilder builder = getArgumentArrayBuilderForUnitTestsWithFileFormatOption(fileSystemRule.getTargetDirPath().toString(), "as-parquetfile");
-        builder = addIncrementalMergeImportArgs(builder, fileSystemRule.getTemporaryRootDirPath().toString());
-        if (withMapreduceOutputBasenameProperty) {
-            builder.withProperty(MAPREDUCE_OUTPUT_BASENAME_PROPERTY, MAPREDUCE_OUTPUT_BASENAME);
-        }
-        return builder.build();
-    }
+    return builder.build();
+  }
 }

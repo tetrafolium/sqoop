@@ -19,8 +19,7 @@
 package org.apache.sqoop.testcategories.thirdpartytest;
 
 /**
- * An Oracle EE test shall test scenarios where a Oracle Enterprise Edition database is needed,
- * for example because of partitioning.
+ * An Oracle EE test shall test scenarios where a Oracle Enterprise Edition
+ * database is needed, for example because of partitioning.
  */
-public interface OracleEeTest extends OracleTest {
-}
+public interface OracleEeTest extends OracleTest {}

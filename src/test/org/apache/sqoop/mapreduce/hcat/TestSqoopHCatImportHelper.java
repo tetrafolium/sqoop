@@ -18,45 +18,44 @@
 
 package org.apache.sqoop.mapreduce.hcat;
 
+import static org.junit.Assert.assertEquals;
+
+import java.math.BigDecimal;
 import org.apache.hadoop.hive.common.type.HiveDecimal;
 import org.apache.sqoop.testcategories.sqooptest.UnitTest;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
-import java.math.BigDecimal;
-
-import static org.junit.Assert.assertEquals;
-
 @Category(UnitTest.class)
 public class TestSqoopHCatImportHelper {
 
-    private SqoopHCatImportHelper importHelper;
+  private SqoopHCatImportHelper importHelper;
 
-    @Before
-    public void init() {
-        importHelper = new SqoopHCatImportHelper();
-    }
+  @Before
+  public void init() {
+    importHelper = new SqoopHCatImportHelper();
+  }
 
-    @Test
-    public void convertLongNumberIntoBigDecimalWithoutRounding() {
-        Long input = new Long("20160523112914897");
-        HiveDecimal actual = importHelper.convertNumberIntoHiveDecimal(input);
-        assertEquals(new BigDecimal("20160523112914897"), actual.bigDecimalValue());
+  @Test
+  public void convertLongNumberIntoBigDecimalWithoutRounding() {
+    Long input = new Long("20160523112914897");
+    HiveDecimal actual = importHelper.convertNumberIntoHiveDecimal(input);
+    assertEquals(new BigDecimal("20160523112914897"), actual.bigDecimalValue());
+  }
+  @Test
+  public void convertDoubleNumberIntoBigDecimalWithoutRounding() {
+    Double input = new Double("0.12345678912345678");
+    HiveDecimal actual = importHelper.convertNumberIntoHiveDecimal(input);
+    assertEquals(new BigDecimal("0.12345678912345678"),
+                 actual.bigDecimalValue());
+  }
 
-    }
-    @Test
-    public void convertDoubleNumberIntoBigDecimalWithoutRounding() {
-        Double input = new Double("0.12345678912345678");
-        HiveDecimal actual = importHelper.convertNumberIntoHiveDecimal(input);
-        assertEquals(new BigDecimal("0.12345678912345678"), actual.bigDecimalValue());
-    }
-
-    @Test
-    public void keepBigDecimalNumberIfInputIsBigDecimal() {
-        BigDecimal input = new BigDecimal("87658675864540185.123456789123456789");
-        HiveDecimal actual = importHelper.convertNumberIntoHiveDecimal(input);
-        assertEquals(new BigDecimal("87658675864540185.123456789123456789"), actual.bigDecimalValue());
-    }
-
+  @Test
+  public void keepBigDecimalNumberIfInputIsBigDecimal() {
+    BigDecimal input = new BigDecimal("87658675864540185.123456789123456789");
+    HiveDecimal actual = importHelper.convertNumberIntoHiveDecimal(input);
+    assertEquals(new BigDecimal("87658675864540185.123456789123456789"),
+                 actual.bigDecimalValue());
+  }
 }

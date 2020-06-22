@@ -18,6 +18,9 @@
 
 package org.apache.sqoop.manager.cubrid;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -27,22 +30,17 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.util.StringUtils;
+import org.apache.sqoop.SqoopOptions;
+import org.apache.sqoop.TestExport;
 import org.apache.sqoop.manager.CubridManager;
 import org.apache.sqoop.testcategories.thirdpartytest.CubridTest;
 import org.junit.After;
 import org.junit.Before;
-
-import org.apache.sqoop.SqoopOptions;
-import org.apache.sqoop.TestExport;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 
 /**
  * Test the CubridManager implementation.
@@ -72,237 +70,231 @@ import static org.junit.Assert.fail;
 @Category(CubridTest.class)
 public class CubridManagerExportTest extends TestExport {
 
-    public static final Log LOG = LogFactory.getLog(
-                                      CubridManagerExportTest.class.getName());
+  public static final Log LOG =
+      LogFactory.getLog(CubridManagerExportTest.class.getName());
 
-    static final String TABLE_PREFIX = "EXPORT_CUBRID_";
+  static final String TABLE_PREFIX = "EXPORT_CUBRID_";
 
-    // instance variables populated during setUp, used during tests.
-    private CubridManager manager;
-    private Connection conn;
+  // instance variables populated during setUp, used during tests.
+  private CubridManager manager;
+  private Connection conn;
 
-    @Override
-    protected Connection getConnection() {
-        return conn;
-    }
+  @Override
+  protected Connection getConnection() {
+    return conn;
+  }
 
-    @Override
-    protected boolean useHsqldbTestServer() {
-        return false;
-    }
+  @Override
+  protected boolean useHsqldbTestServer() {
+    return false;
+  }
 
-    @Override
-    protected String getConnectString() {
-        return CubridTestUtils.getConnectString();
-    }
+  @Override
+  protected String getConnectString() {
+    return CubridTestUtils.getConnectString();
+  }
 
-    @Override
-    protected String getTablePrefix() {
-        return TABLE_PREFIX;
-    }
+  @Override
+  protected String getTablePrefix() {
+    return TABLE_PREFIX;
+  }
 
-    @Override
-    protected String getDropTableStatement(String tableName) {
-        return "DROP TABLE IF EXISTS " + tableName;
-    }
+  @Override
+  protected String getDropTableStatement(String tableName) {
+    return "DROP TABLE IF EXISTS " + tableName;
+  }
 
-    /**
-     * Cubrid could not support --staging-table, Diable this test case.
-     */
-    @Override
-    @Test
-    public void testMultiTransactionWithStaging() throws IOException,
-        SQLException {
-        return;
-    }
+  /**
+   * Cubrid could not support --staging-table, Diable this test case.
+   */
+  @Override
+  @Test
+  public void testMultiTransactionWithStaging()
+      throws IOException, SQLException {
+    return;
+  }
 
-    /**
-     * Cubrid could not support --staging-table, Diable this test case.
-     */
-    @Override
-    @Test
-    public void testMultiMapTextExportWithStaging() throws IOException,
-        SQLException {
-        return;
-    }
+  /**
+   * Cubrid could not support --staging-table, Diable this test case.
+   */
+  @Override
+  @Test
+  public void testMultiMapTextExportWithStaging()
+      throws IOException, SQLException {
+    return;
+  }
 
-    public void createTableAndPopulateData(String table) {
-        String fulltableName = manager.escapeTableName(table);
+  public void createTableAndPopulateData(String table) {
+    String fulltableName = manager.escapeTableName(table);
 
-        Statement stmt = null;
+    Statement stmt = null;
 
-        // Drop the existing table, if there is one.
-        try {
-            conn = manager.getConnection();
-            stmt = conn.createStatement();
-            stmt.execute("DROP TABLE IF EXISTS " + fulltableName);
-            conn.commit();
-        } catch (SQLException sqlE) {
-            LOG.info("Table was not dropped: " + sqlE.getMessage());
-        } finally {
-            try {
-                if (null != stmt) {
-                    stmt.close();
-                }
-            } catch (Exception ex) {
-                LOG.warn("Exception while closing stmt", ex);
-            }
+    // Drop the existing table, if there is one.
+    try {
+      conn = manager.getConnection();
+      stmt = conn.createStatement();
+      stmt.execute("DROP TABLE IF EXISTS " + fulltableName);
+      conn.commit();
+    } catch (SQLException sqlE) {
+      LOG.info("Table was not dropped: " + sqlE.getMessage());
+    } finally {
+      try {
+        if (null != stmt) {
+          stmt.close();
         }
+      } catch (Exception ex) {
+        LOG.warn("Exception while closing stmt", ex);
+      }
+    }
 
-        // Create and populate table
-        try {
-            conn = manager.getConnection();
-            conn.setAutoCommit(false);
-            stmt = conn.createStatement();
+    // Create and populate table
+    try {
+      conn = manager.getConnection();
+      conn.setAutoCommit(false);
+      stmt = conn.createStatement();
 
-            // create the database table and populate it with data.
-            stmt.executeUpdate("CREATE TABLE "
-                               + fulltableName + " ("
-                               + "id INT NOT NULL, "
-                               + "name VARCHAR(24) NOT NULL, "
-                               + "salary FLOAT, " + "dept VARCHAR(32), "
-                               + "PRIMARY KEY (id))");
-            conn.commit();
-        } catch (SQLException sqlE) {
-            LOG.error("Encountered SQL Exception: ", sqlE);
-            sqlE.printStackTrace();
-            fail("SQLException when running test setUp(): " + sqlE);
-        } finally {
-            try {
-                if (null != stmt) {
-                    stmt.close();
-                }
-            } catch (Exception ex) {
-                LOG.warn(
-                    "Exception while closing connection/stmt", ex);
-            }
+      // create the database table and populate it with data.
+      stmt.executeUpdate("CREATE TABLE " + fulltableName + " ("
+                         + "id INT NOT NULL, "
+                         + "name VARCHAR(24) NOT NULL, "
+                         + "salary FLOAT, "
+                         + "dept VARCHAR(32), "
+                         + "PRIMARY KEY (id))");
+      conn.commit();
+    } catch (SQLException sqlE) {
+      LOG.error("Encountered SQL Exception: ", sqlE);
+      sqlE.printStackTrace();
+      fail("SQLException when running test setUp(): " + sqlE);
+    } finally {
+      try {
+        if (null != stmt) {
+          stmt.close();
         }
+      } catch (Exception ex) {
+        LOG.warn("Exception while closing connection/stmt", ex);
+      }
+    }
+  }
+
+  @Before
+  public void setUp() {
+    super.setUp();
+
+    SqoopOptions options =
+        new SqoopOptions(CubridTestUtils.getConnectString(), getTableName());
+    options.setUsername(CubridTestUtils.getCurrentUser());
+    options.setPassword(CubridTestUtils.getPassword());
+    this.manager = new CubridManager(options);
+    try {
+      this.conn = manager.getConnection();
+      this.conn.setAutoCommit(false);
+
+    } catch (SQLException sqlE) {
+      LOG.error(StringUtils.stringifyException(sqlE));
+      fail("Failed with sql exception in setup: " + sqlE);
+    }
+  }
+
+  @After
+  public void tearDown() {
+    super.tearDown();
+    try {
+      conn.close();
+      manager.close();
+    } catch (SQLException sqlE) {
+      LOG.error("Got SQLException: " + sqlE.toString());
+      fail("Got SQLException: " + sqlE.toString());
+    }
+  }
+
+  @Override
+  protected String[] getCodeGenArgv(String... extraArgs) {
+    String[] moreArgs = new String[extraArgs.length + 4];
+    int i = 0;
+    for (i = 0; i < extraArgs.length; i++) {
+      moreArgs[i] = extraArgs[i];
     }
 
-    @Before
-    public void setUp() {
-        super.setUp();
+    // Add username and password args.
+    moreArgs[i++] = "--username";
+    moreArgs[i++] = CubridTestUtils.getCurrentUser();
+    moreArgs[i++] = "--password";
+    moreArgs[i++] = CubridTestUtils.getPassword();
 
-        SqoopOptions options = new SqoopOptions(
-            CubridTestUtils.getConnectString(),
-            getTableName());
-        options.setUsername(CubridTestUtils.getCurrentUser());
-        options.setPassword(CubridTestUtils.getPassword());
-        this.manager = new CubridManager(options);
-        try {
-            this.conn = manager.getConnection();
-            this.conn.setAutoCommit(false);
+    return super.getCodeGenArgv(moreArgs);
+  }
 
-        } catch (SQLException sqlE) {
-            LOG.error(StringUtils.stringifyException(sqlE));
-            fail("Failed with sql exception in setup: " + sqlE);
+  @Override
+  protected String[] getArgv(boolean includeHadoopFlags, int rowsPerStatement,
+                             int statementsPerTx, String... additionalArgv) {
+
+    String[] subArgv = newStrArray(additionalArgv, "--username",
+                                   CubridTestUtils.getCurrentUser(),
+                                   "--password", CubridTestUtils.getPassword());
+    return super.getArgv(includeHadoopFlags, rowsPerStatement, statementsPerTx,
+                         subArgv);
+  }
+
+  protected void createTestFile(String filename, String[] lines)
+      throws IOException {
+    File testdir = new File(getWarehouseDir());
+    if (!testdir.exists()) {
+      testdir.mkdirs();
+    }
+    File file = new File(getWarehouseDir() + "/" + filename);
+    Writer output = new BufferedWriter(new FileWriter(file));
+    for (String line : lines) {
+      output.write(line);
+      output.write("\n");
+    }
+    output.close();
+  }
+
+  public static void assertRowCount(long expected, String tableName,
+                                    Connection connection) {
+    Statement stmt = null;
+    ResultSet rs = null;
+    try {
+      stmt = connection.createStatement();
+      rs = stmt.executeQuery("SELECT count(*) FROM " + tableName);
+      rs.next();
+      assertEquals(expected, rs.getLong(1));
+    } catch (SQLException e) {
+      LOG.error("Can't verify number of rows", e);
+      fail();
+    } finally {
+      try {
+        connection.commit();
+        if (stmt != null) {
+          stmt.close();
         }
-    }
-
-    @After
-    public void tearDown() {
-        super.tearDown();
-        try {
-            conn.close();
-            manager.close();
-        } catch (SQLException sqlE) {
-            LOG.error("Got SQLException: " + sqlE.toString());
-            fail("Got SQLException: " + sqlE.toString());
+        if (rs != null) {
+          rs.close();
         }
+      } catch (SQLException ex) {
+        LOG.info("Ignored exception in finally block.");
+      }
     }
+  }
 
-    @Override
-    protected String[] getCodeGenArgv(String... extraArgs) {
-        String[] moreArgs = new String[extraArgs.length + 4];
-        int i = 0;
-        for (i = 0; i < extraArgs.length; i++) {
-            moreArgs[i] = extraArgs[i];
-        }
+  public String escapeTableOrSchemaName(String tableName) {
+    return "\"" + tableName + "\"";
+  }
 
-        // Add username and password args.
-        moreArgs[i++] = "--username";
-        moreArgs[i++] = CubridTestUtils.getCurrentUser();
-        moreArgs[i++] = "--password";
-        moreArgs[i++] = CubridTestUtils.getPassword();
-
-        return super.getCodeGenArgv(moreArgs);
-    }
-
-    @Override
-    protected String[] getArgv(boolean includeHadoopFlags,
-                               int rowsPerStatement,
-                               int statementsPerTx, String... additionalArgv) {
-
-        String[] subArgv = newStrArray(additionalArgv, "--username",
-                                       CubridTestUtils.getCurrentUser(), "--password",
-                                       CubridTestUtils.getPassword());
-        return super.getArgv(includeHadoopFlags, rowsPerStatement,
-                             statementsPerTx, subArgv);
-    }
-
-    protected void createTestFile(String filename,
-                                  String[] lines)
-    throws IOException {
-        File testdir = new File(getWarehouseDir());
-        if (!testdir.exists()) {
-            testdir.mkdirs();
-        }
-        File file = new File(getWarehouseDir() + "/" + filename);
-        Writer output = new BufferedWriter(new FileWriter(file));
-        for (String line : lines) {
-            output.write(line);
-            output.write("\n");
-        }
-        output.close();
-    }
-
-    public static void assertRowCount(long expected,
-                                      String tableName,
-                                      Connection connection) {
-        Statement stmt = null;
-        ResultSet rs = null;
-        try {
-            stmt = connection.createStatement();
-            rs = stmt.executeQuery("SELECT count(*) FROM "
-                                   + tableName);
-            rs.next();
-            assertEquals(expected, rs.getLong(1));
-        } catch (SQLException e) {
-            LOG.error("Can't verify number of rows", e);
-            fail();
-        } finally {
-            try {
-                connection.commit();
-                if (stmt != null) {
-                    stmt.close();
-                }
-                if (rs != null) {
-                    rs.close();
-                }
-            } catch (SQLException ex) {
-                LOG.info("Ignored exception in finally block.");
-            }
-        }
-    }
-
-    public String escapeTableOrSchemaName(String tableName) {
-        return "\"" + tableName + "\"";
-    }
-
-    /** Make sure mixed update/insert export work correctly. */
-    @Test
-    public void testUpsertTextExport() throws IOException, SQLException {
-        final int TOTAL_RECORDS = 10;
-        createTextFile(0, TOTAL_RECORDS, false);
-        createTable();
-        // first time will be insert.
-        runExport(getArgv(true, 10, 10,
-                          newStrArray(null, "--update-key", "id",
-                                      "--update-mode", "allowinsert")));
-        // second time will be update.
-        runExport(getArgv(true, 10, 10,
-                          newStrArray(null, "--update-key", "id",
-                                      "--update-mode", "allowinsert")));
-        verifyExport(TOTAL_RECORDS);
-    }
+  /** Make sure mixed update/insert export work correctly. */
+  @Test
+  public void testUpsertTextExport() throws IOException, SQLException {
+    final int TOTAL_RECORDS = 10;
+    createTextFile(0, TOTAL_RECORDS, false);
+    createTable();
+    // first time will be insert.
+    runExport(getArgv(true, 10, 10,
+                      newStrArray(null, "--update-key", "id", "--update-mode",
+                                  "allowinsert")));
+    // second time will be update.
+    runExport(getArgv(true, 10, 10,
+                      newStrArray(null, "--update-key", "id", "--update-mode",
+                                  "allowinsert")));
+    verifyExport(TOTAL_RECORDS);
+  }
 }

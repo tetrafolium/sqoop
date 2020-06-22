@@ -44,63 +44,62 @@ import org.apache.sqoop.mapreduce.db.DBConfiguration;
 public class SQLServerResilientUpdateOutputFormat<K extends SqoopRecord, V>
     extends SQLServerResilientExportOutputFormat<K, V> {
 
-    private static final Log LOG = LogFactory.getLog(
-                                       SQLServerResilientUpdateOutputFormat.class);
+  private static final Log LOG =
+      LogFactory.getLog(SQLServerResilientUpdateOutputFormat.class);
 
-    @Override
-    /** {@inheritDoc} */
-    public void checkOutputSpecs(JobContext context)
-    throws IOException, InterruptedException {
-        Configuration conf = context.getConfiguration();
-        DBConfiguration dbConf = new DBConfiguration(conf);
+  @Override
+  /** {@inheritDoc} */
+  public void checkOutputSpecs(JobContext context)
+      throws IOException, InterruptedException {
+    Configuration conf = context.getConfiguration();
+    DBConfiguration dbConf = new DBConfiguration(conf);
 
-        // Sanity check all the configuration values we need.
-        if (null == conf.get(DBConfiguration.URL_PROPERTY)) {
-            throw new IOException("Database connection URL is not set.");
-        } else if (null == dbConf.getOutputTableName()) {
-            throw new IOException("Table name is not set for export.");
-        } else if (null == dbConf.getOutputFieldNames()) {
-            throw new IOException(
-                "Output field names are null.");
-        } else if (null == conf.get(ExportJobBase.SQOOP_EXPORT_UPDATE_COL_KEY)) {
-            throw new IOException("Update key column is not set for export.");
-        }
+    // Sanity check all the configuration values we need.
+    if (null == conf.get(DBConfiguration.URL_PROPERTY)) {
+      throw new IOException("Database connection URL is not set.");
+    } else if (null == dbConf.getOutputTableName()) {
+      throw new IOException("Table name is not set for export.");
+    } else if (null == dbConf.getOutputFieldNames()) {
+      throw new IOException("Output field names are null.");
+    } else if (null == conf.get(ExportJobBase.SQOOP_EXPORT_UPDATE_COL_KEY)) {
+      throw new IOException("Update key column is not set for export.");
     }
+  }
 
-    @Override
-    /** {@inheritDoc} */
-    public RecordWriter<K, V> getRecordWriter(TaskAttemptContext context)
-    throws IOException {
-        try {
-            return new SQLServerUpdateRecordWriter(context);
-        } catch (Exception e) {
-            throw new IOException(e);
-        }
+  @Override
+  /** {@inheritDoc} */
+  public RecordWriter<K, V> getRecordWriter(TaskAttemptContext context)
+      throws IOException {
+    try {
+      return new SQLServerUpdateRecordWriter(context);
+    } catch (Exception e) {
+      throw new IOException(e);
+    }
+  }
+
+  /**
+   * RecordWriter to write the output to UPDATE statements modifying rows
+   * in the database.
+   * The actual database updates are executed in a parallel thread in a
+   * resilient fashion which attempts to recover failed operations
+   */
+  public class SQLServerUpdateRecordWriter<K extends SqoopRecord, V>
+      extends SQLServerExportRecordWriter<K, V> {
+
+    private final Log LOG =
+        LogFactory.getLog(SQLServerUpdateRecordWriter.class);
+
+    public SQLServerUpdateRecordWriter(TaskAttemptContext context)
+        throws IOException {
+      super(context);
     }
 
     /**
-     * RecordWriter to write the output to UPDATE statements modifying rows
-     * in the database.
-     * The actual database updates are executed in a parallel thread in a
-     * resilient fashion which attempts to recover failed operations
+     * Initialize the thread used to perform the asynchronous DB operation
      */
-    public class SQLServerUpdateRecordWriter<K extends SqoopRecord, V>
-        extends SQLServerExportRecordWriter<K, V> {
-
-        private final Log LOG = LogFactory.getLog(
-                                    SQLServerUpdateRecordWriter.class);
-
-        public SQLServerUpdateRecordWriter(TaskAttemptContext context)
-        throws IOException {
-            super(context);
-        }
-
-        /**
-         * Initialize the thread used to perform the asynchronous DB operation
-         */
-        protected void initializeExecThread() throws IOException {
-            execThread = new SQLServerUpdateDBExecThread();
-            execThread.initialize(conf);
-        }
+    protected void initializeExecThread() throws IOException {
+      execThread = new SQLServerUpdateDBExecThread();
+      execThread.initialize(conf);
     }
+  }
 }

@@ -18,51 +18,52 @@
 
 package org.apache.sqoop.hive;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
+import java.io.IOException;
 import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.authentication.KerberosAuthenticator;
 import org.apache.sqoop.db.JdbcConnectionFactory;
 import org.apache.sqoop.db.decorator.KerberizedConnectionFactoryDecorator;
 
-import java.io.IOException;
-
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isEmpty;
-
 public class HiveServer2ConnectionFactoryInitializer {
 
-    public JdbcConnectionFactory createJdbcConnectionFactory(SqoopOptions sqoopOptions) {
-        String connectionUsername = determineConnectionUsername(sqoopOptions);
-        String connectionPassword = sqoopOptions.getHs2Password();
-        JdbcConnectionFactory connectionFactory = new HiveServer2ConnectionFactory(
-            sqoopOptions.getHs2Url(),
-            connectionUsername,
-            connectionPassword);
-        if (connectionPassword == null && useKerberizedConnection(sqoopOptions)) {
-            KerberosAuthenticator authenticator = createKerberosAuthenticator(sqoopOptions);
-            connectionFactory = new KerberizedConnectionFactoryDecorator(connectionFactory, authenticator);
-        }
-        return connectionFactory;
+  public JdbcConnectionFactory
+  createJdbcConnectionFactory(SqoopOptions sqoopOptions) {
+    String connectionUsername = determineConnectionUsername(sqoopOptions);
+    String connectionPassword = sqoopOptions.getHs2Password();
+    JdbcConnectionFactory connectionFactory = new HiveServer2ConnectionFactory(
+        sqoopOptions.getHs2Url(), connectionUsername, connectionPassword);
+    if (connectionPassword == null && useKerberizedConnection(sqoopOptions)) {
+      KerberosAuthenticator authenticator =
+          createKerberosAuthenticator(sqoopOptions);
+      connectionFactory = new KerberizedConnectionFactoryDecorator(
+          connectionFactory, authenticator);
     }
+    return connectionFactory;
+  }
 
-    private String determineConnectionUsername(SqoopOptions sqoopOptions) {
-        if (!isEmpty(sqoopOptions.getHs2User())) {
-            return sqoopOptions.getHs2User();
-        }
-        try {
-            return UserGroupInformation.getLoginUser().getUserName();
-        } catch (IOException e) {
-            throw new RuntimeException("Unable to determine login user.", e);
-        }
+  private String determineConnectionUsername(SqoopOptions sqoopOptions) {
+    if (!isEmpty(sqoopOptions.getHs2User())) {
+      return sqoopOptions.getHs2User();
     }
-
-    private KerberosAuthenticator createKerberosAuthenticator(SqoopOptions sqoopOptions) {
-        return new KerberosAuthenticator(sqoopOptions.getConf(), sqoopOptions.getHs2User(), sqoopOptions.getHs2Keytab());
+    try {
+      return UserGroupInformation.getLoginUser().getUserName();
+    } catch (IOException e) {
+      throw new RuntimeException("Unable to determine login user.", e);
     }
+  }
 
-    private boolean useKerberizedConnection(SqoopOptions sqoopOptions) {
-        return !isBlank(sqoopOptions.getHs2Keytab());
-    }
+  private KerberosAuthenticator
+  createKerberosAuthenticator(SqoopOptions sqoopOptions) {
+    return new KerberosAuthenticator(sqoopOptions.getConf(),
+                                     sqoopOptions.getHs2User(),
+                                     sqoopOptions.getHs2Keytab());
+  }
 
+  private boolean useKerberizedConnection(SqoopOptions sqoopOptions) {
+    return !isBlank(sqoopOptions.getHs2Keytab());
+  }
 }

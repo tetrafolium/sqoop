@@ -24,31 +24,29 @@ import org.apache.commons.logging.LogFactory;
  * Wraps commons logging.
  */
 public final class OraOopLogFactory {
-    private OraOopLogFactory() {
-    }
+  private OraOopLogFactory() {}
 
-    /**
-     * Interface for log entries including caching for test purposes.
-     */
-    public interface OraOopLog2 {
+  /**
+   * Interface for log entries including caching for test purposes.
+   */
+  public interface OraOopLog2 {
 
-        boolean getCacheLogEntries();
+    boolean getCacheLogEntries();
 
-        void setCacheLogEntries(boolean value);
+    void setCacheLogEntries(boolean value);
 
-        String getLogEntries();
+    String getLogEntries();
 
-        void clearCache();
-    }
+    void clearCache();
+  }
 
-    public static OraOopLog getLog(Class<?> clazz) {
+  public static OraOopLog getLog(Class<?> clazz) {
 
-        return OraOopLogFactory.getLog(clazz.getName());
-    }
+    return OraOopLogFactory.getLog(clazz.getName());
+  }
 
-    public static OraOopLog getLog(String logName) {
+  public static OraOopLog getLog(String logName) {
 
-        return new OraOopLog(LogFactory.getLog(logName));
-    }
-
+    return new OraOopLog(LogFactory.getLog(logName));
+  }
 }

@@ -18,9 +18,9 @@
 package org.apache.sqoop.testcategories.sqooptest;
 
 /**
- * An integration test shall test if independently developed classes work together correctly.
- * An integration test checks a whole scenario and thus may start mini clusters or embedded databases and may connect to
- * external resources like RDBMS instances.
+ * An integration test shall test if independently developed classes work
+ * together correctly. An integration test checks a whole scenario and thus may
+ * start mini clusters or embedded databases and may connect to external
+ * resources like RDBMS instances.
  */
-public interface IntegrationTest extends SqoopTest {
-}
+public interface IntegrationTest extends SqoopTest {}

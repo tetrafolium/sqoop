@@ -21,30 +21,30 @@ package org.apache.sqoop.manager.oracle.util;
 /**
  * Generates test data for Oracle INTERVAL YEAR TO MONTH columns.
  */
-public class IntervalYearMonthGenerator extends
-    OraOopTestDataGenerator<String> {
-    private final int precision;
-    private final int minYear;
-    private final int maxYear;
+public class IntervalYearMonthGenerator
+    extends OraOopTestDataGenerator<String> {
+  private final int precision;
+  private final int minYear;
+  private final int maxYear;
 
-    /**
-     * Create a generator that will generate intervals with the specified
-     * precision for years.
-     *
-     * @param precision
-     *          Number of decimal digits in the years part of each interval
-     */
-    public IntervalYearMonthGenerator(int precision) {
-        super();
-        this.precision = precision;
-        this.minYear = -(int) Math.pow(10, precision) + 1;
-        this.maxYear = (int) Math.pow(10, precision) - 1;
-    }
+  /**
+   * Create a generator that will generate intervals with the specified
+   * precision for years.
+   *
+   * @param precision
+   *          Number of decimal digits in the years part of each interval
+   */
+  public IntervalYearMonthGenerator(int precision) {
+    super();
+    this.precision = precision;
+    this.minYear = -(int)Math.pow(10, precision) + 1;
+    this.maxYear = (int)Math.pow(10, precision) - 1;
+  }
 
-    @Override
-    public String next() {
-        int years = minYear + rng.nextInt(maxYear - minYear + 1);
-        int months = rng.nextInt(12);
-        return String.format("%+0" + precision + "d-%02d", years, months);
-    }
+  @Override
+  public String next() {
+    int years = minYear + rng.nextInt(maxYear - minYear + 1);
+    int months = rng.nextInt(12);
+    return String.format("%+0" + precision + "d-%02d", years, months);
+  }
 }

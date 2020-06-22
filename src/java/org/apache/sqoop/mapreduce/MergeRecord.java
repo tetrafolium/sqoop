@@ -34,98 +34,90 @@ import org.apache.sqoop.lib.SqoopRecord;
  * record rather than an old one, if a new one is available.
  */
 public class MergeRecord implements Configurable, Writable {
-    private SqoopRecord sqoopRecord;
-    private boolean isNew;
-    private Configuration config;
+  private SqoopRecord sqoopRecord;
+  private boolean isNew;
+  private Configuration config;
 
-    /** Construct an empty MergeRecord. */
-    public MergeRecord() {
-        this.sqoopRecord = null;
-        this.isNew = false;
-        this.config = new Configuration();
+  /** Construct an empty MergeRecord. */
+  public MergeRecord() {
+    this.sqoopRecord = null;
+    this.isNew = false;
+    this.config = new Configuration();
+  }
+
+  /**
+   * Construct a MergeRecord with all fields initialized.
+   */
+  public MergeRecord(SqoopRecord sr, boolean recordIsNew) {
+    this.sqoopRecord = sr;
+    this.isNew = recordIsNew;
+    this.config = new Configuration();
+  }
+
+  @Override
+  /** {@inheritDoc} */
+  public void setConf(Configuration conf) {
+    this.config = conf;
+  }
+
+  @Override
+  /** {@inheritDoc} */
+  public Configuration getConf() {
+    return this.config;
+  }
+
+  /** @return true if this record came from the "new" dataset. */
+  public boolean isNewRecord() { return isNew; }
+
+  /**
+   * Set the isNew field to 'newVal'.
+   */
+  public void setNewRecord(boolean newVal) { this.isNew = newVal; }
+
+  /**
+   * @return the underlying SqoopRecord we're shipping.
+   */
+  public SqoopRecord getSqoopRecord() { return this.sqoopRecord; }
+
+  /**
+   * Set the SqoopRecord instance we should pass from the mapper to the
+   * reducer.
+   */
+  public void setSqoopRecord(SqoopRecord record) { this.sqoopRecord = record; }
+
+  @Override
+  /**
+   * {@inheritDoc}
+   */
+  public void readFields(DataInput in) throws IOException {
+    this.isNew = in.readBoolean();
+    String className = Text.readString(in);
+    if (null == this.sqoopRecord) {
+      // If we haven't already instantiated an inner SqoopRecord, do so here.
+      try {
+        Class<? extends SqoopRecord> recordClass =
+            (Class<? extends SqoopRecord>)config.getClassByName(className);
+        this.sqoopRecord = recordClass.newInstance();
+      } catch (Exception e) {
+        throw new IOException(e);
+      }
     }
 
-    /**
-     * Construct a MergeRecord with all fields initialized.
-     */
-    public MergeRecord(SqoopRecord sr, boolean recordIsNew) {
-        this.sqoopRecord = sr;
-        this.isNew = recordIsNew;
-        this.config = new Configuration();
-    }
+    this.sqoopRecord.readFields(in);
+  }
 
-    @Override
-    /** {@inheritDoc} */
-    public void setConf(Configuration conf) {
-        this.config = conf;
-    }
+  @Override
+  /**
+   * {@inheritDoc}
+   */
+  public void write(DataOutput out) throws IOException {
+    out.writeBoolean(this.isNew);
+    Text.writeString(out, this.sqoopRecord.getClass().getName());
+    this.sqoopRecord.write(out);
+  }
 
-    @Override
-    /** {@inheritDoc} */
-    public Configuration getConf() {
-        return this.config;
-    }
-
-    /** @return true if this record came from the "new" dataset. */
-    public boolean isNewRecord() {
-        return isNew;
-    }
-
-    /**
-     * Set the isNew field to 'newVal'.
-     */
-    public void setNewRecord(boolean newVal) {
-        this.isNew = newVal;
-    }
-
-    /**
-     * @return the underlying SqoopRecord we're shipping.
-     */
-    public SqoopRecord getSqoopRecord() {
-        return this.sqoopRecord;
-    }
-
-    /**
-     * Set the SqoopRecord instance we should pass from the mapper to the
-     * reducer.
-     */
-    public void setSqoopRecord(SqoopRecord record) {
-        this.sqoopRecord = record;
-    }
-
-    @Override
-    /**
-     * {@inheritDoc}
-     */
-    public void readFields(DataInput in) throws IOException {
-        this.isNew = in.readBoolean();
-        String className = Text.readString(in);
-        if (null == this.sqoopRecord) {
-            // If we haven't already instantiated an inner SqoopRecord, do so here.
-            try {
-                Class<? extends SqoopRecord> recordClass =
-                    (Class<? extends SqoopRecord>) config.getClassByName(className);
-                this.sqoopRecord = recordClass.newInstance();
-            } catch (Exception e) {
-                throw new IOException(e);
-            }
-        }
-
-        this.sqoopRecord.readFields(in);
-    }
-
-    @Override
-    /**
-     * {@inheritDoc}
-     */
-    public void write(DataOutput out) throws IOException {
-        out.writeBoolean(this.isNew);
-        Text.writeString(out, this.sqoopRecord.getClass().getName());
-        this.sqoopRecord.write(out);
-    }
-
-    @Override
-    public String toString() {
-        return "" + this.sqoopRecord;
-    }
+  @Override
+  public String toString() {
+    return "" + this.sqoopRecord;
+  }
 }

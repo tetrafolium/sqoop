@@ -24,13 +24,13 @@ import java.io.IOException;
  */
 public interface FieldMapProcessor {
 
-    /**
-     * Allow arbitrary processing of a FieldMappable object.
-     * @param record an object which can emit a map of its field names to values.
-     * @throws IOException if the processor encounters an IO error when
-     * operating on this object.
-     * @throws ProcessingException if the FieldMapProcessor encounters
-     * a general processing error when operating on this object.
-     */
-    void accept(FieldMappable record) throws IOException, ProcessingException;
+  /**
+   * Allow arbitrary processing of a FieldMappable object.
+   * @param record an object which can emit a map of its field names to values.
+   * @throws IOException if the processor encounters an IO error when
+   * operating on this object.
+   * @throws ProcessingException if the FieldMapProcessor encounters
+   * a general processing error when operating on this object.
+   */
+  void accept(FieldMappable record) throws IOException, ProcessingException;
 }

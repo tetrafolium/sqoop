@@ -18,6 +18,9 @@
 
 package org.apache.sqoop;
 
+import static java.util.Collections.emptyList;
+import static org.junit.Assert.assertEquals;
+
 import java.io.BufferedWriter;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -29,16 +32,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-
 import org.apache.sqoop.testutil.CommonArgs;
 import org.apache.sqoop.testutil.ExportJobTestCase;
 import org.junit.Test;
-
-import static java.util.Collections.emptyList;
-import static org.junit.Assert.assertEquals;
 
 /**
  * Test exporting lines that are created via both options of
@@ -46,73 +44,71 @@ import static org.junit.Assert.assertEquals;
  */
 public class TestBigDecimalExport extends ExportJobTestCase {
 
-    private void runBigDecimalExport(String line)
-    throws IOException, SQLException {
-        FileSystem fs = FileSystem.get(getConf());
-        Path tablePath = getTablePath();
-        fs.mkdirs(tablePath);
-        Path filePath = getDataFilePath();
-        DataOutputStream stream = fs.create(filePath);
-        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(stream));
-        writer.write(line);
-        writer.close();
-        String[] types =
-        { "DECIMAL", "NUMERIC" };
-        createTableWithColTypes(types, emptyList());
+  private void runBigDecimalExport(String line)
+      throws IOException, SQLException {
+    FileSystem fs = FileSystem.get(getConf());
+    Path tablePath = getTablePath();
+    fs.mkdirs(tablePath);
+    Path filePath = getDataFilePath();
+    DataOutputStream stream = fs.create(filePath);
+    BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(stream));
+    writer.write(line);
+    writer.close();
+    String[] types = {"DECIMAL", "NUMERIC"};
+    createTableWithColTypes(types, emptyList());
 
-        List<String> args = new ArrayList<String>();
+    List<String> args = new ArrayList<String>();
 
-        CommonArgs.addHadoopFlags(args);
+    CommonArgs.addHadoopFlags(args);
 
-        args.add("--table");
-        args.add(getTableName());
-        args.add("--export-dir");
-        args.add(tablePath.toString());
-        args.add("--connect");
-        args.add(getConnectString());
-        args.add("-m");
-        args.add("1");
+    args.add("--table");
+    args.add(getTableName());
+    args.add("--export-dir");
+    args.add(tablePath.toString());
+    args.add("--connect");
+    args.add(getConnectString());
+    args.add("-m");
+    args.add("1");
 
-        runExport(args.toArray(new String[args.size()]));
+    runExport(args.toArray(new String[args.size()]));
 
-        BigDecimal actual1 = null;
-        BigDecimal actual2 = null;
+    BigDecimal actual1 = null;
+    BigDecimal actual2 = null;
 
-        Connection conn = getConnection();
+    Connection conn = getConnection();
+    try {
+      PreparedStatement stmt =
+          conn.prepareStatement("SELECT * FROM " + getTableName());
+      try {
+        ResultSet rs = stmt.executeQuery();
         try {
-            PreparedStatement stmt = conn.prepareStatement("SELECT * FROM "
-                                     + getTableName());
-            try {
-                ResultSet rs = stmt.executeQuery();
-                try {
-                    rs.next();
-                    actual1 = rs.getBigDecimal(1);
-                    actual2 = rs.getBigDecimal(2);
-                } finally {
-                    rs.close();
-                }
-            } finally {
-                stmt.close();
-            }
+          rs.next();
+          actual1 = rs.getBigDecimal(1);
+          actual2 = rs.getBigDecimal(2);
         } finally {
-            conn.close();
+          rs.close();
         }
-
-        BigDecimal expected1 = new BigDecimal("0.000001");
-        BigDecimal expected2 = new BigDecimal("0.0000001");
-
-        assertEquals(expected1, actual1);
-        assertEquals(expected2, actual2);
+      } finally {
+        stmt.close();
+      }
+    } finally {
+      conn.close();
     }
 
-    @Test
-    public void testBigDecimalDefault() throws IOException, SQLException {
-        runBigDecimalExport("0.000001,0.0000001");
-    }
+    BigDecimal expected1 = new BigDecimal("0.000001");
+    BigDecimal expected2 = new BigDecimal("0.0000001");
 
-    @Test
-    public void testBigDecimalNoFormat() throws IOException, SQLException {
-        runBigDecimalExport("0.000001,1E-7");
-    }
+    assertEquals(expected1, actual1);
+    assertEquals(expected2, actual2);
+  }
 
+  @Test
+  public void testBigDecimalDefault() throws IOException, SQLException {
+    runBigDecimalExport("0.000001,0.0000001");
+  }
+
+  @Test
+  public void testBigDecimalNoFormat() throws IOException, SQLException {
+    runBigDecimalExport("0.000001,1E-7");
+  }
 }

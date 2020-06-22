@@ -18,25 +18,23 @@
 
 package org.apache.sqoop.manager.mysql;
 
+import static org.junit.Assert.fail;
+
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.util.StringUtils;
+import org.apache.sqoop.SqoopOptions;
+import org.apache.sqoop.TestExport;
 import org.apache.sqoop.manager.MySQLManager;
 import org.apache.sqoop.testcategories.thirdpartytest.MysqlTest;
 import org.junit.After;
 import org.junit.Before;
-
-import org.apache.sqoop.SqoopOptions;
-import org.apache.sqoop.TestExport;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
-
-import static org.junit.Assert.fail;
 
 /**
  * Test the MySQLManager implementation's exportJob() functionality.
@@ -46,145 +44,141 @@ import static org.junit.Assert.fail;
 @Category(MysqlTest.class)
 public class JdbcMySQLExportTest extends TestExport {
 
-    public static final Log LOG = LogFactory.getLog(
-                                      JdbcMySQLExportTest.class.getName());
+  public static final Log LOG =
+      LogFactory.getLog(JdbcMySQLExportTest.class.getName());
 
-    static final String TABLE_PREFIX = "EXPORT_MYSQL_J_";
+  static final String TABLE_PREFIX = "EXPORT_MYSQL_J_";
 
-    // instance variables populated during setUp, used during tests.
-    private MySQLManager manager;
-    private Connection conn;
-    private MySQLTestUtils mySqlTestUtils = new MySQLTestUtils();
+  // instance variables populated during setUp, used during tests.
+  private MySQLManager manager;
+  private Connection conn;
+  private MySQLTestUtils mySqlTestUtils = new MySQLTestUtils();
 
-    @Override
-    protected Connection getConnection() {
-        return conn;
+  @Override
+  protected Connection getConnection() {
+    return conn;
+  }
+
+  // MySQL allows multi-row INSERT statements.
+  @Override
+  protected int getMaxRowsPerStatement() {
+    return 1000;
+  }
+
+  @Override
+  protected boolean useHsqldbTestServer() {
+    return false;
+  }
+
+  @Override
+  protected String getConnectString() {
+    return mySqlTestUtils.getMySqlConnectString();
+  }
+
+  @Override
+  protected String getTablePrefix() {
+    return TABLE_PREFIX;
+  }
+
+  @Override
+  protected String getDropTableStatement(String tableName) {
+    return "DROP TABLE IF EXISTS " + tableName;
+  }
+
+  @Before
+  public void setUp() {
+    super.setUp();
+
+    SqoopOptions options = new SqoopOptions(
+        mySqlTestUtils.getMySqlConnectString(), getTableName());
+    options.setUsername(mySqlTestUtils.getUserName());
+    mySqlTestUtils.addPasswordIfIsSet(options);
+    this.manager = new MySQLManager(options);
+    try {
+      this.conn = manager.getConnection();
+      this.conn.setAutoCommit(false);
+    } catch (SQLException sqlE) {
+      LOG.error(StringUtils.stringifyException(sqlE));
+      fail("Failed with sql exception in setup: " + sqlE);
+    }
+  }
+
+  @After
+  public void tearDown() {
+    try {
+      Statement stmt = conn.createStatement();
+      stmt.execute(getDropTableStatement(getTableName()));
+      stmt.execute(getDropTableStatement(getStagingTableName()));
+    } catch (SQLException e) {
+      LOG.error("Can't clean up the database:", e);
     }
 
-    // MySQL allows multi-row INSERT statements.
-    @Override
-    protected int getMaxRowsPerStatement() {
-        return 1000;
+    super.tearDown();
+
+    if (null != this.conn) {
+      try {
+        this.conn.close();
+      } catch (SQLException sqlE) {
+        LOG.error("Got SQLException closing conn: " + sqlE.toString());
+      }
     }
+  }
 
-    @Override
-    protected boolean useHsqldbTestServer() {
-        return false;
-    }
+  @Override
+  protected String[] getCodeGenArgv(String... extraArgs) {
+    return super.getCodeGenArgv(
+        mySqlTestUtils.addUserNameAndPasswordToArgs(extraArgs));
+  }
 
-    @Override
-    protected String getConnectString() {
-        return mySqlTestUtils.getMySqlConnectString();
-    }
+  @Override
+  protected String[] getArgv(boolean includeHadoopFlags, int rowsPerStatement,
+                             int statementsPerTx, String... additionalArgv) {
 
-    @Override
-    protected String getTablePrefix() {
-        return TABLE_PREFIX;
-    }
+    String[] subArgv = newStrArray(
+        mySqlTestUtils.addUserNameAndPasswordToArgs(additionalArgv));
+    return super.getArgv(includeHadoopFlags, rowsPerStatement, statementsPerTx,
+                         subArgv);
+  }
 
-    @Override
-    protected String getDropTableStatement(String tableName) {
-        return "DROP TABLE IF EXISTS " + tableName;
-    }
+  @Test
+  public void testIntColInBatchMode() throws IOException, SQLException {
+    final int TOTAL_RECORDS = 10;
 
-    @Before
-    public void setUp() {
-        super.setUp();
+    // generate a column equivalent to rownum.
+    ColumnGenerator gen = new ColumnGenerator() {
+      public String getExportText(int rowNum) { return "" + rowNum; }
+      public String getVerifyText(int rowNum) { return "" + rowNum; }
+      public String getType() { return "INTEGER"; }
+    };
 
-        SqoopOptions options = new SqoopOptions(mySqlTestUtils.getMySqlConnectString(),
-                                                getTableName());
-        options.setUsername(mySqlTestUtils.getUserName());
-        mySqlTestUtils.addPasswordIfIsSet(options);
-        this.manager = new MySQLManager(options);
-        try {
-            this.conn = manager.getConnection();
-            this.conn.setAutoCommit(false);
-        } catch (SQLException sqlE) {
-            LOG.error(StringUtils.stringifyException(sqlE));
-            fail("Failed with sql exception in setup: " + sqlE);
-        }
-    }
+    createTextFile(0, TOTAL_RECORDS, false, gen);
+    createTable(gen);
+    runExport(getArgv(true, 10, 10, "--batch"));
+    verifyExport(TOTAL_RECORDS);
+    assertColMinAndMax(forIdx(0), gen);
+  }
 
-    @After
-    public void tearDown() {
-        try {
-            Statement stmt = conn.createStatement();
-            stmt.execute(getDropTableStatement(getTableName()));
-            stmt.execute(getDropTableStatement(getStagingTableName()));
-        } catch(SQLException e) {
-            LOG.error("Can't clean up the database:", e);
-        }
+  @Test
+  public void testUpsert() throws IOException, SQLException {
+    final int TOTAL_RECORDS = 10;
 
-        super.tearDown();
+    createTextFile(0, TOTAL_RECORDS, false);
+    createTable();
 
-        if (null != this.conn) {
-            try {
-                this.conn.close();
-            } catch (SQLException sqlE) {
-                LOG.error("Got SQLException closing conn: " + sqlE.toString());
-            }
-        }
-    }
+    // Insert only
+    runExport(getArgv(true, 10, 10, "--update-key", "id", "--update-mode",
+                      "allowinsert"));
+    verifyExport(TOTAL_RECORDS);
 
-    @Override
-    protected String [] getCodeGenArgv(String... extraArgs) {
-        return super.getCodeGenArgv(mySqlTestUtils.addUserNameAndPasswordToArgs(extraArgs));
-    }
+    // Update only
+    runExport(getArgv(true, 10, 10, "--update-key", "id", "--update-mode",
+                      "allowinsert"));
+    verifyExport(TOTAL_RECORDS);
 
-    @Override
-    protected String [] getArgv(boolean includeHadoopFlags,
-                                int rowsPerStatement, int statementsPerTx, String... additionalArgv) {
-
-        String [] subArgv = newStrArray(mySqlTestUtils.addUserNameAndPasswordToArgs(additionalArgv));
-        return super.getArgv(includeHadoopFlags, rowsPerStatement,
-                             statementsPerTx, subArgv);
-    }
-
-    @Test
-    public void testIntColInBatchMode() throws IOException, SQLException {
-        final int TOTAL_RECORDS = 10;
-
-        // generate a column equivalent to rownum.
-        ColumnGenerator gen = new ColumnGenerator() {
-            public String getExportText(int rowNum) {
-                return "" + rowNum;
-            }
-            public String getVerifyText(int rowNum) {
-                return "" + rowNum;
-            }
-            public String getType() {
-                return "INTEGER";
-            }
-        };
-
-        createTextFile(0, TOTAL_RECORDS, false, gen);
-        createTable(gen);
-        runExport(getArgv(true, 10, 10, "--batch"));
-        verifyExport(TOTAL_RECORDS);
-        assertColMinAndMax(forIdx(0), gen);
-    }
-
-    @Test
-    public void testUpsert() throws IOException, SQLException {
-        final int TOTAL_RECORDS = 10;
-
-        createTextFile(0, TOTAL_RECORDS, false);
-        createTable();
-
-        // Insert only
-        runExport(getArgv(true, 10, 10, "--update-key", "id",
-                          "--update-mode", "allowinsert"));
-        verifyExport(TOTAL_RECORDS);
-
-        // Update only
-        runExport(getArgv(true, 10, 10, "--update-key", "id",
-                          "--update-mode", "allowinsert"));
-        verifyExport(TOTAL_RECORDS);
-
-        // Insert & update
-        createTextFile(0, TOTAL_RECORDS * 2, false);
-        runExport(getArgv(true, 10, 10, "--update-key", "id",
-                          "--update-mode", "allowinsert"));
-        verifyExport(TOTAL_RECORDS * 2);
-    }
+    // Insert & update
+    createTextFile(0, TOTAL_RECORDS * 2, false);
+    runExport(getArgv(true, 10, 10, "--update-key", "id", "--update-mode",
+                      "allowinsert"));
+    verifyExport(TOTAL_RECORDS * 2);
+  }
 }

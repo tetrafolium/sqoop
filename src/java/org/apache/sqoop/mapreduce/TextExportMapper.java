@@ -19,6 +19,8 @@
 package org.apache.sqoop.mapreduce;
 
 import java.io.IOException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.NullWritable;
@@ -27,8 +29,6 @@ import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import org.apache.hadoop.util.ReflectionUtils;
 import org.apache.sqoop.lib.SqoopRecord;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * Converts an input record from a string representation to a parsed Sqoop
@@ -38,87 +38,89 @@ import org.apache.commons.logging.LogFactory;
 public class TextExportMapper
     extends AutoProgressMapper<LongWritable, Text, SqoopRecord, NullWritable> {
 
-    private static final String DUMP_DATA_ON_ERROR_KEY = "org.apache.sqoop.export.text.dump_data_on_error";
+  private static final String DUMP_DATA_ON_ERROR_KEY =
+      "org.apache.sqoop.export.text.dump_data_on_error";
 
-    public static final Log LOG =
-        LogFactory.getLog(TextExportMapper.class.getName());
+  public static final Log LOG =
+      LogFactory.getLog(TextExportMapper.class.getName());
 
-    private SqoopRecord recordImpl;
+  private SqoopRecord recordImpl;
 
-    boolean enableDataDumpOnError;
+  boolean enableDataDumpOnError;
 
-    public TextExportMapper() {
+  public TextExportMapper() {}
+
+  protected void setup(Context context)
+      throws IOException, InterruptedException {
+    super.setup(context);
+
+    Configuration conf = context.getConfiguration();
+
+    // Instantiate a copy of the user's class to hold and parse the record.
+    String recordClassName =
+        conf.get(ExportJobBase.SQOOP_EXPORT_TABLE_CLASS_KEY);
+    if (null == recordClassName) {
+      throw new IOException("Export table class name (" +
+                            ExportJobBase.SQOOP_EXPORT_TABLE_CLASS_KEY +
+                            ") is not set!");
     }
 
-    protected void setup(Context context)
-    throws IOException, InterruptedException {
-        super.setup(context);
-
-        Configuration conf = context.getConfiguration();
-
-        // Instantiate a copy of the user's class to hold and parse the record.
-        String recordClassName = conf.get(
-                                     ExportJobBase.SQOOP_EXPORT_TABLE_CLASS_KEY);
-        if (null == recordClassName) {
-            throw new IOException("Export table class name ("
-                                  + ExportJobBase.SQOOP_EXPORT_TABLE_CLASS_KEY
-                                  + ") is not set!");
-        }
-
-        try {
-            Class cls = Class.forName(recordClassName, true,
-                                      Thread.currentThread().getContextClassLoader());
-            recordImpl = (SqoopRecord) ReflectionUtils.newInstance(cls, conf);
-        } catch (ClassNotFoundException cnfe) {
-            throw new IOException(cnfe);
-        }
-
-        if (null == recordImpl) {
-            throw new IOException("Could not instantiate object of type "
-                                  + recordClassName);
-        }
-
-        enableDataDumpOnError = conf.getBoolean(DUMP_DATA_ON_ERROR_KEY, false);
+    try {
+      Class cls = Class.forName(recordClassName, true,
+                                Thread.currentThread().getContextClassLoader());
+      recordImpl = (SqoopRecord)ReflectionUtils.newInstance(cls, conf);
+    } catch (ClassNotFoundException cnfe) {
+      throw new IOException(cnfe);
     }
 
-
-    public void map(LongWritable key, Text val, Context context)
-    throws IOException, InterruptedException {
-        try {
-            recordImpl.parse(val);
-            context.write(recordImpl, NullWritable.get());
-        } catch (Exception e) {
-            // Something bad has happened
-            LOG.error("");
-            LOG.error("Exception raised during data export");
-            LOG.error("");
-
-            LOG.error("Exception: ", e);
-            if(enableDataDumpOnError) {
-                LOG.error("On input: " + val);
-            } else {
-                LOG.error("Dumping data is not allowed by default, please run the job with -D" + DUMP_DATA_ON_ERROR_KEY + "=true to get corrupted line.");
-            }
-
-            InputSplit is = context.getInputSplit();
-            if (is instanceof FileSplit) {
-                LOG.error("On input file: " + ((FileSplit)is).getPath());
-            } else if (is instanceof CombineFileSplit) {
-                LOG.error("On input file: "
-                          + context.getConfiguration().get("map.input.file"));
-            }
-            LOG.error("At position " + key);
-
-            LOG.error("");
-            LOG.error("Currently processing split:");
-            LOG.error(is);
-
-            LOG.error("");
-            LOG.error("This issue might not necessarily be caused by current input");
-            LOG.error("due to the batching nature of export.");
-            LOG.error("");
-
-            throw new IOException("Can't export data, please check failed map task logs", e);
-        }
+    if (null == recordImpl) {
+      throw new IOException("Could not instantiate object of type " +
+                            recordClassName);
     }
+
+    enableDataDumpOnError = conf.getBoolean(DUMP_DATA_ON_ERROR_KEY, false);
+  }
+
+  public void map(LongWritable key, Text val, Context context)
+      throws IOException, InterruptedException {
+    try {
+      recordImpl.parse(val);
+      context.write(recordImpl, NullWritable.get());
+    } catch (Exception e) {
+      // Something bad has happened
+      LOG.error("");
+      LOG.error("Exception raised during data export");
+      LOG.error("");
+
+      LOG.error("Exception: ", e);
+      if (enableDataDumpOnError) {
+        LOG.error("On input: " + val);
+      } else {
+        LOG.error(
+            "Dumping data is not allowed by default, please run the job with -D" +
+            DUMP_DATA_ON_ERROR_KEY + "=true to get corrupted line.");
+      }
+
+      InputSplit is = context.getInputSplit();
+      if (is instanceof FileSplit) {
+        LOG.error("On input file: " + ((FileSplit)is).getPath());
+      } else if (is instanceof CombineFileSplit) {
+        LOG.error("On input file: " +
+                  context.getConfiguration().get("map.input.file"));
+      }
+      LOG.error("At position " + key);
+
+      LOG.error("");
+      LOG.error("Currently processing split:");
+      LOG.error(is);
+
+      LOG.error("");
+      LOG.error("This issue might not necessarily be caused by current input");
+      LOG.error("due to the batching nature of export.");
+      LOG.error("");
+
+      throw new IOException(
+          "Can't export data, please check failed map task logs", e);
+    }
+  }
 }

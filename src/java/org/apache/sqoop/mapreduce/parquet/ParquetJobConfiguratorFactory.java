@@ -19,8 +19,9 @@
 package org.apache.sqoop.mapreduce.parquet;
 
 /**
- * This interface is an abstract factory of objects which configure Sqoop Parquet jobs.
- * Every product is responsible for configuring different types of Sqoop jobs.
+ * This interface is an abstract factory of objects which configure Sqoop
+ * Parquet jobs. Every product is responsible for configuring different types of
+ * Sqoop jobs.
  *
  * @see ParquetImportJobConfigurator
  * @see ParquetExportJobConfigurator
@@ -28,10 +29,9 @@ package org.apache.sqoop.mapreduce.parquet;
  */
 public interface ParquetJobConfiguratorFactory {
 
-    ParquetImportJobConfigurator createParquetImportJobConfigurator();
+  ParquetImportJobConfigurator createParquetImportJobConfigurator();
 
-    ParquetExportJobConfigurator createParquetExportJobConfigurator();
+  ParquetExportJobConfigurator createParquetExportJobConfigurator();
 
-    ParquetMergeJobConfigurator createParquetMergeJobConfigurator();
-
+  ParquetMergeJobConfigurator createParquetMergeJobConfigurator();
 }

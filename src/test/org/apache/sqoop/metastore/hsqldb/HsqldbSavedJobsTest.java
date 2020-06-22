@@ -18,8 +18,8 @@
 
 package org.apache.sqoop.metastore.hsqldb;
 
-import org.apache.sqoop.metastore.SavedJobsTestBase;
 import org.apache.sqoop.manager.JdbcDrivers;
+import org.apache.sqoop.metastore.SavedJobsTestBase;
 
 /**
  * Test of GenericJobStorage compatibility with Hsqldb
@@ -28,13 +28,14 @@ import org.apache.sqoop.manager.JdbcDrivers;
  * not run it. You need to run this manually with
  * -Dtestcase=HsqldbSavedJobsTest or -Dthirdparty=true.
  *
- * This uses JDBC to store and retrieve metastore data from a local Hsqldb server
+ * This uses JDBC to store and retrieve metastore data from a local Hsqldb
+ * server
  */
 
 public class HsqldbSavedJobsTest extends SavedJobsTestBase {
 
-    public HsqldbSavedJobsTest() {
-        super("jdbc:hsqldb:mem:sqoopmetastore",
-              "SA", "", JdbcDrivers.HSQLDB.getDriverClass());
-    }
+  public HsqldbSavedJobsTest() {
+    super("jdbc:hsqldb:mem:sqoopmetastore", "SA", "",
+          JdbcDrivers.HSQLDB.getDriverClass());
+  }
 }

@@ -20,9 +20,14 @@ package org.apache.sqoop.manager.db2;
 
 public class DB2TestUtils {
 
-    public static final String HOST_URL = System.getProperty("sqoop.test.db2.connectstring.host_url", "jdbc:db2://localhost:50000");
-    public static final String DATABASE_NAME = System.getProperty("sqoop.test.db2.connectstring.database", "SQOOP");
-    public static final String DATABASE_USER = System.getProperty("sqoop.test.db2.connectstring.username", "DB2INST1");
-    public static final String DATABASE_PASSWORD = System.getProperty("sqoop.test.db2.connectstring.password", "Sqoop12345");
-    public static final String CONNECT_STRING = HOST_URL + "/" + DATABASE_NAME + ":currentSchema=" + DATABASE_USER +";";
+  public static final String HOST_URL = System.getProperty(
+      "sqoop.test.db2.connectstring.host_url", "jdbc:db2://localhost:50000");
+  public static final String DATABASE_NAME =
+      System.getProperty("sqoop.test.db2.connectstring.database", "SQOOP");
+  public static final String DATABASE_USER =
+      System.getProperty("sqoop.test.db2.connectstring.username", "DB2INST1");
+  public static final String DATABASE_PASSWORD =
+      System.getProperty("sqoop.test.db2.connectstring.password", "Sqoop12345");
+  public static final String CONNECT_STRING =
+      HOST_URL + "/" + DATABASE_NAME + ":currentSchema=" + DATABASE_USER + ";";
 }

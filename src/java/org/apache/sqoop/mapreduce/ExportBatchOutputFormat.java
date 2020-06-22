@@ -36,104 +36,104 @@ import org.apache.sqoop.lib.SqoopRecord;
 public class ExportBatchOutputFormat<K extends SqoopRecord, V>
     extends ExportOutputFormat<K, V> {
 
-    private static final Log LOG =
-        LogFactory.getLog(ExportBatchOutputFormat.class);
+  private static final Log LOG =
+      LogFactory.getLog(ExportBatchOutputFormat.class);
+
+  @Override
+  /** {@inheritDoc} */
+  public RecordWriter<K, V> getRecordWriter(TaskAttemptContext context)
+      throws IOException {
+    try {
+      return new ExportBatchRecordWriter<K, V>(context);
+    } catch (Exception e) {
+      throw new IOException(e);
+    }
+  }
+
+  /**
+   * RecordWriter to write the output to a row in a database table.
+   * The actual database updates are executed in a second thread.
+   */
+  public class ExportBatchRecordWriter<K extends SqoopRecord, V>
+      extends ExportRecordWriter {
+
+    public ExportBatchRecordWriter(TaskAttemptContext context)
+        throws ClassNotFoundException, SQLException {
+      super(context);
+    }
 
     @Override
     /** {@inheritDoc} */
-    public RecordWriter<K, V> getRecordWriter(TaskAttemptContext context)
-    throws IOException {
-        try {
-            return new ExportBatchRecordWriter<K, V>(context);
-        } catch (Exception e) {
-            throw new IOException(e);
-        }
+    protected boolean isBatchExec() {
+      // We use batches here.
+      return true;
+    }
+
+    @Override
+    /** {@inheritDoc} */
+    protected PreparedStatement
+    getPreparedStatement(List<SqoopRecord> userRecords) throws SQLException {
+
+      PreparedStatement stmt = null;
+
+      // Synchronize on connection to ensure this does not conflict
+      // with the operations in the update thread.
+      Connection conn = getConnection();
+      synchronized (conn) {
+        stmt = conn.prepareStatement(getInsertStatement(userRecords.size()));
+      }
+
+      // Inject the record parameters into the VALUES clauses.
+      for (SqoopRecord record : userRecords) {
+        record.write(stmt, 0);
+        stmt.addBatch();
+      }
+
+      return stmt;
     }
 
     /**
-     * RecordWriter to write the output to a row in a database table.
-     * The actual database updates are executed in a second thread.
+     * @return an INSERT statement.
      */
-    public class ExportBatchRecordWriter<K extends SqoopRecord, V>
-        extends ExportRecordWriter {
+    protected String getInsertStatement(int numRows) {
+      StringBuilder sb = new StringBuilder();
 
-        public ExportBatchRecordWriter(TaskAttemptContext context)
-        throws ClassNotFoundException, SQLException {
-            super(context);
+      sb.append("INSERT INTO " + tableName + " ");
+
+      int numSlots;
+      if (this.columnNames != null) {
+        numSlots = this.columnNames.length;
+
+        sb.append("(");
+        boolean first = true;
+        for (String col : columnNames) {
+          if (!first) {
+            sb.append(", ");
+          }
+
+          sb.append(col);
+          first = false;
         }
 
-        @Override
-        /** {@inheritDoc} */
-        protected boolean isBatchExec() {
-            // We use batches here.
-            return true;
+        sb.append(") ");
+      } else {
+        numSlots = this.columnCount; // set if columnNames is null.
+      }
+
+      sb.append("VALUES ");
+
+      // generates the (?, ?, ?...).
+      sb.append("(");
+      for (int i = 0; i < numSlots; i++) {
+        if (i != 0) {
+          sb.append(", ");
         }
 
-        @Override
-        /** {@inheritDoc} */
-        protected PreparedStatement getPreparedStatement(
-            List<SqoopRecord> userRecords) throws SQLException {
+        sb.append("?");
+      }
+      sb.append(")");
 
-            PreparedStatement stmt = null;
-
-            // Synchronize on connection to ensure this does not conflict
-            // with the operations in the update thread.
-            Connection conn = getConnection();
-            synchronized (conn) {
-                stmt = conn.prepareStatement(getInsertStatement(userRecords.size()));
-            }
-
-            // Inject the record parameters into the VALUES clauses.
-            for (SqoopRecord record : userRecords) {
-                record.write(stmt, 0);
-                stmt.addBatch();
-            }
-
-            return stmt;
-        }
-
-        /**
-         * @return an INSERT statement.
-         */
-        protected String getInsertStatement(int numRows) {
-            StringBuilder sb = new StringBuilder();
-
-            sb.append("INSERT INTO " + tableName + " ");
-
-            int numSlots;
-            if (this.columnNames != null) {
-                numSlots = this.columnNames.length;
-
-                sb.append("(");
-                boolean first = true;
-                for (String col : columnNames) {
-                    if (!first) {
-                        sb.append(", ");
-                    }
-
-                    sb.append(col);
-                    first = false;
-                }
-
-                sb.append(") ");
-            } else {
-                numSlots = this.columnCount; // set if columnNames is null.
-            }
-
-            sb.append("VALUES ");
-
-            // generates the (?, ?, ?...).
-            sb.append("(");
-            for (int i = 0; i < numSlots; i++) {
-                if (i != 0) {
-                    sb.append(", ");
-                }
-
-                sb.append("?");
-            }
-            sb.append(")");
-
-            return sb.toString();
-        }
+      return sb.toString();
     }
+  }
 }

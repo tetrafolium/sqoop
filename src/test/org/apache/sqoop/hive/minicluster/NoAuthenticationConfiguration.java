@@ -18,36 +18,37 @@
 
 package org.apache.sqoop.hive.minicluster;
 
-import org.apache.commons.lang3.StringUtils;
-import org.apache.sqoop.db.JdbcConnectionFactory;
-
 import java.security.PrivilegedAction;
 import java.util.Collections;
 import java.util.Map;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.sqoop.db.JdbcConnectionFactory;
 
-public class NoAuthenticationConfiguration implements AuthenticationConfiguration {
-    @Override
-    public Map<String, String> getAuthenticationConfig() {
-        return Collections.emptyMap();
-    }
+public class NoAuthenticationConfiguration
+    implements AuthenticationConfiguration {
+  @Override
+  public Map<String, String> getAuthenticationConfig() {
+    return Collections.emptyMap();
+  }
 
-    @Override
-    public String getUrlParams() {
-        return StringUtils.EMPTY;
-    }
+  @Override
+  public String getUrlParams() {
+    return StringUtils.EMPTY;
+  }
 
-    @Override
-    public <T> T doAsAuthenticated(PrivilegedAction<T> action) {
-        return action.run();
-    }
+  @Override
+  public <T> T doAsAuthenticated(PrivilegedAction<T> action) {
+    return action.run();
+  }
 
-    @Override
-    public void init() {
-        // do nothing
-    }
+  @Override
+  public void init() {
+    // do nothing
+  }
 
-    @Override
-    public JdbcConnectionFactory decorateConnectionFactory(JdbcConnectionFactory connectionFactory) {
-        return connectionFactory;
-    }
+  @Override
+  public JdbcConnectionFactory
+  decorateConnectionFactory(JdbcConnectionFactory connectionFactory) {
+    return connectionFactory;
+  }
 }

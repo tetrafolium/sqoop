@@ -17,6 +17,7 @@
  */
 package org.apache.sqoop.mapreduce;
 
+import java.util.Date;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -25,38 +26,43 @@ import org.apache.sqoop.SqoopJobDataPublisher;
 import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.config.ConfigurationConstants;
 
-import java.util.Date;
-
 /**
  * Util class to publish job data to listeners.
  */
 public final class PublishJobData {
 
-    public static final Log LOG = LogFactory.getLog(PublishJobData.class.getName());
+  public static final Log LOG =
+      LogFactory.getLog(PublishJobData.class.getName());
 
-    private PublishJobData() {}
+  private PublishJobData() {}
 
-    public static void publishJobData(Configuration conf, SqoopOptions options,
-                                      String operation, String tableName, long startTime) {
-        // Publish metadata about export job to listeners (if they are registered with sqoop)
-        long endTime = new Date().getTime();
-        String publishClassName = conf.get(ConfigurationConstants.DATA_PUBLISH_CLASS);
-        if (!StringUtils.isEmpty(publishClassName)) {
-            try {
-                Class publishClass =  Class.forName(publishClassName);
-                Object obj = publishClass.newInstance();
-                if (obj instanceof SqoopJobDataPublisher) {
-                    SqoopJobDataPublisher publisher = (SqoopJobDataPublisher) obj;
-                    SqoopJobDataPublisher.Data data =
-                        new SqoopJobDataPublisher.Data(operation, options, tableName, startTime, endTime);
-                    LOG.info("Published data is " + data.toString());
-                    publisher.publish(data);
-                } else {
-                    LOG.warn("Publisher class not an instance of SqoopJobDataPublisher. Ignoring...");
-                }
-            } catch (Exception ex) {
-                LOG.warn("Unable to publish " + operation + " data to publisher " + ex.getMessage(), ex);
-            }
+  public static void publishJobData(Configuration conf, SqoopOptions options,
+                                    String operation, String tableName,
+                                    long startTime) {
+    // Publish metadata about export job to listeners (if they are registered
+    // with sqoop)
+    long endTime = new Date().getTime();
+    String publishClassName =
+        conf.get(ConfigurationConstants.DATA_PUBLISH_CLASS);
+    if (!StringUtils.isEmpty(publishClassName)) {
+      try {
+        Class publishClass = Class.forName(publishClassName);
+        Object obj = publishClass.newInstance();
+        if (obj instanceof SqoopJobDataPublisher) {
+          SqoopJobDataPublisher publisher = (SqoopJobDataPublisher)obj;
+          SqoopJobDataPublisher.Data data = new SqoopJobDataPublisher.Data(
+              operation, options, tableName, startTime, endTime);
+          LOG.info("Published data is " + data.toString());
+          publisher.publish(data);
+        } else {
+          LOG.warn(
+              "Publisher class not an instance of SqoopJobDataPublisher. Ignoring...");
         }
+      } catch (Exception ex) {
+        LOG.warn("Unable to publish " + operation + " data to publisher " +
+                     ex.getMessage(),
+                 ex);
+      }
     }
+  }
 }

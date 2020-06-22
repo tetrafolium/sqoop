@@ -18,6 +18,7 @@
 
 package org.apache.sqoop.metastore;
 
+import java.util.Arrays;
 import org.apache.sqoop.testcategories.sqooptest.UnitTest;
 import org.apache.sqoop.util.BlockJUnit4ClassRunnerWithParametersFactory;
 import org.junit.Before;
@@ -29,53 +30,53 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
-import java.util.Arrays;
-
 @RunWith(Parameterized.class)
 @Category(UnitTest.class)
-@Parameterized.UseParametersRunnerFactory(BlockJUnit4ClassRunnerWithParametersFactory.class)
+@Parameterized.
+UseParametersRunnerFactory(BlockJUnit4ClassRunnerWithParametersFactory.class)
 public class TestGenericJobStorageValidate {
 
-    @Parameters(name = "metastoreConnectionString = {0}, validationShouldFail = {1}")
-    public static Iterable<? extends Object> parameters() {
-        return Arrays.asList(
-                   new Object[] {"jdbc:mysql://localhost/", false},
-                   new Object[] {"jdbc:oracle://localhost/", false},
-                   new Object[] {"jdbc:hsqldb://localhost/", false},
-                   new Object[] {"jdbc:postgresql://localhost/", false},
-                   new Object[] {"jdbc:sqlserver://localhost/", false},
-                   new Object[] {"jdbc:db2://localhost/", false},
-                   new Object[] {"jdbc:dummy://localhost/", true},
-                   new Object[] {null, true},
-                   new Object[] {"", true});
+  @Parameters(
+      name = "metastoreConnectionString = {0}, validationShouldFail = {1}")
+  public static Iterable<? extends Object>
+  parameters() {
+    return Arrays.asList(new Object[] {"jdbc:mysql://localhost/", false},
+                         new Object[] {"jdbc:oracle://localhost/", false},
+                         new Object[] {"jdbc:hsqldb://localhost/", false},
+                         new Object[] {"jdbc:postgresql://localhost/", false},
+                         new Object[] {"jdbc:sqlserver://localhost/", false},
+                         new Object[] {"jdbc:db2://localhost/", false},
+                         new Object[] {"jdbc:dummy://localhost/", true},
+                         new Object[] {null, true}, new Object[] {"", true});
+  }
+
+  @Rule public ExpectedException expectedException = ExpectedException.none();
+
+  private final String connectionString;
+
+  private final boolean expectedToFail;
+
+  private GenericJobStorage jobStorage;
+
+  public TestGenericJobStorageValidate(String connectionString,
+                                       boolean expectedToFail) {
+    this.connectionString = connectionString;
+    this.expectedToFail = expectedToFail;
+  }
+
+  @Before
+  public void before() {
+    jobStorage = new GenericJobStorage();
+  }
+
+  @Test
+  public void testValidateMetastoreConnectionStringWithParameters() {
+    if (expectedToFail) {
+      expectedException.expect(RuntimeException.class);
+      expectedException.expectMessage(
+          connectionString +
+          " is an invalid connection string or the required RDBMS is not supported.");
     }
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
-
-    private final String connectionString;
-
-    private final boolean expectedToFail;
-
-    private GenericJobStorage jobStorage;
-
-    public TestGenericJobStorageValidate(String connectionString, boolean expectedToFail) {
-        this.connectionString = connectionString;
-        this.expectedToFail = expectedToFail;
-    }
-
-    @Before
-    public void before() {
-        jobStorage = new GenericJobStorage();
-    }
-
-    @Test
-    public void testValidateMetastoreConnectionStringWithParameters() {
-        if (expectedToFail) {
-            expectedException.expect(RuntimeException.class);
-            expectedException.expectMessage(connectionString + " is an invalid connection string or the required RDBMS is not supported.");
-        }
-        jobStorage.validateMetastoreConnectionString(connectionString);
-    }
-
+    jobStorage.validateMetastoreConnectionString(connectionString);
+  }
 }

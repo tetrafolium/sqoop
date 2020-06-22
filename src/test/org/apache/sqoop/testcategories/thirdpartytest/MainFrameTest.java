@@ -18,7 +18,7 @@
 package org.apache.sqoop.testcategories.thirdpartytest;
 
 /**
- * A MainFrame test shall test scenarios where a MainFrame external instance is required.
+ * A MainFrame test shall test scenarios where a MainFrame external instance is
+ * required.
  */
-public interface MainFrameTest extends ThirdPartyTest {
-}
+public interface MainFrameTest extends ThirdPartyTest {}

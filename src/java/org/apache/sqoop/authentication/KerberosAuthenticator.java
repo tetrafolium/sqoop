@@ -18,43 +18,38 @@
 
 package org.apache.sqoop.authentication;
 
+import java.io.IOException;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.security.UserGroupInformation;
 
-import java.io.IOException;
-
 public class KerberosAuthenticator {
 
-    private final Configuration configuration;
+  private final Configuration configuration;
 
-    private final String principal;
+  private final String principal;
 
-    private final String keytabLocation;
+  private final String keytabLocation;
 
-    public KerberosAuthenticator(Configuration configuration, String principal, String keytabLocation) {
-        this.configuration = configuration;
-        this.principal = principal;
-        this.keytabLocation = keytabLocation;
+  public KerberosAuthenticator(Configuration configuration, String principal,
+                               String keytabLocation) {
+    this.configuration = configuration;
+    this.principal = principal;
+    this.keytabLocation = keytabLocation;
+  }
+
+  public UserGroupInformation authenticate() {
+    UserGroupInformation.setConfiguration(configuration);
+    try {
+      return UserGroupInformation.loginUserFromKeytabAndReturnUGI(
+          principal, keytabLocation);
+    } catch (IOException e) {
+      throw new RuntimeException("Kerberos authentication failed!", e);
     }
+  }
 
-    public UserGroupInformation authenticate() {
-        UserGroupInformation.setConfiguration(configuration);
-        try {
-            return UserGroupInformation.loginUserFromKeytabAndReturnUGI(principal, keytabLocation);
-        } catch (IOException e) {
-            throw new RuntimeException("Kerberos authentication failed!", e);
-        }
-    }
+  public Configuration getConfiguration() { return configuration; }
 
-    public Configuration getConfiguration() {
-        return configuration;
-    }
+  public String getPrincipal() { return principal; }
 
-    public String getPrincipal() {
-        return principal;
-    }
-
-    public String getKeytabLocation() {
-        return keytabLocation;
-    }
+  public String getKeytabLocation() { return keytabLocation; }
 }

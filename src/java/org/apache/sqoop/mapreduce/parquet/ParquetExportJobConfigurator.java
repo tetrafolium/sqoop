@@ -18,22 +18,22 @@
 
 package org.apache.sqoop.mapreduce.parquet;
 
+import java.io.IOException;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 
-import java.io.IOException;
-
 /**
- * This interface defines the type of a product of {@link ParquetJobConfiguratorFactory}.
- * The implementations of the methods of this interface help to configure Sqoop Parquet export jobs.
+ * This interface defines the type of a product of {@link
+ * ParquetJobConfiguratorFactory}. The implementations of the methods of this
+ * interface help to configure Sqoop Parquet export jobs.
  */
 public interface ParquetExportJobConfigurator {
 
-    void configureInputFormat(Job job, Path inputPath) throws IOException;
+  void configureInputFormat(Job job, Path inputPath) throws IOException;
 
-    Class<? extends Mapper> getMapperClass();
+  Class<? extends Mapper> getMapperClass();
 
-    Class<? extends InputFormat> getInputFormatClass();
+  Class<? extends InputFormat> getInputFormatClass();
 }

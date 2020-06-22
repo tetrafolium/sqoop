@@ -18,32 +18,33 @@
 
 package org.apache.sqoop.mapreduce;
 
+import java.io.IOException;
 import org.apache.avro.Conversions;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.mapred.AvroWrapper;
 import org.apache.avro.reflect.ReflectData;
 import org.apache.hadoop.io.NullWritable;
 
-import java.io.IOException;
-
 /**
  * Exports records from an Avro data file.
  */
 public class AvroExportMapper
-    extends GenericRecordExportMapper<AvroWrapper<GenericRecord>, NullWritable> {
+    extends GenericRecordExportMapper<AvroWrapper<GenericRecord>,
+                                      NullWritable> {
 
-    @Override
-    protected void setup(Context context) throws IOException, InterruptedException {
-        super.setup(context);
+  @Override
+  protected void setup(Context context)
+      throws IOException, InterruptedException {
+    super.setup(context);
 
-        // Add decimal support
-        ReflectData.get().addLogicalTypeConversion(new Conversions.DecimalConversion());
-    }
+    // Add decimal support
+    ReflectData.get().addLogicalTypeConversion(
+        new Conversions.DecimalConversion());
+  }
 
-    @Override
-    protected void map(AvroWrapper<GenericRecord> key, NullWritable value,
-                       Context context) throws IOException, InterruptedException {
-        context.write(toSqoopRecord(key.datum()), NullWritable.get());
-    }
-
+  @Override
+  protected void map(AvroWrapper<GenericRecord> key, NullWritable value,
+                     Context context) throws IOException, InterruptedException {
+    context.write(toSqoopRecord(key.datum()), NullWritable.get());
+  }
 }

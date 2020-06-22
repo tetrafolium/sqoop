@@ -18,54 +18,58 @@
 
 package org.apache.sqoop.util;
 
+import static org.junit.Assert.*;
+
 import java.io.IOException;
 import java.net.URI;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.RawLocalFileSystem;
 import org.apache.sqoop.testcategories.sqooptest.UnitTest;
-import org.junit.Test;
 import org.junit.Before;
+import org.junit.Test;
 import org.junit.experimental.categories.Category;
-
-import static org.junit.Assert.*;
 
 @Category(UnitTest.class)
 public class TestFileSystemUtil {
-    private Configuration conf;
+  private Configuration conf;
 
-    @Before
-    public void setUp() {
-        conf = new Configuration();
-        conf.set("fs.my.impl", MyFileSystem.class.getName());
-    }
+  @Before
+  public void setUp() {
+    conf = new Configuration();
+    conf.set("fs.my.impl", MyFileSystem.class.getName());
+  }
 
-    @Test
-    public void testMakeQualifiedWhenPathIsNullThenReturnsNull() throws IOException {
-        assertNull(FileSystemUtil.makeQualified(null, conf));
-    }
+  @Test
+  public void testMakeQualifiedWhenPathIsNullThenReturnsNull()
+      throws IOException {
+    assertNull(FileSystemUtil.makeQualified(null, conf));
+  }
 
-    @Test
-    public void testMakeQualifiedWhenPathIsRelativeThenReturnDefault() throws IOException {
-        Path actual = FileSystemUtil.makeQualified(new Path("foo/bar"), conf);
-        assertEquals("file", actual.toUri().getScheme());
-    }
+  @Test
+  public void testMakeQualifiedWhenPathIsRelativeThenReturnDefault()
+      throws IOException {
+    Path actual = FileSystemUtil.makeQualified(new Path("foo/bar"), conf);
+    assertEquals("file", actual.toUri().getScheme());
+  }
 
-    @Test
-    public void testMakeQualifiedWhenPathHasCustomSchemaThenReturnSameSchema() throws IOException {
-        Path actual = FileSystemUtil.makeQualified(new Path("my:/foo/bar"), conf);
-        assertEquals("my", actual.toUri().getScheme());
-    }
+  @Test
+  public void testMakeQualifiedWhenPathHasCustomSchemaThenReturnSameSchema()
+      throws IOException {
+    Path actual = FileSystemUtil.makeQualified(new Path("my:/foo/bar"), conf);
+    assertEquals("my", actual.toUri().getScheme());
+  }
 
-    @Test(expected = IOException.class)
-    public void testMakeQualifiedWhenPathHasBadSchemaThenThrowsIOException() throws IOException {
-        FileSystemUtil.makeQualified(new Path("nosuchfs://foo/bar"), conf);
-    }
+  @Test(expected = IOException.class)
+  public void testMakeQualifiedWhenPathHasBadSchemaThenThrowsIOException()
+      throws IOException {
+    FileSystemUtil.makeQualified(new Path("nosuchfs://foo/bar"), conf);
+  }
 
-    public static final class MyFileSystem extends RawLocalFileSystem {
-        @Override
-        public URI getUri() {
-            return URI.create("my:///");
-        }
+  public static final class MyFileSystem extends RawLocalFileSystem {
+    @Override
+    public URI getUri() {
+      return URI.create("my:///");
     }
+  }
 }

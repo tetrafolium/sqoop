@@ -17,53 +17,48 @@
  */
 package org.apache.sqoop.mapreduce.db;
 
+import static org.junit.Assert.assertFalse;
+
 import java.sql.ResultSet;
 import java.util.List;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.sqoop.testcategories.sqooptest.UnitTest;
-import org.apache.sqoop.validation.ValidationException;
-
 import org.apache.sqoop.testutil.MockResultSet;
-
+import org.apache.sqoop.validation.ValidationException;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.rules.ExpectedException;
 
-import static org.junit.Assert.assertFalse;
-
 @Category(UnitTest.class)
 public class TextSplitterHadoopConfIntegrationTest {
-    private static final String TEXT_COL_NAME = "text_col_name";
+  private static final String TEXT_COL_NAME = "text_col_name";
 
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
+  @Rule public ExpectedException thrown = ExpectedException.none();
 
-    @Test
-    public void testDefaultValueOfUnsetBooleanParam() throws Exception {
-        Configuration conf = Job.getInstance().getConfiguration();
-        TextSplitter splitter = new TextSplitter();
-        ResultSet rs = new MockResultSet();
+  @Test
+  public void testDefaultValueOfUnsetBooleanParam() throws Exception {
+    Configuration conf = Job.getInstance().getConfiguration();
+    TextSplitter splitter = new TextSplitter();
+    ResultSet rs = new MockResultSet();
 
-        String containedByExpectedExceptionMessage = TextSplitter.ALLOW_TEXT_SPLITTER_PROPERTY;
+    String containedByExpectedExceptionMessage =
+        TextSplitter.ALLOW_TEXT_SPLITTER_PROPERTY;
 
-        thrown.expect(ValidationException.class);
-        thrown.expectMessage(containedByExpectedExceptionMessage);
-        splitter.split(conf, rs, TEXT_COL_NAME);
-    }
+    thrown.expect(ValidationException.class);
+    thrown.expectMessage(containedByExpectedExceptionMessage);
+    splitter.split(conf, rs, TEXT_COL_NAME);
+  }
 
-    @Test
-    public void testBooleanParamValue() throws Exception {
-        Configuration conf = Job.getInstance().getConfiguration();
-        conf.set(TextSplitter.ALLOW_TEXT_SPLITTER_PROPERTY, "true");
-        TextSplitter splitter = new TextSplitter();
-        ResultSet rs = new MockResultSet();
-        List<InputSplit> splits = splitter.split(conf, rs, TEXT_COL_NAME);
-        assertFalse(splits.isEmpty());
-    }
-
+  @Test
+  public void testBooleanParamValue() throws Exception {
+    Configuration conf = Job.getInstance().getConfiguration();
+    conf.set(TextSplitter.ALLOW_TEXT_SPLITTER_PROPERTY, "true");
+    TextSplitter splitter = new TextSplitter();
+    ResultSet rs = new MockResultSet();
+    List<InputSplit> splits = splitter.split(conf, rs, TEXT_COL_NAME);
+    assertFalse(splits.isEmpty());
+  }
 }
-

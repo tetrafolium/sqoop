@@ -18,6 +18,12 @@
 
 package org.apache.sqoop.importjob.numerictypes.parquet;
 
+import static org.apache.sqoop.testutil.NumericTypesTestUtils.FAIL_WITHOUT_EXTRA_ARGS;
+import static org.apache.sqoop.testutil.NumericTypesTestUtils.FAIL_WITH_PADDING_ONLY;
+import static org.apache.sqoop.testutil.NumericTypesTestUtils.SUCCEED_WITHOUT_EXTRA_ARGS;
+import static org.apache.sqoop.testutil.NumericTypesTestUtils.SUCCEED_WITH_PADDING_ONLY;
+
+import java.util.Arrays;
 import org.apache.sqoop.importjob.configuration.ParquetTestConfiguration;
 import org.apache.sqoop.importjob.configuration.PostgresqlImportJobTestConfigurationForNumeric;
 import org.apache.sqoop.importjob.configuration.PostgresqlImportJobTestConfigurationPaddingShouldSucceed;
@@ -30,32 +36,34 @@ import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import java.util.Arrays;
-
-import static org.apache.sqoop.testutil.NumericTypesTestUtils.FAIL_WITHOUT_EXTRA_ARGS;
-import static org.apache.sqoop.testutil.NumericTypesTestUtils.FAIL_WITH_PADDING_ONLY;
-import static org.apache.sqoop.testutil.NumericTypesTestUtils.SUCCEED_WITHOUT_EXTRA_ARGS;
-import static org.apache.sqoop.testutil.NumericTypesTestUtils.SUCCEED_WITH_PADDING_ONLY;
-
 @Category(PostgresqlTest.class)
 @RunWith(Parameterized.class)
-@Parameterized.UseParametersRunnerFactory(BlockJUnit4ClassRunnerWithParametersFactory.class)
-public class PostgresNumericTypesParquetImportTest<T extends ParquetTestConfiguration> extends NumericTypesParquetImportTestBase<T> {
+@Parameterized.
+UseParametersRunnerFactory(BlockJUnit4ClassRunnerWithParametersFactory.class)
+public class PostgresNumericTypesParquetImportTest<
+    T extends ParquetTestConfiguration>
+    extends NumericTypesParquetImportTestBase<T> {
 
-    @Override
-    public DatabaseAdapter createAdapter() {
-        return new PostgresDatabaseAdapter();
-    }
+  @Override
+  public DatabaseAdapter createAdapter() {
+    return new PostgresDatabaseAdapter();
+  }
 
-    @Parameterized.Parameters(name = "Config: {0}| failWithoutExtraArgs: {1}| failWithPadding: {2}")
-    public static Iterable<? extends Object> testConfigurations() {
-        return Arrays.asList(
-        new Object[] {new PostgresqlImportJobTestConfigurationForNumeric(), FAIL_WITHOUT_EXTRA_ARGS, FAIL_WITH_PADDING_ONLY},
-        new Object[] {new PostgresqlImportJobTestConfigurationPaddingShouldSucceed(), SUCCEED_WITHOUT_EXTRA_ARGS, SUCCEED_WITH_PADDING_ONLY}
-               );
-    }
+  @Parameterized.Parameters(
+      name = "Config: {0}| failWithoutExtraArgs: {1}| failWithPadding: {2}")
+  public static Iterable<? extends Object>
+  testConfigurations() {
+    return Arrays.asList(
+        new Object[] {new PostgresqlImportJobTestConfigurationForNumeric(),
+                      FAIL_WITHOUT_EXTRA_ARGS, FAIL_WITH_PADDING_ONLY},
+        new Object[] {
+            new PostgresqlImportJobTestConfigurationPaddingShouldSucceed(),
+            SUCCEED_WITHOUT_EXTRA_ARGS, SUCCEED_WITH_PADDING_ONLY});
+  }
 
-    public PostgresNumericTypesParquetImportTest(T configuration, boolean failWithoutExtraArgs, boolean failWithPaddingOnly) {
-        super(configuration, failWithoutExtraArgs, failWithPaddingOnly);
-    }
+  public PostgresNumericTypesParquetImportTest(T configuration,
+                                               boolean failWithoutExtraArgs,
+                                               boolean failWithPaddingOnly) {
+    super(configuration, failWithoutExtraArgs, failWithPaddingOnly);
+  }
 }

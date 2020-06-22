@@ -18,7 +18,6 @@
 package org.apache.sqoop.mapreduce.db.netezza;
 
 import java.io.IOException;
-
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 
@@ -28,12 +27,12 @@ import org.apache.hadoop.io.Text;
 public class NetezzaExternalTableTextImportMapper
     extends NetezzaExternalTableImportMapper<Text, NullWritable> {
 
-    @Override
-    protected void writeRecord(Text text, Context context)
-    throws IOException, InterruptedException {
-        // May be we should set the output to be String for faster performance
-        // There is no real benefit in changing it to Text and then
-        // converting it back in our case
-        context.write(text, NullWritable.get());
-    }
+  @Override
+  protected void writeRecord(Text text, Context context)
+      throws IOException, InterruptedException {
+    // May be we should set the output to be String for faster performance
+    // There is no real benefit in changing it to Text and then
+    // converting it back in our case
+    context.write(text, NullWritable.get());
+  }
 }

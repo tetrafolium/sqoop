@@ -18,12 +18,12 @@
 
 package org.apache.sqoop.validation;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import org.apache.sqoop.testcategories.sqooptest.UnitTest;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
-
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Tests for AbsoluteValidationThreshold.
@@ -31,15 +31,15 @@ import static org.junit.Assert.assertTrue;
 @Category(UnitTest.class)
 public class AbsoluteValidationThresholdTest {
 
-    /**
-     * Test the implementation for AbsoluteValidationThreshold.
-     * Both arguments should be same else fail.
-     */
-    @Test
-    public void testAbsoluteValidationThreshold() {
-        ValidationThreshold validationThreshold = new AbsoluteValidationThreshold();
-        assertTrue(validationThreshold.compare(100, 100));
-        assertFalse(validationThreshold.compare(100, 90));
-        assertFalse(validationThreshold.compare(90, 100));
-    }
+  /**
+   * Test the implementation for AbsoluteValidationThreshold.
+   * Both arguments should be same else fail.
+   */
+  @Test
+  public void testAbsoluteValidationThreshold() {
+    ValidationThreshold validationThreshold = new AbsoluteValidationThreshold();
+    assertTrue(validationThreshold.compare(100, 100));
+    assertFalse(validationThreshold.compare(100, 90));
+    assertFalse(validationThreshold.compare(90, 100));
+  }
 }

@@ -22,7 +22,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import org.apache.hadoop.conf.Configuration;
-
 import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.TestMultiCols;
 import org.apache.sqoop.testcategories.thirdpartytest.SqlServerTest;
@@ -42,100 +41,97 @@ import org.junit.experimental.categories.Category;
  *
  * You need to put SQL Server JDBC driver library (sqljdbc4.jar) in a location
  * where Sqoop will be able to access it (since this library cannot be checked
- * into Apache's tree for licensing reasons) and set it's path through -Dsqoop.thirdparty.lib.dir.
+ * into Apache's tree for licensing reasons) and set it's path through
+ * -Dsqoop.thirdparty.lib.dir.
  *
  * To set up your test environment:
  *   Install SQL Server Express 2012
  *   Create a database SQOOPTEST
  *   Create a login SQOOPUSER with password PASSWORD and grant all
  *   access for SQOOPTEST to SQOOPUSER.
- *   Set these through -Dsqoop.test.sqlserver.connectstring.host_url, -Dsqoop.test.sqlserver.database and
- *   -Dms.sqlserver.password
+ *   Set these through -Dsqoop.test.sqlserver.connectstring.host_url,
+ * -Dsqoop.test.sqlserver.database and -Dms.sqlserver.password
  */
 @Category(SqlServerTest.class)
 public class SQLServerMultiColsTest extends TestMultiCols {
 
-    protected boolean useHsqldbTestServer() {
-        return false;
+  protected boolean useHsqldbTestServer() { return false; }
+
+  protected String getConnectString() {
+    return MSSQLTestUtils.getDBConnectString();
+  }
+
+  /**
+   * Drop a table if it already exists in the database.
+   *
+   * @param table
+   *            the name of the table to drop.
+   * @throws SQLException
+   *             if something goes wrong.
+   */
+  protected void dropTableIfExists(String table) throws SQLException {
+    Connection conn = getManager().getConnection();
+    String sqlStmt =
+        "IF OBJECT_ID('" + table + "') IS NOT NULL  DROP TABLE " + table;
+    PreparedStatement statement = conn.prepareStatement(
+        sqlStmt, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+    try {
+      statement.executeUpdate();
+      conn.commit();
+    } finally {
+      statement.close();
     }
+  }
 
-    protected String getConnectString() {
-        return MSSQLTestUtils.getDBConnectString();
+  protected SqoopOptions getSqoopOptions(Configuration conf) {
+
+    String username = MSSQLTestUtils.getDBUserName();
+    String password = MSSQLTestUtils.getDBPassWord();
+    SqoopOptions opts = new SqoopOptions(conf);
+    opts.setUsername(username);
+    opts.setPassword(password);
+
+    return opts;
+  }
+
+  @After
+  public void tearDown() {
+    try {
+      dropTableIfExists(getTableName());
+    } catch (SQLException sqle) {
+      LOG.info("Table clean-up failed: " + sqle);
+    } finally {
+      super.tearDown();
     }
+  }
 
-    /**
-    * Drop a table if it already exists in the database.
-    *
-    * @param table
-    *            the name of the table to drop.
-    * @throws SQLException
-    *             if something goes wrong.
-    */
-    protected void dropTableIfExists(String table) throws SQLException {
-        Connection conn = getManager().getConnection();
-        String sqlStmt = "IF OBJECT_ID('" + table
-                         + "') IS NOT NULL  DROP TABLE " + table;
-        PreparedStatement statement = conn.prepareStatement(sqlStmt,
-                                      ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-        try {
-            statement.executeUpdate();
-            conn.commit();
-        } finally {
-            statement.close();
-        }
-    }
+  @Test
+  public void testMixed4() {
+    // Overridden to bypass test case invalid for MSSQL server
+  }
 
-    protected SqoopOptions getSqoopOptions(Configuration conf) {
+  @Test
+  public void testMixed5() {
+    // Overridden to bypass test case invalid for MSSQL server
+  }
 
-        String username = MSSQLTestUtils.getDBUserName();
-        String password = MSSQLTestUtils.getDBPassWord();
-        SqoopOptions opts = new SqoopOptions(conf);
-        opts.setUsername(username);
-        opts.setPassword(password);
+  @Test
+  public void testMixed6() {
+    // Overridden to bypass test case invalid for MSSQL server
+  }
 
-        return opts;
+  @Test
+  public void testSkipFirstCol() {
+    // Overridden to bypass test case invalid for MSSQL server
+  }
 
-    }
+  @Test
+  public void testSkipSecondCol() {
+    // Overridden to bypass test case invalid for MSSQL server
+  }
 
-    @After
-    public void tearDown() {
-        try {
-            dropTableIfExists(getTableName());
-        } catch (SQLException sqle) {
-            LOG.info("Table clean-up failed: " + sqle);
-        } finally {
-            super.tearDown();
-        }
-    }
-
-    @Test
-    public void testMixed4() {
-        // Overridden to bypass test case invalid for MSSQL server
-    }
-
-    @Test
-    public void testMixed5() {
-        // Overridden to bypass test case invalid for MSSQL server
-    }
-
-    @Test
-    public void testMixed6() {
-        // Overridden to bypass test case invalid for MSSQL server
-    }
-
-    @Test
-    public void testSkipFirstCol() {
-        // Overridden to bypass test case invalid for MSSQL server
-    }
-
-    @Test
-    public void testSkipSecondCol() {
-        // Overridden to bypass test case invalid for MSSQL server
-    }
-
-    @Test
-    public void testSkipThirdCol() {
-        // Overridden to bypass test case invalid for MSSQL server
-    }
-
+  @Test
+  public void testSkipThirdCol() {
+    // Overridden to bypass test case invalid for MSSQL server
+  }
 }

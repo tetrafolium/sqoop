@@ -27,12 +27,14 @@ import org.apache.sqoop.metastore.MetaConnectIncrementalImportTestBase;
  * not run it. You need to run this manually with
  * -Dtestcase=HsqldbMetaConnectIncrementalImportTest or -Dthirdparty=true.
  *
- * This uses JDBC to store and retrieve metastore data from a local Hsqldb server
+ * This uses JDBC to store and retrieve metastore data from a local Hsqldb
+ * server
  */
 
-public class HsqldbMetaConnectIncrementalImportTest extends MetaConnectIncrementalImportTestBase {
+public class HsqldbMetaConnectIncrementalImportTest
+    extends MetaConnectIncrementalImportTestBase {
 
-    public HsqldbMetaConnectIncrementalImportTest() {
-        super("jdbc:hsqldb:mem:sqoopmetastore", "SA", "");
-    }
+  public HsqldbMetaConnectIncrementalImportTest() {
+    super("jdbc:hsqldb:mem:sqoopmetastore", "SA", "");
+  }
 }

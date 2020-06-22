@@ -18,7 +18,7 @@
 package org.apache.sqoop.testcategories.thirdpartytest;
 
 /**
- * A PostgreSql test shall test scenarios where a PostgreSql driver and/or external instance is required.
+ * A PostgreSql test shall test scenarios where a PostgreSql driver and/or
+ * external instance is required.
  */
-public interface PostgresqlTest extends ThirdPartyTest {
-}
+public interface PostgresqlTest extends ThirdPartyTest {}

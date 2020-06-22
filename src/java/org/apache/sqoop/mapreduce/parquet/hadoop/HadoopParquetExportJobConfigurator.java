@@ -18,32 +18,33 @@
 
 package org.apache.sqoop.mapreduce.parquet.hadoop;
 
+import java.io.IOException;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
-import org.apache.sqoop.mapreduce.parquet.ParquetExportJobConfigurator;
 import org.apache.parquet.avro.AvroParquetInputFormat;
-
-import java.io.IOException;
+import org.apache.sqoop.mapreduce.parquet.ParquetExportJobConfigurator;
 
 /**
- * An implementation of {@link ParquetExportJobConfigurator} which depends on the Hadoop Parquet library.
+ * An implementation of {@link ParquetExportJobConfigurator} which depends on
+ * the Hadoop Parquet library.
  */
-public class HadoopParquetExportJobConfigurator implements ParquetExportJobConfigurator {
+public class HadoopParquetExportJobConfigurator
+    implements ParquetExportJobConfigurator {
 
-    @Override
-    public void configureInputFormat(Job job, Path inputPath) throws IOException {
-        // do nothing
-    }
+  @Override
+  public void configureInputFormat(Job job, Path inputPath) throws IOException {
+    // do nothing
+  }
 
-    @Override
-    public Class<? extends Mapper> getMapperClass() {
-        return HadoopParquetExportMapper.class;
-    }
+  @Override
+  public Class<? extends Mapper> getMapperClass() {
+    return HadoopParquetExportMapper.class;
+  }
 
-    @Override
-    public Class<? extends InputFormat> getInputFormatClass() {
-        return AvroParquetInputFormat.class;
-    }
+  @Override
+  public Class<? extends InputFormat> getInputFormatClass() {
+    return AvroParquetInputFormat.class;
+  }
 }

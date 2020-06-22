@@ -18,21 +18,19 @@
 
 package org.apache.sqoop.manager.oracle;
 
+import static org.junit.Assert.fail;
+
 import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
 import java.util.Formatter;
-
-import org.apache.sqoop.manager.oracle.util.OracleUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
-
 import org.apache.sqoop.SqoopOptions;
+import org.apache.sqoop.manager.oracle.util.OracleUtils;
 import org.apache.sqoop.testcategories.thirdpartytest.OracleTest;
 import org.apache.sqoop.testutil.LobAvroImportTestCase;
 import org.junit.experimental.categories.Category;
-
-import static org.junit.Assert.fail;
 
 /**
  * Tests BLOB/CLOB import for Avro with Oracle Db.
@@ -40,54 +38,54 @@ import static org.junit.Assert.fail;
 @Category(OracleTest.class)
 public class OracleLobAvroImportTest extends LobAvroImportTestCase {
 
-    public static final Log LOG = LogFactory.getLog(
-                                      OracleCompatTest.class.getName());
+  public static final Log LOG =
+      LogFactory.getLog(OracleCompatTest.class.getName());
 
-    @Override
-    protected Log getLogger() {
-        return LOG;
+  @Override
+  protected Log getLogger() {
+    return LOG;
+  }
+
+  @Override
+  protected String getDbFriendlyName() {
+    return "Oracle";
+  }
+
+  @Override
+  protected String getConnectString() {
+    return OracleUtils.CONNECT_STRING;
+  }
+
+  @Override
+  protected SqoopOptions getSqoopOptions(Configuration conf) {
+    SqoopOptions opts = new SqoopOptions(conf);
+    OracleUtils.setOracleAuth(opts);
+    return opts;
+  }
+
+  @Override
+  protected void dropTableIfExists(String table) throws SQLException {
+    OracleUtils.dropTable(table, getManager());
+  }
+
+  @Override
+  protected String getBlobInsertStr(String blobData) {
+    // Oracle wants blob data encoded as hex (e.g. '01fca3b5').
+
+    StringBuilder sb = new StringBuilder();
+    sb.append("'");
+
+    Formatter fmt = new Formatter(sb);
+    try {
+      for (byte b : blobData.getBytes("UTF-8")) {
+        fmt.format("%02X", b);
+      }
+    } catch (UnsupportedEncodingException uee) {
+      // Should not happen; Java always supports UTF-8.
+      fail("Could not get utf-8 bytes for blob string");
+      return null;
     }
-
-    @Override
-    protected String getDbFriendlyName() {
-        return "Oracle";
-    }
-
-    @Override
-    protected String getConnectString() {
-        return OracleUtils.CONNECT_STRING;
-    }
-
-    @Override
-    protected SqoopOptions getSqoopOptions(Configuration conf) {
-        SqoopOptions opts = new SqoopOptions(conf);
-        OracleUtils.setOracleAuth(opts);
-        return opts;
-    }
-
-    @Override
-    protected void dropTableIfExists(String table) throws SQLException {
-        OracleUtils.dropTable(table, getManager());
-    }
-
-    @Override
-    protected String getBlobInsertStr(String blobData) {
-        // Oracle wants blob data encoded as hex (e.g. '01fca3b5').
-
-        StringBuilder sb = new StringBuilder();
-        sb.append("'");
-
-        Formatter fmt = new Formatter(sb);
-        try {
-            for (byte b : blobData.getBytes("UTF-8")) {
-                fmt.format("%02X", b);
-            }
-        } catch (UnsupportedEncodingException uee) {
-            // Should not happen; Java always supports UTF-8.
-            fail("Could not get utf-8 bytes for blob string");
-            return null;
-        }
-        sb.append("'");
-        return sb.toString();
-    }
+    sb.append("'");
+    return sb.toString();
+  }
 }

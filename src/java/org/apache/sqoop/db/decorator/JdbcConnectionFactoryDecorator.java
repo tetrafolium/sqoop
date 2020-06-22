@@ -20,15 +20,14 @@ package org.apache.sqoop.db.decorator;
 
 import org.apache.sqoop.db.JdbcConnectionFactory;
 
-public abstract class JdbcConnectionFactoryDecorator implements JdbcConnectionFactory {
+public abstract class JdbcConnectionFactoryDecorator
+    implements JdbcConnectionFactory {
 
-    protected final JdbcConnectionFactory decorated;
+  protected final JdbcConnectionFactory decorated;
 
-    public JdbcConnectionFactoryDecorator(JdbcConnectionFactory decorated) {
-        this.decorated = decorated;
-    }
+  public JdbcConnectionFactoryDecorator(JdbcConnectionFactory decorated) {
+    this.decorated = decorated;
+  }
 
-    public JdbcConnectionFactory getDecorated() {
-        return decorated;
-    }
+  public JdbcConnectionFactory getDecorated() { return decorated; }
 }

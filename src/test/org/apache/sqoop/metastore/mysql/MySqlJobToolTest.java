@@ -33,9 +33,10 @@ import org.junit.experimental.categories.Category;
  * not run it. You need to run this manually with
  * -Dtestcase=MySqlJobToolTest or -Dthirdparty=true.
  *
- * You need to put MySql JDBC driver library (mysql-connector-java-5.1.38-bin.jar) in a location
- * where Sqoop will be able to access it (since this library cannot be checked
- * into Apache's tree for licensing reasons) and set it's path through -Dsqoop.thirdparty.lib.dir.
+ * You need to put MySql JDBC driver library
+ * (mysql-connector-java-5.1.38-bin.jar) in a location where Sqoop will be able
+ * to access it (since this library cannot be checked into Apache's tree for
+ * licensing reasons) and set it's path through -Dsqoop.thirdparty.lib.dir.
  *
  *   Once you have a running MySql database,
  *   Set server URL, database name, username, and password with system variables
@@ -45,10 +46,10 @@ import org.junit.experimental.categories.Category;
 @Category(MysqlTest.class)
 public class MySqlJobToolTest extends JobToolTestBase {
 
-    private static MySQLTestUtils mySQLTestUtils = new MySQLTestUtils();
+  private static MySQLTestUtils mySQLTestUtils = new MySQLTestUtils();
 
-    public MySqlJobToolTest() {
-        super(mySQLTestUtils.getMySqlConnectString(), mySQLTestUtils.getUserName(),
-              mySQLTestUtils.getUserPass());
-    }
+  public MySqlJobToolTest() {
+    super(mySQLTestUtils.getMySqlConnectString(), mySQLTestUtils.getUserName(),
+          mySQLTestUtils.getUserPass());
+  }
 }

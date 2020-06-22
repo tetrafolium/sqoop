@@ -38,93 +38,91 @@ import org.apache.hadoop.util.ReflectionUtils;
 public class CombineShimRecordReader
     extends RecordReader<LongWritable, Object> {
 
-    public static final Log LOG =
-        LogFactory.getLog(CombineShimRecordReader.class.getName());
+  public static final Log LOG =
+      LogFactory.getLog(CombineShimRecordReader.class.getName());
 
-    private CombineFileSplit split;
-    private TaskAttemptContext context;
-    private int index;
-    private RecordReader<LongWritable, Object> rr;
+  private CombineFileSplit split;
+  private TaskAttemptContext context;
+  private int index;
+  private RecordReader<LongWritable, Object> rr;
 
-    /**
-     * Constructor invoked by CombineFileRecordReader that identifies part of a
-     * CombineFileSplit to use.
-     */
-    public CombineShimRecordReader(CombineFileSplit split,
-                                   TaskAttemptContext context, Integer index)
-    throws IOException, InterruptedException {
-        this.index = index;
-        this.split = (CombineFileSplit) split;
-        this.context = context;
+  /**
+   * Constructor invoked by CombineFileRecordReader that identifies part of a
+   * CombineFileSplit to use.
+   */
+  public CombineShimRecordReader(CombineFileSplit split,
+                                 TaskAttemptContext context, Integer index)
+      throws IOException, InterruptedException {
+    this.index = index;
+    this.split = (CombineFileSplit)split;
+    this.context = context;
 
-        createChildReader();
+    createChildReader();
+  }
+
+  @Override
+  public void initialize(InputSplit curSplit, TaskAttemptContext curContext)
+      throws IOException, InterruptedException {
+    this.split = (CombineFileSplit)curSplit;
+    this.context = curContext;
+
+    if (null == rr) {
+      createChildReader();
     }
 
-    @Override
-    public void initialize(InputSplit curSplit, TaskAttemptContext curContext)
-    throws IOException, InterruptedException {
-        this.split = (CombineFileSplit) curSplit;
-        this.context = curContext;
+    FileSplit fileSplit =
+        new FileSplit(this.split.getPath(index), this.split.getOffset(index),
+                      this.split.getLength(index), this.split.getLocations());
+    this.rr.initialize(fileSplit, this.context);
+  }
 
-        if (null == rr) {
-            createChildReader();
-        }
+  @Override
+  public float getProgress() throws IOException, InterruptedException {
+    return rr.getProgress();
+  }
 
-        FileSplit fileSplit = new FileSplit(this.split.getPath(index),
-                                            this.split.getOffset(index), this.split.getLength(index),
-                                            this.split.getLocations());
-        this.rr.initialize(fileSplit, this.context);
+  @Override
+  public void close() throws IOException {
+    if (null != rr) {
+      rr.close();
+      rr = null;
+    }
+  }
+
+  @Override
+  public LongWritable getCurrentKey() throws IOException, InterruptedException {
+    return rr.getCurrentKey();
+  }
+
+  @Override
+  public Object getCurrentValue() throws IOException, InterruptedException {
+    return rr.getCurrentValue();
+  }
+
+  @Override
+  public boolean nextKeyValue() throws IOException, InterruptedException {
+    return rr.nextKeyValue();
+  }
+
+  /**
+   * Actually instantiate the user's chosen RecordReader implementation.
+   */
+  @SuppressWarnings("unchecked")
+  private void createChildReader() throws IOException, InterruptedException {
+    LOG.debug("ChildSplit operates on: " + split.getPath(index));
+
+    Configuration conf = context.getConfiguration();
+
+    // Determine the file format we're reading.
+    Class rrClass;
+    if (ExportJobBase.isSequenceFiles(conf, split.getPath(index))) {
+      rrClass = SequenceFileRecordReader.class;
+    } else {
+      rrClass = LineRecordReader.class;
     }
 
-    @Override
-    public float getProgress() throws IOException, InterruptedException {
-        return rr.getProgress();
-    }
-
-    @Override
-    public void close() throws IOException {
-        if (null != rr) {
-            rr.close();
-            rr = null;
-        }
-    }
-
-    @Override
-    public LongWritable getCurrentKey()
-    throws IOException, InterruptedException {
-        return rr.getCurrentKey();
-    }
-
-    @Override
-    public Object getCurrentValue()
-    throws IOException, InterruptedException {
-        return rr.getCurrentValue();
-    }
-
-    @Override
-    public boolean nextKeyValue() throws IOException, InterruptedException {
-        return rr.nextKeyValue();
-    }
-
-    /**
-     * Actually instantiate the user's chosen RecordReader implementation.
-     */
-    @SuppressWarnings("unchecked")
-    private void createChildReader() throws IOException, InterruptedException {
-        LOG.debug("ChildSplit operates on: " + split.getPath(index));
-
-        Configuration conf = context.getConfiguration();
-
-        // Determine the file format we're reading.
-        Class rrClass;
-        if (ExportJobBase.isSequenceFiles(conf, split.getPath(index))) {
-            rrClass = SequenceFileRecordReader.class;
-        } else {
-            rrClass = LineRecordReader.class;
-        }
-
-        // Create the appropriate record reader.
-        this.rr = (RecordReader<LongWritable, Object>)
-                  ReflectionUtils.newInstance(rrClass, conf);
-    }
+    // Create the appropriate record reader.
+    this.rr = (RecordReader<LongWritable, Object>)ReflectionUtils.newInstance(
+        rrClass, conf);
+  }
 }

@@ -20,5 +20,5 @@ package org.apache.sqoop.importjob.configuration;
 
 public interface AvroTestConfiguration extends ImportJobTestConfiguration {
 
-    String[] getExpectedResultsForAvro();
+  String[] getExpectedResultsForAvro();
 }

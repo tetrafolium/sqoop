@@ -46,40 +46,28 @@ import org.apache.commons.logging.LogFactory;
  */
 public class CubridTestUtils {
 
-    public static final Log LOG = LogFactory.getLog(CubridTestUtils.class
-                                  .getName());
+  public static final Log LOG =
+      LogFactory.getLog(CubridTestUtils.class.getName());
 
-    public static final String HOST_URL = System
-                                          .getProperty("sqoop.test.cubrid.connectstring.host_url",
-                                                  "jdbc:cubrid:localhost:33000");
+  public static final String HOST_URL =
+      System.getProperty("sqoop.test.cubrid.connectstring.host_url",
+                         "jdbc:cubrid:localhost:33000");
 
-    static final String TEST_DATABASE = System
-                                        .getProperty("sqoop.test.cubrid.connectstring.database",
-                                                "sqoop");
-    static final String TEST_USER = System
-                                    .getProperty("sqoop.test.cubrid.connectstring.username",
-                                            "sqoop");
-    static final String TEST_PASS = System
-                                    .getProperty("sqoop.test.cubrid.connectstring.password",
-                                            "Sqoop12345");
-    static final String TABLE_NAME = "EMPLOYEES_CUBRID";
-    static final String NULL_TABLE_NAME = "NULL_EMPLOYEES_CUBRID";
-    static final String CONNECT_STRING = HOST_URL + ":"
-                                         + TEST_DATABASE + ":::";
+  static final String TEST_DATABASE =
+      System.getProperty("sqoop.test.cubrid.connectstring.database", "sqoop");
+  static final String TEST_USER =
+      System.getProperty("sqoop.test.cubrid.connectstring.username", "sqoop");
+  static final String TEST_PASS = System.getProperty(
+      "sqoop.test.cubrid.connectstring.password", "Sqoop12345");
+  static final String TABLE_NAME = "EMPLOYEES_CUBRID";
+  static final String NULL_TABLE_NAME = "NULL_EMPLOYEES_CUBRID";
+  static final String CONNECT_STRING = HOST_URL + ":" + TEST_DATABASE + ":::";
 
-    public static String getCurrentUser() {
-        return TEST_USER;
-    }
+  public static String getCurrentUser() { return TEST_USER; }
 
-    public static String getPassword() {
-        return TEST_PASS;
-    }
+  public static String getPassword() { return TEST_PASS; }
 
-    public static String getConnectString() {
-        return CONNECT_STRING;
-    }
+  public static String getConnectString() { return CONNECT_STRING; }
 
-    public static String getTableName() {
-        return TABLE_NAME;
-    }
+  public static String getTableName() { return TABLE_NAME; }
 }
