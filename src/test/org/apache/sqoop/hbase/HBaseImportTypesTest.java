@@ -26,13 +26,13 @@ import org.junit.Test;
  */
 public class HBaseImportTypesTest extends HBaseTestCase {
 
-  @Test
-  public void testStrings() throws IOException {
-    String[] argv = getArgv(true, "stringT", "stringF", true, null);
-    String[] types = {"INT", "VARCHAR(32)"};
-    String[] vals = {"0", "'abc'"};
-    createTableWithColTypes(types, vals);
-    runImport(argv);
-    verifyHBaseCell("stringT", "0", "stringF", getColName(1), "abc");
-  }
+@Test
+public void testStrings() throws IOException {
+	String[] argv = getArgv(true, "stringT", "stringF", true, null);
+	String[] types = {"INT", "VARCHAR(32)"};
+	String[] vals = {"0", "'abc'"};
+	createTableWithColTypes(types, vals);
+	runImport(argv);
+	verifyHBaseCell("stringT", "0", "stringF", getColName(1), "abc");
+}
 }

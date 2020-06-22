@@ -26,28 +26,28 @@ package org.apache.sqoop.validation;
  */
 public class AbortOnFailureHandler implements ValidationFailureHandler {
 
-  static final ValidationFailureHandler INSTANCE = new AbortOnFailureHandler();
+static final ValidationFailureHandler INSTANCE = new AbortOnFailureHandler();
 
-  /**
-   * Method that handles the validation failure.
-   *
-   * @param validationContext validation context
-   * @return if failure was handled or not
-   * @throws ValidationException
-   */
-  @Override
-  public boolean handle(ValidationContext validationContext)
-      throws ValidationException {
+/**
+ * Method that handles the validation failure.
+ *
+ * @param validationContext validation context
+ * @return if failure was handled or not
+ * @throws ValidationException
+ */
+@Override
+public boolean handle(ValidationContext validationContext)
+throws ValidationException {
 
-    StringBuilder messageBuffer = new StringBuilder();
-    messageBuffer.append("Validation failed by ");
-    messageBuffer.append(validationContext.getMessage());
-    messageBuffer.append(". Reason: ").append(validationContext.getReason());
-    messageBuffer.append(", Row Count at Source: ");
-    messageBuffer.append(validationContext.getSourceRowCount());
-    messageBuffer.append(", Row Count at Target: ");
-    messageBuffer.append(validationContext.getTargetRowCount());
+	StringBuilder messageBuffer = new StringBuilder();
+	messageBuffer.append("Validation failed by ");
+	messageBuffer.append(validationContext.getMessage());
+	messageBuffer.append(". Reason: ").append(validationContext.getReason());
+	messageBuffer.append(", Row Count at Source: ");
+	messageBuffer.append(validationContext.getSourceRowCount());
+	messageBuffer.append(", Row Count at Target: ");
+	messageBuffer.append(validationContext.getTargetRowCount());
 
-    throw new ValidationException(messageBuffer.toString());
-  }
+	throw new ValidationException(messageBuffer.toString());
+}
 }

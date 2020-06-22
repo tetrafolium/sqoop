@@ -31,69 +31,72 @@ import org.junit.experimental.categories.Category;
 
 @Category(UnitTest.class)
 public class TestMainframeFTPFileEntryParser {
-  static List<String> listing;
-  static MainframeFTPFileEntryParser parser2;
-  @BeforeClass
-  public static void setUpBeforeClass() throws Exception {
-    /* Volume Unit    Referred Ext Used Recfm Lrecl BlkSz Dsorg Dsname
-     * xxx300 3390   2016/05/25  1   45  VB    2349 27998  PS
-    UNLOAD.EDH.UNLOADED x31167 Tape UNLOAD.EDH.UNLOADT xxx305 3390   2016/05/23
-    1   45  VB    2349 27998  PS  UNLOAD.EDH.UNLOAD1 xxx305 3390   2016/05/25  1
-    45  VB    2349 27998  PS  UNLOAD.EDH.UNLOAD2 xxx305 3390   2016/05/25  1 45
-    VB    2349 27998  PS  UNLOAD.EDH.UNLOAD3 Migrated DUMMY.DATA OVR343 3390
-    2018/01/23  1    1  FB     132 27984  PS  EMPTY Migrated JCL.CNTL OVR346
-    3390   2018/01/22  1    1  FB      80 27920  PS  MIXED.FB80 Migrated
-    PLAIN.FB80 OVR341 3390   2018/01/23  1    9  VA     125   129  PS
-    PRDA.SPFLOG1.LIST G20427 Tape UNLOAD.ABCDE.ZZ9UYT.FB.TAPE SEM352 3390
-    2018/01/23  1    1  FB     150  1500  PS  USER.BRODCAST OVR346 3390
-    2018/01/23  3    3  FB      80  6160  PO  USER.ISPPROF
-     */
-    listing = new ArrayList<String>();
-    listing.add(
-        "Volume Unit    Referred Ext Used Recfm Lrecl BlkSz Dsorg Dsname");
-    listing.add(
-        "xxx300 3390   2016/05/25  1   45  VB    2349 27998  PS  UNLOAD.EDH.UNLOADED");
-    listing.add(
-        "x31167 Tape                                                                               UNLOAD.EDH.UNLOADT");
-    listing.add(
-        "xxx305 3390   2016/05/23  1   45  VB    2349 27998  PS  UNLOAD.EDH.UNLOAD1");
-    listing.add(
-        "xxx305 3390   2016/05/25  1   45  VB    2349 27998  PS  UNLOAD.EDH.UNLOAD2");
-    listing.add(
-        "xxx305 3390   2016/05/25  1   45  VB    2349 27998  PS  UNLOAD.EDH.UNLOAD3");
-    listing.add(
-        "Migrated                                                PLAIN.FB80");
-    listing.add(
-        "Migrated                                                DUMMY.DATA");
-    listing.add(
-        "Migrated                                                JCL.CNTL");
-  }
+static List<String> listing;
+static MainframeFTPFileEntryParser parser2;
+@BeforeClass
+public static void setUpBeforeClass() throws Exception {
+	/* Volume Unit    Referred Ext Used Recfm Lrecl BlkSz Dsorg Dsname
+	 * xxx300 3390   2016/05/25  1   45  VB    2349 27998  PS
+	   UNLOAD.EDH.UNLOADED x31167 Tape UNLOAD.EDH.UNLOADT xxx305 3390   2016/05/23
+	   1   45  VB    2349 27998  PS  UNLOAD.EDH.UNLOAD1 xxx305 3390   2016/05/25  1
+	   45  VB    2349 27998  PS  UNLOAD.EDH.UNLOAD2 xxx305 3390   2016/05/25  1 45
+	   VB    2349 27998  PS  UNLOAD.EDH.UNLOAD3 Migrated DUMMY.DATA OVR343 3390
+	   2018/01/23  1    1  FB     132 27984  PS  EMPTY Migrated JCL.CNTL OVR346
+	   3390   2018/01/22  1    1  FB      80 27920  PS  MIXED.FB80 Migrated
+	   PLAIN.FB80 OVR341 3390   2018/01/23  1    9  VA     125   129  PS
+	   PRDA.SPFLOG1.LIST G20427 Tape UNLOAD.ABCDE.ZZ9UYT.FB.TAPE SEM352 3390
+	   2018/01/23  1    1  FB     150  1500  PS  USER.BRODCAST OVR346 3390
+	   2018/01/23  3    3  FB      80  6160  PO  USER.ISPPROF
+	 */
+	listing = new ArrayList<String>();
+	listing.add(
+		"Volume Unit    Referred Ext Used Recfm Lrecl BlkSz Dsorg Dsname");
+	listing.add(
+		"xxx300 3390   2016/05/25  1   45  VB    2349 27998  PS  UNLOAD.EDH.UNLOADED");
+	listing.add(
+		"x31167 Tape                                                                               UNLOAD.EDH.UNLOADT");
+	listing.add(
+		"xxx305 3390   2016/05/23  1   45  VB    2349 27998  PS  UNLOAD.EDH.UNLOAD1");
+	listing.add(
+		"xxx305 3390   2016/05/25  1   45  VB    2349 27998  PS  UNLOAD.EDH.UNLOAD2");
+	listing.add(
+		"xxx305 3390   2016/05/25  1   45  VB    2349 27998  PS  UNLOAD.EDH.UNLOAD3");
+	listing.add(
+		"Migrated                                                PLAIN.FB80");
+	listing.add(
+		"Migrated                                                DUMMY.DATA");
+	listing.add(
+		"Migrated                                                JCL.CNTL");
+}
 
-  @AfterClass
-  public static void tearDownAfterClass() throws Exception {}
+@AfterClass
+public static void tearDownAfterClass() throws Exception {
+}
 
-  @Before
-  public void setUp() throws Exception {}
+@Before
+public void setUp() throws Exception {
+}
 
-  @After
-  public void tearDown() throws Exception {}
+@After
+public void tearDown() throws Exception {
+}
 
-  @Test
-  public void testMainframeFTPFileEntryParserString() {
-    MainframeFTPFileEntryParser parser = new MainframeFTPFileEntryParser();
-    assert (parser != null);
-  }
+@Test
+public void testMainframeFTPFileEntryParserString() {
+	MainframeFTPFileEntryParser parser = new MainframeFTPFileEntryParser();
+	assert (parser != null);
+}
 
-  @Test
-  public void testParseFTPEntry() {
-    parser2 = new MainframeFTPFileEntryParser();
-    int i = 0;
-    for (String j : listing) {
-      FTPFile file = parser2.parseFTPEntry(j);
-      if (file != null) {
-        i++;
-      }
-    }
-    assert (i == listing.size() - 1);
-  }
+@Test
+public void testParseFTPEntry() {
+	parser2 = new MainframeFTPFileEntryParser();
+	int i = 0;
+	for (String j : listing) {
+		FTPFile file = parser2.parseFTPEntry(j);
+		if (file != null) {
+			i++;
+		}
+	}
+	assert (i == listing.size() - 1);
+}
 }

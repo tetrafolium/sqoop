@@ -26,72 +26,72 @@ import org.apache.hadoop.conf.Configuration;
 
 public class AutoGenericJobStorage extends GenericJobStorage {
 
-  public static final Log LOG =
-      LogFactory.getLog(AutoGenericJobStorage.class.getName());
+public static final Log LOG =
+	LogFactory.getLog(AutoGenericJobStorage.class.getName());
 
-  /**
-   * Configuration key specifying whether this storage agent is active.
-   * Defaults to "on" to allow zero-conf local users.
-   */
-  public static final String AUTO_STORAGE_IS_ACTIVE_KEY =
-      "sqoop.metastore.client.enable.autoconnect";
+/**
+ * Configuration key specifying whether this storage agent is active.
+ * Defaults to "on" to allow zero-conf local users.
+ */
+public static final String AUTO_STORAGE_IS_ACTIVE_KEY =
+	"sqoop.metastore.client.enable.autoconnect";
 
-  /**
-   * Configuration key specifying the connect string used by this
-   * storage agent.
-   */
-  public static final String AUTO_STORAGE_CONNECT_STRING_KEY =
-      "sqoop.metastore.client.autoconnect.url";
+/**
+ * Configuration key specifying the connect string used by this
+ * storage agent.
+ */
+public static final String AUTO_STORAGE_CONNECT_STRING_KEY =
+	"sqoop.metastore.client.autoconnect.url";
 
-  /**
-   * Configuration key specifying the username to bind with.
-   */
-  public static final String AUTO_STORAGE_USER_KEY =
-      "sqoop.metastore.client.autoconnect.username";
+/**
+ * Configuration key specifying the username to bind with.
+ */
+public static final String AUTO_STORAGE_USER_KEY =
+	"sqoop.metastore.client.autoconnect.username";
 
-  /** HSQLDB default user is named 'SA'. */
-  private static final String DEFAULT_AUTO_USER = "SA";
+/** HSQLDB default user is named 'SA'. */
+private static final String DEFAULT_AUTO_USER = "SA";
 
-  /**
-   * Configuration key specifying the password to bind with.
-   */
-  public static final String AUTO_STORAGE_PASS_KEY =
-      "sqoop.metastore.client.autoconnect.password";
+/**
+ * Configuration key specifying the password to bind with.
+ */
+public static final String AUTO_STORAGE_PASS_KEY =
+	"sqoop.metastore.client.autoconnect.password";
 
-  /** HSQLDB default user has an empty password. */
-  public static final String DEFAULT_AUTO_PASSWORD = "";
+/** HSQLDB default user has an empty password. */
+public static final String DEFAULT_AUTO_PASSWORD = "";
 
-  @Override
-  /** {@inheritDoc} */
-  public boolean canAccept(Map<String, String> descriptor) {
-    Configuration conf = this.getConf();
-    return conf.getBoolean(AUTO_STORAGE_IS_ACTIVE_KEY, true);
-  }
+@Override
+/** {@inheritDoc} */
+public boolean canAccept(Map<String, String> descriptor) {
+	Configuration conf = this.getConf();
+	return conf.getBoolean(AUTO_STORAGE_IS_ACTIVE_KEY, true);
+}
 
-  /**
-   * Determine the user's home directory and return a connect
-   * string to HSQLDB that uses ~/.sqoop/ as the storage location
-   * for the metastore database.
-   */
-  private String getHomeDirFileConnectStr() {
-    String homeDir = System.getProperty("user.home");
+/**
+ * Determine the user's home directory and return a connect
+ * string to HSQLDB that uses ~/.sqoop/ as the storage location
+ * for the metastore database.
+ */
+private String getHomeDirFileConnectStr() {
+	String homeDir = System.getProperty("user.home");
 
-    File homeDirObj = new File(homeDir);
-    File sqoopDataDirObj = new File(homeDirObj, ".sqoop");
-    File databaseFileObj = new File(sqoopDataDirObj, "metastore.db");
+	File homeDirObj = new File(homeDir);
+	File sqoopDataDirObj = new File(homeDirObj, ".sqoop");
+	File databaseFileObj = new File(sqoopDataDirObj, "metastore.db");
 
-    String dbFileStr = databaseFileObj.toString();
-    return "jdbc:hsqldb:file:" + dbFileStr +
-        ";hsqldb.write_delay=false;shutdown=true";
-  }
+	String dbFileStr = databaseFileObj.toString();
+	return "jdbc:hsqldb:file:" + dbFileStr +
+	       ";hsqldb.write_delay=false;shutdown=true";
+}
 
-  @Override
-  protected void setConnectionParameters(Map<String, String> descriptor) {
-    Configuration conf = getConf();
-    setMetastoreConnectStr(
-        conf.get(AUTO_STORAGE_CONNECT_STRING_KEY, getHomeDirFileConnectStr()));
-    setMetastoreUser(conf.get(AUTO_STORAGE_USER_KEY, DEFAULT_AUTO_USER));
-    setMetastorePassword(
-        conf.get(AUTO_STORAGE_PASS_KEY, DEFAULT_AUTO_PASSWORD));
-  }
+@Override
+protected void setConnectionParameters(Map<String, String> descriptor) {
+	Configuration conf = getConf();
+	setMetastoreConnectStr(
+		conf.get(AUTO_STORAGE_CONNECT_STRING_KEY, getHomeDirFileConnectStr()));
+	setMetastoreUser(conf.get(AUTO_STORAGE_USER_KEY, DEFAULT_AUTO_USER));
+	setMetastorePassword(
+		conf.get(AUTO_STORAGE_PASS_KEY, DEFAULT_AUTO_PASSWORD));
+}
 }

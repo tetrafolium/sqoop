@@ -46,8 +46,8 @@ import org.junit.experimental.categories.Category;
 @Category(OracleTest.class)
 public class OracleJobToolTest extends JobToolTestBase {
 
-  public OracleJobToolTest() {
-    super(OracleUtils.CONNECT_STRING, OracleUtils.ORACLE_USER_NAME,
-          OracleUtils.ORACLE_USER_PASS);
-  }
+public OracleJobToolTest() {
+	super(OracleUtils.CONNECT_STRING, OracleUtils.ORACLE_USER_NAME,
+	      OracleUtils.ORACLE_USER_PASS);
+}
 }

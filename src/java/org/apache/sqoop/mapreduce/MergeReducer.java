@@ -30,9 +30,9 @@ import org.apache.sqoop.lib.SqoopRecord;
  */
 public class MergeReducer extends MergeReducerBase<SqoopRecord, NullWritable> {
 
-  @Override
-  protected void writeRecord(SqoopRecord record, Context c)
-      throws IOException, InterruptedException {
-    c.write(record, NullWritable.get());
-  }
+@Override
+protected void writeRecord(SqoopRecord record, Context c)
+throws IOException, InterruptedException {
+	c.write(record, NullWritable.get());
+}
 }

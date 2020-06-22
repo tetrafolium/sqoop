@@ -29,123 +29,123 @@ import java.util.Map;
 
 public class ArgumentArrayBuilder {
 
-  private static final String PROPERTY_PREFIX = "-D";
+private static final String PROPERTY_PREFIX = "-D";
 
-  private static final String OPTION_PREFIX = "--";
+private static final String OPTION_PREFIX = "--";
 
-  private static final String TOOL_ARG_SEPARATOR = "--";
+private static final String TOOL_ARG_SEPARATOR = "--";
 
-  private Map<String, Argument> properties;
+private Map<String, Argument> properties;
 
-  private Map<String, Argument> options;
+private Map<String, Argument> options;
 
-  private Map<String, Argument> toolOptions;
+private Map<String, Argument> toolOptions;
 
-  private boolean withCommonHadoopFlags;
+private boolean withCommonHadoopFlags;
 
-  public ArgumentArrayBuilder() {
-    properties = new HashMap<>();
-    options = new HashMap<>();
-    toolOptions = new HashMap<>();
-  }
+public ArgumentArrayBuilder() {
+	properties = new HashMap<>();
+	options = new HashMap<>();
+	toolOptions = new HashMap<>();
+}
 
-  public ArgumentArrayBuilder withProperty(String name, String value) {
-    properties.put(name, new Argument(name, value));
-    return this;
-  }
+public ArgumentArrayBuilder withProperty(String name, String value) {
+	properties.put(name, new Argument(name, value));
+	return this;
+}
 
-  public ArgumentArrayBuilder withProperty(String name) {
-    properties.put(name, new Argument(name));
-    return this;
-  }
+public ArgumentArrayBuilder withProperty(String name) {
+	properties.put(name, new Argument(name));
+	return this;
+}
 
-  public ArgumentArrayBuilder withOption(String name, String value) {
-    options.put(name, new Argument(name, value));
-    return this;
-  }
+public ArgumentArrayBuilder withOption(String name, String value) {
+	options.put(name, new Argument(name, value));
+	return this;
+}
 
-  public ArgumentArrayBuilder withOption(String name) {
-    options.put(name, new Argument(name));
-    return this;
-  }
+public ArgumentArrayBuilder withOption(String name) {
+	options.put(name, new Argument(name));
+	return this;
+}
 
-  public ArgumentArrayBuilder withToolOption(String name, String value) {
-    toolOptions.put(name, new Argument(name, value));
-    return this;
-  }
+public ArgumentArrayBuilder withToolOption(String name, String value) {
+	toolOptions.put(name, new Argument(name, value));
+	return this;
+}
 
-  public ArgumentArrayBuilder withToolOption(String name) {
-    toolOptions.put(name, new Argument(name));
-    return this;
-  }
+public ArgumentArrayBuilder withToolOption(String name) {
+	toolOptions.put(name, new Argument(name));
+	return this;
+}
 
-  public ArgumentArrayBuilder with(ArgumentArrayBuilder otherBuilder) {
-    properties.putAll(otherBuilder.properties);
-    options.putAll(otherBuilder.options);
-    toolOptions.putAll(otherBuilder.toolOptions);
-    return this;
-  }
+public ArgumentArrayBuilder with(ArgumentArrayBuilder otherBuilder) {
+	properties.putAll(otherBuilder.properties);
+	options.putAll(otherBuilder.options);
+	toolOptions.putAll(otherBuilder.toolOptions);
+	return this;
+}
 
-  public ArgumentArrayBuilder withCommonHadoopFlags(boolean b) {
-    withCommonHadoopFlags = b;
-    return this;
-  }
+public ArgumentArrayBuilder withCommonHadoopFlags(boolean b) {
+	withCommonHadoopFlags = b;
+	return this;
+}
 
-  public ArgumentArrayBuilder withCommonHadoopFlags() {
-    withCommonHadoopFlags = true;
-    return this;
-  }
+public ArgumentArrayBuilder withCommonHadoopFlags() {
+	withCommonHadoopFlags = true;
+	return this;
+}
 
-  /**
-   * Transforms the given options, properties and toolOptions to the command
-   * line format Sqoop expects, by adding dashes (--) and the capital D letter
-   * when it's necessary (in front of properties)
-   * @return String array that can be used to run tests
-   */
-  public String[] build() {
-    List<String> result = new ArrayList<>();
-    if (withCommonHadoopFlags) {
-      CommonArgs.addHadoopFlags(result);
-    }
-    if (!properties.isEmpty()) {
-      Collections.addAll(
-          result, createArgumentArrayFromProperties(properties.values()));
-    }
-    if (!options.isEmpty()) {
-      Collections.addAll(result,
-                         createArgumentArrayFromOptions(options.values()));
-    }
-    if (!toolOptions.isEmpty()) {
-      result.add(TOOL_ARG_SEPARATOR);
-      Collections.addAll(result,
-                         createArgumentArrayFromOptions(toolOptions.values()));
-    }
-    return result.toArray(new String[result.size()]);
-  }
+/**
+ * Transforms the given options, properties and toolOptions to the command
+ * line format Sqoop expects, by adding dashes (--) and the capital D letter
+ * when it's necessary (in front of properties)
+ * @return String array that can be used to run tests
+ */
+public String[] build() {
+	List<String> result = new ArrayList<>();
+	if (withCommonHadoopFlags) {
+		CommonArgs.addHadoopFlags(result);
+	}
+	if (!properties.isEmpty()) {
+		Collections.addAll(
+			result, createArgumentArrayFromProperties(properties.values()));
+	}
+	if (!options.isEmpty()) {
+		Collections.addAll(result,
+		                   createArgumentArrayFromOptions(options.values()));
+	}
+	if (!toolOptions.isEmpty()) {
+		result.add(TOOL_ARG_SEPARATOR);
+		Collections.addAll(result,
+		                   createArgumentArrayFromOptions(toolOptions.values()));
+	}
+	return result.toArray(new String[result.size()]);
+}
 
-  private String[] createArgumentArrayFromProperties(
-      Iterable<Argument> properties) {
-    List<String> result = new ArrayList<>();
-    for (Argument property : properties) {
-      result.add(PROPERTY_PREFIX);
-      result.add(property.toString());
-    }
-    return result.toArray(new String[result.size()]);
-  }
+private String[] createArgumentArrayFromProperties(
+	Iterable<Argument> properties) {
+	List<String> result = new ArrayList<>();
+	for (Argument property : properties) {
+		result.add(PROPERTY_PREFIX);
+		result.add(property.toString());
+	}
+	return result.toArray(new String[result.size()]);
+}
 
-  private String[] createArgumentArrayFromOptions(Iterable<Argument> options) {
-    List<String> result = new ArrayList<>();
-    for (Argument option : options) {
-      result.add(OPTION_PREFIX + option.getName());
-      if (!isEmpty(option.getValue())) {
-        result.add(option.getValue());
-      }
-    }
-    return result.toArray(new String[result.size()]);
-  }
+private String[] createArgumentArrayFromOptions(Iterable<Argument> options) {
+	List<String> result = new ArrayList<>();
+	for (Argument option : options) {
+		result.add(OPTION_PREFIX + option.getName());
+		if (!isEmpty(option.getValue())) {
+			result.add(option.getValue());
+		}
+	}
+	return result.toArray(new String[result.size()]);
+}
 
-  @Override
-  public String toString() {
-    return Arrays.toString(build());
-  }
+@Override
+public String toString() {
+	return Arrays.toString(build());
+}
 }

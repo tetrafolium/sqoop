@@ -28,86 +28,86 @@ import org.junit.Test;
  */
 public class TestAccumuloImport extends AccumuloTestCase {
 
-  @Test
-  public void testBasicUsage() throws IOException {
-    String[] argv = getArgv("BasicUsage", "BasicColFam", true, null);
-    String[] types = {"INT", "INT"};
-    String[] vals = {"0", "1"};
-    createTableWithColTypes(types, vals);
-    runImport(argv);
-    verifyAccumuloCell("BasicUsage", "0", "BasicColFam", getColName(1), "1");
-  }
+@Test
+public void testBasicUsage() throws IOException {
+	String[] argv = getArgv("BasicUsage", "BasicColFam", true, null);
+	String[] types = {"INT", "INT"};
+	String[] vals = {"0", "1"};
+	createTableWithColTypes(types, vals);
+	runImport(argv);
+	verifyAccumuloCell("BasicUsage", "0", "BasicColFam", getColName(1), "1");
+}
 
-  @Test
-  public void testMissingTableFails() throws IOException {
-    // Test that if the table doesn't exist, we fail unless we
-    // explicitly create the table.
-    String[] argv = getArgv("MissingTable", "MissingFam", false, null);
-    String[] types = {"INT", "INT"};
-    String[] vals = {"0", "1"};
-    createTableWithColTypes(types, vals);
-    try {
-      runImport(argv);
-      fail("Expected Exception");
-    } catch (IOException e) {
-      LOG.info("Got exception -- ok; we expected that job to fail.");
-    }
-  }
+@Test
+public void testMissingTableFails() throws IOException {
+	// Test that if the table doesn't exist, we fail unless we
+	// explicitly create the table.
+	String[] argv = getArgv("MissingTable", "MissingFam", false, null);
+	String[] types = {"INT", "INT"};
+	String[] vals = {"0", "1"};
+	createTableWithColTypes(types, vals);
+	try {
+		runImport(argv);
+		fail("Expected Exception");
+	} catch (IOException e) {
+		LOG.info("Got exception -- ok; we expected that job to fail.");
+	}
+}
 
-  @Test
-  public void testOverwriteSucceeds() throws IOException {
-    // Test that we can create a table and then import immediately
-    // back on top of it without problem.
-    String[] argv = getArgv("OverwriteT", "OverwriteF", true, null);
-    String[] types = {"INT", "INT"};
-    String[] vals = {"0", "1"};
-    createTableWithColTypes(types, vals);
-    runImport(argv);
-    verifyAccumuloCell("OverwriteT", "0", "OverwriteF", getColName(1), "1");
-    // Run a second time.
-    runImport(argv);
-    verifyAccumuloCell("OverwriteT", "0", "OverwriteF", getColName(1), "1");
-  }
+@Test
+public void testOverwriteSucceeds() throws IOException {
+	// Test that we can create a table and then import immediately
+	// back on top of it without problem.
+	String[] argv = getArgv("OverwriteT", "OverwriteF", true, null);
+	String[] types = {"INT", "INT"};
+	String[] vals = {"0", "1"};
+	createTableWithColTypes(types, vals);
+	runImport(argv);
+	verifyAccumuloCell("OverwriteT", "0", "OverwriteF", getColName(1), "1");
+	// Run a second time.
+	runImport(argv);
+	verifyAccumuloCell("OverwriteT", "0", "OverwriteF", getColName(1), "1");
+}
 
-  @Test
-  public void testStrings() throws IOException {
-    String[] argv = getArgv("stringT", "stringF", true, null);
-    String[] types = {"INT", "VARCHAR(32)"};
-    String[] vals = {"0", "'abc'"};
-    createTableWithColTypes(types, vals);
-    runImport(argv);
-    verifyAccumuloCell("stringT", "0", "stringF", getColName(1), "abc");
-  }
+@Test
+public void testStrings() throws IOException {
+	String[] argv = getArgv("stringT", "stringF", true, null);
+	String[] types = {"INT", "VARCHAR(32)"};
+	String[] vals = {"0", "'abc'"};
+	createTableWithColTypes(types, vals);
+	runImport(argv);
+	verifyAccumuloCell("stringT", "0", "stringF", getColName(1), "abc");
+}
 
-  @Test
-  public void testNulls() throws IOException {
-    String[] argv = getArgv("nullT", "nullF", true, null);
-    String[] types = {"INT", "INT", "INT"};
-    String[] vals = {"0", "42", "null"};
-    createTableWithColTypes(types, vals);
-    runImport(argv);
-    // This cell should import correctly.
-    verifyAccumuloCell("nullT", "0", "nullF", getColName(1), "42");
+@Test
+public void testNulls() throws IOException {
+	String[] argv = getArgv("nullT", "nullF", true, null);
+	String[] types = {"INT", "INT", "INT"};
+	String[] vals = {"0", "42", "null"};
+	createTableWithColTypes(types, vals);
+	runImport(argv);
+	// This cell should import correctly.
+	verifyAccumuloCell("nullT", "0", "nullF", getColName(1), "42");
 
-    // This cell should not be placed in the results..
-    verifyAccumuloCell("nullT", "0", "nullF", getColName(2), null);
-  }
+	// This cell should not be placed in the results..
+	verifyAccumuloCell("nullT", "0", "nullF", getColName(2), null);
+}
 
-  @Test
-  public void testExitFailure() throws IOException {
-    String[] argv = getArgv("NoAccumuloT", "NoAccumuloF", true, null);
-    String[] types = {"INT", "INT", "INT"};
-    String[] vals = {"0", "42", "43"};
-    createTableWithColTypes(types, vals);
-    try {
-      AccumuloUtil.setAlwaysNoAccumuloJarMode(true);
-      runImport(argv);
-      fail("should have gotten exception");
-    } catch (IOException e) {
-      // Got the exception, so we're happy
-      LOG.info("Got exception -- ok; we expected that to fail.");
-    } finally {
-      AccumuloUtil.setAlwaysNoAccumuloJarMode(false);
-    }
-  }
+@Test
+public void testExitFailure() throws IOException {
+	String[] argv = getArgv("NoAccumuloT", "NoAccumuloF", true, null);
+	String[] types = {"INT", "INT", "INT"};
+	String[] vals = {"0", "42", "43"};
+	createTableWithColTypes(types, vals);
+	try {
+		AccumuloUtil.setAlwaysNoAccumuloJarMode(true);
+		runImport(argv);
+		fail("should have gotten exception");
+	} catch (IOException e) {
+		// Got the exception, so we're happy
+		LOG.info("Got exception -- ok; we expected that to fail.");
+	} finally {
+		AccumuloUtil.setAlwaysNoAccumuloJarMode(false);
+	}
+}
 }

@@ -23,31 +23,31 @@ package org.apache.sqoop.manager.oracle.util;
  * UTF-8.
  */
 public class NCharGenerator extends OraOopTestDataGenerator<String> {
-  private int minLength;
-  private int maxLength;
+private int minLength;
+private int maxLength;
 
-  /**
-   * Create an NCharGenerator that will generate Strings between minLength and
-   * maxLength in length.
-   *
-   * @param minLength
-   *          Minimum length for generated strings
-   * @param maxLength
-   *          Maximum length for generated strings
-   */
-  public NCharGenerator(int minLength, int maxLength) {
-    super();
-    this.minLength = minLength;
-    this.maxLength = maxLength;
-  }
+/**
+ * Create an NCharGenerator that will generate Strings between minLength and
+ * maxLength in length.
+ *
+ * @param minLength
+ *          Minimum length for generated strings
+ * @param maxLength
+ *          Maximum length for generated strings
+ */
+public NCharGenerator(int minLength, int maxLength) {
+	super();
+	this.minLength = minLength;
+	this.maxLength = maxLength;
+}
 
-  @Override
-  public String next() {
-    int length = minLength + rng.nextInt(maxLength - minLength + 1);
-    StringBuilder sb = new StringBuilder();
-    while (sb.length() < length) {
-      sb.append(Character.toChars(rng.nextInt(0x10FFFF)));
-    }
-    return sb.toString().substring(0, length);
-  }
+@Override
+public String next() {
+	int length = minLength + rng.nextInt(maxLength - minLength + 1);
+	StringBuilder sb = new StringBuilder();
+	while (sb.length() < length) {
+		sb.append(Character.toChars(rng.nextInt(0x10FFFF)));
+	}
+	return sb.toString().substring(0, length);
+}
 }

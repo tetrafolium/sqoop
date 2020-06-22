@@ -47,71 +47,73 @@ import org.junit.runners.model.Statement;
  */
 public abstract class CloudCredentialsRule implements TestRule {
 
-  protected final Map<String, String> credentialsMap;
+protected final Map<String, String> credentialsMap;
 
-  private final CredentialGenerator credentialGenerator;
+private final CredentialGenerator credentialGenerator;
 
-  protected CloudCredentialsRule() { this(new CredentialGenerator()); }
+protected CloudCredentialsRule() {
+	this(new CredentialGenerator());
+}
 
-  public CloudCredentialsRule(CredentialGenerator credentialGenerator) {
-    this.credentialGenerator = credentialGenerator;
-    this.credentialsMap = new HashMap<>();
-  }
+public CloudCredentialsRule(CredentialGenerator credentialGenerator) {
+	this.credentialGenerator = credentialGenerator;
+	this.credentialsMap = new HashMap<>();
+}
 
-  @Override
-  public Statement apply(Statement base, Description description) {
-    return new Statement() {
-      @Override
-      public void evaluate() throws Throwable {
-        assumeTrue(isNotBlank(getGeneratorCommand()));
+@Override
+public Statement apply(Statement base, Description description) {
+	return new Statement() {
+		       @Override
+		       public void evaluate() throws Throwable {
+			       assumeTrue(isNotBlank(getGeneratorCommand()));
 
-        setupCredentials();
-        base.evaluate();
-      }
-    };
-  }
+			       setupCredentials();
+			       base.evaluate();
+		       }
+	};
+}
 
-  public void fillCredentialProvider(Configuration conf, String providerPath) {
-    credentialsMap.forEach(
-        (key, value)
-            -> runCredentialProviderCreateCommand(
-                getCreateCommand(key, value, providerPath), conf));
-  }
+public void fillCredentialProvider(Configuration conf, String providerPath) {
+	credentialsMap.forEach(
+		(key, value)
+		->runCredentialProviderCreateCommand(
+			getCreateCommand(key, value, providerPath), conf));
+}
 
-  protected void setupCredentials() throws IOException {
-    Iterable<String> credentials =
-        credentialGenerator.invokeGeneratorCommand(getGeneratorCommand());
+protected void setupCredentials() throws IOException {
+	Iterable<String> credentials =
+		credentialGenerator.invokeGeneratorCommand(getGeneratorCommand());
 
-    initializeCredentialsMap(credentials);
-  }
+	initializeCredentialsMap(credentials);
+}
 
-  private void runCredentialProviderCreateCommand(String command,
-                                                  Configuration conf) {
-    try {
-      ToolRunner.run(conf, new CredentialShell(), command.split(" "));
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
-  }
+private void runCredentialProviderCreateCommand(String command,
+                                                Configuration conf) {
+	try {
+		ToolRunner.run(conf, new CredentialShell(), command.split(" "));
+	} catch (Exception e) {
+		throw new RuntimeException(e);
+	}
+}
 
-  private String getCreateCommand(String credentialKey, String credentialValue,
-                                  String providerPath) {
-    return "create " + credentialKey + " -value " + credentialValue +
-        " -provider " + providerPath;
-  }
+private String getCreateCommand(String credentialKey, String credentialValue,
+                                String providerPath) {
+	return "create " + credentialKey + " -value " + credentialValue +
+	       " -provider " + providerPath;
+}
 
-  public abstract void addCloudCredentialProperties(Configuration hadoopConf);
+public abstract void addCloudCredentialProperties(Configuration hadoopConf);
 
-  public abstract void
-  addCloudCredentialProperties(ArgumentArrayBuilder builder);
+public abstract void
+addCloudCredentialProperties(ArgumentArrayBuilder builder);
 
-  public abstract void
-  addCloudCredentialProviderProperties(ArgumentArrayBuilder builder);
+public abstract void
+addCloudCredentialProviderProperties(ArgumentArrayBuilder builder);
 
-  public abstract String getBaseCloudDirectoryUrl();
+public abstract String getBaseCloudDirectoryUrl();
 
-  protected abstract void
-  initializeCredentialsMap(Iterable<String> credentials);
+protected abstract void
+initializeCredentialsMap(Iterable<String> credentials);
 
-  protected abstract String getGeneratorCommand();
+protected abstract String getGeneratorCommand();
 }

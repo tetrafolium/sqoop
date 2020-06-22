@@ -47,10 +47,10 @@ import org.junit.experimental.categories.Category;
 @Category(SqlServerTest.class)
 public class SqlServerJobToolTest extends JobToolTestBase {
 
-  private static MSSQLTestUtils msSQLTestUtils = new MSSQLTestUtils();
+private static MSSQLTestUtils msSQLTestUtils = new MSSQLTestUtils();
 
-  public SqlServerJobToolTest() {
-    super(msSQLTestUtils.getDBConnectString(), msSQLTestUtils.getDBUserName(),
-          msSQLTestUtils.getDBPassWord());
-  }
+public SqlServerJobToolTest() {
+	super(msSQLTestUtils.getDBConnectString(), msSQLTestUtils.getDBUserName(),
+	      msSQLTestUtils.getDBPassWord());
+}
 }

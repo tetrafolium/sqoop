@@ -32,44 +32,44 @@ import org.apache.sqoop.mapreduce.hcat.SqoopHCatImportHelper;
  * Netezza import mapper using external tables for HCat integration.
  */
 public class NetezzaExternalTableHCatImportMapper
-    extends NetezzaExternalTableImportMapper<NullWritable, HCatRecord> {
-  private SqoopHCatImportHelper helper;
-  private SqoopRecord sqoopRecord;
+	extends NetezzaExternalTableImportMapper<NullWritable, HCatRecord> {
+private SqoopHCatImportHelper helper;
+private SqoopRecord sqoopRecord;
 
-  @Override
-  protected void setup(Context context)
-      throws IOException, InterruptedException {
-    Configuration conf = context.getConfiguration();
-    helper = new SqoopHCatImportHelper(conf);
-    String recordClassName =
-        conf.get(ConfigurationHelper.getDbInputClassProperty());
-    if (null == recordClassName) {
-      throw new IOException("DB Input class name is not set!");
-    }
-    try {
-      Class<?> cls =
-          Class.forName(recordClassName, true,
-                        Thread.currentThread().getContextClassLoader());
-      sqoopRecord = (SqoopRecord)ReflectionUtils.newInstance(cls, conf);
-    } catch (ClassNotFoundException cnfe) {
-      throw new IOException(cnfe);
-    }
+@Override
+protected void setup(Context context)
+throws IOException, InterruptedException {
+	Configuration conf = context.getConfiguration();
+	helper = new SqoopHCatImportHelper(conf);
+	String recordClassName =
+		conf.get(ConfigurationHelper.getDbInputClassProperty());
+	if (null == recordClassName) {
+		throw new IOException("DB Input class name is not set!");
+	}
+	try {
+		Class<?> cls =
+			Class.forName(recordClassName, true,
+			              Thread.currentThread().getContextClassLoader());
+		sqoopRecord = (SqoopRecord)ReflectionUtils.newInstance(cls, conf);
+	} catch (ClassNotFoundException cnfe) {
+		throw new IOException(cnfe);
+	}
 
-    if (null == sqoopRecord) {
-      throw new IOException("Could not instantiate object of type " +
-                            recordClassName);
-    }
-  }
+	if (null == sqoopRecord) {
+		throw new IOException("Could not instantiate object of type " +
+		                      recordClassName);
+	}
+}
 
-  @Override
-  protected void writeRecord(Text text, Context context)
-      throws IOException, InterruptedException {
-    try {
-      sqoopRecord.parse(text);
-      context.write(NullWritable.get(),
-                    helper.convertToHCatRecord(sqoopRecord));
-    } catch (RecordParser.ParseError pe) {
-      throw new IOException("Exception parsing netezza import record", pe);
-    }
-  }
+@Override
+protected void writeRecord(Text text, Context context)
+throws IOException, InterruptedException {
+	try {
+		sqoopRecord.parse(text);
+		context.write(NullWritable.get(),
+		              helper.convertToHCatRecord(sqoopRecord));
+	} catch (RecordParser.ParseError pe) {
+		throw new IOException("Exception parsing netezza import record", pe);
+	}
+}
 }

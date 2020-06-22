@@ -56,114 +56,114 @@ import org.junit.experimental.categories.Category;
 @Category(CubridTest.class)
 public class CubridCompatTest extends ManagerCompatTestCase {
 
-  public static final Log LOG =
-      LogFactory.getLog(CubridCompatTest.class.getName());
+public static final Log LOG =
+	LogFactory.getLog(CubridCompatTest.class.getName());
 
-  @Override
-  protected Log getLogger() {
-    return LOG;
-  }
+@Override
+protected Log getLogger() {
+	return LOG;
+}
 
-  @Override
-  protected String getDbFriendlyName() {
-    return "CUBRID";
-  }
+@Override
+protected String getDbFriendlyName() {
+	return "CUBRID";
+}
 
-  @Override
-  protected String getConnectString() {
-    return CubridTestUtils.getConnectString();
-  }
+@Override
+protected String getConnectString() {
+	return CubridTestUtils.getConnectString();
+}
 
-  @Override
-  protected SqoopOptions getSqoopOptions(Configuration conf) {
-    SqoopOptions opts = new SqoopOptions(conf);
-    opts.setUsername(CubridTestUtils.getCurrentUser());
-    opts.setPassword(CubridTestUtils.getPassword());
-    return opts;
-  }
+@Override
+protected SqoopOptions getSqoopOptions(Configuration conf) {
+	SqoopOptions opts = new SqoopOptions(conf);
+	opts.setUsername(CubridTestUtils.getCurrentUser());
+	opts.setPassword(CubridTestUtils.getPassword());
+	return opts;
+}
 
-  @Override
-  protected void dropTableIfExists(String table) throws SQLException {
-    Connection conn = getManager().getConnection();
-    PreparedStatement statement = conn.prepareStatement(
-        "DROP TABLE IF EXISTS " + table, ResultSet.TYPE_FORWARD_ONLY,
-        ResultSet.CONCUR_READ_ONLY);
-    try {
-      statement.executeUpdate();
-      conn.commit();
-    } finally {
-      statement.close();
-    }
-  }
+@Override
+protected void dropTableIfExists(String table) throws SQLException {
+	Connection conn = getManager().getConnection();
+	PreparedStatement statement = conn.prepareStatement(
+		"DROP TABLE IF EXISTS " + table, ResultSet.TYPE_FORWARD_ONLY,
+		ResultSet.CONCUR_READ_ONLY);
+	try {
+		statement.executeUpdate();
+		conn.commit();
+	} finally {
+		statement.close();
+	}
+}
 
-  @Override
-  protected boolean supportsBoolean() {
-    return false;
-  }
+@Override
+protected boolean supportsBoolean() {
+	return false;
+}
 
-  @Override
-  protected boolean supportsLongVarChar() {
-    return false;
-  }
+@Override
+protected boolean supportsLongVarChar() {
+	return false;
+}
 
-  @Override
-  protected String getFixedCharSeqOut(int fieldWidth, String asInserted) {
-    return padString(fieldWidth, asInserted);
-  }
+@Override
+protected String getFixedCharSeqOut(int fieldWidth, String asInserted) {
+	return padString(fieldWidth, asInserted);
+}
 
-  @Override
-  protected String getTimestampSeqOutput(String tsAsInserted) {
-    // We trim timestamps to exactly one tenth of a second.
-    if ("null".equals(tsAsInserted)) {
-      return tsAsInserted;
-    }
+@Override
+protected String getTimestampSeqOutput(String tsAsInserted) {
+	// We trim timestamps to exactly one tenth of a second.
+	if ("null".equals(tsAsInserted)) {
+		return tsAsInserted;
+	}
 
-    int dotPos = tsAsInserted.indexOf(".");
-    if (-1 == dotPos) {
-      return tsAsInserted + ".0";
-    } else {
-      return tsAsInserted.substring(0, dotPos + 2);
-    }
-  }
+	int dotPos = tsAsInserted.indexOf(".");
+	if (-1 == dotPos) {
+		return tsAsInserted + ".0";
+	} else {
+		return tsAsInserted.substring(0, dotPos + 2);
+	}
+}
 
-  @Override
-  protected String getVarBinaryType() {
-    return "BIT VARYING(48)";
-  }
+@Override
+protected String getVarBinaryType() {
+	return "BIT VARYING(48)";
+}
 
-  @Override
-  protected String getVarBinarySeqOutput(String asInserted) {
-    return toLowerHexString(asInserted);
-  }
+@Override
+protected String getVarBinarySeqOutput(String asInserted) {
+	return toLowerHexString(asInserted);
+}
 
-  @Override
-  protected String getNumericSeqOutput(String numAsInserted) {
-    int totalDecPartSize = getNumericDecPartDigits();
-    int numPad; // number of digits to pad by.
+@Override
+protected String getNumericSeqOutput(String numAsInserted) {
+	int totalDecPartSize = getNumericDecPartDigits();
+	int numPad; // number of digits to pad by.
 
-    int dotPos = numAsInserted.indexOf(".");
-    if (-1 == dotPos) {
-      numAsInserted = numAsInserted + ".";
-      numPad = totalDecPartSize;
-    } else {
-      int existingDecimalSize = numAsInserted.length() - dotPos;
-      numPad = totalDecPartSize - existingDecimalSize;
-    }
+	int dotPos = numAsInserted.indexOf(".");
+	if (-1 == dotPos) {
+		numAsInserted = numAsInserted + ".";
+		numPad = totalDecPartSize;
+	} else {
+		int existingDecimalSize = numAsInserted.length() - dotPos;
+		numPad = totalDecPartSize - existingDecimalSize;
+	}
 
-    if (numPad < 0) {
-      // We actually have to trim the value.
-      return numAsInserted.substring(0, numAsInserted.length() + numPad + 1);
-    } else {
-      String zeros = "";
-      for (int i = 0; i < numPad; i++) {
-        zeros = zeros + "0";
-      }
-      return numAsInserted + zeros;
-    }
-  }
+	if (numPad < 0) {
+		// We actually have to trim the value.
+		return numAsInserted.substring(0, numAsInserted.length() + numPad + 1);
+	} else {
+		String zeros = "";
+		for (int i = 0; i < numPad; i++) {
+			zeros = zeros + "0";
+		}
+		return numAsInserted + zeros;
+	}
+}
 
-  @Override
-  protected String getDecimalSeqOutput(String numAsInserted) {
-    return getNumericSeqOutput(numAsInserted);
-  }
+@Override
+protected String getDecimalSeqOutput(String numAsInserted) {
+	return getNumericSeqOutput(numAsInserted);
+}
 }

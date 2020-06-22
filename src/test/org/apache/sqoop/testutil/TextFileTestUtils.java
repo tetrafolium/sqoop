@@ -32,64 +32,64 @@ import org.apache.hadoop.fs.Path;
 
 public class TextFileTestUtils {
 
-  private static final String DEFAULT_OUTPUT_FILE_NAME = "/part-m-00000";
+private static final String DEFAULT_OUTPUT_FILE_NAME = "/part-m-00000";
 
-  public static final Log LOG =
-      LogFactory.getLog(TextFileTestUtils.class.getName());
+public static final Log LOG =
+	LogFactory.getLog(TextFileTestUtils.class.getName());
 
-  /**
-   * Verify results at the given tablePath.
-   * @param expectedResults string array of expected results
-   * @param fileSystem current filesystem
-   * @param tablePath path of the output table
-   */
-  public static void verify(String[] expectedResults, FileSystem fileSystem,
-                            Path tablePath) throws IOException {
-    String outputFilePathString =
-        tablePath.toString() + DEFAULT_OUTPUT_FILE_NAME;
-    readAndVerify(expectedResults, fileSystem, outputFilePathString);
-  }
+/**
+ * Verify results at the given tablePath.
+ * @param expectedResults string array of expected results
+ * @param fileSystem current filesystem
+ * @param tablePath path of the output table
+ */
+public static void verify(String[] expectedResults, FileSystem fileSystem,
+                          Path tablePath) throws IOException {
+	String outputFilePathString =
+		tablePath.toString() + DEFAULT_OUTPUT_FILE_NAME;
+	readAndVerify(expectedResults, fileSystem, outputFilePathString);
+}
 
-  /**
-   * Verify results at the given tablePath.
-   * @param expectedResults string array of expected results
-   * @param fileSystem current filesystem
-   * @param tablePath path of the output table
-   * @param outputFileName MapReduce output filename
-   */
-  public static void verify(String[] expectedResults, FileSystem fileSystem,
-                            Path tablePath, String outputFileName) {
-    String outputFilePathString = tablePath.toString() + "/" + outputFileName;
-    readAndVerify(expectedResults, fileSystem, outputFilePathString);
-  }
+/**
+ * Verify results at the given tablePath.
+ * @param expectedResults string array of expected results
+ * @param fileSystem current filesystem
+ * @param tablePath path of the output table
+ * @param outputFileName MapReduce output filename
+ */
+public static void verify(String[] expectedResults, FileSystem fileSystem,
+                          Path tablePath, String outputFileName) {
+	String outputFilePathString = tablePath.toString() + "/" + outputFileName;
+	readAndVerify(expectedResults, fileSystem, outputFilePathString);
+}
 
-  private static void readAndVerify(String[] expectedResults,
-                                    FileSystem fileSystem,
-                                    String outputFilePathString) {
-    Path outputFilePath = new Path(outputFilePathString);
+private static void readAndVerify(String[] expectedResults,
+                                  FileSystem fileSystem,
+                                  String outputFilePathString) {
+	Path outputFilePath = new Path(outputFilePathString);
 
-    try (BufferedReader br = new BufferedReader(new InputStreamReader(
-             fileSystem.open(outputFilePath), Charset.forName("UTF-8")))) {
-      String line = br.readLine();
-      int i = 0;
+	try (BufferedReader br = new BufferedReader(new InputStreamReader(
+							    fileSystem.open(outputFilePath), Charset.forName("UTF-8")))) {
+		String line = br.readLine();
+		int i = 0;
 
-      if (line == null && expectedResults != null &&
-          expectedResults.length > 0) {
-        fail("Empty output file was not expected");
-      }
+		if (line == null && expectedResults != null &&
+		    expectedResults.length > 0) {
+			fail("Empty output file was not expected");
+		}
 
-      while (line != null) {
-        assertEquals(expectedResults[i++], line);
-        line = br.readLine();
-      }
+		while (line != null) {
+			assertEquals(expectedResults[i++], line);
+			line = br.readLine();
+		}
 
-      if (expectedResults != null && expectedResults.length > i) {
-        fail("More output data was expected");
-      }
+		if (expectedResults != null && expectedResults.length > i) {
+			fail("More output data was expected");
+		}
 
-    } catch (IOException ioe) {
-      LOG.error("Issue with verifying the output", ioe);
-      throw new RuntimeException(ioe);
-    }
-  }
+	} catch (IOException ioe) {
+		LOG.error("Issue with verifying the output", ioe);
+		throw new RuntimeException(ioe);
+	}
+}
 }

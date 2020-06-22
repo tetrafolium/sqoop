@@ -25,29 +25,30 @@ import org.apache.hadoop.conf.Configuration;
  * Helper class for setting up an Avro MapReduce job.
  */
 public final class AvroJob {
-  public static final String MAP_OUTPUT_SCHEMA = "avro.map.output.schema";
+public static final String MAP_OUTPUT_SCHEMA = "avro.map.output.schema";
 
-  /** The configuration key for a job's output schema. */
-  public static final String OUTPUT_SCHEMA = "avro.output.schema";
+/** The configuration key for a job's output schema. */
+public static final String OUTPUT_SCHEMA = "avro.output.schema";
 
-  private AvroJob() {}
+private AvroJob() {
+}
 
-  public static void setMapOutputSchema(Configuration job, Schema s) {
-    job.set(MAP_OUTPUT_SCHEMA, s.toString());
-  }
+public static void setMapOutputSchema(Configuration job, Schema s) {
+	job.set(MAP_OUTPUT_SCHEMA, s.toString());
+}
 
-  /** Return a job's map output key schema. */
-  public static Schema getMapOutputSchema(Configuration job) {
-    return Schema.parse(job.get(MAP_OUTPUT_SCHEMA, job.get(OUTPUT_SCHEMA)));
-  }
+/** Return a job's map output key schema. */
+public static Schema getMapOutputSchema(Configuration job) {
+	return Schema.parse(job.get(MAP_OUTPUT_SCHEMA, job.get(OUTPUT_SCHEMA)));
+}
 
-  /** Set a job's output key schema. */
-  public static void setOutputSchema(Configuration job, Schema s) {
-    job.set(OUTPUT_SCHEMA, s.toString());
-  }
+/** Set a job's output key schema. */
+public static void setOutputSchema(Configuration job, Schema s) {
+	job.set(OUTPUT_SCHEMA, s.toString());
+}
 
-  /** Return a job's output key schema. */
-  public static Schema getOutputSchema(Configuration job) {
-    return Schema.parse(job.get(OUTPUT_SCHEMA));
-  }
+/** Return a job's output key schema. */
+public static Schema getOutputSchema(Configuration job) {
+	return Schema.parse(job.get(OUTPUT_SCHEMA));
+}
 }

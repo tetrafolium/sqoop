@@ -35,106 +35,106 @@ import org.apache.sqoop.mapreduce.UpdateOutputFormat;
  * see official MySQL documentation.
  */
 public class MySQLUpsertOutputFormat<K extends SqoopRecord, V>
-    extends UpdateOutputFormat<K, V> {
+	extends UpdateOutputFormat<K, V> {
 
-  private final Log log = LogFactory.getLog(getClass());
+private final Log log = LogFactory.getLog(getClass());
 
-  @Override
-  /** {@inheritDoc} */
-  public RecordWriter<K, V> getRecordWriter(TaskAttemptContext context)
-      throws IOException {
-    try {
-      return new MySQLUpsertRecordWriter(context);
-    } catch (Exception e) {
-      throw new IOException(e);
-    }
-  }
+@Override
+/** {@inheritDoc} */
+public RecordWriter<K, V> getRecordWriter(TaskAttemptContext context)
+throws IOException {
+	try {
+		return new MySQLUpsertRecordWriter(context);
+	} catch (Exception e) {
+		throw new IOException(e);
+	}
+}
 
-  /**
-   * RecordWriter to write the output to UPDATE/INSERT statements.
-   */
-  public class MySQLUpsertRecordWriter extends UpdateRecordWriter {
+/**
+ * RecordWriter to write the output to UPDATE/INSERT statements.
+ */
+public class MySQLUpsertRecordWriter extends UpdateRecordWriter {
 
-    public MySQLUpsertRecordWriter(TaskAttemptContext context)
-        throws ClassNotFoundException, SQLException {
-      super(context);
-    }
+public MySQLUpsertRecordWriter(TaskAttemptContext context)
+throws ClassNotFoundException, SQLException {
+	super(context);
+}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected PreparedStatement
-    getPreparedStatement(List<SqoopRecord> userRecords) throws SQLException {
+/**
+ * {@inheritDoc}
+ */
+@Override
+protected PreparedStatement
+getPreparedStatement(List<SqoopRecord> userRecords) throws SQLException {
 
-      PreparedStatement stmt = null;
+	PreparedStatement stmt = null;
 
-      // Synchronize on connection to ensure this does not conflict
-      // with the operations in the update thread.
-      Connection conn = getConnection();
-      synchronized (conn) {
-        stmt = conn.prepareStatement(getUpdateStatement(userRecords.size()));
-      }
+	// Synchronize on connection to ensure this does not conflict
+	// with the operations in the update thread.
+	Connection conn = getConnection();
+	synchronized (conn) {
+		stmt = conn.prepareStatement(getUpdateStatement(userRecords.size()));
+	}
 
-      // Inject the record parameters into the UPDATE and WHERE clauses.  This
-      // assumes that the update key column is the last column serialized in
-      // by the underlying record. Our code auto-gen process for exports was
-      // responsible for taking care of this constraint.
-      int i = 0;
-      for (SqoopRecord record : userRecords) {
-        record.write(stmt, i);
-        i += columnNames.length;
-      }
-      stmt.addBatch();
+	// Inject the record parameters into the UPDATE and WHERE clauses.  This
+	// assumes that the update key column is the last column serialized in
+	// by the underlying record. Our code auto-gen process for exports was
+	// responsible for taking care of this constraint.
+	int i = 0;
+	for (SqoopRecord record : userRecords) {
+		record.write(stmt, i);
+		i += columnNames.length;
+	}
+	stmt.addBatch();
 
-      return stmt;
-    }
+	return stmt;
+}
 
-    protected String getUpdateStatement(int numRows) {
-      boolean first;
-      StringBuilder sb = new StringBuilder();
-      sb.append("INSERT INTO ");
-      sb.append(tableName);
-      sb.append("(");
-      first = true;
-      for (String column : columnNames) {
-        if (first) {
-          first = false;
-        } else {
-          sb.append(", ");
-        }
-        sb.append(column);
-      }
+protected String getUpdateStatement(int numRows) {
+	boolean first;
+	StringBuilder sb = new StringBuilder();
+	sb.append("INSERT INTO ");
+	sb.append(tableName);
+	sb.append("(");
+	first = true;
+	for (String column : columnNames) {
+		if (first) {
+			first = false;
+		} else {
+			sb.append(", ");
+		}
+		sb.append(column);
+	}
 
-      sb.append(") VALUES(");
-      for (int i = 0; i < numRows; i++) {
-        if (i > 0) {
-          sb.append("),(");
-        }
-        for (int j = 0; j < columnNames.length; j++) {
-          if (j > 0) {
-            sb.append(", ");
-          }
-          sb.append("?");
-        }
-      }
+	sb.append(") VALUES(");
+	for (int i = 0; i < numRows; i++) {
+		if (i > 0) {
+			sb.append("),(");
+		}
+		for (int j = 0; j < columnNames.length; j++) {
+			if (j > 0) {
+				sb.append(", ");
+			}
+			sb.append("?");
+		}
+	}
 
-      sb.append(") ON DUPLICATE KEY UPDATE ");
+	sb.append(") ON DUPLICATE KEY UPDATE ");
 
-      first = true;
-      for (String column : columnNames) {
-        if (first) {
-          first = false;
-        } else {
-          sb.append(", ");
-        }
+	first = true;
+	for (String column : columnNames) {
+		if (first) {
+			first = false;
+		} else {
+			sb.append(", ");
+		}
 
-        sb.append(column).append("=VALUES(").append(column).append(")");
-      }
+		sb.append(column).append("=VALUES(").append(column).append(")");
+	}
 
-      String query = sb.toString();
-      log.debug("Using upsert query: " + query);
-      return query;
-    }
-  }
+	String query = sb.toString();
+	log.debug("Using upsert query: " + query);
+	return query;
+}
+}
 }

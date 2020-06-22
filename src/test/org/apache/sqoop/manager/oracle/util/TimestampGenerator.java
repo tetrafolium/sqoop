@@ -27,42 +27,44 @@ import java.util.GregorianCalendar;
  * 4711BC and 9999AD.
  */
 public class TimestampGenerator extends OraOopTestDataGenerator<Timestamp> {
-  private static final int NANOS_DIGITS = 9;
-  private static final int MIN_YEAR = -4711;
-  private static final int MAX_YEAR = 9999;
-  private final int precision;
-  private final Calendar cal = Calendar.getInstance();
+private static final int NANOS_DIGITS = 9;
+private static final int MIN_YEAR = -4711;
+private static final int MAX_YEAR = 9999;
+private final int precision;
+private final Calendar cal = Calendar.getInstance();
 
-  /**
-   * Create a TimestampGenerator that will generate Timestamps with a given
-   * precision.
-   *
-   * @param precision
-   *          Number of decimal digits after the decimal point in the seconds of
-   *          generated Timestamps.
-   */
-  public TimestampGenerator(int precision) { this.precision = precision; }
+/**
+ * Create a TimestampGenerator that will generate Timestamps with a given
+ * precision.
+ *
+ * @param precision
+ *          Number of decimal digits after the decimal point in the seconds of
+ *          generated Timestamps.
+ */
+public TimestampGenerator(int precision) {
+	this.precision = precision;
+}
 
-  @Override
-  public Timestamp next() {
-    cal.clear();
-    cal.set(Calendar.YEAR, MIN_YEAR + rng.nextInt(MAX_YEAR - MIN_YEAR + 1));
-    cal.set(Calendar.DAY_OF_YEAR,
-            1 + rng.nextInt(cal.getActualMaximum(Calendar.DAY_OF_YEAR)));
-    cal.set(Calendar.HOUR_OF_DAY, rng.nextInt(24));
-    cal.set(Calendar.MINUTE, rng.nextInt(60));
-    cal.set(Calendar.SECOND,
-            rng.nextInt(cal.getActualMaximum(Calendar.SECOND)));
-    // Workaround for oracle jdbc bugs related to BC leap years
-    if (cal.get(Calendar.ERA) == GregorianCalendar.BC &&
-        cal.get(Calendar.MONTH) == 1 && cal.get(Calendar.DAY_OF_MONTH) >= 28) {
-      return next();
-    }
-    Timestamp timestamp = new Timestamp(cal.getTimeInMillis());
-    if (precision > 0) {
-      int nanos = rng.nextInt((int)Math.pow(10, precision));
-      timestamp.setNanos(nanos * (int)Math.pow(10, NANOS_DIGITS - precision));
-    }
-    return timestamp;
-  }
+@Override
+public Timestamp next() {
+	cal.clear();
+	cal.set(Calendar.YEAR, MIN_YEAR + rng.nextInt(MAX_YEAR - MIN_YEAR + 1));
+	cal.set(Calendar.DAY_OF_YEAR,
+	        1 + rng.nextInt(cal.getActualMaximum(Calendar.DAY_OF_YEAR)));
+	cal.set(Calendar.HOUR_OF_DAY, rng.nextInt(24));
+	cal.set(Calendar.MINUTE, rng.nextInt(60));
+	cal.set(Calendar.SECOND,
+	        rng.nextInt(cal.getActualMaximum(Calendar.SECOND)));
+	// Workaround for oracle jdbc bugs related to BC leap years
+	if (cal.get(Calendar.ERA) == GregorianCalendar.BC &&
+	    cal.get(Calendar.MONTH) == 1 && cal.get(Calendar.DAY_OF_MONTH) >= 28) {
+		return next();
+	}
+	Timestamp timestamp = new Timestamp(cal.getTimeInMillis());
+	if (precision > 0) {
+		int nanos = rng.nextInt((int)Math.pow(10, precision));
+		timestamp.setNanos(nanos * (int)Math.pow(10, NANOS_DIGITS - precision));
+	}
+	return timestamp;
+}
 }

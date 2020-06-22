@@ -24,19 +24,19 @@ import java.util.Iterator;
  * Contains a list of Oracle columns.
  */
 public class OracleTableColumns
-    extends OraOopGenerics.ObjectList<OracleTableColumn> {
+	extends OraOopGenerics.ObjectList<OracleTableColumn> {
 
-  public OracleTableColumn findColumnByName(String columnName) {
+public OracleTableColumn findColumnByName(String columnName) {
 
-    OracleTableColumn result;
+	OracleTableColumn result;
 
-    Iterator<OracleTableColumn> iterator = this.iterator();
-    while (iterator.hasNext()) {
-      result = iterator.next();
-      if (result.getName().equals(columnName)) {
-        return result;
-      }
-    }
-    return null;
-  }
+	Iterator<OracleTableColumn> iterator = this.iterator();
+	while (iterator.hasNext()) {
+		result = iterator.next();
+		if (result.getName().equals(columnName)) {
+			return result;
+		}
+	}
+	return null;
+}
 }

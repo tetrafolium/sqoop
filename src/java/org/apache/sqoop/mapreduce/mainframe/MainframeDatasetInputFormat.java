@@ -39,58 +39,58 @@ import org.apache.sqoop.util.MainframeFTPClientUtils;
  * more dataset names.
  */
 public class MainframeDatasetInputFormat<T extends SqoopRecord>
-    extends InputFormat<LongWritable, T> {
+	extends InputFormat<LongWritable, T> {
 
-  private static final Log LOG =
-      LogFactory.getLog(MainframeDatasetInputFormat.class);
+private static final Log LOG =
+	LogFactory.getLog(MainframeDatasetInputFormat.class);
 
-  @Override
-  public RecordReader<LongWritable, T>
-  createRecordReader(InputSplit inputSplit,
-                     TaskAttemptContext taskAttemptContext)
-      throws IOException, InterruptedException {
-    return new MainframeDatasetFTPRecordReader<T>();
-  }
+@Override
+public RecordReader<LongWritable, T>
+createRecordReader(InputSplit inputSplit,
+                   TaskAttemptContext taskAttemptContext)
+throws IOException, InterruptedException {
+	return new MainframeDatasetFTPRecordReader<T>();
+}
 
-  @Override
-  public List<InputSplit> getSplits(JobContext job) throws IOException {
-    List<InputSplit> splits = new ArrayList<InputSplit>();
-    Configuration conf = job.getConfiguration();
-    String dsName =
-        conf.get(MainframeConfiguration.MAINFRAME_INPUT_DATASET_NAME);
-    LOG.info("Datasets to transfer from: " + dsName);
-    String dsType =
-        conf.get(MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE);
-    LOG.info("Dataset type: " + dsType);
-    String dsTape =
-        conf.get(MainframeConfiguration.MAINFRAME_INPUT_DATASET_TAPE);
-    LOG.info("Dataset on tape?: " + dsTape);
-    List<String> datasets = retrieveDatasets(dsName, conf);
-    if (datasets.isEmpty()) {
-      throw new IOException("No datasets retrieved from " + dsName);
-    } else {
-      int count = datasets.size();
-      int chunks = Math.min(count, ConfigurationHelper.getJobNumMaps(job));
-      for (int i = 0; i < chunks; i++) {
-        splits.add(new MainframeDatasetInputSplit());
-      }
+@Override
+public List<InputSplit> getSplits(JobContext job) throws IOException {
+	List<InputSplit> splits = new ArrayList<InputSplit>();
+	Configuration conf = job.getConfiguration();
+	String dsName =
+		conf.get(MainframeConfiguration.MAINFRAME_INPUT_DATASET_NAME);
+	LOG.info("Datasets to transfer from: " + dsName);
+	String dsType =
+		conf.get(MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE);
+	LOG.info("Dataset type: " + dsType);
+	String dsTape =
+		conf.get(MainframeConfiguration.MAINFRAME_INPUT_DATASET_TAPE);
+	LOG.info("Dataset on tape?: " + dsTape);
+	List<String> datasets = retrieveDatasets(dsName, conf);
+	if (datasets.isEmpty()) {
+		throw new IOException("No datasets retrieved from " + dsName);
+	} else {
+		int count = datasets.size();
+		int chunks = Math.min(count, ConfigurationHelper.getJobNumMaps(job));
+		for (int i = 0; i < chunks; i++) {
+			splits.add(new MainframeDatasetInputSplit());
+		}
 
-      int j = 0;
-      while (j < count) {
-        for (InputSplit sp : splits) {
-          if (j == count) {
-            break;
-          }
-          ((MainframeDatasetInputSplit)sp).addDataset(datasets.get(j));
-          j++;
-        }
-      }
-    }
-    return splits;
-  }
+		int j = 0;
+		while (j < count) {
+			for (InputSplit sp : splits) {
+				if (j == count) {
+					break;
+				}
+				((MainframeDatasetInputSplit)sp).addDataset(datasets.get(j));
+				j++;
+			}
+		}
+	}
+	return splits;
+}
 
-  protected List<String> retrieveDatasets(String dsName, Configuration conf)
-      throws IOException {
-    return MainframeFTPClientUtils.listSequentialDatasets(dsName, conf);
-  }
+protected List<String> retrieveDatasets(String dsName, Configuration conf)
+throws IOException {
+	return MainframeFTPClientUtils.listSequentialDatasets(dsName, conf);
+}
 }

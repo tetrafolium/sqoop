@@ -43,97 +43,97 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 public abstract class SplitByImportTestBase
-    extends ImportJobTestCase implements DatabaseAdapterFactory {
+	extends ImportJobTestCase implements DatabaseAdapterFactory {
 
-  public static final Log LOG =
-      LogFactory.getLog(SplitByImportTestBase.class.getName());
+public static final Log LOG =
+	LogFactory.getLog(SplitByImportTestBase.class.getName());
 
-  private Configuration conf = new Configuration();
+private Configuration conf = new Configuration();
 
-  private final ParquetTestConfiguration configuration;
-  private final DatabaseAdapter adapter;
+private final ParquetTestConfiguration configuration;
+private final DatabaseAdapter adapter;
 
-  public SplitByImportTestBase() {
-    this.adapter = createAdapter();
-    this.configuration = new GenericImportJobSplitByTestConfiguration();
-  }
+public SplitByImportTestBase() {
+	this.adapter = createAdapter();
+	this.configuration = new GenericImportJobSplitByTestConfiguration();
+}
 
-  @Rule public ExpectedException thrown = ExpectedException.none();
+@Rule public ExpectedException thrown = ExpectedException.none();
 
-  @Override
-  protected Configuration getConf() {
-    return conf;
-  }
+@Override
+protected Configuration getConf() {
+	return conf;
+}
 
-  @Override
-  protected boolean useHsqldbTestServer() {
-    return false;
-  }
+@Override
+protected boolean useHsqldbTestServer() {
+	return false;
+}
 
-  @Override
-  protected String getConnectString() {
-    return adapter.getConnectionString();
-  }
+@Override
+protected String getConnectString() {
+	return adapter.getConnectionString();
+}
 
-  @Override
-  protected SqoopOptions getSqoopOptions(Configuration conf) {
-    SqoopOptions opts = new SqoopOptions(conf);
-    adapter.injectConnectionParameters(opts);
-    return opts;
-  }
+@Override
+protected SqoopOptions getSqoopOptions(Configuration conf) {
+	SqoopOptions opts = new SqoopOptions(conf);
+	adapter.injectConnectionParameters(opts);
+	return opts;
+}
 
-  @Override
-  protected void dropTableIfExists(String table) throws SQLException {
-    adapter.dropTableIfExists(table, getManager());
-  }
+@Override
+protected void dropTableIfExists(String table) throws SQLException {
+	adapter.dropTableIfExists(table, getManager());
+}
 
-  @Before
-  public void setUp() {
-    super.setUp();
-    String[] names = configuration.getNames();
-    String[] types = configuration.getTypes();
-    createTableWithColTypesAndNames(names, types, new String[0]);
-    List<String[]> inputData = configuration.getSampleData();
-    for (String[] input : inputData) {
-      insertIntoTable(names, types, input);
-    }
-  }
+@Before
+public void setUp() {
+	super.setUp();
+	String[] names = configuration.getNames();
+	String[] types = configuration.getTypes();
+	createTableWithColTypesAndNames(names, types, new String[0]);
+	List<String[]> inputData = configuration.getSampleData();
+	for (String[] input : inputData) {
+		insertIntoTable(names, types, input);
+	}
+}
 
-  @After
-  public void tearDown() {
-    try {
-      dropTableIfExists(getTableName());
-    } catch (SQLException e) {
-      LOG.warn("Error trying to drop table on tearDown: " + e);
-    }
-    super.tearDown();
-  }
+@After
+public void tearDown() {
+	try {
+		dropTableIfExists(getTableName());
+	} catch (SQLException e) {
+		LOG.warn("Error trying to drop table on tearDown: " + e);
+	}
+	super.tearDown();
+}
 
-  private ArgumentArrayBuilder getArgsBuilder() {
-    return new ArgumentArrayBuilder()
-        .withCommonHadoopFlags(true)
-        .withProperty("org.apache.sqoop.splitter.allow_text_splitter", "true")
-        .withOption("warehouse-dir", getWarehouseDir())
-        .withOption("num-mappers", "2")
-        .withOption("table", getTableName())
-        .withOption("connect", getConnectString())
-        .withOption("split-by",
-                    GenericImportJobSplitByTestConfiguration.NAME_COLUMN)
-        .withOption("as-parquetfile");
-  }
+private ArgumentArrayBuilder getArgsBuilder() {
+	return new ArgumentArrayBuilder()
+	       .withCommonHadoopFlags(true)
+	       .withProperty("org.apache.sqoop.splitter.allow_text_splitter", "true")
+	       .withOption("warehouse-dir", getWarehouseDir())
+	       .withOption("num-mappers", "2")
+	       .withOption("table", getTableName())
+	       .withOption("connect", getConnectString())
+	       .withOption("split-by",
+	                   GenericImportJobSplitByTestConfiguration.NAME_COLUMN)
+	       .withOption("as-parquetfile");
+}
 
-  @Test
-  public void testSplitBy() throws IOException {
-    ArgumentArrayBuilder builder = getArgsBuilder();
-    String[] args = builder.build();
-    runImport(args);
-    verifyParquetFile();
-  }
+@Test
+public void testSplitBy() throws IOException {
+	ArgumentArrayBuilder builder = getArgsBuilder();
+	String[] args = builder.build();
+	runImport(args);
+	verifyParquetFile();
+}
 
-  private void verifyParquetFile() {
-    ParquetReader reader = new ParquetReader(
-        new Path(getWarehouseDir() + "/" + getTableName()), getConf());
-    assertEquals(asList(configuration.getExpectedResultsForParquet()),
-                 reader.readAllInCsvSorted());
-  }
+private void verifyParquetFile() {
+	ParquetReader reader = new ParquetReader(
+		new Path(getWarehouseDir() + "/" + getTableName()), getConf());
+	assertEquals(asList(configuration.getExpectedResultsForParquet()),
+	             reader.readAllInCsvSorted());
+}
 }

@@ -38,149 +38,157 @@ import org.apache.hive.service.server.HiveServer2;
 
 public class HiveMiniCluster {
 
-  private static final Log LOG =
-      LogFactory.getLog(HiveMiniCluster.class.getName());
+private static final Log LOG =
+	LogFactory.getLog(HiveMiniCluster.class.getName());
 
-  private static final String DEFAULT_HOST = "127.0.0.1";
+private static final String DEFAULT_HOST = "127.0.0.1";
 
-  private static final int DEFAULT_PORT = 10000;
+private static final int DEFAULT_PORT = 10000;
 
-  private final String hostName;
+private final String hostName;
 
-  private final int port;
+private final int port;
 
-  private final String tempFolderPath;
+private final String tempFolderPath;
 
-  private final AuthenticationConfiguration authenticationConfiguration;
+private final AuthenticationConfiguration authenticationConfiguration;
 
-  private final HiveServer2 hiveServer2;
+private final HiveServer2 hiveServer2;
 
-  private HiveConf config;
+private HiveConf config;
 
-  private URL originalHiveSiteLocation;
+private URL originalHiveSiteLocation;
 
-  public HiveMiniCluster(
-      AuthenticationConfiguration authenticationConfiguration) {
-    this(DEFAULT_HOST, DEFAULT_PORT, authenticationConfiguration);
-  }
+public HiveMiniCluster(
+	AuthenticationConfiguration authenticationConfiguration) {
+	this(DEFAULT_HOST, DEFAULT_PORT, authenticationConfiguration);
+}
 
-  public HiveMiniCluster(
-      String hostname, int port,
-      AuthenticationConfiguration authenticationConfiguration) {
-    this(hostname, port, Files.createTempDir().getAbsolutePath(),
-         authenticationConfiguration);
-  }
+public HiveMiniCluster(
+	String hostname, int port,
+	AuthenticationConfiguration authenticationConfiguration) {
+	this(hostname, port, Files.createTempDir().getAbsolutePath(),
+	     authenticationConfiguration);
+}
 
-  public HiveMiniCluster(
-      String hostname, int port, String tempFolderPath,
-      AuthenticationConfiguration authenticationConfiguration) {
-    this.hostName = hostname;
-    this.port = port;
-    this.tempFolderPath = tempFolderPath;
-    this.authenticationConfiguration = authenticationConfiguration;
-    this.hiveServer2 = new HiveServer2();
-  }
+public HiveMiniCluster(
+	String hostname, int port, String tempFolderPath,
+	AuthenticationConfiguration authenticationConfiguration) {
+	this.hostName = hostname;
+	this.port = port;
+	this.tempFolderPath = tempFolderPath;
+	this.authenticationConfiguration = authenticationConfiguration;
+	this.hiveServer2 = new HiveServer2();
+}
 
-  private void createHiveConf() {
-    config = new HiveConf();
-    config.set(HiveConf.ConfVars.METASTOREWAREHOUSE.varname, tempFolderPath);
-    config.set(HiveConf.ConfVars.HIVE_SERVER2_THRIFT_BIND_HOST.varname,
-               getHostName());
-    config.setInt(HiveConf.ConfVars.HIVE_SERVER2_THRIFT_PORT.varname,
-                  getPort());
-    config.set(HiveConf.ConfVars.METASTORECONNECTURLKEY.varname,
-               getMetastoreConnectUrl());
-    // setting port to -1 to turn the webui off
-    config.setInt(HiveConf.ConfVars.HIVE_SERVER2_WEBUI_PORT.varname, -1);
+private void createHiveConf() {
+	config = new HiveConf();
+	config.set(HiveConf.ConfVars.METASTOREWAREHOUSE.varname, tempFolderPath);
+	config.set(HiveConf.ConfVars.HIVE_SERVER2_THRIFT_BIND_HOST.varname,
+	           getHostName());
+	config.setInt(HiveConf.ConfVars.HIVE_SERVER2_THRIFT_PORT.varname,
+	              getPort());
+	config.set(HiveConf.ConfVars.METASTORECONNECTURLKEY.varname,
+	           getMetastoreConnectUrl());
+	// setting port to -1 to turn the webui off
+	config.setInt(HiveConf.ConfVars.HIVE_SERVER2_WEBUI_PORT.varname, -1);
 
-    for (Map.Entry<String, String> authConfig :
-         authenticationConfiguration.getAuthenticationConfig().entrySet()) {
-      config.set(authConfig.getKey(), authConfig.getValue());
-    }
-  }
+	for (Map.Entry<String, String> authConfig :
+	     authenticationConfiguration.getAuthenticationConfig().entrySet()) {
+		config.set(authConfig.getKey(), authConfig.getValue());
+	}
+}
 
-  public void start() {
-    try {
-      authenticationConfiguration.init();
-      createHiveConf();
-      createHiveSiteXml();
-      startHiveServer();
-      waitForStartUp();
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
-  }
+public void start() {
+	try {
+		authenticationConfiguration.init();
+		createHiveConf();
+		createHiveSiteXml();
+		startHiveServer();
+		waitForStartUp();
+	} catch (Exception e) {
+		throw new RuntimeException(e);
+	}
+}
 
-  private void createHiveSiteXml() throws IOException {
-    File hiveSiteXmlFile = new File(tempFolderPath, "hive-site.xml");
-    try (OutputStream out = new FileOutputStream(hiveSiteXmlFile)) {
-      config.writeXml(out);
-    }
+private void createHiveSiteXml() throws IOException {
+	File hiveSiteXmlFile = new File(tempFolderPath, "hive-site.xml");
+	try (OutputStream out = new FileOutputStream(hiveSiteXmlFile)) {
+		config.writeXml(out);
+	}
 
-    originalHiveSiteLocation = HiveConf.getHiveSiteLocation();
-    HiveConf.setHiveSiteLocation(hiveSiteXmlFile.toURI().toURL());
-  }
+	originalHiveSiteLocation = HiveConf.getHiveSiteLocation();
+	HiveConf.setHiveSiteLocation(hiveSiteXmlFile.toURI().toURL());
+}
 
-  private void startHiveServer() throws Exception {
-    authenticationConfiguration.doAsAuthenticated(new PrivilegedAction<Void>() {
-      @Override
-      public Void run() {
-        hiveServer2.init(config);
-        hiveServer2.start();
-        return null;
-      }
-    });
-  }
+private void startHiveServer() throws Exception {
+	authenticationConfiguration.doAsAuthenticated(new PrivilegedAction<Void>() {
+			@Override
+			public Void run() {
+			        hiveServer2.init(config);
+			        hiveServer2.start();
+			        return null;
+			}
+		});
+}
 
-  public void stop() {
-    hiveServer2.stop();
-    HiveConf.setHiveSiteLocation(originalHiveSiteLocation);
-    try {
-      FileUtils.deleteDirectory(new File(tempFolderPath));
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-  }
+public void stop() {
+	hiveServer2.stop();
+	HiveConf.setHiveSiteLocation(originalHiveSiteLocation);
+	try {
+		FileUtils.deleteDirectory(new File(tempFolderPath));
+	} catch (IOException e) {
+		throw new RuntimeException(e);
+	}
+}
 
-  public HiveConf getConfig() { return config; }
+public HiveConf getConfig() {
+	return config;
+}
 
-  public int getPort() { return port; }
+public int getPort() {
+	return port;
+}
 
-  public String getHostName() { return hostName; }
+public String getHostName() {
+	return hostName;
+}
 
-  public String getUrl() {
-    return String.format("jdbc:hive2://%s:%d/default%s", hostName, port,
-                         authenticationConfiguration.getUrlParams());
-  }
+public String getUrl() {
+	return String.format("jdbc:hive2://%s:%d/default%s", hostName, port,
+	                     authenticationConfiguration.getUrlParams());
+}
 
-  public String getTempFolderPath() { return tempFolderPath; }
+public String getTempFolderPath() {
+	return tempFolderPath;
+}
 
-  public String getMetastoreConnectUrl() {
-    return String.format(
-        "jdbc:derby:;databaseName=%s/minicluster_metastore_db;create=true",
-        tempFolderPath);
-  }
+public String getMetastoreConnectUrl() {
+	return String.format(
+		"jdbc:derby:;databaseName=%s/minicluster_metastore_db;create=true",
+		tempFolderPath);
+}
 
-  public boolean isStarted() {
-    return hiveServer2.getServiceState() == Service.STATE.STARTED;
-  }
+public boolean isStarted() {
+	return hiveServer2.getServiceState() == Service.STATE.STARTED;
+}
 
-  private void waitForStartUp() throws InterruptedException, TimeoutException {
-    final int numberOfAttempts = 500;
-    final long sleepTime = 100;
-    for (int i = 0; i < numberOfAttempts; ++i) {
-      try {
-        LOG.debug("Attempt " + (i + 1) + " to access " + hostName + ":" + port);
-        new Socket(InetAddress.getByName(hostName), port).close();
-        return;
-      } catch (RuntimeException | IOException e) {
-        LOG.debug("Failed to connect to " + hostName + ":" + port, e);
-      }
+private void waitForStartUp() throws InterruptedException, TimeoutException {
+	final int numberOfAttempts = 500;
+	final long sleepTime = 100;
+	for (int i = 0; i < numberOfAttempts; ++i) {
+		try {
+			LOG.debug("Attempt " + (i + 1) + " to access " + hostName + ":" + port);
+			new Socket(InetAddress.getByName(hostName), port).close();
+			return;
+		} catch (RuntimeException | IOException e) {
+			LOG.debug("Failed to connect to " + hostName + ":" + port, e);
+		}
 
-      Thread.sleep(sleepTime);
-    }
+		Thread.sleep(sleepTime);
+	}
 
-    throw new RuntimeException("Couldn't access new server: " + hostName + ":" +
-                               port);
-  }
+	throw new RuntimeException("Couldn't access new server: " + hostName + ":" +
+	                           port);
+}
 }

@@ -32,77 +32,77 @@ import org.apache.sqoop.mapreduce.UpdateOutputFormat;
  * official CUBRID documentation.
  */
 public class CubridUpsertOutputFormat<K extends SqoopRecord, V>
-    extends UpdateOutputFormat<K, V> {
+	extends UpdateOutputFormat<K, V> {
 
-  private final Log log = LogFactory.getLog(getClass());
+private final Log log = LogFactory.getLog(getClass());
 
-  @Override
-  /** {@inheritDoc} */
-  public RecordWriter<K, V> getRecordWriter(TaskAttemptContext context)
-      throws IOException {
-    try {
-      return new CubridUpsertRecordWriter(context);
-    } catch (Exception e) {
-      throw new IOException(e);
-    }
-  }
+@Override
+/** {@inheritDoc} */
+public RecordWriter<K, V> getRecordWriter(TaskAttemptContext context)
+throws IOException {
+	try {
+		return new CubridUpsertRecordWriter(context);
+	} catch (Exception e) {
+		throw new IOException(e);
+	}
+}
 
-  /**
-   * RecordWriter to write the output to UPDATE/INSERT statements.
-   */
-  public class CubridUpsertRecordWriter extends UpdateRecordWriter {
+/**
+ * RecordWriter to write the output to UPDATE/INSERT statements.
+ */
+public class CubridUpsertRecordWriter extends UpdateRecordWriter {
 
-    public CubridUpsertRecordWriter(TaskAttemptContext context)
-        throws ClassNotFoundException, SQLException {
-      super(context);
-    }
+public CubridUpsertRecordWriter(TaskAttemptContext context)
+throws ClassNotFoundException, SQLException {
+	super(context);
+}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected String getUpdateStatement() {
-      boolean first;
-      StringBuilder sb = new StringBuilder();
-      sb.append("INSERT INTO ");
-      sb.append(tableName);
-      sb.append("(");
-      first = true;
-      for (String column : columnNames) {
-        if (first) {
-          first = false;
-        } else {
-          sb.append(", ");
-        }
-        sb.append(column);
-      }
+/**
+ * {@inheritDoc}
+ */
+@Override
+protected String getUpdateStatement() {
+	boolean first;
+	StringBuilder sb = new StringBuilder();
+	sb.append("INSERT INTO ");
+	sb.append(tableName);
+	sb.append("(");
+	first = true;
+	for (String column : columnNames) {
+		if (first) {
+			first = false;
+		} else {
+			sb.append(", ");
+		}
+		sb.append(column);
+	}
 
-      sb.append(") VALUES(");
-      first = true;
-      for (int i = 0; i < columnNames.length; i++) {
-        if (first) {
-          first = false;
-        } else {
-          sb.append(", ");
-        }
-        sb.append("?");
-      }
+	sb.append(") VALUES(");
+	first = true;
+	for (int i = 0; i < columnNames.length; i++) {
+		if (first) {
+			first = false;
+		} else {
+			sb.append(", ");
+		}
+		sb.append("?");
+	}
 
-      sb.append(") ON DUPLICATE KEY UPDATE ");
+	sb.append(") ON DUPLICATE KEY UPDATE ");
 
-      first = true;
-      for (String column : columnNames) {
-        if (first) {
-          first = false;
-        } else {
-          sb.append(", ");
-        }
-        sb.append(column).append("=").append(column);
-      }
+	first = true;
+	for (String column : columnNames) {
+		if (first) {
+			first = false;
+		} else {
+			sb.append(", ");
+		}
+		sb.append(column).append("=").append(column);
+	}
 
-      String query = sb.toString();
-      log.debug("Using upsert query: " + query);
-      return query;
-    }
-  }
+	String query = sb.toString();
+	log.debug("Using upsert query: " + query);
+	return query;
+}
+}
 }

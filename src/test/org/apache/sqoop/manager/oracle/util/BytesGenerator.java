@@ -22,30 +22,30 @@ package org.apache.sqoop.manager.oracle.util;
  * Generates Blob test data.
  */
 public class BytesGenerator extends OraOopTestDataGenerator<byte[]> {
-  private int minBytes;
-  private int maxBytes;
+private int minBytes;
+private int maxBytes;
 
-  /**
-   * Create a generator that will generate arrays of bytes with length varying
-   * between minBytes and maxBytes.
-   *
-   * @param minBytes
-   *          Minimum number of bytes in generated RAWs
-   * @param maxBytes
-   *          Maximum number of bytes in generated RAWs
-   */
-  public BytesGenerator(int minBytes, int maxBytes) {
-    super();
-    this.minBytes = minBytes;
-    this.maxBytes = maxBytes;
-  }
+/**
+ * Create a generator that will generate arrays of bytes with length varying
+ * between minBytes and maxBytes.
+ *
+ * @param minBytes
+ *          Minimum number of bytes in generated RAWs
+ * @param maxBytes
+ *          Maximum number of bytes in generated RAWs
+ */
+public BytesGenerator(int minBytes, int maxBytes) {
+	super();
+	this.minBytes = minBytes;
+	this.maxBytes = maxBytes;
+}
 
-  @Override
-  public byte[] next() {
-    int rawSize = (int)(rng.nextDouble() * (maxBytes - minBytes) + minBytes);
-    byte[] rawData = new byte[rawSize];
-    rng.nextBytes(rawData);
+@Override
+public byte[] next() {
+	int rawSize = (int)(rng.nextDouble() * (maxBytes - minBytes) + minBytes);
+	byte[] rawData = new byte[rawSize];
+	rng.nextBytes(rawData);
 
-    return rawData;
-  }
+	return rawData;
+}
 }

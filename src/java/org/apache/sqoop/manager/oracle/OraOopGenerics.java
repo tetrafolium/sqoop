@@ -27,21 +27,31 @@ import java.util.List;
  */
 public class OraOopGenerics {
 
-  /**
-   * Generic class to hold list of objects.
-   */
-  public static class ObjectList<T> {
+/**
+ * Generic class to hold list of objects.
+ */
+public static class ObjectList<T> {
 
-    private List<T> objects;
+private List<T> objects;
 
-    public ObjectList() { this.objects = new ArrayList<T>(); }
+public ObjectList() {
+	this.objects = new ArrayList<T>();
+}
 
-    public void add(T item) { this.objects.add(item); }
+public void add(T item) {
+	this.objects.add(item);
+}
 
-    public int size() { return this.objects.size(); }
+public int size() {
+	return this.objects.size();
+}
 
-    public T get(int index) { return this.objects.get(index); }
+public T get(int index) {
+	return this.objects.get(index);
+}
 
-    public Iterator<T> iterator() { return this.objects.iterator(); }
-  }
+public Iterator<T> iterator() {
+	return this.objects.iterator();
+}
+}
 }

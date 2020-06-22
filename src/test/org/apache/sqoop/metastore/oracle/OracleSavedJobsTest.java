@@ -47,8 +47,8 @@ import org.junit.experimental.categories.Category;
 @Category(OracleTest.class)
 public class OracleSavedJobsTest extends SavedJobsTestBase {
 
-  public OracleSavedJobsTest() {
-    super(OracleUtils.CONNECT_STRING, OracleUtils.ORACLE_USER_NAME,
-          OracleUtils.ORACLE_USER_PASS, JdbcDrivers.ORACLE.getDriverClass());
-  }
+public OracleSavedJobsTest() {
+	super(OracleUtils.CONNECT_STRING, OracleUtils.ORACLE_USER_NAME,
+	      OracleUtils.ORACLE_USER_PASS, JdbcDrivers.ORACLE.getDriverClass());
+}
 }

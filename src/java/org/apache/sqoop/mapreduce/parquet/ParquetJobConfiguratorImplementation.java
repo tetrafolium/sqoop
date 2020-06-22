@@ -26,23 +26,23 @@ import org.apache.sqoop.mapreduce.parquet.hadoop.HadoopParquetJobConfiguratorFac
  * instantiate concrete {@link ParquetJobConfiguratorFactory} objects.
  */
 public enum ParquetJobConfiguratorImplementation {
-  HADOOP(HadoopParquetJobConfiguratorFactory.class);
+	HADOOP(HadoopParquetJobConfiguratorFactory.class);
 
-  private Class<? extends ParquetJobConfiguratorFactory>
-      configuratorFactoryClass;
+	private Class<? extends ParquetJobConfiguratorFactory>
+	configuratorFactoryClass;
 
-  ParquetJobConfiguratorImplementation(
-      Class<? extends ParquetJobConfiguratorFactory> configuratorFactoryClass) {
-    this.configuratorFactoryClass = configuratorFactoryClass;
-  }
+	ParquetJobConfiguratorImplementation(
+		Class<? extends ParquetJobConfiguratorFactory> configuratorFactoryClass) {
+		this.configuratorFactoryClass = configuratorFactoryClass;
+	}
 
-  public ParquetJobConfiguratorFactory createFactory() {
-    try {
-      return configuratorFactoryClass.newInstance();
-    } catch (InstantiationException | IllegalAccessException e) {
-      throw new RuntimeException("Could not instantiate factory class: " +
-                                     configuratorFactoryClass,
-                                 e);
-    }
-  }
+	public ParquetJobConfiguratorFactory createFactory() {
+		try {
+			return configuratorFactoryClass.newInstance();
+		} catch (InstantiationException | IllegalAccessException e) {
+			throw new RuntimeException("Could not instantiate factory class: " +
+			                           configuratorFactoryClass,
+			                           e);
+		}
+	}
 }

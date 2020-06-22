@@ -45,10 +45,10 @@ import org.junit.experimental.categories.Category;
  */
 @Category(OracleTest.class)
 public class OracleMetaConnectIncrementalImportTest
-    extends MetaConnectIncrementalImportTestBase {
+	extends MetaConnectIncrementalImportTestBase {
 
-  public OracleMetaConnectIncrementalImportTest() {
-    super(OracleUtils.CONNECT_STRING, OracleUtils.ORACLE_USER_NAME,
-          OracleUtils.ORACLE_USER_PASS);
-  }
+public OracleMetaConnectIncrementalImportTest() {
+	super(OracleUtils.CONNECT_STRING, OracleUtils.ORACLE_USER_NAME,
+	      OracleUtils.ORACLE_USER_PASS);
+}
 }

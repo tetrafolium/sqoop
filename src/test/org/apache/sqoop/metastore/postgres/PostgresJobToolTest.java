@@ -45,7 +45,7 @@ import org.junit.experimental.categories.Category;
 @Category(PostgresqlTest.class)
 public class PostgresJobToolTest extends JobToolTestBase {
 
-  public PostgresJobToolTest() {
-    super(CONNECT_STRING, DATABASE_USER, PASSWORD);
-  }
+public PostgresJobToolTest() {
+	super(CONNECT_STRING, DATABASE_USER, PASSWORD);
+}
 }

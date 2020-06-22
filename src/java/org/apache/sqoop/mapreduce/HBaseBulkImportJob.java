@@ -49,126 +49,126 @@ import org.apache.sqoop.util.ImportException;
  */
 public class HBaseBulkImportJob extends HBaseImportJob {
 
-  public static final Log LOG =
-      LogFactory.getLog(HBaseBulkImportJob.class.getName());
+public static final Log LOG =
+	LogFactory.getLog(HBaseBulkImportJob.class.getName());
 
-  private Connection hbaseConnection;
+private Connection hbaseConnection;
 
-  public HBaseBulkImportJob(final SqoopOptions opts,
-                            final ImportJobContext importContext) {
-    super(opts, importContext);
-  }
+public HBaseBulkImportJob(final SqoopOptions opts,
+                          final ImportJobContext importContext) {
+	super(opts, importContext);
+}
 
-  @Override
-  protected void configureMapper(Job job, String tableName,
-                                 String tableClassName) throws IOException {
-    job.setMapOutputKeyClass(ImmutableBytesWritable.class);
-    job.setMapOutputValueClass(Put.class);
-    job.setMapperClass(getMapperClass());
-  }
+@Override
+protected void configureMapper(Job job, String tableName,
+                               String tableClassName) throws IOException {
+	job.setMapOutputKeyClass(ImmutableBytesWritable.class);
+	job.setMapOutputValueClass(Put.class);
+	job.setMapperClass(getMapperClass());
+}
 
-  @Override
-  protected Class<? extends Mapper> getMapperClass() {
-    return HBaseBulkImportMapper.class;
-  }
+@Override
+protected Class<? extends Mapper> getMapperClass() {
+	return HBaseBulkImportMapper.class;
+}
 
-  @Override
-  protected void jobSetup(Job job) throws IOException, ImportException {
-    super.jobSetup(job);
+@Override
+protected void jobSetup(Job job) throws IOException, ImportException {
+	super.jobSetup(job);
 
-    // we shouldn't have gotten here if bulk load dir is not set
-    // so let's throw a ImportException
-    if (getContext().getDestination() == null) {
-      throw new ImportException("Can't run HBaseBulkImportJob without a "
-                                + "valid destination directory.");
-    }
+	// we shouldn't have gotten here if bulk load dir is not set
+	// so let's throw a ImportException
+	if (getContext().getDestination() == null) {
+		throw new ImportException("Can't run HBaseBulkImportJob without a "
+		                          + "valid destination directory.");
+	}
 
-    TableMapReduceUtil.addDependencyJars(job.getConfiguration(),
-                                         Preconditions.class);
-    FileOutputFormat.setOutputPath(job, getContext().getDestination());
-    TableName hbaseTableName = TableName.valueOf(options.getHBaseTable());
-    hbaseConnection =
-        ConnectionFactory.createConnection(job.getConfiguration());
+	TableMapReduceUtil.addDependencyJars(job.getConfiguration(),
+	                                     Preconditions.class);
+	FileOutputFormat.setOutputPath(job, getContext().getDestination());
+	TableName hbaseTableName = TableName.valueOf(options.getHBaseTable());
+	hbaseConnection =
+		ConnectionFactory.createConnection(job.getConfiguration());
 
-    try (Table hbaseTable = hbaseConnection.getTable(hbaseTableName)) {
-      HFileOutputFormat2.configureIncrementalLoad(
-          job, hbaseTable, hbaseConnection.getRegionLocator(hbaseTableName));
-    } catch (IOException | RuntimeException e) {
-      try {
-        hbaseConnection.close();
-      } catch (IOException ioException) {
-        LOG.error("Cannot close HBase connection.", ioException);
-      }
-      throw e;
-    }
-  }
+	try (Table hbaseTable = hbaseConnection.getTable(hbaseTableName)) {
+		HFileOutputFormat2.configureIncrementalLoad(
+			job, hbaseTable, hbaseConnection.getRegionLocator(hbaseTableName));
+	} catch (IOException | RuntimeException e) {
+		try {
+			hbaseConnection.close();
+		} catch (IOException ioException) {
+			LOG.error("Cannot close HBase connection.", ioException);
+		}
+		throw e;
+	}
+}
 
-  /**
-   * Perform the loading of Hfiles.
-   */
-  @Override
-  protected void completeImport(Job job) throws IOException, ImportException {
-    super.completeImport(job);
+/**
+ * Perform the loading of Hfiles.
+ */
+@Override
+protected void completeImport(Job job) throws IOException, ImportException {
+	super.completeImport(job);
 
-    // Make the bulk load files source directory accessible to the world
-    // so that the hbase user can deal with it
-    Path bulkLoadDir = getContext().getDestination();
-    FileSystem fileSystem = bulkLoadDir.getFileSystem(job.getConfiguration());
-    setPermission(fileSystem, fileSystem.getFileStatus(bulkLoadDir),
-                  FsPermission.createImmutable((short)00777));
+	// Make the bulk load files source directory accessible to the world
+	// so that the hbase user can deal with it
+	Path bulkLoadDir = getContext().getDestination();
+	FileSystem fileSystem = bulkLoadDir.getFileSystem(job.getConfiguration());
+	setPermission(fileSystem, fileSystem.getFileStatus(bulkLoadDir),
+	              FsPermission.createImmutable((short)00777));
 
-    TableName hbaseTableName = TableName.valueOf(options.getHBaseTable());
+	TableName hbaseTableName = TableName.valueOf(options.getHBaseTable());
 
-    // Load generated HFiles into table
-    try (Table hbaseTable = hbaseConnection.getTable(hbaseTableName);
-         Admin hbaseAdmin = hbaseConnection.getAdmin()) {
-      LoadIncrementalHFiles loader =
-          new LoadIncrementalHFiles(job.getConfiguration());
-      loader.doBulkLoad(bulkLoadDir, hbaseAdmin, hbaseTable,
-                        hbaseConnection.getRegionLocator(hbaseTableName));
-    } catch (Exception e) {
-      String errorMessage =
-          String.format("Unrecoverable error while "
-                            + "performing the bulk load of files in [%s]",
-                        bulkLoadDir.toString());
-      throw new ImportException(errorMessage, e);
-    }
-  }
+	// Load generated HFiles into table
+	try (Table hbaseTable = hbaseConnection.getTable(hbaseTableName);
+	     Admin hbaseAdmin = hbaseConnection.getAdmin()) {
+		LoadIncrementalHFiles loader =
+			new LoadIncrementalHFiles(job.getConfiguration());
+		loader.doBulkLoad(bulkLoadDir, hbaseAdmin, hbaseTable,
+		                  hbaseConnection.getRegionLocator(hbaseTableName));
+	} catch (Exception e) {
+		String errorMessage =
+			String.format("Unrecoverable error while "
+			              + "performing the bulk load of files in [%s]",
+			              bulkLoadDir.toString());
+		throw new ImportException(errorMessage, e);
+	}
+}
 
-  @Override
-  protected void jobTeardown(Job job) throws IOException, ImportException {
-    try {
-      super.jobTeardown(job);
-      // Delete the hfiles directory after we are finished.
-      Path destination = getContext().getDestination();
-      FileSystem fileSystem = destination.getFileSystem(job.getConfiguration());
-      fileSystem.delete(destination, true);
-    } finally {
-      try {
-        hbaseConnection.close();
-      } catch (IOException e) {
-        LOG.error("Cannot close HBase connection.", e);
-      }
-    }
-  }
+@Override
+protected void jobTeardown(Job job) throws IOException, ImportException {
+	try {
+		super.jobTeardown(job);
+		// Delete the hfiles directory after we are finished.
+		Path destination = getContext().getDestination();
+		FileSystem fileSystem = destination.getFileSystem(job.getConfiguration());
+		fileSystem.delete(destination, true);
+	} finally {
+		try {
+			hbaseConnection.close();
+		} catch (IOException e) {
+			LOG.error("Cannot close HBase connection.", e);
+		}
+	}
+}
 
-  /**
-   * Set the file permission of the path of the given fileStatus. If the path
-   * is a directory, apply permission recursively to all subdirectories and
-   * files.
-   *
-   * @param fs         the filesystem
-   * @param fileStatus containing the path
-   * @param permission the permission
-   * @throws java.io.IOException
-   */
-  private void setPermission(FileSystem fs, FileStatus fileStatus,
-                             FsPermission permission) throws IOException {
-    if (fileStatus.isDir()) {
-      for (FileStatus file : fs.listStatus(fileStatus.getPath())) {
-        setPermission(fs, file, permission);
-      }
-    }
-    fs.setPermission(fileStatus.getPath(), permission);
-  }
+/**
+ * Set the file permission of the path of the given fileStatus. If the path
+ * is a directory, apply permission recursively to all subdirectories and
+ * files.
+ *
+ * @param fs         the filesystem
+ * @param fileStatus containing the path
+ * @param permission the permission
+ * @throws java.io.IOException
+ */
+private void setPermission(FileSystem fs, FileStatus fileStatus,
+                           FsPermission permission) throws IOException {
+	if (fileStatus.isDir()) {
+		for (FileStatus file : fs.listStatus(fileStatus.getPath())) {
+			setPermission(fs, file, permission);
+		}
+	}
+	fs.setPermission(fileStatus.getPath(), permission);
+}
 }

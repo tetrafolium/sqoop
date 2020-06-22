@@ -50,9 +50,9 @@ import org.junit.experimental.categories.Category;
  */
 @Category(Db2Test.class)
 public class DB2MetaConnectIncrementalImportTest
-    extends MetaConnectIncrementalImportTestBase {
+	extends MetaConnectIncrementalImportTestBase {
 
-  public DB2MetaConnectIncrementalImportTest() {
-    super(CONNECT_STRING, DATABASE_USER, DATABASE_PASSWORD);
-  }
+public DB2MetaConnectIncrementalImportTest() {
+	super(CONNECT_STRING, DATABASE_USER, DATABASE_PASSWORD);
+}
 }

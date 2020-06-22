@@ -26,12 +26,12 @@ import org.apache.hadoop.io.Text;
  * Netezza export mapper for text records.
  */
 public class NetezzaExternalTableTextExportMapper
-    extends NetezzaExternalTableExportMapper<LongWritable, Text> {
+	extends NetezzaExternalTableExportMapper<LongWritable, Text> {
 
-  @Override
-  public void map(LongWritable key, Text text, Context context)
-      throws IOException, InterruptedException {
-    writeTextRecord(text);
-    context.progress();
-  }
+@Override
+public void map(LongWritable key, Text text, Context context)
+throws IOException, InterruptedException {
+	writeTextRecord(text);
+	context.progress();
+}
 }

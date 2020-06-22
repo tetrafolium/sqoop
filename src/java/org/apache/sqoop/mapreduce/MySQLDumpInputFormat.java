@@ -35,58 +35,61 @@ import org.apache.sqoop.mapreduce.db.DataDrivenDBInputFormat;
  */
 public class MySQLDumpInputFormat extends DataDrivenDBInputFormat {
 
-  public static final Log LOG =
-      LogFactory.getLog(MySQLDumpInputFormat.class.getName());
+public static final Log LOG =
+	LogFactory.getLog(MySQLDumpInputFormat.class.getName());
 
-  /**
-   * A RecordReader that just takes the WHERE conditions from the DBInputSplit
-   * and relates them to the mapper as a single input record.
-   */
-  public static class MySQLDumpRecordReader
-      extends RecordReader<String, NullWritable> {
+/**
+ * A RecordReader that just takes the WHERE conditions from the DBInputSplit
+ * and relates them to the mapper as a single input record.
+ */
+public static class MySQLDumpRecordReader
+	extends RecordReader<String, NullWritable> {
 
-    private boolean delivered;
-    private String clause;
+private boolean delivered;
+private String clause;
 
-    public MySQLDumpRecordReader(InputSplit split) { initialize(split, null); }
+public MySQLDumpRecordReader(InputSplit split) {
+	initialize(split, null);
+}
 
-    @Override
-    public boolean nextKeyValue() {
-      boolean hasNext = !delivered;
-      delivered = true;
-      return hasNext;
-    }
+@Override
+public boolean nextKeyValue() {
+	boolean hasNext = !delivered;
+	delivered = true;
+	return hasNext;
+}
 
-    @Override
-    public String getCurrentKey() {
-      return clause;
-    }
+@Override
+public String getCurrentKey() {
+	return clause;
+}
 
-    @Override
-    public NullWritable getCurrentValue() {
-      return NullWritable.get();
-    }
+@Override
+public NullWritable getCurrentValue() {
+	return NullWritable.get();
+}
 
-    @Override
-    public void close() {}
+@Override
+public void close() {
+}
 
-    @Override
-    public float getProgress() {
-      return delivered ? 1.0f : 0.0f;
-    }
+@Override
+public float getProgress() {
+	return delivered ? 1.0f : 0.0f;
+}
 
-    @Override
-    public void initialize(InputSplit split, TaskAttemptContext context) {
-      DataDrivenDBInputFormat.DataDrivenDBInputSplit dbSplit =
-          (DataDrivenDBInputFormat.DataDrivenDBInputSplit)split;
+@Override
+public void initialize(InputSplit split, TaskAttemptContext context) {
+	DataDrivenDBInputFormat.DataDrivenDBInputSplit dbSplit =
+		(DataDrivenDBInputFormat.DataDrivenDBInputSplit)split;
 
-      this.clause = "(" + dbSplit.getLowerClause() + ") AND (" +
-                    dbSplit.getUpperClause() + ")";
-    }
-  }
+	this.clause = "(" + dbSplit.getLowerClause() + ") AND (" +
+	              dbSplit.getUpperClause() + ")";
+}
+}
 
-  public RecordReader<String, NullWritable>
-  createRecordReader(InputSplit split, TaskAttemptContext context) {
-    return new MySQLDumpRecordReader(split);
-  }
+public RecordReader<String, NullWritable>
+createRecordReader(InputSplit split, TaskAttemptContext context) {
+	return new MySQLDumpRecordReader(split);
+}
 }

@@ -30,61 +30,61 @@ import org.junit.rules.ExpectedException;
 
 public abstract class AbstractTestAvroImport extends CloudImportJobTestCase {
 
-  public static final Log LOG =
-      LogFactory.getLog(AbstractTestAvroImport.class.getName());
+public static final Log LOG =
+	LogFactory.getLog(AbstractTestAvroImport.class.getName());
 
-  @Rule public ExpectedException thrown = ExpectedException.none();
+@Rule public ExpectedException thrown = ExpectedException.none();
 
-  protected AbstractTestAvroImport(CloudCredentialsRule credentialsRule) {
-    super(credentialsRule);
-  }
+protected AbstractTestAvroImport(CloudCredentialsRule credentialsRule) {
+	super(credentialsRule);
+}
 
-  @Test
-  public void
-  testImportAsAvroDataFileWithoutDeleteTargetDirOptionWhenTargetDirDoesNotExist()
-      throws IOException {
-    String[] args = getArgsWithAsAvroDataFileOption();
-    runImport(args);
-    AvroTestUtils.verify(getDataSet().getExpectedAvroOutput(),
-                         fileSystemRule.getCloudFileSystem().getConf(),
-                         fileSystemRule.getTargetDirPath());
-  }
+@Test
+public void
+testImportAsAvroDataFileWithoutDeleteTargetDirOptionWhenTargetDirDoesNotExist()
+throws IOException {
+	String[] args = getArgsWithAsAvroDataFileOption();
+	runImport(args);
+	AvroTestUtils.verify(getDataSet().getExpectedAvroOutput(),
+	                     fileSystemRule.getCloudFileSystem().getConf(),
+	                     fileSystemRule.getTargetDirPath());
+}
 
-  @Test
-  public void
-  testImportAsAvroDataFileWithDeleteTargetDirOptionWhenTargetDirAlreadyExists()
-      throws IOException {
-    String[] args = getArgsWithAsAvroDataFileOption();
-    runImport(args);
+@Test
+public void
+testImportAsAvroDataFileWithDeleteTargetDirOptionWhenTargetDirAlreadyExists()
+throws IOException {
+	String[] args = getArgsWithAsAvroDataFileOption();
+	runImport(args);
 
-    args = getArgsWithAsAvroDataFileAndDeleteTargetDirOption();
-    runImport(args);
-    AvroTestUtils.verify(getDataSet().getExpectedAvroOutput(),
-                         fileSystemRule.getCloudFileSystem().getConf(),
-                         fileSystemRule.getTargetDirPath());
-  }
+	args = getArgsWithAsAvroDataFileAndDeleteTargetDirOption();
+	runImport(args);
+	AvroTestUtils.verify(getDataSet().getExpectedAvroOutput(),
+	                     fileSystemRule.getCloudFileSystem().getConf(),
+	                     fileSystemRule.getTargetDirPath());
+}
 
-  @Test
-  public void
-  testImportAsAvroDataFileWithoutDeleteTargetDirOptionWhenTargetDirAlreadyExists()
-      throws IOException {
-    String[] args = getArgsWithAsAvroDataFileOption();
-    runImport(args);
+@Test
+public void
+testImportAsAvroDataFileWithoutDeleteTargetDirOptionWhenTargetDirAlreadyExists()
+throws IOException {
+	String[] args = getArgsWithAsAvroDataFileOption();
+	runImport(args);
 
-    thrown.expect(IOException.class);
-    runImport(args);
-  }
+	thrown.expect(IOException.class);
+	runImport(args);
+}
 
-  private String[] getArgsWithAsAvroDataFileOption() {
-    return getArgsForUnitTestsWithFileFormatOption(
-        fileSystemRule.getTargetDirPath().toString(), "as-avrodatafile");
-  }
+private String[] getArgsWithAsAvroDataFileOption() {
+	return getArgsForUnitTestsWithFileFormatOption(
+		fileSystemRule.getTargetDirPath().toString(), "as-avrodatafile");
+}
 
-  private String[] getArgsWithAsAvroDataFileAndDeleteTargetDirOption() {
-    ArgumentArrayBuilder builder =
-        getArgumentArrayBuilderForUnitTestsWithFileFormatOption(
-            fileSystemRule.getTargetDirPath().toString(), "as-avrodatafile");
-    builder.withOption("delete-target-dir");
-    return builder.build();
-  }
+private String[] getArgsWithAsAvroDataFileAndDeleteTargetDirOption() {
+	ArgumentArrayBuilder builder =
+		getArgumentArrayBuilderForUnitTestsWithFileFormatOption(
+			fileSystemRule.getTargetDirPath().toString(), "as-avrodatafile");
+	builder.withOption("delete-target-dir");
+	return builder.build();
+}
 }

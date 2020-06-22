@@ -30,37 +30,37 @@ import org.apache.commons.logging.LogFactory;
  */
 public class RowCountValidator implements Validator {
 
-  public static final Log LOG =
-      LogFactory.getLog(RowCountValidator.class.getName());
+public static final Log LOG =
+	LogFactory.getLog(RowCountValidator.class.getName());
 
-  @Override
-  public boolean validate(ValidationContext context)
-      throws ValidationException {
-    return validate(context, AbsoluteValidationThreshold.INSTANCE,
-                    AbortOnFailureHandler.INSTANCE);
-  }
+@Override
+public boolean validate(ValidationContext context)
+throws ValidationException {
+	return validate(context, AbsoluteValidationThreshold.INSTANCE,
+	                AbortOnFailureHandler.INSTANCE);
+}
 
-  @Override
-  public boolean validate(ValidationContext validationContext,
-                          ValidationThreshold validationThreshold,
-                          ValidationFailureHandler validationFailureHandler)
-      throws ValidationException {
-    LOG.debug("Validating data using row counts: Source [" +
-              validationContext.getSourceRowCount() + "] with Target[" +
-              validationContext.getTargetRowCount() + "]");
+@Override
+public boolean validate(ValidationContext validationContext,
+                        ValidationThreshold validationThreshold,
+                        ValidationFailureHandler validationFailureHandler)
+throws ValidationException {
+	LOG.debug("Validating data using row counts: Source [" +
+	          validationContext.getSourceRowCount() + "] with Target[" +
+	          validationContext.getTargetRowCount() + "]");
 
-    if (validationThreshold.compare(validationContext.getSourceRowCount(),
-                                    validationContext.getTargetRowCount())) {
-      LOG.info("Data successfully validated");
-      return true;
-    }
+	if (validationThreshold.compare(validationContext.getSourceRowCount(),
+	                                validationContext.getTargetRowCount())) {
+		LOG.info("Data successfully validated");
+		return true;
+	}
 
-    validationContext.setMessage(this.getClass().getSimpleName());
-    validationContext.setReason("The expected counter value was " +
-                                validationContext.getSourceRowCount() +
-                                " but the actual value was " +
-                                validationContext.getTargetRowCount());
+	validationContext.setMessage(this.getClass().getSimpleName());
+	validationContext.setReason("The expected counter value was " +
+	                            validationContext.getSourceRowCount() +
+	                            " but the actual value was " +
+	                            validationContext.getTargetRowCount());
 
-    return validationFailureHandler.handle(validationContext);
-  }
+	return validationFailureHandler.handle(validationContext);
+}
 }

@@ -49,87 +49,87 @@ import org.junit.runners.Parameterized;
 UseParametersRunnerFactory(BlockJUnit4ClassRunnerWithParametersFactory.class)
 public class OracleSpecialCharacterTableImportTest extends ImportJobTestCase {
 
-  @Parameterized.Parameters(name = "tableName = {0}")
-  public static Iterable<? extends Object> tableNameParameters() {
-    return Arrays.asList("DOLLAR$", "FOO$BAR", "T#1");
-  }
+@Parameterized.Parameters(name = "tableName = {0}")
+public static Iterable<? extends Object> tableNameParameters() {
+	return Arrays.asList("DOLLAR$", "FOO$BAR", "T#1");
+}
 
-  public static final Log LOG =
-      LogFactory.getLog(OracleSpecialCharacterTableImportTest.class.getName());
+public static final Log LOG =
+	LogFactory.getLog(OracleSpecialCharacterTableImportTest.class.getName());
 
-  private final String tableName;
+private final String tableName;
 
-  @Override
-  protected boolean useHsqldbTestServer() {
-    return false;
-  }
+@Override
+protected boolean useHsqldbTestServer() {
+	return false;
+}
 
-  @Override
-  protected String getConnectString() {
-    return OracleUtils.CONNECT_STRING;
-  }
+@Override
+protected String getConnectString() {
+	return OracleUtils.CONNECT_STRING;
+}
 
-  @Override
-  protected SqoopOptions getSqoopOptions(Configuration conf) {
-    SqoopOptions opts = new SqoopOptions(conf);
-    OracleUtils.setOracleAuth(opts);
-    return opts;
-  }
+@Override
+protected SqoopOptions getSqoopOptions(Configuration conf) {
+	SqoopOptions opts = new SqoopOptions(conf);
+	OracleUtils.setOracleAuth(opts);
+	return opts;
+}
 
-  @Override
-  protected void dropTableIfExists(String table) throws SQLException {
-    OracleUtils.dropTable(table, getManager());
-  }
+@Override
+protected void dropTableIfExists(String table) throws SQLException {
+	OracleUtils.dropTable(table, getManager());
+}
 
-  @After
-  public void tearDown() {
-    try {
-      OracleUtils.dropTable(getTableName(), getManager());
-    } catch (SQLException e) {
-      LOG.error("Test table could not be dropped", e);
-    }
-    super.tearDown();
-  }
+@After
+public void tearDown() {
+	try {
+		OracleUtils.dropTable(getTableName(), getManager());
+	} catch (SQLException e) {
+		LOG.error("Test table could not be dropped", e);
+	}
+	super.tearDown();
+}
 
-  protected String[] getArgv() {
-    ArrayList<String> args = new ArrayList<String>();
+protected String[] getArgv() {
+	ArrayList<String> args = new ArrayList<String>();
 
-    CommonArgs.addHadoopFlags(args);
+	CommonArgs.addHadoopFlags(args);
 
-    args.add("--connect");
-    args.add(getConnectString());
-    args.add("--username");
-    args.add(OracleUtils.ORACLE_USER_NAME);
-    args.add("--password");
-    args.add(OracleUtils.ORACLE_USER_PASS);
-    args.add("--target-dir");
-    args.add(getTablePath().toString());
-    args.add("--num-mappers");
-    args.add("1");
-    args.add("--table");
-    args.add(getTableName());
+	args.add("--connect");
+	args.add(getConnectString());
+	args.add("--username");
+	args.add(OracleUtils.ORACLE_USER_NAME);
+	args.add("--password");
+	args.add(OracleUtils.ORACLE_USER_PASS);
+	args.add("--target-dir");
+	args.add(getTablePath().toString());
+	args.add("--num-mappers");
+	args.add("1");
+	args.add("--table");
+	args.add(getTableName());
 
-    return args.toArray(new String[0]);
-  }
+	return args.toArray(new String[0]);
+}
 
-  public OracleSpecialCharacterTableImportTest(String tableName) {
-    this.tableName = tableName;
-  }
+public OracleSpecialCharacterTableImportTest(String tableName) {
+	this.tableName = tableName;
+}
 
-  @Test
-  public void testImportWithTableNameContainingSpecialCharacters()
-      throws IOException {
-    String[] types = {"VARCHAR(50)"};
-    String[] vals = {"'hello, world!'"};
-    setCurTableName(tableName);
-    createTableWithColTypes(types, vals);
-    String[] args = getArgv();
-    runImport(args);
+@Test
+public void testImportWithTableNameContainingSpecialCharacters()
+throws IOException {
+	String[] types = {"VARCHAR(50)"};
+	String[] vals = {"'hello, world!'"};
+	setCurTableName(tableName);
+	createTableWithColTypes(types, vals);
+	String[] args = getArgv();
+	runImport(args);
 
-    Path filePath = new Path(getTablePath(), "part-m-00000");
-    String output =
-        Files.toString(new File(filePath.toString()), Charsets.UTF_8);
+	Path filePath = new Path(getTablePath(), "part-m-00000");
+	String output =
+		Files.toString(new File(filePath.toString()), Charsets.UTF_8);
 
-    assertEquals("hello, world!", output.trim());
-  }
+	assertEquals("hello, world!", output.trim());
+}
 }

@@ -26,26 +26,27 @@ package org.apache.sqoop.hbase;
  */
 public final class HBaseUtil {
 
-  private static boolean testingMode = false;
+private static boolean testingMode = false;
 
-  private HBaseUtil() {}
+private HBaseUtil() {
+}
 
-  /**
-   * This is a way to make this always return false for testing.
-   */
-  public static void setAlwaysNoHBaseJarMode(boolean mode) {
-    testingMode = mode;
-  }
+/**
+ * This is a way to make this always return false for testing.
+ */
+public static void setAlwaysNoHBaseJarMode(boolean mode) {
+	testingMode = mode;
+}
 
-  public static boolean isHBaseJarPresent() {
-    if (testingMode) {
-      return false;
-    }
-    try {
-      Class.forName("org.apache.hadoop.hbase.client.HTable");
-    } catch (ClassNotFoundException cnfe) {
-      return false;
-    }
-    return true;
-  }
+public static boolean isHBaseJarPresent() {
+	if (testingMode) {
+		return false;
+	}
+	try {
+		Class.forName("org.apache.hadoop.hbase.client.HTable");
+	} catch (ClassNotFoundException cnfe) {
+		return false;
+	}
+	return true;
+}
 }

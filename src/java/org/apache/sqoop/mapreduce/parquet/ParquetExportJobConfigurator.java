@@ -31,9 +31,9 @@ import org.apache.hadoop.mapreduce.Mapper;
  */
 public interface ParquetExportJobConfigurator {
 
-  void configureInputFormat(Job job, Path inputPath) throws IOException;
+void configureInputFormat(Job job, Path inputPath) throws IOException;
 
-  Class<? extends Mapper> getMapperClass();
+Class<? extends Mapper> getMapperClass();
 
-  Class<? extends InputFormat> getInputFormatClass();
+Class<? extends InputFormat> getInputFormatClass();
 }

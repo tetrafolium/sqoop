@@ -55,169 +55,180 @@ import org.mockito.stubbing.Answer;
 @Category(UnitTest.class)
 public class TestSQLServerDBRecordReader {
 
-  private static final String SPLIT_BY_COLUMN = "myCol";
-  private static final String COL_NAME_SAME_AS_SPLIT_BY = SPLIT_BY_COLUMN;
-  private static final String UPPERCASE_COL_NAME =
-      SPLIT_BY_COLUMN.toUpperCase();
-  private static final String ANY_VALUE_FOR_COL = "Value";
-  private static final String NULL_VALUE_FOR_COL = null;
+private static final String SPLIT_BY_COLUMN = "myCol";
+private static final String COL_NAME_SAME_AS_SPLIT_BY = SPLIT_BY_COLUMN;
+private static final String UPPERCASE_COL_NAME =
+	SPLIT_BY_COLUMN.toUpperCase();
+private static final String ANY_VALUE_FOR_COL = "Value";
+private static final String NULL_VALUE_FOR_COL = null;
 
-  private SQLServerDBRecordReader reader;
+private SQLServerDBRecordReader reader;
 
-  @Before
-  public void before() throws Exception {
-    DBInputFormat.DBInputSplit split = mock(DBInputFormat.DBInputSplit.class);
-    Configuration conf = new Configuration();
-    conf.set(SQLServerDBInputFormat.IMPORT_FAILURE_HANDLER_CLASS,
-             SQLFailureHandlerStub.class.getName());
-    Connection connection = mock(Connection.class);
-    DBConfiguration dbConfiguration = mock(DBConfiguration.class);
-    when(dbConfiguration.getInputOrderBy()).thenReturn(SPLIT_BY_COLUMN);
+@Before
+public void before() throws Exception {
+	DBInputFormat.DBInputSplit split = mock(DBInputFormat.DBInputSplit.class);
+	Configuration conf = new Configuration();
+	conf.set(SQLServerDBInputFormat.IMPORT_FAILURE_HANDLER_CLASS,
+	         SQLFailureHandlerStub.class.getName());
+	Connection connection = mock(Connection.class);
+	DBConfiguration dbConfiguration = mock(DBConfiguration.class);
+	when(dbConfiguration.getInputOrderBy()).thenReturn(SPLIT_BY_COLUMN);
 
-    reader = spy(new SQLServerDBRecordReader(split, SqlTableClassStub.class,
-                                             conf, connection, dbConfiguration,
-                                             "", new String[] {}, "", ""));
+	reader = spy(new SQLServerDBRecordReader(split, SqlTableClassStub.class,
+	                                         conf, connection, dbConfiguration,
+	                                         "", new String[] {}, "", ""));
 
-    doAnswer(new Answer<String>() {
-      @Override
-      public String answer(InvocationOnMock invocationOnMock) throws Throwable {
-        return StringUtils.EMPTY;
-      }
-    })
-        .when(reader)
-        .getSelectQuery();
+	doAnswer(new Answer<String>() {
+			@Override
+			public String answer(InvocationOnMock invocationOnMock) throws Throwable {
+			        return StringUtils.EMPTY;
+			}
+		})
+	.when(reader)
+	.getSelectQuery();
 
-    doAnswer(new Answer<ResultSet>() {
-      @Override
-      public ResultSet answer(InvocationOnMock invocationOnMock)
-          throws Throwable {
-        return mock(ResultSet.class);
-      }
-    })
-        .when(reader)
-        .executeQuery(anyString());
+	doAnswer(new Answer<ResultSet>() {
+			@Override
+			public ResultSet answer(InvocationOnMock invocationOnMock)
+			throws Throwable {
+			        return mock(ResultSet.class);
+			}
+		})
+	.when(reader)
+	.executeQuery(anyString());
 
-    reader.initialize(mock(InputSplit.class), mock(TaskAttemptContext.class));
-  }
+	reader.initialize(mock(InputSplit.class), mock(TaskAttemptContext.class));
+}
 
-  @Test
-  public void returnNullIfTheLastRecordValueIsNull() {
-    when(reader.currentValue())
-        .thenReturn(new SqlTableClassStub(COL_NAME_SAME_AS_SPLIT_BY,
-                                          NULL_VALUE_FOR_COL));
-    reader.getCurrentValue();
-    assertEquals(NULL_VALUE_FOR_COL, reader.getLastRecordValue());
-  }
+@Test
+public void returnNullIfTheLastRecordValueIsNull() {
+	when(reader.currentValue())
+	.thenReturn(new SqlTableClassStub(COL_NAME_SAME_AS_SPLIT_BY,
+	                                  NULL_VALUE_FOR_COL));
+	reader.getCurrentValue();
+	assertEquals(NULL_VALUE_FOR_COL, reader.getLastRecordValue());
+}
 
-  @Test
-  public void returnNullIfTheLastRecordValueIsNullAndColumnNameIsDifferent() {
-    when(reader.currentValue())
-        .thenReturn(
-            new SqlTableClassStub(UPPERCASE_COL_NAME, NULL_VALUE_FOR_COL));
-    reader.getCurrentValue();
-    assertEquals(NULL_VALUE_FOR_COL, reader.getLastRecordValue());
-  }
+@Test
+public void returnNullIfTheLastRecordValueIsNullAndColumnNameIsDifferent() {
+	when(reader.currentValue())
+	.thenReturn(
+		new SqlTableClassStub(UPPERCASE_COL_NAME, NULL_VALUE_FOR_COL));
+	reader.getCurrentValue();
+	assertEquals(NULL_VALUE_FOR_COL, reader.getLastRecordValue());
+}
 
-  @Test
-  public void returnLastSavedValueWhenColumNameIsTheSameSplitByColumn() {
-    when(reader.currentValue())
-        .thenReturn(new SqlTableClassStub(COL_NAME_SAME_AS_SPLIT_BY,
-                                          ANY_VALUE_FOR_COL));
-    reader.getCurrentValue();
+@Test
+public void returnLastSavedValueWhenColumNameIsTheSameSplitByColumn() {
+	when(reader.currentValue())
+	.thenReturn(new SqlTableClassStub(COL_NAME_SAME_AS_SPLIT_BY,
+	                                  ANY_VALUE_FOR_COL));
+	reader.getCurrentValue();
 
-    assertEquals(ANY_VALUE_FOR_COL, reader.getLastRecordValue());
-  }
+	assertEquals(ANY_VALUE_FOR_COL, reader.getLastRecordValue());
+}
 
-  /*
-   * This test intended to test if the table name and query parameter wouldn't
-   * match (eg.: mycol, MyCol) if the DB is case insensitive
-   */
-  @Test
-  public void returnLastSavedValueWhenColumnNameDifferentFromSplitByColumn() {
-    when(reader.currentValue())
-        .thenReturn(
-            new SqlTableClassStub(UPPERCASE_COL_NAME, ANY_VALUE_FOR_COL));
-    reader.getCurrentValue();
+/*
+ * This test intended to test if the table name and query parameter wouldn't
+ * match (eg.: mycol, MyCol) if the DB is case insensitive
+ */
+@Test
+public void returnLastSavedValueWhenColumnNameDifferentFromSplitByColumn() {
+	when(reader.currentValue())
+	.thenReturn(
+		new SqlTableClassStub(UPPERCASE_COL_NAME, ANY_VALUE_FOR_COL));
+	reader.getCurrentValue();
 
-    assertEquals(ANY_VALUE_FOR_COL, reader.getLastRecordValue());
-  }
+	assertEquals(ANY_VALUE_FOR_COL, reader.getLastRecordValue());
+}
 
-  private static class SqlTableClassStub extends SqoopRecord {
-    private String colName;
-    private String colValue;
+private static class SqlTableClassStub extends SqoopRecord {
+private String colName;
+private String colValue;
 
-    public SqlTableClassStub(String colName, String colValue) {
-      this.colName = colName;
-      this.colValue = colValue;
-    }
+public SqlTableClassStub(String colName, String colValue) {
+	this.colName = colName;
+	this.colValue = colValue;
+}
 
-    @Override
-    public Map<String, Object> getFieldMap() {
-      return new HashMap<String, Object>() {
-        { put(colName, colValue); }
-      };
-    }
+@Override
+public Map<String, Object> getFieldMap() {
+	return new HashMap<String, Object>() {
+		       { put(colName, colValue); }
+	};
+}
 
-    @Override
-    public void parse(CharSequence s) throws RecordParser.ParseError {}
+@Override
+public void parse(CharSequence s) throws RecordParser.ParseError {
+}
 
-    @Override
-    public void parse(Text s) throws RecordParser.ParseError {}
+@Override
+public void parse(Text s) throws RecordParser.ParseError {
+}
 
-    @Override
-    public void parse(byte[] s) throws RecordParser.ParseError {}
+@Override
+public void parse(byte[] s) throws RecordParser.ParseError {
+}
 
-    @Override
-    public void parse(char[] s) throws RecordParser.ParseError {}
+@Override
+public void parse(char[] s) throws RecordParser.ParseError {
+}
 
-    @Override
-    public void parse(ByteBuffer s) throws RecordParser.ParseError {}
+@Override
+public void parse(ByteBuffer s) throws RecordParser.ParseError {
+}
 
-    @Override
-    public void parse(CharBuffer s) throws RecordParser.ParseError {}
+@Override
+public void parse(CharBuffer s) throws RecordParser.ParseError {
+}
 
-    @Override
-    public void loadLargeObjects(LargeObjectLoader objLoader)
-        throws SQLException, IOException, InterruptedException {}
+@Override
+public void loadLargeObjects(LargeObjectLoader objLoader)
+throws SQLException, IOException, InterruptedException {
+}
 
-    @Override
-    public int write(PreparedStatement stmt, int offset) throws SQLException {
-      return 0;
-    }
+@Override
+public int write(PreparedStatement stmt, int offset) throws SQLException {
+	return 0;
+}
 
-    @Override
-    public String toString(DelimiterSet delimiters) {
-      return null;
-    }
+@Override
+public String toString(DelimiterSet delimiters) {
+	return null;
+}
 
-    @Override
-    public int getClassFormatVersion() {
-      return 0;
-    }
+@Override
+public int getClassFormatVersion() {
+	return 0;
+}
 
-    @Override
-    public void write(DataOutput dataOutput) throws IOException {}
+@Override
+public void write(DataOutput dataOutput) throws IOException {
+}
 
-    @Override
-    public void readFields(DataInput dataInput) throws IOException {}
+@Override
+public void readFields(DataInput dataInput) throws IOException {
+}
 
-    @Override
-    public void write(PreparedStatement statement) throws SQLException {}
+@Override
+public void write(PreparedStatement statement) throws SQLException {
+}
 
-    @Override
-    public void readFields(ResultSet resultSet) throws SQLException {}
-  }
+@Override
+public void readFields(ResultSet resultSet) throws SQLException {
+}
+}
 
-  private static class SQLFailureHandlerStub extends SQLFailureHandler {
+private static class SQLFailureHandlerStub extends SQLFailureHandler {
 
-    @Override
-    public boolean canHandleFailure(Throwable failureCause) {
-      return false;
-    }
+@Override
+public boolean canHandleFailure(Throwable failureCause) {
+	return false;
+}
 
-    @Override
-    public Connection recover() throws IOException {
-      return null;
-    }
-  }
+@Override
+public Connection recover() throws IOException {
+	return null;
+}
+}
 }

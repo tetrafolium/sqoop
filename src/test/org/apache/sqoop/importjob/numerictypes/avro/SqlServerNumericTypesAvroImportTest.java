@@ -30,15 +30,15 @@ import org.junit.experimental.categories.Category;
 
 @Category(SqlServerTest.class)
 public class SqlServerNumericTypesAvroImportTest
-    extends NumericTypesAvroImportTestBase {
+	extends NumericTypesAvroImportTestBase {
 
-  @Override
-  public DatabaseAdapter createAdapter() {
-    return new SqlServerDatabaseAdapter();
-  }
+@Override
+public DatabaseAdapter createAdapter() {
+	return new SqlServerDatabaseAdapter();
+}
 
-  public SqlServerNumericTypesAvroImportTest() {
-    super(new SqlServerImportJobTestConfiguration(), SUCCEED_WITHOUT_EXTRA_ARGS,
-          SUCCEED_WITH_PADDING_ONLY);
-  }
+public SqlServerNumericTypesAvroImportTest() {
+	super(new SqlServerImportJobTestConfiguration(), SUCCEED_WITHOUT_EXTRA_ARGS,
+	      SUCCEED_WITH_PADDING_ONLY);
+}
 }

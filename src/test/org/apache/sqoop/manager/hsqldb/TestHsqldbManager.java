@@ -40,47 +40,47 @@ import org.junit.experimental.categories.Category;
 @Category(IntegrationTest.class)
 public class TestHsqldbManager {
 
-  public static final Log LOG =
-      LogFactory.getLog(TestHsqldbManager.class.getName());
+public static final Log LOG =
+	LogFactory.getLog(TestHsqldbManager.class.getName());
 
-  // instance variables populated during setUp, used during tests
-  private HsqldbTestServer testServer;
-  private ConnManager manager;
+// instance variables populated during setUp, used during tests
+private HsqldbTestServer testServer;
+private ConnManager manager;
 
-  @Before
-  public void setUp() {
-    testServer = new HsqldbTestServer();
-    try {
-      testServer.resetServer();
-    } catch (SQLException sqlE) {
-      LOG.error("Got SQLException: " + sqlE.toString());
-      fail("Got SQLException: " + sqlE.toString());
-    } catch (ClassNotFoundException cnfe) {
-      LOG.error("Could not find class for db driver: " + cnfe.toString());
-      fail("Could not find class for db driver: " + cnfe.toString());
-    }
+@Before
+public void setUp() {
+	testServer = new HsqldbTestServer();
+	try {
+		testServer.resetServer();
+	} catch (SQLException sqlE) {
+		LOG.error("Got SQLException: " + sqlE.toString());
+		fail("Got SQLException: " + sqlE.toString());
+	} catch (ClassNotFoundException cnfe) {
+		LOG.error("Could not find class for db driver: " + cnfe.toString());
+		fail("Could not find class for db driver: " + cnfe.toString());
+	}
 
-    manager = testServer.getManager();
-  }
+	manager = testServer.getManager();
+}
 
-  @After
-  public void tearDown() {
-    try {
-      manager.close();
-    } catch (SQLException sqlE) {
-      LOG.error("Got SQLException: " + sqlE.toString());
-      fail("Got SQLException: " + sqlE.toString());
-    }
-  }
+@After
+public void tearDown() {
+	try {
+		manager.close();
+	} catch (SQLException sqlE) {
+		LOG.error("Got SQLException: " + sqlE.toString());
+		fail("Got SQLException: " + sqlE.toString());
+	}
+}
 
-  // note: hsql returns only the "PUBLIC" schema name; not individual user db
-  // names.
-  @Test
-  public void testListDatabases() {
-    String[] databases = manager.listDatabases();
+// note: hsql returns only the "PUBLIC" schema name; not individual user db
+// names.
+@Test
+public void testListDatabases() {
+	String[] databases = manager.listDatabases();
 
-    assertNotNull("manager returned no database list", databases);
-    assertEquals("Database list should be length 1", 1, databases.length);
-    assertEquals(HsqldbTestServer.getSchemaName(), databases[0]);
-  }
+	assertNotNull("manager returned no database list", databases);
+	assertEquals("Database list should be length 1", 1, databases.length);
+	assertEquals(HsqldbTestServer.getSchemaName(), databases[0]);
+}
 }

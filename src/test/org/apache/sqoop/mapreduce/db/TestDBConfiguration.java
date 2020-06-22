@@ -31,35 +31,35 @@ import org.junit.experimental.categories.Category;
 @Category(UnitTest.class)
 public class TestDBConfiguration {
 
-  @Test
-  public void testPropertiesToString() {
-    Properties connParams = new Properties();
-    connParams.setProperty("a", "value-a");
-    connParams.setProperty("b", "value-b");
-    connParams.setProperty("a.b", "value-a.b");
-    connParams.setProperty("a.b.c", "value-a.b.c");
-    connParams.setProperty("aaaaaaaaaa.bbbbbbb.cccccccc", "value-abc");
-    String result = DBConfiguration.propertiesToString(connParams);
-    Properties resultParams = DBConfiguration.propertiesFromString(result);
-    assertEquals("connection params don't match", connParams, resultParams);
+@Test
+public void testPropertiesToString() {
+	Properties connParams = new Properties();
+	connParams.setProperty("a", "value-a");
+	connParams.setProperty("b", "value-b");
+	connParams.setProperty("a.b", "value-a.b");
+	connParams.setProperty("a.b.c", "value-a.b.c");
+	connParams.setProperty("aaaaaaaaaa.bbbbbbb.cccccccc", "value-abc");
+	String result = DBConfiguration.propertiesToString(connParams);
+	Properties resultParams = DBConfiguration.propertiesFromString(result);
+	assertEquals("connection params don't match", connParams, resultParams);
 
-    connParams = new Properties();
-    connParams.put("conn.timeout", "3000");
-    connParams.put("conn.buffer_size", "256");
-    connParams.put("conn.dummy", "dummy");
-    connParams.put("conn.foo", "bar");
-    result = DBConfiguration.propertiesToString(connParams);
-    resultParams = DBConfiguration.propertiesFromString(result);
-    assertEquals("connection params don't match", connParams, resultParams);
+	connParams = new Properties();
+	connParams.put("conn.timeout", "3000");
+	connParams.put("conn.buffer_size", "256");
+	connParams.put("conn.dummy", "dummy");
+	connParams.put("conn.foo", "bar");
+	result = DBConfiguration.propertiesToString(connParams);
+	resultParams = DBConfiguration.propertiesFromString(result);
+	assertEquals("connection params don't match", connParams, resultParams);
 
-    connParams = new Properties();
-    connParams.put("user", "ABC");
-    connParams.put("password", "complex\"pass,word\\123");
-    connParams.put("complex\"param,\\name", "dummy");
-    connParams.put("conn.buffer=size", "256");
-    connParams.put("jdbc.property", "a=b");
-    result = DBConfiguration.propertiesToString(connParams);
-    resultParams = DBConfiguration.propertiesFromString(result);
-    assertEquals("connection params don't match", connParams, resultParams);
-  }
+	connParams = new Properties();
+	connParams.put("user", "ABC");
+	connParams.put("password", "complex\"pass,word\\123");
+	connParams.put("complex\"param,\\name", "dummy");
+	connParams.put("conn.buffer=size", "256");
+	connParams.put("jdbc.property", "a=b");
+	result = DBConfiguration.propertiesToString(connParams);
+	resultParams = DBConfiguration.propertiesFromString(result);
+	assertEquals("connection params don't match", connParams, resultParams);
+}
 }

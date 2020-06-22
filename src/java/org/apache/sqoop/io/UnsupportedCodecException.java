@@ -24,9 +24,15 @@ import java.io.IOException;
  */
 public class UnsupportedCodecException extends IOException {
 
-  public UnsupportedCodecException() { super("UnsupportedCodecException"); }
+public UnsupportedCodecException() {
+	super("UnsupportedCodecException");
+}
 
-  public UnsupportedCodecException(String msg) { super(msg); }
+public UnsupportedCodecException(String msg) {
+	super(msg);
+}
 
-  public UnsupportedCodecException(Throwable cause) { super(cause); }
+public UnsupportedCodecException(Throwable cause) {
+	super(cause);
+}
 }

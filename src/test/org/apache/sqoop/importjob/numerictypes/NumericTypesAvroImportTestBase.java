@@ -26,30 +26,30 @@ import org.apache.sqoop.testutil.AvroTestUtils;
 import org.apache.sqoop.testutil.NumericTypesTestUtils;
 
 public abstract class NumericTypesAvroImportTestBase<
-    T extends AvroTestConfiguration> extends NumericTypesImportTestBase<T> {
+		T extends AvroTestConfiguration> extends NumericTypesImportTestBase<T> {
 
-  public static final Log LOG =
-      LogFactory.getLog(NumericTypesAvroImportTestBase.class.getName());
+public static final Log LOG =
+	LogFactory.getLog(NumericTypesAvroImportTestBase.class.getName());
 
-  public NumericTypesAvroImportTestBase(T configuration,
-                                        boolean failWithoutExtraArgs,
-                                        boolean failWithPaddingOnly) {
-    super(configuration, failWithoutExtraArgs, failWithPaddingOnly);
-  }
+public NumericTypesAvroImportTestBase(T configuration,
+                                      boolean failWithoutExtraArgs,
+                                      boolean failWithPaddingOnly) {
+	super(configuration, failWithoutExtraArgs, failWithPaddingOnly);
+}
 
-  @Override
-  public ArgumentArrayBuilder getArgsBuilder() {
-    ArgumentArrayBuilder builder = new ArgumentArrayBuilder();
-    includeCommonOptions(builder);
-    builder.withOption("as-avrodatafile");
-    NumericTypesTestUtils.addEnableAvroDecimal(builder);
-    return builder;
-  }
+@Override
+public ArgumentArrayBuilder getArgsBuilder() {
+	ArgumentArrayBuilder builder = new ArgumentArrayBuilder();
+	includeCommonOptions(builder);
+	builder.withOption("as-avrodatafile");
+	NumericTypesTestUtils.addEnableAvroDecimal(builder);
+	return builder;
+}
 
-  @Override
-  public void verify() {
-    AvroTestUtils.registerDecimalConversionUsageForVerification();
-    AvroTestUtils.verify(configuration.getExpectedResultsForAvro(), getConf(),
-                         getTablePath());
-  }
+@Override
+public void verify() {
+	AvroTestUtils.registerDecimalConversionUsageForVerification();
+	AvroTestUtils.verify(configuration.getExpectedResultsForAvro(), getConf(),
+	                     getTablePath());
+}
 }

@@ -28,18 +28,18 @@ import org.apache.sqoop.util.LoggingUtils;
  * Other specific reducers are highly encouraged to inherit from this class.
  */
 public abstract class SqoopReducer<KI, VI, KO, VO>
-    extends Reducer<KI, VI, KO, VO> {
+	extends Reducer<KI, VI, KO, VO> {
 
-  @Override
-  protected void setup(Context context)
-      throws IOException, InterruptedException {
-    super.setup(context);
+@Override
+protected void setup(Context context)
+throws IOException, InterruptedException {
+	super.setup(context);
 
-    Configuration configuration = context.getConfiguration();
+	Configuration configuration = context.getConfiguration();
 
-    // Propagate verbose flag if needed
-    if (configuration.getBoolean(JobBase.PROPERTY_VERBOSE, false)) {
-      LoggingUtils.setDebugLevel();
-    }
-  }
+	// Propagate verbose flag if needed
+	if (configuration.getBoolean(JobBase.PROPERTY_VERBOSE, false)) {
+		LoggingUtils.setDebugLevel();
+	}
+}
 }

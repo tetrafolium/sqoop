@@ -30,20 +30,21 @@ import org.apache.commons.logging.LogFactory;
  */
 public class AbsoluteValidationThreshold implements ValidationThreshold {
 
-  private static final Log LOG =
-      LogFactory.getLog(AbsoluteValidationThreshold.class.getName());
+private static final Log LOG =
+	LogFactory.getLog(AbsoluteValidationThreshold.class.getName());
 
-  @Override
-  public void setThresholdValue(long value) {}
+@Override
+public void setThresholdValue(long value) {
+}
 
-  static final ValidationThreshold INSTANCE = new AbsoluteValidationThreshold();
+static final ValidationThreshold INSTANCE = new AbsoluteValidationThreshold();
 
-  @Override
-  @SuppressWarnings("unchecked")
-  public boolean compare(Comparable left, Comparable right) {
-    LOG.debug("Absolute Validation threshold comparing " + left + " with " +
-              right);
+@Override
+@SuppressWarnings("unchecked")
+public boolean compare(Comparable left, Comparable right) {
+	LOG.debug("Absolute Validation threshold comparing " + left + " with " +
+	          right);
 
-    return (Math.abs(left.compareTo(right)) == 0);
-  }
+	return (Math.abs(left.compareTo(right)) == 0);
+}
 }

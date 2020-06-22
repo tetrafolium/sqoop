@@ -20,5 +20,5 @@ package org.apache.sqoop.importjob.configuration;
 
 public interface HiveTestConfiguration extends ImportJobTestConfiguration {
 
-  Object[] getExpectedResultsForHive();
+Object[] getExpectedResultsForHive();
 }

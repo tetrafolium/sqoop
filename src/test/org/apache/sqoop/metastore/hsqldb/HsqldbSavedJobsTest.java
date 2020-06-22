@@ -34,8 +34,8 @@ import org.apache.sqoop.metastore.SavedJobsTestBase;
 
 public class HsqldbSavedJobsTest extends SavedJobsTestBase {
 
-  public HsqldbSavedJobsTest() {
-    super("jdbc:hsqldb:mem:sqoopmetastore", "SA", "",
-          JdbcDrivers.HSQLDB.getDriverClass());
-  }
+public HsqldbSavedJobsTest() {
+	super("jdbc:hsqldb:mem:sqoopmetastore", "SA", "",
+	      JdbcDrivers.HSQLDB.getDriverClass());
+}
 }

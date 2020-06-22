@@ -31,74 +31,74 @@ import org.apache.sqoop.testutil.ArgumentArrayBuilder;
 
 public class S3CredentialsRule extends CloudCredentialsRule {
 
-  private static final String PROPERTY_GENERATOR_COMMAND =
-      "s3.generator.command";
+private static final String PROPERTY_GENERATOR_COMMAND =
+	"s3.generator.command";
 
-  private static final String PROPERTY_BUCKET_URL = "s3.bucket.url";
+private static final String PROPERTY_BUCKET_URL = "s3.bucket.url";
 
-  @Override
-  public void addCloudCredentialProperties(Configuration hadoopConf) {
-    hadoopConf.set(ACCESS_KEY, credentialsMap.get(ACCESS_KEY));
-    hadoopConf.set(SECRET_KEY, credentialsMap.get(SECRET_KEY));
+@Override
+public void addCloudCredentialProperties(Configuration hadoopConf) {
+	hadoopConf.set(ACCESS_KEY, credentialsMap.get(ACCESS_KEY));
+	hadoopConf.set(SECRET_KEY, credentialsMap.get(SECRET_KEY));
 
-    if (credentialsMap.containsKey(SESSION_TOKEN)) {
-      hadoopConf.set(SESSION_TOKEN, credentialsMap.get(SESSION_TOKEN));
-      hadoopConf.set(Constants.AWS_CREDENTIALS_PROVIDER,
-                     TemporaryAWSCredentialsProvider.class.getName());
-    }
+	if (credentialsMap.containsKey(SESSION_TOKEN)) {
+		hadoopConf.set(SESSION_TOKEN, credentialsMap.get(SESSION_TOKEN));
+		hadoopConf.set(Constants.AWS_CREDENTIALS_PROVIDER,
+		               TemporaryAWSCredentialsProvider.class.getName());
+	}
 
-    // Default filesystem needs to be set to S3 for the output verification
-    // phase
-    hadoopConf.set("fs.defaultFS", getBaseCloudDirectoryUrl());
+	// Default filesystem needs to be set to S3 for the output verification
+	// phase
+	hadoopConf.set("fs.defaultFS", getBaseCloudDirectoryUrl());
 
-    // FileSystem has a static cache that should be disabled during tests to
-    // make sure Sqoop relies on the S3 credentials set via the -D system
-    // properties. For details please see SQOOP-3383
-    hadoopConf.setBoolean("fs.s3a.impl.disable.cache", true);
-  }
+	// FileSystem has a static cache that should be disabled during tests to
+	// make sure Sqoop relies on the S3 credentials set via the -D system
+	// properties. For details please see SQOOP-3383
+	hadoopConf.setBoolean("fs.s3a.impl.disable.cache", true);
+}
 
-  @Override
-  public void addCloudCredentialProperties(ArgumentArrayBuilder builder) {
-    builder.withProperty(Constants.ACCESS_KEY, credentialsMap.get(ACCESS_KEY))
-        .withProperty(Constants.SECRET_KEY, credentialsMap.get(SECRET_KEY));
-    if (credentialsMap.containsKey(SESSION_TOKEN)) {
-      builder
-          .withProperty(Constants.SESSION_TOKEN,
-                        credentialsMap.get(SESSION_TOKEN))
-          .withProperty(Constants.AWS_CREDENTIALS_PROVIDER,
-                        TemporaryAWSCredentialsProvider.class.getName());
-    }
-  }
+@Override
+public void addCloudCredentialProperties(ArgumentArrayBuilder builder) {
+	builder.withProperty(Constants.ACCESS_KEY, credentialsMap.get(ACCESS_KEY))
+	.withProperty(Constants.SECRET_KEY, credentialsMap.get(SECRET_KEY));
+	if (credentialsMap.containsKey(SESSION_TOKEN)) {
+		builder
+		.withProperty(Constants.SESSION_TOKEN,
+		              credentialsMap.get(SESSION_TOKEN))
+		.withProperty(Constants.AWS_CREDENTIALS_PROVIDER,
+		              TemporaryAWSCredentialsProvider.class.getName());
+	}
+}
 
-  @Override
-  public void
-  addCloudCredentialProviderProperties(ArgumentArrayBuilder builder) {
-    builder.withProperty("fs.s3a.impl.disable.cache", "true");
-    if (credentialsMap.containsKey(SESSION_TOKEN)) {
-      builder.withProperty(Constants.AWS_CREDENTIALS_PROVIDER,
-                           TemporaryAWSCredentialsProvider.class.getName());
-    }
-  }
+@Override
+public void
+addCloudCredentialProviderProperties(ArgumentArrayBuilder builder) {
+	builder.withProperty("fs.s3a.impl.disable.cache", "true");
+	if (credentialsMap.containsKey(SESSION_TOKEN)) {
+		builder.withProperty(Constants.AWS_CREDENTIALS_PROVIDER,
+		                     TemporaryAWSCredentialsProvider.class.getName());
+	}
+}
 
-  @Override
-  public String getBaseCloudDirectoryUrl() {
-    String propertyBucketUrl = System.getProperty(PROPERTY_BUCKET_URL);
-    return propertyBucketUrl.concat("/");
-  }
+@Override
+public String getBaseCloudDirectoryUrl() {
+	String propertyBucketUrl = System.getProperty(PROPERTY_BUCKET_URL);
+	return propertyBucketUrl.concat("/");
+}
 
-  @Override
-  protected void initializeCredentialsMap(Iterable<String> credentials) {
-    Iterator<String> credentialsIterator = credentials.iterator();
+@Override
+protected void initializeCredentialsMap(Iterable<String> credentials) {
+	Iterator<String> credentialsIterator = credentials.iterator();
 
-    credentialsMap.put(ACCESS_KEY, credentialsIterator.next());
-    credentialsMap.put(SECRET_KEY, credentialsIterator.next());
-    if (credentialsIterator.hasNext()) {
-      credentialsMap.put(SESSION_TOKEN, credentialsIterator.next());
-    }
-  }
+	credentialsMap.put(ACCESS_KEY, credentialsIterator.next());
+	credentialsMap.put(SECRET_KEY, credentialsIterator.next());
+	if (credentialsIterator.hasNext()) {
+		credentialsMap.put(SESSION_TOKEN, credentialsIterator.next());
+	}
+}
 
-  @Override
-  protected String getGeneratorCommand() {
-    return System.getProperty(PROPERTY_GENERATOR_COMMAND);
-  }
+@Override
+protected String getGeneratorCommand() {
+	return System.getProperty(PROPERTY_GENERATOR_COMMAND);
+}
 }

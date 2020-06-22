@@ -27,22 +27,26 @@ import org.apache.avro.Schema;
  */
 public class AvroSchemaMismatchException extends RuntimeException {
 
-  static final String MESSAGE_TEMPLATE =
-      "%s%nExpected schema: %s%nActual schema: %s";
+static final String MESSAGE_TEMPLATE =
+	"%s%nExpected schema: %s%nActual schema: %s";
 
-  private final Schema writtenWithSchema;
+private final Schema writtenWithSchema;
 
-  private final Schema actualSchema;
+private final Schema actualSchema;
 
-  public AvroSchemaMismatchException(String message, Schema writtenWithSchema,
-                                     Schema actualSchema) {
-    super(String.format(MESSAGE_TEMPLATE, message, writtenWithSchema.toString(),
-                        actualSchema.toString()));
-    this.writtenWithSchema = writtenWithSchema;
-    this.actualSchema = actualSchema;
-  }
+public AvroSchemaMismatchException(String message, Schema writtenWithSchema,
+                                   Schema actualSchema) {
+	super(String.format(MESSAGE_TEMPLATE, message, writtenWithSchema.toString(),
+	                    actualSchema.toString()));
+	this.writtenWithSchema = writtenWithSchema;
+	this.actualSchema = actualSchema;
+}
 
-  public Schema getWrittenWithSchema() { return writtenWithSchema; }
+public Schema getWrittenWithSchema() {
+	return writtenWithSchema;
+}
 
-  public Schema getActualSchema() { return actualSchema; }
+public Schema getActualSchema() {
+	return actualSchema;
+}
 }

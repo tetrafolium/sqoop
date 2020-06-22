@@ -29,9 +29,9 @@ package org.apache.sqoop.mapreduce.parquet;
  */
 public interface ParquetJobConfiguratorFactory {
 
-  ParquetImportJobConfigurator createParquetImportJobConfigurator();
+ParquetImportJobConfigurator createParquetImportJobConfigurator();
 
-  ParquetExportJobConfigurator createParquetExportJobConfigurator();
+ParquetExportJobConfigurator createParquetExportJobConfigurator();
 
-  ParquetMergeJobConfigurator createParquetMergeJobConfigurator();
+ParquetMergeJobConfigurator createParquetMergeJobConfigurator();
 }

@@ -47,10 +47,10 @@ import org.junit.experimental.categories.Category;
 @Category(MysqlTest.class)
 public class MySqlSavedJobsTest extends SavedJobsTestBase {
 
-  private static MySQLTestUtils mySQLTestUtils = new MySQLTestUtils();
+private static MySQLTestUtils mySQLTestUtils = new MySQLTestUtils();
 
-  public MySqlSavedJobsTest() {
-    super(mySQLTestUtils.getMySqlConnectString(), mySQLTestUtils.getUserName(),
-          mySQLTestUtils.getUserPass(), JdbcDrivers.MYSQL.getDriverClass());
-  }
+public MySqlSavedJobsTest() {
+	super(mySQLTestUtils.getMySqlConnectString(), mySQLTestUtils.getUserName(),
+	      mySQLTestUtils.getUserPass(), JdbcDrivers.MYSQL.getDriverClass());
+}
 }

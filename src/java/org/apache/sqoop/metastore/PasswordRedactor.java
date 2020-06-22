@@ -26,27 +26,27 @@ import java.util.Map;
 
 public class PasswordRedactor {
 
-  static final String REDACTED_PASSWORD_STRING = "********";
+static final String REDACTED_PASSWORD_STRING = "********";
 
-  private static final Collection<String> REDACTION_KEYS =
-      Arrays.asList(DB_PASSWORD_KEY);
+private static final Collection<String> REDACTION_KEYS =
+	Arrays.asList(DB_PASSWORD_KEY);
 
-  public static String redactValue(String key, String value) {
-    if (REDACTION_KEYS.contains(key)) {
-      return REDACTED_PASSWORD_STRING;
-    } else {
-      return value;
-    }
-  }
+public static String redactValue(String key, String value) {
+	if (REDACTION_KEYS.contains(key)) {
+		return REDACTED_PASSWORD_STRING;
+	} else {
+		return value;
+	}
+}
 
-  public static Map<String, String> redactValues(Map<?, ?> values) {
-    Map<String, String> result = new HashMap<>();
+public static Map<String, String> redactValues(Map<?, ?> values) {
+	Map<String, String> result = new HashMap<>();
 
-    for (Map.Entry<?, ?> entry : values.entrySet()) {
-      String key = entry.getKey().toString();
-      result.put(key, redactValue(key, entry.getValue().toString()));
-    }
+	for (Map.Entry<?, ?> entry : values.entrySet()) {
+		String key = entry.getKey().toString();
+		result.put(key, redactValue(key, entry.getValue().toString()));
+	}
 
-    return result;
-  }
+	return result;
+}
 }

@@ -50,147 +50,147 @@ import org.junit.Test;
  */
 public class TestMainframeManager extends BaseSqoopTestCase {
 
-  private static final Log LOG =
-      LogFactory.getLog(TestMainframeManager.class.getName());
+private static final Log LOG =
+	LogFactory.getLog(TestMainframeManager.class.getName());
 
-  private ConnManager manager;
+private ConnManager manager;
 
-  private SqoopOptions opts;
+private SqoopOptions opts;
 
-  private ImportJobContext context;
+private ImportJobContext context;
 
-  @Before
-  public void setUp() {
-    Configuration conf = getConf();
-    opts = getSqoopOptions(conf);
-    opts.setConnectString("dummy.server");
-    opts.setTableName("dummy.pds");
-    opts.setConnManagerClassName(MainframeManager.class.getName());
-    context = new ImportJobContext(getTableName(), null, opts, null);
-    ConnFactory f = new ConnFactory(conf);
-    try {
-      this.manager = f.getManager(new JobData(opts, new MainframeImportTool()));
-    } catch (IOException ioe) {
-      fail("IOException instantiating manager: " +
-           StringUtils.stringifyException(ioe));
-    }
-  }
+@Before
+public void setUp() {
+	Configuration conf = getConf();
+	opts = getSqoopOptions(conf);
+	opts.setConnectString("dummy.server");
+	opts.setTableName("dummy.pds");
+	opts.setConnManagerClassName(MainframeManager.class.getName());
+	context = new ImportJobContext(getTableName(), null, opts, null);
+	ConnFactory f = new ConnFactory(conf);
+	try {
+		this.manager = f.getManager(new JobData(opts, new MainframeImportTool()));
+	} catch (IOException ioe) {
+		fail("IOException instantiating manager: " +
+		     StringUtils.stringifyException(ioe));
+	}
+}
 
-  @After
-  public void tearDown() {
-    try {
-      manager.close();
-    } catch (SQLException sqlE) {
-      LOG.error("Got SQLException: " + sqlE.toString());
-      fail("Got SQLException: " + sqlE.toString());
-    }
-  }
+@After
+public void tearDown() {
+	try {
+		manager.close();
+	} catch (SQLException sqlE) {
+		LOG.error("Got SQLException: " + sqlE.toString());
+		fail("Got SQLException: " + sqlE.toString());
+	}
+}
 
-  @Test
-  public void testListColNames() {
-    String[] colNames = manager.getColumnNames(getTableName());
-    assertNotNull("manager should return a column list", colNames);
-    assertEquals("Column list should be length 1", 1, colNames.length);
-    assertEquals(MainframeManager.DEFAULT_DATASET_COLUMN_NAME, colNames[0]);
-  }
+@Test
+public void testListColNames() {
+	String[] colNames = manager.getColumnNames(getTableName());
+	assertNotNull("manager should return a column list", colNames);
+	assertEquals("Column list should be length 1", 1, colNames.length);
+	assertEquals(MainframeManager.DEFAULT_DATASET_COLUMN_NAME, colNames[0]);
+}
 
-  @Test
-  public void testListColTypes() {
-    Map<String, Integer> types = manager.getColumnTypes(getTableName());
-    assertNotNull("manager should return a column types map", types);
-    assertEquals("Column types map should be size 1", 1, types.size());
-    assertEquals(
-        types.get(MainframeManager.DEFAULT_DATASET_COLUMN_NAME).intValue(),
-        Types.VARCHAR);
-  }
+@Test
+public void testListColTypes() {
+	Map<String, Integer> types = manager.getColumnTypes(getTableName());
+	assertNotNull("manager should return a column types map", types);
+	assertEquals("Column types map should be size 1", 1, types.size());
+	assertEquals(
+		types.get(MainframeManager.DEFAULT_DATASET_COLUMN_NAME).intValue(),
+		Types.VARCHAR);
+}
 
-  @Test
-  public void testImportTableNoHBaseJarPresent() {
-    HBaseUtil.setAlwaysNoHBaseJarMode(true);
-    opts.setHBaseTable("dummy_table");
-    try {
-      manager.importTable(context);
-      fail("An ImportException should be thrown: "
-           +
-           "HBase jars are not present in classpath, cannot import to HBase!");
-    } catch (ImportException e) {
-      assertEquals(
-          e.toString(),
-          "HBase jars are not present in classpath, cannot import to HBase!");
-    } catch (IOException e) {
-      fail("No IOException should be thrown!");
-    } finally {
-      HBaseUtil.setAlwaysNoHBaseJarMode(false);
-      opts.setHBaseTable(null);
-    }
-  }
+@Test
+public void testImportTableNoHBaseJarPresent() {
+	HBaseUtil.setAlwaysNoHBaseJarMode(true);
+	opts.setHBaseTable("dummy_table");
+	try {
+		manager.importTable(context);
+		fail("An ImportException should be thrown: "
+		     +
+		     "HBase jars are not present in classpath, cannot import to HBase!");
+	} catch (ImportException e) {
+		assertEquals(
+			e.toString(),
+			"HBase jars are not present in classpath, cannot import to HBase!");
+	} catch (IOException e) {
+		fail("No IOException should be thrown!");
+	} finally {
+		HBaseUtil.setAlwaysNoHBaseJarMode(false);
+		opts.setHBaseTable(null);
+	}
+}
 
-  @Test
-  public void testImportTableNoAccumuloJarPresent() {
-    AccumuloUtil.setAlwaysNoAccumuloJarMode(true);
-    opts.setAccumuloTable("dummy_table");
-    try {
-      manager.importTable(context);
-      fail("An ImportException should be thrown: "
-           + "Accumulo jars are not present in classpath, cannot import to "
-           + "Accumulo!");
-    } catch (ImportException e) {
-      assertEquals(
-          e.toString(),
-          "Accumulo jars are not present in classpath, cannot import to "
-              + "Accumulo!");
-    } catch (IOException e) {
-      fail("No IOException should be thrown!");
-    } finally {
-      AccumuloUtil.setAlwaysNoAccumuloJarMode(false);
-      opts.setAccumuloTable(null);
-    }
-  }
+@Test
+public void testImportTableNoAccumuloJarPresent() {
+	AccumuloUtil.setAlwaysNoAccumuloJarMode(true);
+	opts.setAccumuloTable("dummy_table");
+	try {
+		manager.importTable(context);
+		fail("An ImportException should be thrown: "
+		     + "Accumulo jars are not present in classpath, cannot import to "
+		     + "Accumulo!");
+	} catch (ImportException e) {
+		assertEquals(
+			e.toString(),
+			"Accumulo jars are not present in classpath, cannot import to "
+			+ "Accumulo!");
+	} catch (IOException e) {
+		fail("No IOException should be thrown!");
+	} finally {
+		AccumuloUtil.setAlwaysNoAccumuloJarMode(false);
+		opts.setAccumuloTable(null);
+	}
+}
 
-  @Test
-  public void testListTables() {
-    String[] tables = manager.listTables();
-    assertNull("manager should not return a list of tables", tables);
-  }
+@Test
+public void testListTables() {
+	String[] tables = manager.listTables();
+	assertNull("manager should not return a list of tables", tables);
+}
 
-  @Test
-  public void testListDatabases() {
-    String[] databases = manager.listDatabases();
-    assertNull("manager should not return a list of databases", databases);
-  }
+@Test
+public void testListDatabases() {
+	String[] databases = manager.listDatabases();
+	assertNull("manager should not return a list of databases", databases);
+}
 
-  @Test
-  public void testGetPrimaryKey() {
-    String primaryKey = manager.getPrimaryKey(getTableName());
-    assertNull("manager should not return a primary key", primaryKey);
-  }
+@Test
+public void testGetPrimaryKey() {
+	String primaryKey = manager.getPrimaryKey(getTableName());
+	assertNull("manager should not return a primary key", primaryKey);
+}
 
-  @Test
-  public void testReadTable() {
-    String[] colNames = manager.getColumnNames(getTableName());
-    try {
-      ResultSet table = manager.readTable(getTableName(), colNames);
-      assertNull("manager should not read a table", table);
-    } catch (SQLException sqlE) {
-      fail("Got SQLException: " + sqlE.toString());
-    }
-  }
+@Test
+public void testReadTable() {
+	String[] colNames = manager.getColumnNames(getTableName());
+	try {
+		ResultSet table = manager.readTable(getTableName(), colNames);
+		assertNull("manager should not read a table", table);
+	} catch (SQLException sqlE) {
+		fail("Got SQLException: " + sqlE.toString());
+	}
+}
 
-  @Test
-  public void testGetConnection() {
-    try {
-      Connection con = manager.getConnection();
-      assertNull("manager should not return a connection", con);
-    } catch (SQLException sqlE) {
-      fail("Got SQLException: " + sqlE.toString());
-    }
-  }
+@Test
+public void testGetConnection() {
+	try {
+		Connection con = manager.getConnection();
+		assertNull("manager should not return a connection", con);
+	} catch (SQLException sqlE) {
+		fail("Got SQLException: " + sqlE.toString());
+	}
+}
 
-  @Test
-  public void testGetDriverClass() {
-    String driverClass = manager.getDriverClass();
-    assertNotNull("manager should return a driver class", driverClass);
-    assertEquals("manager should return an empty driver class", "",
-                 driverClass);
-  }
+@Test
+public void testGetDriverClass() {
+	String driverClass = manager.getDriverClass();
+	assertNotNull("manager should return a driver class", driverClass);
+	assertEquals("manager should return an empty driver class", "",
+	             driverClass);
+}
 }

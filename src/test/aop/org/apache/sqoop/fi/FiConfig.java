@@ -28,22 +28,24 @@ import org.apache.hadoop.conf.Configuration;
  *   -Dfi.config=<file_name>
  */
 public class FiConfig {
-  private static final String CONFIG_PARAMETER =
-      ProbabilityModel.FPROB_NAME + "config";
-  private static final String DEFAULT_CONFIG = "fi-site.xml";
-  private static Configuration conf;
-  static {
-    if (conf == null) {
-      conf = new Configuration(false);
-      String configName = System.getProperty(CONFIG_PARAMETER, DEFAULT_CONFIG);
-      conf.addResource(configName);
-    }
-  }
+private static final String CONFIG_PARAMETER =
+	ProbabilityModel.FPROB_NAME + "config";
+private static final String DEFAULT_CONFIG = "fi-site.xml";
+private static Configuration conf;
+static {
+	if (conf == null) {
+		conf = new Configuration(false);
+		String configName = System.getProperty(CONFIG_PARAMETER, DEFAULT_CONFIG);
+		conf.addResource(configName);
+	}
+}
 
-  /**
-   * Method provides access to local Configuration
-   *
-   * @return Configuration initialized with fault injection's parameters
-   */
-  public static Configuration getConfig() { return conf; }
+/**
+ * Method provides access to local Configuration
+ *
+ * @return Configuration initialized with fault injection's parameters
+ */
+public static Configuration getConfig() {
+	return conf;
+}
 }

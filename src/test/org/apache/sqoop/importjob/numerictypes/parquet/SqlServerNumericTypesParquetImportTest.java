@@ -30,15 +30,15 @@ import org.junit.experimental.categories.Category;
 
 @Category(SqlServerTest.class)
 public class SqlServerNumericTypesParquetImportTest
-    extends NumericTypesParquetImportTestBase {
+	extends NumericTypesParquetImportTestBase {
 
-  @Override
-  public DatabaseAdapter createAdapter() {
-    return new SqlServerDatabaseAdapter();
-  }
+@Override
+public DatabaseAdapter createAdapter() {
+	return new SqlServerDatabaseAdapter();
+}
 
-  public SqlServerNumericTypesParquetImportTest() {
-    super(new SqlServerImportJobTestConfiguration(), SUCCEED_WITHOUT_EXTRA_ARGS,
-          SUCCEED_WITH_PADDING_ONLY);
-  }
+public SqlServerNumericTypesParquetImportTest() {
+	super(new SqlServerImportJobTestConfiguration(), SUCCEED_WITHOUT_EXTRA_ARGS,
+	      SUCCEED_WITH_PADDING_ONLY);
+}
 }

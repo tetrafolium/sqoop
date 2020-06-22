@@ -30,7 +30,7 @@ import org.apache.hadoop.mapreduce.Job;
  */
 public interface ParquetMergeJobConfigurator {
 
-  void configureParquetMergeJob(Configuration conf, Job job, Path oldPath,
-                                Path newPath, Path finalPath)
-      throws IOException;
+void configureParquetMergeJob(Configuration conf, Job job, Path oldPath,
+                              Path newPath, Path finalPath)
+throws IOException;
 }

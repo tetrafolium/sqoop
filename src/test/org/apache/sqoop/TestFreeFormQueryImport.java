@@ -44,119 +44,121 @@ import org.junit.Test;
  */
 public class TestFreeFormQueryImport extends ImportJobTestCase {
 
-  private Log log;
+private Log log;
 
-  public TestFreeFormQueryImport() {
-    this.log = LogFactory.getLog(TestFreeFormQueryImport.class.getName());
-  }
+public TestFreeFormQueryImport() {
+	this.log = LogFactory.getLog(TestFreeFormQueryImport.class.getName());
+}
 
-  /**
-   * @return the Log object to use for reporting during this test
-   */
-  protected Log getLogger() { return log; }
+/**
+ * @return the Log object to use for reporting during this test
+ */
+protected Log getLogger() {
+	return log;
+}
 
-  /** the names of the tables we're creating. */
-  private List<String> tableNames;
+/** the names of the tables we're creating. */
+private List<String> tableNames;
 
-  @After
-  public void tearDown() {
-    // Clean up the database on our way out.
-    for (String tableName : tableNames) {
-      try {
-        dropTableIfExists(tableName);
-      } catch (SQLException e) {
-        log.warn("Error trying to drop table '" + tableName +
-                 "' on tearDown: " + e);
-      }
-    }
-    super.tearDown();
-  }
+@After
+public void tearDown() {
+	// Clean up the database on our way out.
+	for (String tableName : tableNames) {
+		try {
+			dropTableIfExists(tableName);
+		} catch (SQLException e) {
+			log.warn("Error trying to drop table '" + tableName +
+			         "' on tearDown: " + e);
+		}
+	}
+	super.tearDown();
+}
 
-  /**
-   * Create the argv to pass to Sqoop.
-   * @param splitByCol column of the table used to split work.
-   * @param query free form query to be used.
-   * @return the argv as an array of strings.
-   */
-  protected String[] getArgv(String splitByCol, String query) {
-    ArrayList<String> args = new ArrayList<String>();
+/**
+ * Create the argv to pass to Sqoop.
+ * @param splitByCol column of the table used to split work.
+ * @param query free form query to be used.
+ * @return the argv as an array of strings.
+ */
+protected String[] getArgv(String splitByCol, String query) {
+	ArrayList<String> args = new ArrayList<String>();
 
-    CommonArgs.addHadoopFlags(args);
+	CommonArgs.addHadoopFlags(args);
 
-    args.add("--connect");
-    args.add(getConnectString());
-    args.add("--target-dir");
-    args.add(getTablePath().toString());
-    args.add("--split-by");
-    args.add(splitByCol);
-    args.add("--num-mappers");
-    args.add("2");
-    args.add("--query");
-    args.add(query);
+	args.add("--connect");
+	args.add(getConnectString());
+	args.add("--target-dir");
+	args.add(getTablePath().toString());
+	args.add("--split-by");
+	args.add(splitByCol);
+	args.add("--num-mappers");
+	args.add("2");
+	args.add("--query");
+	args.add(query);
 
-    return args.toArray(new String[0]);
-  }
+	return args.toArray(new String[0]);
+}
 
-  /**
-   * Create two tables that share the common id column.  Run free-form query
-   * import on the result table that is created by joining the two tables on
-   * the id column.
-   */
-  @Test
-  public void testSimpleJoin() throws IOException {
-    tableNames = new ArrayList<String>();
+/**
+ * Create two tables that share the common id column.  Run free-form query
+ * import on the result table that is created by joining the two tables on
+ * the id column.
+ */
+@Test
+public void testSimpleJoin() throws IOException {
+	tableNames = new ArrayList<String>();
 
-    String[] types1 = {
-        "SMALLINT",
-    };
-    String[] vals1 = {
-        "1",
-    };
-    String tableName1 = getTableName();
-    createTableWithColTypes(types1, vals1);
-    tableNames.add(tableName1);
+	String[] types1 = {
+		"SMALLINT",
+	};
+	String[] vals1 = {
+		"1",
+	};
+	String tableName1 = getTableName();
+	createTableWithColTypes(types1, vals1);
+	tableNames.add(tableName1);
 
-    incrementTableNum();
+	incrementTableNum();
 
-    String[] types2 = {
-        "SMALLINT",
-        "VARCHAR(32)",
-    };
-    String[] vals2 = {
-        "1",
-        "'foo'",
-    };
-    String tableName2 = getTableName();
-    createTableWithColTypes(types2, vals2);
-    tableNames.add(tableName2);
+	String[] types2 = {
+		"SMALLINT",
+		"VARCHAR(32)",
+	};
+	String[] vals2 = {
+		"1",
+		"'foo'",
+	};
+	String tableName2 = getTableName();
+	createTableWithColTypes(types2, vals2);
+	tableNames.add(tableName2);
 
-    String query = "SELECT " + tableName1 + "." + getColName(0) + ", " +
-                   tableName2 + "." + getColName(1) + " "
-                   + "FROM " + tableName1 + " JOIN " + tableName2 + " ON (" +
-                   tableName1 + "." + getColName(0) + " = " + tableName2 + "." +
-                   getColName(0) + ") WHERE " + tableName1 + "." +
-                   getColName(0) + " < 3 AND $CONDITIONS";
+	String query = "SELECT " + tableName1 + "." + getColName(0) + ", " +
+	               tableName2 + "." + getColName(1) + " "
+	               + "FROM " + tableName1 + " JOIN " + tableName2 + " ON (" +
+	               tableName1 + "." + getColName(0) + " = " + tableName2 + "." +
+	               getColName(0) + ") WHERE " + tableName1 + "." +
+	               getColName(0) + " < 3 AND $CONDITIONS";
 
-    runImport(getArgv(tableName1 + "." + getColName(0), query));
+	runImport(getArgv(tableName1 + "." + getColName(0), query));
 
-    Path filePath = new Path(getTablePath(), "part-m-00000");
-    String expectedVal = "1,foo";
+	Path filePath = new Path(getTablePath(), "part-m-00000");
+	String expectedVal = "1,foo";
 
-    BufferedReader reader = null;
-    if (!isOnPhysicalCluster()) {
-      reader = new BufferedReader(new InputStreamReader(
-          new FileInputStream(new File(filePath.toString()))));
-    } else {
-      FileSystem dfs = FileSystem.get(getConf());
-      FSDataInputStream dis = dfs.open(filePath);
-      reader = new BufferedReader(new InputStreamReader(dis));
-    }
-    try {
-      String line = reader.readLine();
-      assertEquals("QueryResult expected a different string", expectedVal,
-                   line);
-    } finally {
-      IOUtils.closeStream(reader);
-    }
-  }
+	BufferedReader reader = null;
+	if (!isOnPhysicalCluster()) {
+		reader = new BufferedReader(new InputStreamReader(
+						    new FileInputStream(new File(filePath.toString()))));
+	} else {
+		FileSystem dfs = FileSystem.get(getConf());
+		FSDataInputStream dis = dfs.open(filePath);
+		reader = new BufferedReader(new InputStreamReader(dis));
+	}
+	try {
+		String line = reader.readLine();
+		assertEquals("QueryResult expected a different string", expectedVal,
+		             line);
+	} finally {
+		IOUtils.closeStream(reader);
+	}
+}
 }

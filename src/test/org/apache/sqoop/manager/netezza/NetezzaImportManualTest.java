@@ -64,310 +64,310 @@ import org.junit.experimental.categories.Category;
 @Category({ManualTest.class, NetezzaTest.class})
 public class NetezzaImportManualTest extends ImportJobTestCase {
 
-  public static final Log LOG =
-      LogFactory.getLog(NetezzaImportManualTest.class.getName());
+public static final Log LOG =
+	LogFactory.getLog(NetezzaImportManualTest.class.getName());
 
-  // instance variables populated during setUp, used during tests
-  private NetezzaManager manager;
-  private Connection conn;
-  @Override
-  protected boolean useHsqldbTestServer() {
-    return false;
-  }
+// instance variables populated during setUp, used during tests
+private NetezzaManager manager;
+private Connection conn;
+@Override
+protected boolean useHsqldbTestServer() {
+	return false;
+}
 
-  @Override
-  protected String getTableName() {
-    return NetezzaTestUtils.TABLE_NAME + "_IMP_";
-  }
+@Override
+protected String getTableName() {
+	return NetezzaTestUtils.TABLE_NAME + "_IMP_";
+}
 
-  private void createTable(String tableName, String... extraColumns)
-      throws SQLException {
-    PreparedStatement statement = conn.prepareStatement(
-        "DROP TABLE " + tableName, ResultSet.TYPE_FORWARD_ONLY,
-        ResultSet.CONCUR_READ_ONLY);
-    try {
-      statement.executeUpdate();
-      conn.commit();
-    } catch (SQLException sqle) {
-      conn.rollback();
-    } finally {
-      statement.close();
-    }
+private void createTable(String tableName, String... extraColumns)
+throws SQLException {
+	PreparedStatement statement = conn.prepareStatement(
+		"DROP TABLE " + tableName, ResultSet.TYPE_FORWARD_ONLY,
+		ResultSet.CONCUR_READ_ONLY);
+	try {
+		statement.executeUpdate();
+		conn.commit();
+	} catch (SQLException sqle) {
+		conn.rollback();
+	} finally {
+		statement.close();
+	}
 
-    StringBuilder sb = new StringBuilder();
-    sb.append("CREATE TABLE " + tableName + " (");
-    sb.append("id INT NOT NULL PRIMARY KEY, ");
-    sb.append("name VARCHAR(24) NOT NULL, ");
-    sb.append("start_date DATE, ");
-    sb.append("Salary FLOAT, ");
-    sb.append("Fired BOOL, ");
-    sb.append("dept VARCHAR(32) ");
-    for (String col : extraColumns) {
-      sb.append(", " + col + "  INTEGER");
-    }
-    sb.append(")");
+	StringBuilder sb = new StringBuilder();
+	sb.append("CREATE TABLE " + tableName + " (");
+	sb.append("id INT NOT NULL PRIMARY KEY, ");
+	sb.append("name VARCHAR(24) NOT NULL, ");
+	sb.append("start_date DATE, ");
+	sb.append("Salary FLOAT, ");
+	sb.append("Fired BOOL, ");
+	sb.append("dept VARCHAR(32) ");
+	for (String col : extraColumns) {
+		sb.append(", " + col + "  INTEGER");
+	}
+	sb.append(")");
 
-    statement = conn.prepareStatement(
-        sb.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-    try {
-      statement.executeUpdate();
-      conn.commit();
-    } finally {
-      statement.close();
-    }
-  }
+	statement = conn.prepareStatement(
+		sb.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+	try {
+		statement.executeUpdate();
+		conn.commit();
+	} finally {
+		statement.close();
+	}
+}
 
-  private void populateTable(String tableName) throws SQLException {
-    Statement statement = conn.createStatement();
-    try {
-      statement.executeUpdate(
-          "INSERT INTO " + tableName +
-          " VALUES(1,'Aaron','2009-05-14',1000000.00,TRUE,'engineering')");
-      statement.executeUpdate(
-          "INSERT INTO " + tableName +
-          " VALUES(2,'Bob','2009-04-20',400.00,TRUE,'sales')");
-      statement.executeUpdate(
-          "INSERT INTO " + tableName +
-          " VALUES(3,'Fred','2009-01-23',15.00,FALSE,'marketing')");
-      conn.commit();
-    } finally {
-      statement.close();
-    }
-  }
+private void populateTable(String tableName) throws SQLException {
+	Statement statement = conn.createStatement();
+	try {
+		statement.executeUpdate(
+			"INSERT INTO " + tableName +
+			" VALUES(1,'Aaron','2009-05-14',1000000.00,TRUE,'engineering')");
+		statement.executeUpdate(
+			"INSERT INTO " + tableName +
+			" VALUES(2,'Bob','2009-04-20',400.00,TRUE,'sales')");
+		statement.executeUpdate(
+			"INSERT INTO " + tableName +
+			" VALUES(3,'Fred','2009-01-23',15.00,FALSE,'marketing')");
+		conn.commit();
+	} finally {
+		statement.close();
+	}
+}
 
-  private void populateTableWithNull(String tableName) throws SQLException {
-    Statement statement = conn.createStatement();
-    try {
-      statement.executeUpdate("INSERT INTO " + tableName +
-                              " VALUES(1,'Aaron','2009-05-14',1000000.00,TRUE,"
-                              + "'engineering',NULL,1)");
-      statement.executeUpdate(
-          "INSERT INTO " + tableName +
-          " VALUES(2,'Bob','2009-04-20',400.00,TRUE,'sales',NULL,2)");
-      statement.executeUpdate(
-          "INSERT INTO " + tableName +
-          " VALUES(3,'Fred','2009-01-23',15.00,FALSE,'marketing',NULL,3)");
-      conn.commit();
-    } finally {
-      statement.close();
-    }
-  }
+private void populateTableWithNull(String tableName) throws SQLException {
+	Statement statement = conn.createStatement();
+	try {
+		statement.executeUpdate("INSERT INTO " + tableName +
+		                        " VALUES(1,'Aaron','2009-05-14',1000000.00,TRUE,"
+		                        + "'engineering',NULL,1)");
+		statement.executeUpdate(
+			"INSERT INTO " + tableName +
+			" VALUES(2,'Bob','2009-04-20',400.00,TRUE,'sales',NULL,2)");
+		statement.executeUpdate(
+			"INSERT INTO " + tableName +
+			" VALUES(3,'Fred','2009-01-23',15.00,FALSE,'marketing',NULL,3)");
+		conn.commit();
+	} finally {
+		statement.close();
+	}
+}
 
-  public void setUpData() {
-    SqoopOptions options =
-        new SqoopOptions(NetezzaTestUtils.getNZConnectString(), getTableName());
-    options.setUsername(NetezzaTestUtils.getNZUser());
-    options.setPassword(NetezzaTestUtils.getNZPassword());
-    try {
-      manager = new NetezzaManager(options);
-      conn = manager.getConnection();
-      createTable(getTableName());
-      populateTable(getTableName());
-      String tableNameWithNull = getTableName() + "_W_N";
-      createTable(tableNameWithNull, new String[] {"col0", "col1"});
-      populateTableWithNull(tableNameWithNull);
-    } catch (SQLException sqlE) {
-      fail("Setup failed with SQLException " + sqlE);
-    }
-  }
+public void setUpData() {
+	SqoopOptions options =
+		new SqoopOptions(NetezzaTestUtils.getNZConnectString(), getTableName());
+	options.setUsername(NetezzaTestUtils.getNZUser());
+	options.setPassword(NetezzaTestUtils.getNZPassword());
+	try {
+		manager = new NetezzaManager(options);
+		conn = manager.getConnection();
+		createTable(getTableName());
+		populateTable(getTableName());
+		String tableNameWithNull = getTableName() + "_W_N";
+		createTable(tableNameWithNull, new String[] {"col0", "col1"});
+		populateTableWithNull(tableNameWithNull);
+	} catch (SQLException sqlE) {
+		fail("Setup failed with SQLException " + sqlE);
+	}
+}
 
-  @Before
-  public void setUp() {
-    super.setUp();
-    setUpData();
-  }
+@Before
+public void setUp() {
+	super.setUp();
+	setUpData();
+}
 
-  @After
-  public void tearDown() {
-    super.tearDown();
-    try {
-      manager.close();
-    } catch (SQLException sqlE) {
-      LOG.error("Got SQLException: " + sqlE.toString());
-      fail("Got SQLException: " + sqlE.toString());
-    }
-  }
+@After
+public void tearDown() {
+	super.tearDown();
+	try {
+		manager.close();
+	} catch (SQLException sqlE) {
+		LOG.error("Got SQLException: " + sqlE.toString());
+		fail("Got SQLException: " + sqlE.toString());
+	}
+}
 
-  private String[] getExpectedResults() {
-    String[] expectedResults = {
-        "1,Aaron,2009-05-14,1000000.0,true,engineering",
-        "2,Bob,2009-04-20,400.0,true,sales",
-        "3,Fred,2009-01-23,15.0,false,marketing",
-    };
+private String[] getExpectedResults() {
+	String[] expectedResults = {
+		"1,Aaron,2009-05-14,1000000.0,true,engineering",
+		"2,Bob,2009-04-20,400.0,true,sales",
+		"3,Fred,2009-01-23,15.0,false,marketing",
+	};
 
-    return expectedResults;
-  }
-  private String[] getDirectModeExpectedResults() {
-    String[] expectedResults = {
-        "1,Aaron,2009-05-14,1000000,T,engineering",
-        "2,Bob,2009-04-20,400,T,sales",
-        "3,Fred,2009-01-23,15,F,marketing",
-    };
-    return expectedResults;
-  }
-  private String[] getExpectedResultsWithNulls() {
-    String[] expectedResults = {
-        "1,Aaron,2009-05-14,1000000.0,true,engineering,\\N,1",
-        "2,Bob,2009-04-20,400.0,true,sales,\\N,2",
-        "3,Fred,2009-01-23,15.0,false,marketing,\\N,3",
-    };
+	return expectedResults;
+}
+private String[] getDirectModeExpectedResults() {
+	String[] expectedResults = {
+		"1,Aaron,2009-05-14,1000000,T,engineering",
+		"2,Bob,2009-04-20,400,T,sales",
+		"3,Fred,2009-01-23,15,F,marketing",
+	};
+	return expectedResults;
+}
+private String[] getExpectedResultsWithNulls() {
+	String[] expectedResults = {
+		"1,Aaron,2009-05-14,1000000.0,true,engineering,\\N,1",
+		"2,Bob,2009-04-20,400.0,true,sales,\\N,2",
+		"3,Fred,2009-01-23,15.0,false,marketing,\\N,3",
+	};
 
-    return expectedResults;
-  }
+	return expectedResults;
+}
 
-  private String[] getDirectModeExpectedResultsWithNulls() {
-    String[] expectedResults = {
-        "1,Aaron,2009-05-14,1000000,T,engineering,\\N,1",
-        "2,Bob,2009-04-20,400,T,sales,\\N,2",
-        "3,Fred,2009-01-23,15,F,marketing,\\N,3",
-    };
+private String[] getDirectModeExpectedResultsWithNulls() {
+	String[] expectedResults = {
+		"1,Aaron,2009-05-14,1000000,T,engineering,\\N,1",
+		"2,Bob,2009-04-20,400,T,sales,\\N,2",
+		"3,Fred,2009-01-23,15,F,marketing,\\N,3",
+	};
 
-    return expectedResults;
-  }
+	return expectedResults;
+}
 
-  private String[] getArgv(boolean isDirect, String tableName,
-                           String... extraArgs) {
-    ArrayList<String> args = new ArrayList<String>();
+private String[] getArgv(boolean isDirect, String tableName,
+                         String... extraArgs) {
+	ArrayList<String> args = new ArrayList<String>();
 
-    CommonArgs.addHadoopFlags(args);
+	CommonArgs.addHadoopFlags(args);
 
-    args.add("--table");
-    args.add(tableName);
-    args.add("--warehouse-dir");
-    args.add(getWarehouseDir());
-    args.add("--connect");
-    args.add(NetezzaTestUtils.getNZConnectString());
-    args.add("--username");
-    args.add(NetezzaTestUtils.getNZUser());
-    args.add("--password");
-    args.add(NetezzaTestUtils.getNZPassword());
-    args.add("--num-mappers");
-    args.add("1");
+	args.add("--table");
+	args.add(tableName);
+	args.add("--warehouse-dir");
+	args.add(getWarehouseDir());
+	args.add("--connect");
+	args.add(NetezzaTestUtils.getNZConnectString());
+	args.add("--username");
+	args.add(NetezzaTestUtils.getNZUser());
+	args.add("--password");
+	args.add(NetezzaTestUtils.getNZPassword());
+	args.add("--num-mappers");
+	args.add("1");
 
-    if (isDirect) {
-      args.add("--direct");
-    }
-    for (String arg : extraArgs) {
-      args.add(arg);
-    }
-    return args.toArray(new String[args.size()]);
-  }
+	if (isDirect) {
+		args.add("--direct");
+	}
+	for (String arg : extraArgs) {
+		args.add(arg);
+	}
+	return args.toArray(new String[args.size()]);
+}
 
-  private void runNetezzaTest(boolean isDirect, String tableName,
-                              String[] expectedResults, String... extraArgs)
-      throws IOException {
+private void runNetezzaTest(boolean isDirect, String tableName,
+                            String[] expectedResults, String... extraArgs)
+throws IOException {
 
-    Path warehousePath = new Path(this.getWarehouseDir());
-    Path tablePath = new Path(warehousePath, tableName);
+	Path warehousePath = new Path(this.getWarehouseDir());
+	Path tablePath = new Path(warehousePath, tableName);
 
-    Path filePath;
+	Path filePath;
 
-    filePath = new Path(tablePath, "part-m-00000");
+	filePath = new Path(tablePath, "part-m-00000");
 
-    File tableFile = new File(tablePath.toString());
-    if (tableFile.exists() && tableFile.isDirectory()) {
-      // remove the directory before running the import.
-      FileListing.recursiveDeleteDir(tableFile);
-    }
+	File tableFile = new File(tablePath.toString());
+	if (tableFile.exists() && tableFile.isDirectory()) {
+		// remove the directory before running the import.
+		FileListing.recursiveDeleteDir(tableFile);
+	}
 
-    String[] argv = getArgv(isDirect, tableName, extraArgs);
-    try {
-      runImport(argv);
-    } catch (IOException ioe) {
-      LOG.error("Got IOException during import: " + ioe.toString());
-      ioe.printStackTrace();
-      fail(ioe.toString());
-    }
+	String[] argv = getArgv(isDirect, tableName, extraArgs);
+	try {
+		runImport(argv);
+	} catch (IOException ioe) {
+		LOG.error("Got IOException during import: " + ioe.toString());
+		ioe.printStackTrace();
+		fail(ioe.toString());
+	}
 
-    File f = new File(filePath.toString());
-    assertTrue("Could not find imported data file : " + f, f.exists());
-    BufferedReader r = null;
-    try {
-      // Read through the file and make sure it's all there.
-      r = new BufferedReader(new InputStreamReader(new FileInputStream(f)));
-      String[] s = new String[3];
-      for (int i = 0; i < s.length; ++i) {
-        s[i] = r.readLine();
-        LOG.info("Line read from file = " + s[i]);
-      }
-      Arrays.sort(s);
-      for (int i = 0; i < expectedResults.length; ++i) {
-        assertEquals(expectedResults[i], s[i]);
-      }
-    } catch (IOException ioe) {
-      LOG.error("Got IOException verifying results: " + ioe.toString());
-      ioe.printStackTrace();
-      fail(ioe.toString());
-    } finally {
-      IOUtils.closeStream(r);
-    }
-  }
+	File f = new File(filePath.toString());
+	assertTrue("Could not find imported data file : " + f, f.exists());
+	BufferedReader r = null;
+	try {
+		// Read through the file and make sure it's all there.
+		r = new BufferedReader(new InputStreamReader(new FileInputStream(f)));
+		String[] s = new String[3];
+		for (int i = 0; i < s.length; ++i) {
+			s[i] = r.readLine();
+			LOG.info("Line read from file = " + s[i]);
+		}
+		Arrays.sort(s);
+		for (int i = 0; i < expectedResults.length; ++i) {
+			assertEquals(expectedResults[i], s[i]);
+		}
+	} catch (IOException ioe) {
+		LOG.error("Got IOException verifying results: " + ioe.toString());
+		ioe.printStackTrace();
+		fail(ioe.toString());
+	} finally {
+		IOUtils.closeStream(r);
+	}
+}
 
-  @Test
-  public void testNetezzaImport() throws IOException {
+@Test
+public void testNetezzaImport() throws IOException {
 
-    runNetezzaTest(false, getTableName(), getExpectedResults());
-  }
+	runNetezzaTest(false, getTableName(), getExpectedResults());
+}
 
-  @Test
-  public void testDirectImport() throws IOException {
-    runNetezzaTest(true, getTableName(), getDirectModeExpectedResults());
-  }
+@Test
+public void testDirectImport() throws IOException {
+	runNetezzaTest(true, getTableName(), getDirectModeExpectedResults());
+}
 
-  @Test
-  public void testListTables() throws IOException {
-    SqoopOptions options =
-        new SqoopOptions(NetezzaTestUtils.getNZConnectString(), getTableName());
-    options.setUsername(NetezzaTestUtils.getNZUser());
-    options.setPassword(NetezzaTestUtils.getNZPassword());
+@Test
+public void testListTables() throws IOException {
+	SqoopOptions options =
+		new SqoopOptions(NetezzaTestUtils.getNZConnectString(), getTableName());
+	options.setUsername(NetezzaTestUtils.getNZUser());
+	options.setPassword(NetezzaTestUtils.getNZPassword());
 
-    ConnManager mgr = new NetezzaManager(options);
-    String[] tables = mgr.listTables();
-    Arrays.sort(tables);
-    assertTrue(getTableName() + " is not found!",
-               Arrays.binarySearch(tables, getTableName()) >= 0);
-  }
+	ConnManager mgr = new NetezzaManager(options);
+	String[] tables = mgr.listTables();
+	Arrays.sort(tables);
+	assertTrue(getTableName() + " is not found!",
+	           Arrays.binarySearch(tables, getTableName()) >= 0);
+}
 
-  @Test
-  public void testIncrementalImport() throws IOException {
-    String[] expectedResults = {};
+@Test
+public void testIncrementalImport() throws IOException {
+	String[] expectedResults = {};
 
-    String[] extraArgs = {
-        "--incremental",
-        "lastmodified",
-        "--check-column",
-        "START_DATE",
-    };
+	String[] extraArgs = {
+		"--incremental",
+		"lastmodified",
+		"--check-column",
+		"START_DATE",
+	};
 
-    runNetezzaTest(false, getTableName(), expectedResults, extraArgs);
-  }
+	runNetezzaTest(false, getTableName(), expectedResults, extraArgs);
+}
 
-  @Test
-  public void testNullStringValue() throws Exception {
+@Test
+public void testNullStringValue() throws Exception {
 
-    String[] extraArgs = {
-        "--null-string",
-        "\\\\N",
-        "--null-non-string",
-        "\\\\N",
-    };
+	String[] extraArgs = {
+		"--null-string",
+		"\\\\N",
+		"--null-non-string",
+		"\\\\N",
+	};
 
-    String[] expectedResultsWithNulls = getExpectedResultsWithNulls();
-    String tableNameWithNull = getTableName() + "_W_N";
+	String[] expectedResultsWithNulls = getExpectedResultsWithNulls();
+	String tableNameWithNull = getTableName() + "_W_N";
 
-    runNetezzaTest(false, tableNameWithNull, expectedResultsWithNulls,
-                   extraArgs);
-  }
+	runNetezzaTest(false, tableNameWithNull, expectedResultsWithNulls,
+	               extraArgs);
+}
 
-  @Test
-  public void testValidExtraArgs() throws Exception {
+@Test
+public void testValidExtraArgs() throws Exception {
 
-    String[] extraArgs = {
-        "--", "--log-dir", "/tmp", "--max-errors", "2",
-    };
-    String[] expectedResults = getDirectModeExpectedResults();
-    String tableName = getTableName();
+	String[] extraArgs = {
+		"--", "--log-dir", "/tmp", "--max-errors", "2",
+	};
+	String[] expectedResults = getDirectModeExpectedResults();
+	String tableName = getTableName();
 
-    runNetezzaTest(true, tableName, expectedResults, extraArgs);
-  }
+	runNetezzaTest(true, tableName, expectedResults, extraArgs);
+}
 }

@@ -29,92 +29,94 @@ import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 
 public class MiniKdcInfrastructureRule
-    implements TestRule, MiniKdcInfrastructure {
+	implements TestRule, MiniKdcInfrastructure {
 
-  private MiniKdc miniKdc;
+private MiniKdc miniKdc;
 
-  private Properties configuration;
+private Properties configuration;
 
-  private File workDir;
+private File workDir;
 
-  private String testPrincipal;
+private String testPrincipal;
 
-  private File keytabFile;
+private File keytabFile;
 
-  public MiniKdcInfrastructureRule() {
-    File baseDir = Files.createTempDir();
-    this.workDir = new File(baseDir, "MiniKdcWorkDir");
-    this.configuration = MiniKdc.createConf();
-  }
+public MiniKdcInfrastructureRule() {
+	File baseDir = Files.createTempDir();
+	this.workDir = new File(baseDir, "MiniKdcWorkDir");
+	this.configuration = MiniKdc.createConf();
+}
 
-  @Override
-  public void start() {
-    try {
-      miniKdc = new MiniKdc(configuration, workDir);
-      miniKdc.start();
-      createTestPrincipal();
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
-  }
+@Override
+public void start() {
+	try {
+		miniKdc = new MiniKdc(configuration, workDir);
+		miniKdc.start();
+		createTestPrincipal();
+	} catch (Exception e) {
+		throw new RuntimeException(e);
+	}
+}
 
-  private void createTestPrincipal() {
-    try {
-      createKeytabFile();
-      testPrincipal = currentUser() + "/" + miniKdc.getHost();
-      miniKdc.createPrincipal(keytabFile, testPrincipal);
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
-  }
+private void createTestPrincipal() {
+	try {
+		createKeytabFile();
+		testPrincipal = currentUser() + "/" + miniKdc.getHost();
+		miniKdc.createPrincipal(keytabFile, testPrincipal);
+	} catch (Exception e) {
+		throw new RuntimeException(e);
+	}
+}
 
-  private void createKeytabFile() {
-    try {
-      keytabFile = new File(workDir.getAbsolutePath(), "keytab");
-      keytabFile.createNewFile();
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-  }
+private void createKeytabFile() {
+	try {
+		keytabFile = new File(workDir.getAbsolutePath(), "keytab");
+		keytabFile.createNewFile();
+	} catch (IOException e) {
+		throw new RuntimeException(e);
+	}
+}
 
-  @Override
-  public void stop() {
-    try {
-      miniKdc.stop();
-      FileUtils.deleteDirectory(workDir);
-      configuration = null;
-      miniKdc = null;
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-  }
+@Override
+public void stop() {
+	try {
+		miniKdc.stop();
+		FileUtils.deleteDirectory(workDir);
+		configuration = null;
+		miniKdc = null;
+	} catch (IOException e) {
+		throw new RuntimeException(e);
+	}
+}
 
-  @Override
-  public Statement apply(final Statement base, Description description) {
-    return new Statement() {
-      @Override
-      public void evaluate() throws Throwable {
-        start();
-        base.evaluate();
-        stop();
-      }
-    };
-  }
+@Override
+public Statement apply(final Statement base, Description description) {
+	return new Statement() {
+		       @Override
+		       public void evaluate() throws Throwable {
+			       start();
+			       base.evaluate();
+			       stop();
+		       }
+	};
+}
 
-  @Override
-  public String getTestPrincipal() {
-    return testPrincipal + "@" + miniKdc.getRealm();
-  }
+@Override
+public String getTestPrincipal() {
+	return testPrincipal + "@" + miniKdc.getRealm();
+}
 
-  @Override
-  public String getRealm() {
-    return miniKdc.getRealm();
-  }
+@Override
+public String getRealm() {
+	return miniKdc.getRealm();
+}
 
-  @Override
-  public String getKeytabFilePath() {
-    return keytabFile.getAbsolutePath();
-  }
+@Override
+public String getKeytabFilePath() {
+	return keytabFile.getAbsolutePath();
+}
 
-  private String currentUser() { return System.getProperty("user.name"); }
+private String currentUser() {
+	return System.getProperty("user.name");
+}
 }

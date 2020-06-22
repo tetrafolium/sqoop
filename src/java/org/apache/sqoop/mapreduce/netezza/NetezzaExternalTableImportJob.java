@@ -46,128 +46,128 @@ import org.apache.sqoop.mapreduce.hcat.SqoopHCatUtilities;
  */
 public class NetezzaExternalTableImportJob extends ImportJobBase {
 
-  public NetezzaExternalTableImportJob(final SqoopOptions opts,
-                                       ImportJobContext context) {
-    super(opts, NetezzaExternalTableTextImportMapper.class,
-          NetezzaExternalTableInputFormat.class, RawKeyTextOutputFormat.class,
-          context);
-  }
+public NetezzaExternalTableImportJob(final SqoopOptions opts,
+                                     ImportJobContext context) {
+	super(opts, NetezzaExternalTableTextImportMapper.class,
+	      NetezzaExternalTableInputFormat.class, RawKeyTextOutputFormat.class,
+	      context);
+}
 
-  @Override
-  protected void propagateOptionsToJob(Job job) {
-    Configuration conf = job.getConfiguration();
-    String nullValue = options.getNullStringValue();
-    if (nullValue != null) {
-      conf.set(DirectNetezzaManager.NETEZZA_NULL_VALUE,
-               StringEscapeUtils.unescapeJava(nullValue));
-    }
-    conf.setInt(DelimiterSet.OUTPUT_FIELD_DELIM_KEY,
-                options.getOutputFieldDelim());
-    conf.setInt(DelimiterSet.OUTPUT_RECORD_DELIM_KEY,
-                options.getOutputRecordDelim());
-    conf.setInt(DelimiterSet.OUTPUT_ENCLOSED_BY_KEY,
-                options.getOutputEnclosedBy());
-    // Netezza uses \ as the escape character. Force the use of it
-    int escapeChar = options.getOutputEscapedBy();
-    if (escapeChar > 0) {
-      if (escapeChar != '\\') {
-        LOG.info(
-            "Setting escaped char to \\ for Netezza external table import");
-      }
-      conf.setInt(DelimiterSet.OUTPUT_ESCAPED_BY_KEY, '\\');
-    }
-    conf.setBoolean(DelimiterSet.OUTPUT_ENCLOSE_REQUIRED_KEY,
-                    options.isOutputEncloseRequired());
-  }
-  /**
-   * Configure the inputformat to use for the job.
-   */
-  @Override
-  protected void configureInputFormat(Job job, String tableName,
-                                      String tableClassName, String splitByCol)
-      throws ClassNotFoundException, IOException {
+@Override
+protected void propagateOptionsToJob(Job job) {
+	Configuration conf = job.getConfiguration();
+	String nullValue = options.getNullStringValue();
+	if (nullValue != null) {
+		conf.set(DirectNetezzaManager.NETEZZA_NULL_VALUE,
+		         StringEscapeUtils.unescapeJava(nullValue));
+	}
+	conf.setInt(DelimiterSet.OUTPUT_FIELD_DELIM_KEY,
+	            options.getOutputFieldDelim());
+	conf.setInt(DelimiterSet.OUTPUT_RECORD_DELIM_KEY,
+	            options.getOutputRecordDelim());
+	conf.setInt(DelimiterSet.OUTPUT_ENCLOSED_BY_KEY,
+	            options.getOutputEnclosedBy());
+	// Netezza uses \ as the escape character. Force the use of it
+	int escapeChar = options.getOutputEscapedBy();
+	if (escapeChar > 0) {
+		if (escapeChar != '\\') {
+			LOG.info(
+				"Setting escaped char to \\ for Netezza external table import");
+		}
+		conf.setInt(DelimiterSet.OUTPUT_ESCAPED_BY_KEY, '\\');
+	}
+	conf.setBoolean(DelimiterSet.OUTPUT_ENCLOSE_REQUIRED_KEY,
+	                options.isOutputEncloseRequired());
+}
+/**
+ * Configure the inputformat to use for the job.
+ */
+@Override
+protected void configureInputFormat(Job job, String tableName,
+                                    String tableClassName, String splitByCol)
+throws ClassNotFoundException, IOException {
 
-    ConnManager mgr = getContext().getConnManager();
-    String username = options.getUsername();
-    if (null == username || username.length() == 0) {
-      DBConfiguration.configureDB(job.getConfiguration(), mgr.getDriverClass(),
-                                  options.getConnectString());
-    } else {
-      DBConfiguration.configureDB(job.getConfiguration(), mgr.getDriverClass(),
-                                  options.getConnectString(), username,
-                                  options.getPassword());
-    }
+	ConnManager mgr = getContext().getConnManager();
+	String username = options.getUsername();
+	if (null == username || username.length() == 0) {
+		DBConfiguration.configureDB(job.getConfiguration(), mgr.getDriverClass(),
+		                            options.getConnectString());
+	} else {
+		DBConfiguration.configureDB(job.getConfiguration(), mgr.getDriverClass(),
+		                            options.getConnectString(), username,
+		                            options.getPassword());
+	}
 
-    String[] colNames = options.getColumns();
-    if (null == colNames) {
-      colNames = mgr.getColumnNames(tableName);
-    }
+	String[] colNames = options.getColumns();
+	if (null == colNames) {
+		colNames = mgr.getColumnNames(tableName);
+	}
 
-    String[] sqlColNames = null;
-    if (null != colNames) {
-      sqlColNames = new String[colNames.length];
-      for (int i = 0; i < colNames.length; i++) {
-        sqlColNames[i] = mgr.escapeColName(colNames[i]);
-      }
-    }
+	String[] sqlColNames = null;
+	if (null != colNames) {
+		sqlColNames = new String[colNames.length];
+		for (int i = 0; i < colNames.length; i++) {
+			sqlColNames[i] = mgr.escapeColName(colNames[i]);
+		}
+	}
 
-    // It's ok if the where clause is null in DBInputFormat.setInput.
-    String whereClause = options.getWhereClause();
+	// It's ok if the where clause is null in DBInputFormat.setInput.
+	String whereClause = options.getWhereClause();
 
-    // We can't set the class properly in here, because we may not have the
-    // jar loaded in this JVM. So we start by calling setInput() with
-    // DBWritable and then overriding the string manually.
+	// We can't set the class properly in here, because we may not have the
+	// jar loaded in this JVM. So we start by calling setInput() with
+	// DBWritable and then overriding the string manually.
 
-    // Note that mysqldump also does *not* want a quoted table name.
-    DataDrivenDBInputFormat.setInput(job, DBWritable.class, tableName,
-                                     whereClause, mgr.escapeColName(splitByCol),
-                                     sqlColNames);
+	// Note that mysqldump also does *not* want a quoted table name.
+	DataDrivenDBInputFormat.setInput(job, DBWritable.class, tableName,
+	                                 whereClause, mgr.escapeColName(splitByCol),
+	                                 sqlColNames);
 
-    LOG.debug("Using InputFormat: " + inputFormatClass);
-    job.setInputFormatClass(getInputFormatClass());
+	LOG.debug("Using InputFormat: " + inputFormatClass);
+	job.setInputFormatClass(getInputFormatClass());
 
-    if (isHCatJob) {
-      LOG.debug("Using table class: " + tableClassName);
-      job.getConfiguration().set(ConfigurationHelper.getDbInputClassProperty(),
-                                 tableClassName);
-    }
-  }
+	if (isHCatJob) {
+		LOG.debug("Using table class: " + tableClassName);
+		job.getConfiguration().set(ConfigurationHelper.getDbInputClassProperty(),
+		                           tableClassName);
+	}
+}
 
-  /**
-   * Set the mapper class implementation to use in the job, as well as any
-   * related configuration (e.g., map output types).
-   */
-  protected void configureMapper(Job job, String tableName,
-                                 String tableClassName)
-      throws ClassNotFoundException, IOException {
-    super.configureMapper(job, tableName, tableClassName);
-    job.setMapperClass(getMapperClass());
-    if (isHCatJob) {
-      LOG.info("Configuring mapper for HCatalog import job");
-      job.setOutputKeyClass(LongWritable.class);
-      job.setOutputValueClass(SqoopHCatUtilities.getImportValueClass());
-      return;
-    }
-    job.setOutputKeyClass(String.class);
-    job.setOutputValueClass(NullWritable.class);
-  }
+/**
+ * Set the mapper class implementation to use in the job, as well as any
+ * related configuration (e.g., map output types).
+ */
+protected void configureMapper(Job job, String tableName,
+                               String tableClassName)
+throws ClassNotFoundException, IOException {
+	super.configureMapper(job, tableName, tableClassName);
+	job.setMapperClass(getMapperClass());
+	if (isHCatJob) {
+		LOG.info("Configuring mapper for HCatalog import job");
+		job.setOutputKeyClass(LongWritable.class);
+		job.setOutputValueClass(SqoopHCatUtilities.getImportValueClass());
+		return;
+	}
+	job.setOutputKeyClass(String.class);
+	job.setOutputValueClass(NullWritable.class);
+}
 
-  @Override
-  protected Class<? extends OutputFormat> getOutputFormatClass()
-      throws ClassNotFoundException {
-    if (isHCatJob) {
-      return SqoopHCatUtilities.getOutputFormatClass();
-    } else {
-      return RawKeyTextOutputFormat.class;
-    }
-  }
+@Override
+protected Class<? extends OutputFormat> getOutputFormatClass()
+throws ClassNotFoundException {
+	if (isHCatJob) {
+		return SqoopHCatUtilities.getOutputFormatClass();
+	} else {
+		return RawKeyTextOutputFormat.class;
+	}
+}
 
-  @Override
-  protected Class<? extends Mapper> getMapperClass() {
-    if (isHCatJob) {
-      return NetezzaExternalTableHCatImportMapper.class;
-    } else {
-      return NetezzaExternalTableTextImportMapper.class;
-    }
-  }
+@Override
+protected Class<? extends Mapper> getMapperClass() {
+	if (isHCatJob) {
+		return NetezzaExternalTableHCatImportMapper.class;
+	} else {
+		return NetezzaExternalTableTextImportMapper.class;
+	}
+}
 }

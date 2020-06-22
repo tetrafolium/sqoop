@@ -26,32 +26,34 @@ package org.apache.sqoop.util;
 @SuppressWarnings("serial")
 public class ExitSecurityException extends SecurityException {
 
-  private final int exitStatus;
+private final int exitStatus;
 
-  public ExitSecurityException() {
-    super("ExitSecurityException");
-    this.exitStatus = 0;
-  }
+public ExitSecurityException() {
+	super("ExitSecurityException");
+	this.exitStatus = 0;
+}
 
-  public ExitSecurityException(final String message) {
-    super(message);
-    this.exitStatus = 0;
-  }
+public ExitSecurityException(final String message) {
+	super(message);
+	this.exitStatus = 0;
+}
 
-  /**
-   * Register a System.exit() event being suppressed with a particular
-   * exit status code.
-   */
-  public ExitSecurityException(int status) {
-    super("ExitSecurityException");
-    this.exitStatus = status;
-  }
+/**
+ * Register a System.exit() event being suppressed with a particular
+ * exit status code.
+ */
+public ExitSecurityException(int status) {
+	super("ExitSecurityException");
+	this.exitStatus = status;
+}
 
-  @Override
-  public String toString() {
-    String msg = getMessage();
-    return (null == msg) ? ("exit with status " + exitStatus) : msg;
-  }
+@Override
+public String toString() {
+	String msg = getMessage();
+	return (null == msg) ? ("exit with status " + exitStatus) : msg;
+}
 
-  public int getExitStatus() { return this.exitStatus; }
+public int getExitStatus() {
+	return this.exitStatus;
+}
 }

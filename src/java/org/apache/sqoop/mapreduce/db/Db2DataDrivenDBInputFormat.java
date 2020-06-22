@@ -29,25 +29,25 @@ import org.apache.sqoop.mapreduce.DBWritable;
  * A InputFormat that reads input data from DB2.
  */
 public class Db2DataDrivenDBInputFormat<T extends DBWritable>
-    extends DataDrivenDBInputFormat<T> implements Configurable {
+	extends DataDrivenDBInputFormat<T> implements Configurable {
 
-  @Override
-  protected RecordReader<LongWritable, T>
-  createDBRecordReader(DBInputSplit split, Configuration conf)
-      throws IOException {
+@Override
+protected RecordReader<LongWritable, T>
+createDBRecordReader(DBInputSplit split, Configuration conf)
+throws IOException {
 
-    DBConfiguration dbConf = getDBConf();
-    @SuppressWarnings("unchecked")
-    Class<T> inputClass = (Class<T>)(dbConf.getInputClass());
+	DBConfiguration dbConf = getDBConf();
+	@SuppressWarnings("unchecked")
+	Class<T> inputClass = (Class<T>)(dbConf.getInputClass());
 
-    try {
-      // Use DB2-specific db reader
-      return new Db2DataDrivenDBRecordReader<T>(
-          split, inputClass, conf, getConnection(), dbConf,
-          dbConf.getInputConditions(), dbConf.getInputFieldNames(),
-          dbConf.getInputTableName());
-    } catch (SQLException ex) {
-      throw new IOException(ex);
-    }
-  }
+	try {
+		// Use DB2-specific db reader
+		return new Db2DataDrivenDBRecordReader<T>(
+			split, inputClass, conf, getConnection(), dbConf,
+			dbConf.getInputConditions(), dbConf.getInputFieldNames(),
+			dbConf.getInputTableName());
+	} catch (SQLException ex) {
+		throw new IOException(ex);
+	}
+}
 }

@@ -28,20 +28,20 @@ import org.apache.sqoop.mapreduce.parquet.ParquetMergeJobConfigurator;
  * the Hadoop Parquet library.
  */
 public class HadoopParquetJobConfiguratorFactory
-    implements ParquetJobConfiguratorFactory {
+	implements ParquetJobConfiguratorFactory {
 
-  @Override
-  public ParquetImportJobConfigurator createParquetImportJobConfigurator() {
-    return new HadoopParquetImportJobConfigurator();
-  }
+@Override
+public ParquetImportJobConfigurator createParquetImportJobConfigurator() {
+	return new HadoopParquetImportJobConfigurator();
+}
 
-  @Override
-  public ParquetExportJobConfigurator createParquetExportJobConfigurator() {
-    return new HadoopParquetExportJobConfigurator();
-  }
+@Override
+public ParquetExportJobConfigurator createParquetExportJobConfigurator() {
+	return new HadoopParquetExportJobConfigurator();
+}
 
-  @Override
-  public ParquetMergeJobConfigurator createParquetMergeJobConfigurator() {
-    return new HadoopParquetMergeJobConfigurator();
-  }
+@Override
+public ParquetMergeJobConfigurator createParquetMergeJobConfigurator() {
+	return new HadoopParquetMergeJobConfigurator();
+}
 }

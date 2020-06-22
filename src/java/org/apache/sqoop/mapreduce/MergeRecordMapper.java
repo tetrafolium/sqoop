@@ -26,10 +26,10 @@ import org.apache.sqoop.lib.SqoopRecord;
  * Mapper for the merge program which operates on SequenceFiles.
  */
 public class MergeRecordMapper
-    extends MergeMapperBase<LongWritable, SqoopRecord> {
+	extends MergeMapperBase<LongWritable, SqoopRecord> {
 
-  public void map(LongWritable key, SqoopRecord val, Context c)
-      throws IOException, InterruptedException {
-    processRecord(val, c);
-  }
+public void map(LongWritable key, SqoopRecord val, Context c)
+throws IOException, InterruptedException {
+	processRecord(val, c);
+}
 }

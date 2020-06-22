@@ -26,41 +26,41 @@ import org.apache.commons.logging.LogFactory;
  * Identity reducer that continuously reports progress via a background thread.
  */
 public class AutoProgressReducer<KEYIN, VALIN, KEYOUT, VALOUT>
-    extends SqoopReducer<KEYIN, VALIN, KEYOUT, VALOUT> {
+	extends SqoopReducer<KEYIN, VALIN, KEYOUT, VALOUT> {
 
-  public static final Log LOG =
-      LogFactory.getLog(AutoProgressReducer.class.getName());
+public static final Log LOG =
+	LogFactory.getLog(AutoProgressReducer.class.getName());
 
-  // reduce() method intentionally omitted;
-  // Reducer.reduce() is the identity reducer.
+// reduce() method intentionally omitted;
+// Reducer.reduce() is the identity reducer.
 
-  /**
-   * Run the mapping process for this task, wrapped in an auto-progress system.
-   */
-  @Override
-  public void run(Context context) throws IOException, InterruptedException {
-    ProgressThread thread = new ProgressThread(context, LOG);
+/**
+ * Run the mapping process for this task, wrapped in an auto-progress system.
+ */
+@Override
+public void run(Context context) throws IOException, InterruptedException {
+	ProgressThread thread = new ProgressThread(context, LOG);
 
-    try {
-      thread.setDaemon(true);
-      thread.start();
+	try {
+		thread.setDaemon(true);
+		thread.start();
 
-      // use default run() method to actually drive the mapping.
-      super.run(context);
-    } finally {
-      // Tell the progress thread to exit..
-      LOG.debug("Instructing auto-progress thread to quit.");
-      thread.signalShutdown();
-      try {
-        // And wait for that to happen.
-        LOG.debug("Waiting for progress thread shutdown...");
-        thread.join();
-        LOG.debug("Progress thread shutdown detected.");
-      } catch (InterruptedException ie) {
-        LOG.warn("Interrupted when waiting on auto-progress thread: " +
-                     ie.toString(),
-                 ie);
-      }
-    }
-  }
+		// use default run() method to actually drive the mapping.
+		super.run(context);
+	} finally {
+		// Tell the progress thread to exit..
+		LOG.debug("Instructing auto-progress thread to quit.");
+		thread.signalShutdown();
+		try {
+			// And wait for that to happen.
+			LOG.debug("Waiting for progress thread shutdown...");
+			thread.join();
+			LOG.debug("Progress thread shutdown detected.");
+		} catch (InterruptedException ie) {
+			LOG.warn("Interrupted when waiting on auto-progress thread: " +
+			         ie.toString(),
+			         ie);
+		}
+	}
+}
 }

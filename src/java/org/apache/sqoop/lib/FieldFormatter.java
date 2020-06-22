@@ -24,122 +24,123 @@ import java.util.regex.Pattern;
  */
 public final class FieldFormatter {
 
-  private static final Pattern REPLACE_PATTERN = Pattern.compile("\\n|\\r|\01");
+private static final Pattern REPLACE_PATTERN = Pattern.compile("\\n|\\r|\01");
 
-  /**
-   * This drops all default Hive delimiters from the string and passes it on.
-   *
-   * These delimiters are \n, \r and \01. This method is invoked when the
-   * command line option {@code --hive-drop-delims} is provided.
-   *
-   * @param str
-   * @param delimiters
-   * @return
-   */
-  public static String hiveStringDropDelims(String str,
-                                            DelimiterSet delimiters) {
-    return hiveStringReplaceDelims(str, "", delimiters);
-  }
+/**
+ * This drops all default Hive delimiters from the string and passes it on.
+ *
+ * These delimiters are \n, \r and \01. This method is invoked when the
+ * command line option {@code --hive-drop-delims} is provided.
+ *
+ * @param str
+ * @param delimiters
+ * @return
+ */
+public static String hiveStringDropDelims(String str,
+                                          DelimiterSet delimiters) {
+	return hiveStringReplaceDelims(str, "", delimiters);
+}
 
-  /**
-   * replace hive delimiters with a user-defined string passed to the
-   * --hive-delims-replacement option.
-   * @param str
-   * @param delimiters
-   * @return
-   */
-  public static String hiveStringReplaceDelims(String str, String replacement,
-                                               DelimiterSet delimiters) {
-    String droppedDelims = REPLACE_PATTERN.matcher(str).replaceAll(replacement);
-    return escapeAndEnclose(droppedDelims, delimiters);
-  }
+/**
+ * replace hive delimiters with a user-defined string passed to the
+ * --hive-delims-replacement option.
+ * @param str
+ * @param delimiters
+ * @return
+ */
+public static String hiveStringReplaceDelims(String str, String replacement,
+                                             DelimiterSet delimiters) {
+	String droppedDelims = REPLACE_PATTERN.matcher(str).replaceAll(replacement);
+	return escapeAndEnclose(droppedDelims, delimiters);
+}
 
-  /**
-   * Takes an input string representing the value of a field, encloses it in
-   * enclosing chars, and escapes any occurrences of such characters in the
-   * middle.  The escape character itself is also escaped if it appears in the
-   * text of the field.  If there is no enclosing character, then any
-   * delimiters present in the field body are escaped instead.
-   *
-   * The field is enclosed only if:
-   *   enclose != '\000', and:
-   *     encloseRequired is true, or
-   *     one of the fields-terminated-by or lines-terminated-by characters is
-   *     present in the string.
-   *
-   * Escaping is not performed if the escape char is '\000'.
-   *
-   * @param str - The user's string to escape and enclose
-   * @param delimiters - The DelimiterSet to use identifying the escape and
-   * enclose semantics. If the specified escape or enclose characters are
-   * '\000', those operations are not performed.
-   * @return the escaped, enclosed version of 'str'.
-   */
-  public static String escapeAndEnclose(String str, DelimiterSet delimiters) {
+/**
+ * Takes an input string representing the value of a field, encloses it in
+ * enclosing chars, and escapes any occurrences of such characters in the
+ * middle.  The escape character itself is also escaped if it appears in the
+ * text of the field.  If there is no enclosing character, then any
+ * delimiters present in the field body are escaped instead.
+ *
+ * The field is enclosed only if:
+ *   enclose != '\000', and:
+ *     encloseRequired is true, or
+ *     one of the fields-terminated-by or lines-terminated-by characters is
+ *     present in the string.
+ *
+ * Escaping is not performed if the escape char is '\000'.
+ *
+ * @param str - The user's string to escape and enclose
+ * @param delimiters - The DelimiterSet to use identifying the escape and
+ * enclose semantics. If the specified escape or enclose characters are
+ * '\000', those operations are not performed.
+ * @return the escaped, enclosed version of 'str'.
+ */
+public static String escapeAndEnclose(String str, DelimiterSet delimiters) {
 
-    char escape = delimiters.getEscapedBy();
-    char enclose = delimiters.getEnclosedBy();
-    boolean encloseRequired = delimiters.isEncloseRequired();
+	char escape = delimiters.getEscapedBy();
+	char enclose = delimiters.getEnclosedBy();
+	boolean encloseRequired = delimiters.isEncloseRequired();
 
-    // true if we can use an escape character.
-    boolean escapingLegal = DelimiterSet.NULL_CHAR != escape;
-    String withEscapes;
+	// true if we can use an escape character.
+	boolean escapingLegal = DelimiterSet.NULL_CHAR != escape;
+	String withEscapes;
 
-    if (null == str) {
-      return null;
-    }
+	if (null == str) {
+		return null;
+	}
 
-    if (escapingLegal) {
-      // escaping is legal. Escape any instances of the escape char itself.
-      withEscapes = str.replace("" + escape, "" + escape + escape);
-    } else {
-      // no need to double-escape
-      withEscapes = str;
-    }
+	if (escapingLegal) {
+		// escaping is legal. Escape any instances of the escape char itself.
+		withEscapes = str.replace("" + escape, "" + escape + escape);
+	} else {
+		// no need to double-escape
+		withEscapes = str;
+	}
 
-    if (DelimiterSet.NULL_CHAR == enclose) {
-      // The enclose-with character was left unset, so we can't enclose items.
+	if (DelimiterSet.NULL_CHAR == enclose) {
+		// The enclose-with character was left unset, so we can't enclose items.
 
-      if (escapingLegal) {
-        // If the user has used the fields-terminated-by or
-        // lines-terminated-by characters in the string, escape them if we
-        // have an escape character.
-        String fields = "" + delimiters.getFieldsTerminatedBy();
-        String lines = "" + delimiters.getLinesTerminatedBy();
-        withEscapes = withEscapes.replace(fields, "" + escape + fields);
-        withEscapes = withEscapes.replace(lines, "" + escape + lines);
-      }
+		if (escapingLegal) {
+			// If the user has used the fields-terminated-by or
+			// lines-terminated-by characters in the string, escape them if we
+			// have an escape character.
+			String fields = "" + delimiters.getFieldsTerminatedBy();
+			String lines = "" + delimiters.getLinesTerminatedBy();
+			withEscapes = withEscapes.replace(fields, "" + escape + fields);
+			withEscapes = withEscapes.replace(lines, "" + escape + lines);
+		}
 
-      // No enclosing possible, so now return this.
-      return withEscapes;
-    }
+		// No enclosing possible, so now return this.
+		return withEscapes;
+	}
 
-    // if we have an enclosing character, and escaping is legal, then the
-    // encloser must always be escaped.
-    if (escapingLegal) {
-      withEscapes = withEscapes.replace("" + enclose, "" + escape + enclose);
-    }
+	// if we have an enclosing character, and escaping is legal, then the
+	// encloser must always be escaped.
+	if (escapingLegal) {
+		withEscapes = withEscapes.replace("" + enclose, "" + escape + enclose);
+	}
 
-    boolean actuallyDoEnclose = encloseRequired;
-    if (!actuallyDoEnclose) {
-      // check if the string requires enclosing.
-      char[] mustEncloseFor = new char[2];
-      mustEncloseFor[0] = delimiters.getFieldsTerminatedBy();
-      mustEncloseFor[1] = delimiters.getLinesTerminatedBy();
-      for (char reason : mustEncloseFor) {
-        if (str.indexOf(reason) != -1) {
-          actuallyDoEnclose = true;
-          break;
-        }
-      }
-    }
+	boolean actuallyDoEnclose = encloseRequired;
+	if (!actuallyDoEnclose) {
+		// check if the string requires enclosing.
+		char[] mustEncloseFor = new char[2];
+		mustEncloseFor[0] = delimiters.getFieldsTerminatedBy();
+		mustEncloseFor[1] = delimiters.getLinesTerminatedBy();
+		for (char reason : mustEncloseFor) {
+			if (str.indexOf(reason) != -1) {
+				actuallyDoEnclose = true;
+				break;
+			}
+		}
+	}
 
-    if (actuallyDoEnclose) {
-      return "" + enclose + withEscapes + enclose;
-    } else {
-      return withEscapes;
-    }
-  }
+	if (actuallyDoEnclose) {
+		return "" + enclose + withEscapes + enclose;
+	} else {
+		return withEscapes;
+	}
+}
 
-  private FieldFormatter() {}
+private FieldFormatter() {
+}
 }

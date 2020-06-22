@@ -28,25 +28,25 @@ import org.apache.commons.logging.LogFactory;
 
 public class CredentialGenerator {
 
-  public static final Log LOG =
-      LogFactory.getLog(CredentialGenerator.class.getName());
+public static final Log LOG =
+	LogFactory.getLog(CredentialGenerator.class.getName());
 
-  public Iterable<String> invokeGeneratorCommand(String generatorCommand)
-      throws IOException {
-    ProcessBuilder processBuilder =
-        new ProcessBuilder("/bin/sh", "-c", generatorCommand);
-    Process process = processBuilder.start();
+public Iterable<String> invokeGeneratorCommand(String generatorCommand)
+throws IOException {
+	ProcessBuilder processBuilder =
+		new ProcessBuilder("/bin/sh", "-c", generatorCommand);
+	Process process = processBuilder.start();
 
-    try (InputStreamReader inputStreamReader = new InputStreamReader(
-             process.getInputStream(), Charset.forName("UTF-8"));
-         BufferedReader bufferedReader =
-             new BufferedReader(inputStreamReader);) {
-      String output = bufferedReader.readLine();
+	try (InputStreamReader inputStreamReader = new InputStreamReader(
+		     process.getInputStream(), Charset.forName("UTF-8"));
+	     BufferedReader bufferedReader =
+		     new BufferedReader(inputStreamReader); ) {
+		String output = bufferedReader.readLine();
 
-      return Arrays.asList(output.split(" "));
-    } catch (IOException ioE) {
-      LOG.error("Issue invoking generating credentials", ioE);
-      throw new RuntimeException(ioE);
-    }
-  }
+		return Arrays.asList(output.split(" "));
+	} catch (IOException ioE) {
+		LOG.error("Issue invoking generating credentials", ioE);
+		throw new RuntimeException(ioE);
+	}
+}
 }

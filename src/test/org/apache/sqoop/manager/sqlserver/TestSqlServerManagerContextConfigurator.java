@@ -44,92 +44,92 @@ import org.junit.experimental.categories.Category;
 @Category(UnitTest.class)
 public class TestSqlServerManagerContextConfigurator {
 
-  public static final Log LOG = LogFactory.getLog(
-      TestSqlServerManagerContextConfigurator.class.getName());
+public static final Log LOG = LogFactory.getLog(
+	TestSqlServerManagerContextConfigurator.class.getName());
 
-  private final SqlServerManagerContextConfigurator formatConfigurator =
-      new SqlServerManagerContextConfigurator();
+private final SqlServerManagerContextConfigurator formatConfigurator =
+	new SqlServerManagerContextConfigurator();
 
-  private SqoopOptions options;
+private SqoopOptions options;
 
-  @Test
-  public void testResilientImportContextConfiguration() {
-    String[] extraArgs = {"--resilient"};
-    options.setExtraArgs(extraArgs);
+@Test
+public void testResilientImportContextConfiguration() {
+	String[] extraArgs = {"--resilient"};
+	options.setExtraArgs(extraArgs);
 
-    ImportJobContext context =
-        new ImportJobContext("TABLE_NAME", "example.jar", options, null);
-    formatConfigurator.configureContextForImport(context, "id");
-    Class<? extends InputFormat> inputFormat = context.getInputFormat();
-    assertThat(inputFormat).isSameAs(SQLServerDBInputFormat.class);
-  }
+	ImportJobContext context =
+		new ImportJobContext("TABLE_NAME", "example.jar", options, null);
+	formatConfigurator.configureContextForImport(context, "id");
+	Class<? extends InputFormat> inputFormat = context.getInputFormat();
+	assertThat(inputFormat).isSameAs(SQLServerDBInputFormat.class);
+}
 
-  @Test
-  public void testNonResilientImportContextConfiguration() {
-    String[] extraArgs = {"--non-resilient"};
-    options.setExtraArgs(extraArgs);
+@Test
+public void testNonResilientImportContextConfiguration() {
+	String[] extraArgs = {"--non-resilient"};
+	options.setExtraArgs(extraArgs);
 
-    ImportJobContext context =
-        new ImportJobContext("TABLE_NAME", "example.jar", options, null);
-    formatConfigurator.configureContextForImport(context, "id");
-    Class<? extends InputFormat> inputFormat = context.getInputFormat();
-    assertThat(inputFormat).isSameAs(DataDrivenDBInputFormat.class);
-  }
+	ImportJobContext context =
+		new ImportJobContext("TABLE_NAME", "example.jar", options, null);
+	formatConfigurator.configureContextForImport(context, "id");
+	Class<? extends InputFormat> inputFormat = context.getInputFormat();
+	assertThat(inputFormat).isSameAs(DataDrivenDBInputFormat.class);
+}
 
-  @Test
-  public void testResilientExportContextConfiguration() {
-    String[] extraArgs = {"--resilient"};
-    options.setExtraArgs(extraArgs);
+@Test
+public void testResilientExportContextConfiguration() {
+	String[] extraArgs = {"--resilient"};
+	options.setExtraArgs(extraArgs);
 
-    ExportJobContext context =
-        new ExportJobContext("TABLE_NAME", "example.jar", options);
-    formatConfigurator.configureContextForExport(context);
-    Class outputFormatClass = context.getOutputFormatClass();
-    assertThat(outputFormatClass)
-        .isSameAs(SQLServerResilientExportOutputFormat.class);
-  }
+	ExportJobContext context =
+		new ExportJobContext("TABLE_NAME", "example.jar", options);
+	formatConfigurator.configureContextForExport(context);
+	Class outputFormatClass = context.getOutputFormatClass();
+	assertThat(outputFormatClass)
+	.isSameAs(SQLServerResilientExportOutputFormat.class);
+}
 
-  @Test
-  public void testNonResilientExportContextConfiguration() {
-    String[] extraArgs = {"--non-resilient"};
-    options.setExtraArgs(extraArgs);
+@Test
+public void testNonResilientExportContextConfiguration() {
+	String[] extraArgs = {"--non-resilient"};
+	options.setExtraArgs(extraArgs);
 
-    ExportJobContext context =
-        new ExportJobContext("TABLE_NAME", "example.jar", options);
-    formatConfigurator.configureContextForExport(context);
-    Class outputFormatClass = context.getOutputFormatClass();
-    assertThat(outputFormatClass)
-        .isSameAs(SqlServerExportBatchOutputFormat.class);
-  }
+	ExportJobContext context =
+		new ExportJobContext("TABLE_NAME", "example.jar", options);
+	formatConfigurator.configureContextForExport(context);
+	Class outputFormatClass = context.getOutputFormatClass();
+	assertThat(outputFormatClass)
+	.isSameAs(SqlServerExportBatchOutputFormat.class);
+}
 
-  @Test
-  public void testResilientUpdateContextConfiguration() {
-    String[] extraArgs = {"--resilient"};
-    options.setExtraArgs(extraArgs);
+@Test
+public void testResilientUpdateContextConfiguration() {
+	String[] extraArgs = {"--resilient"};
+	options.setExtraArgs(extraArgs);
 
-    ExportJobContext context =
-        new ExportJobContext("TABLE_NAME", "example.jar", options);
-    formatConfigurator.configureContextForUpdate(context, null);
-    Class outputFormatClass = context.getOutputFormatClass();
-    assertThat(outputFormatClass)
-        .isSameAs(SQLServerResilientUpdateOutputFormat.class);
-  }
+	ExportJobContext context =
+		new ExportJobContext("TABLE_NAME", "example.jar", options);
+	formatConfigurator.configureContextForUpdate(context, null);
+	Class outputFormatClass = context.getOutputFormatClass();
+	assertThat(outputFormatClass)
+	.isSameAs(SQLServerResilientUpdateOutputFormat.class);
+}
 
-  @Test
-  public void testNonResilientUpdateContextConfiguration() {
-    String[] extraArgs = {"--non-resilient"};
-    options.setExtraArgs(extraArgs);
+@Test
+public void testNonResilientUpdateContextConfiguration() {
+	String[] extraArgs = {"--non-resilient"};
+	options.setExtraArgs(extraArgs);
 
-    ExportJobContext context =
-        new ExportJobContext("TABLE_NAME", "example.jar", options);
-    formatConfigurator.configureContextForUpdate(context, null);
-    Class outputFormatClass = context.getOutputFormatClass();
-    assertThat(outputFormatClass).isNull();
-  }
+	ExportJobContext context =
+		new ExportJobContext("TABLE_NAME", "example.jar", options);
+	formatConfigurator.configureContextForUpdate(context, null);
+	Class outputFormatClass = context.getOutputFormatClass();
+	assertThat(outputFormatClass).isNull();
+}
 
-  @Before
-  public void setUp() {
-    Configuration conf = new Configuration();
-    this.options = new SqoopOptions(conf);
-  }
+@Before
+public void setUp() {
+	Configuration conf = new Configuration();
+	this.options = new SqoopOptions(conf);
+}
 }

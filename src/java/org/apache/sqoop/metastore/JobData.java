@@ -26,33 +26,42 @@ import org.apache.sqoop.tool.SqoopTool;
  * permanent resource.
  */
 public class JobData {
-  private SqoopOptions opts;
-  private SqoopTool tool;
+private SqoopOptions opts;
+private SqoopTool tool;
 
-  public JobData() {}
+public JobData() {
+}
 
-  public JobData(SqoopOptions options, SqoopTool sqoopTool) {
-    this.opts = options;
-    this.tool = sqoopTool;
-  }
+public JobData(SqoopOptions options, SqoopTool sqoopTool) {
+	this.opts = options;
+	this.tool = sqoopTool;
+}
 
-  /**
-   * Gets the SqoopOptions.
-   */
-  public SqoopOptions getSqoopOptions() { return this.opts; }
+/**
+ * Gets the SqoopOptions.
+ */
+public SqoopOptions getSqoopOptions() {
+	return this.opts;
+}
 
-  /**
-   * Gets the SqoopTool.
-   */
-  public SqoopTool getSqoopTool() { return this.tool; }
+/**
+ * Gets the SqoopTool.
+ */
+public SqoopTool getSqoopTool() {
+	return this.tool;
+}
 
-  /**
-   * Sets the SqoopOptions.
-   */
-  public void setSqoopOptions(SqoopOptions options) { this.opts = options; }
+/**
+ * Sets the SqoopOptions.
+ */
+public void setSqoopOptions(SqoopOptions options) {
+	this.opts = options;
+}
 
-  /**
-   * Sets the SqoopTool.
-   */
-  public void setSqoopTool(SqoopTool sqoopTool) { this.tool = sqoopTool; }
+/**
+ * Sets the SqoopTool.
+ */
+public void setSqoopTool(SqoopTool sqoopTool) {
+	this.tool = sqoopTool;
+}
 }

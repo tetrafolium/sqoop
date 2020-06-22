@@ -44,9 +44,9 @@ import org.junit.experimental.categories.Category;
  */
 @Category(PostgresqlTest.class)
 public class PostgresMetaConnectIncrementalImportTest
-    extends MetaConnectIncrementalImportTestBase {
+	extends MetaConnectIncrementalImportTestBase {
 
-  public PostgresMetaConnectIncrementalImportTest() {
-    super(CONNECT_STRING, DATABASE_USER, PASSWORD);
-  }
+public PostgresMetaConnectIncrementalImportTest() {
+	super(CONNECT_STRING, DATABASE_USER, PASSWORD);
+}
 }

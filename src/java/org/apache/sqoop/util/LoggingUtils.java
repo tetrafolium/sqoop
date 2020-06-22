@@ -28,26 +28,29 @@ import org.apache.log4j.Logger;
  */
 public final class LoggingUtils {
 
-  private LoggingUtils() {}
+private LoggingUtils() {
+}
 
-  /**
-   * Log entire chain of SQLExceptions using old SQLException.getNextException
-   * interface instead of new Throwable.getCause().
-   */
-  public static void logAll(Log log, SQLException e) { logAll(log, null, e); }
+/**
+ * Log entire chain of SQLExceptions using old SQLException.getNextException
+ * interface instead of new Throwable.getCause().
+ */
+public static void logAll(Log log, SQLException e) {
+	logAll(log, null, e);
+}
 
-  public static void logAll(Log log, String message, SQLException e) {
-    log.error(message == null ? "Top level exception: " : message, e);
-    e = e.getNextException();
-    int indx = 1;
-    while (e != null) {
-      log.error("Chained exception " + indx + ": ", e);
-      e = e.getNextException();
-      indx++;
-    }
-  }
+public static void logAll(Log log, String message, SQLException e) {
+	log.error(message == null ? "Top level exception: " : message, e);
+	e = e.getNextException();
+	int indx = 1;
+	while (e != null) {
+		log.error("Chained exception " + indx + ": ", e);
+		e = e.getNextException();
+		indx++;
+	}
+}
 
-  public static void setDebugLevel() {
-    Logger.getLogger("org.apache.sqoop").setLevel(Level.DEBUG);
-  }
+public static void setDebugLevel() {
+	Logger.getLogger("org.apache.sqoop").setLevel(Level.DEBUG);
+}
 }

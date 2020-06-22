@@ -29,14 +29,14 @@ import org.apache.commons.logging.LogFactory;
  * This is mostly used for testing purposes since this fails silently.
  */
 public class LogOnFailureHandler implements ValidationFailureHandler {
-  private static final Log LOG =
-      LogFactory.getLog(LogOnFailureHandler.class.getName());
+private static final Log LOG =
+	LogFactory.getLog(LogOnFailureHandler.class.getName());
 
-  static final ValidationFailureHandler INSTANCE = new LogOnFailureHandler();
+static final ValidationFailureHandler INSTANCE = new LogOnFailureHandler();
 
-  @Override
-  public boolean handle(ValidationContext context) throws ValidationException {
-    LOG.warn(context.getMessage() + ", Reason: " + context.getReason());
-    return true;
-  }
+@Override
+public boolean handle(ValidationContext context) throws ValidationException {
+	LOG.warn(context.getMessage() + ", Reason: " + context.getReason());
+	return true;
+}
 }

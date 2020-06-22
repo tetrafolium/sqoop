@@ -31,89 +31,89 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 public abstract class AbstractTestIncrementalAppendAvroImport
-    extends CloudImportJobTestCase {
+	extends CloudImportJobTestCase {
 
-  public static final Log LOG = LogFactory.getLog(
-      AbstractTestIncrementalAppendAvroImport.class.getName());
+public static final Log LOG = LogFactory.getLog(
+	AbstractTestIncrementalAppendAvroImport.class.getName());
 
-  @Rule public ExpectedException thrown = ExpectedException.none();
+@Rule public ExpectedException thrown = ExpectedException.none();
 
-  protected AbstractTestIncrementalAppendAvroImport(
-      CloudCredentialsRule credentialsRule) {
-    super(credentialsRule);
-  }
+protected AbstractTestIncrementalAppendAvroImport(
+	CloudCredentialsRule credentialsRule) {
+	super(credentialsRule);
+}
 
-  @Test
-  public void testIncrementalAppendAsAvroDataFileWhenNoNewRowIsImported()
-      throws IOException {
-    String[] args = getArgsWithAsAvroDataFileOption(false);
-    runImport(args);
+@Test
+public void testIncrementalAppendAsAvroDataFileWhenNoNewRowIsImported()
+throws IOException {
+	String[] args = getArgsWithAsAvroDataFileOption(false);
+	runImport(args);
 
-    args = getIncrementalAppendArgsWithAsAvroDataFileOption(false);
-    runImport(args);
+	args = getIncrementalAppendArgsWithAsAvroDataFileOption(false);
+	runImport(args);
 
-    failIfOutputFilePathContainingPatternExists(
-        fileSystemRule.getCloudFileSystem(), fileSystemRule.getTargetDirPath(),
-        MAP_OUTPUT_FILE_00001);
-  }
+	failIfOutputFilePathContainingPatternExists(
+		fileSystemRule.getCloudFileSystem(), fileSystemRule.getTargetDirPath(),
+		MAP_OUTPUT_FILE_00001);
+}
 
-  @Test
-  public void testIncrementalAppendAsAvroDataFile() throws IOException {
-    String[] args = getArgsWithAsAvroDataFileOption(false);
-    runImport(args);
+@Test
+public void testIncrementalAppendAsAvroDataFile() throws IOException {
+	String[] args = getArgsWithAsAvroDataFileOption(false);
+	runImport(args);
 
-    insertInputDataIntoTable(getDataSet().getExtraInputData());
+	insertInputDataIntoTable(getDataSet().getExtraInputData());
 
-    args = getIncrementalAppendArgsWithAsAvroDataFileOption(false);
-    runImport(args);
+	args = getIncrementalAppendArgsWithAsAvroDataFileOption(false);
+	runImport(args);
 
-    AvroTestUtils.verify(getDataSet().getExpectedExtraAvroOutput(),
-                         fileSystemRule.getCloudFileSystem().getConf(),
-                         fileSystemRule.getTargetDirPath(),
-                         MAP_OUTPUT_FILE_00001);
-  }
+	AvroTestUtils.verify(getDataSet().getExpectedExtraAvroOutput(),
+	                     fileSystemRule.getCloudFileSystem().getConf(),
+	                     fileSystemRule.getTargetDirPath(),
+	                     MAP_OUTPUT_FILE_00001);
+}
 
-  @Test
-  public void
-  testIncrementalAppendAsAvroDataFileWithMapreduceOutputBasenameProperty()
-      throws IOException {
-    String[] args = getArgsWithAsAvroDataFileOption(true);
-    runImport(args);
+@Test
+public void
+testIncrementalAppendAsAvroDataFileWithMapreduceOutputBasenameProperty()
+throws IOException {
+	String[] args = getArgsWithAsAvroDataFileOption(true);
+	runImport(args);
 
-    insertInputDataIntoTable(getDataSet().getExtraInputData());
+	insertInputDataIntoTable(getDataSet().getExtraInputData());
 
-    args = getIncrementalAppendArgsWithAsAvroDataFileOption(true);
-    runImport(args);
+	args = getIncrementalAppendArgsWithAsAvroDataFileOption(true);
+	runImport(args);
 
-    AvroTestUtils.verify(getDataSet().getExpectedExtraAvroOutput(),
-                         fileSystemRule.getCloudFileSystem().getConf(),
-                         fileSystemRule.getTargetDirPath(),
-                         CUSTOM_MAP_OUTPUT_FILE_00001);
-  }
+	AvroTestUtils.verify(getDataSet().getExpectedExtraAvroOutput(),
+	                     fileSystemRule.getCloudFileSystem().getConf(),
+	                     fileSystemRule.getTargetDirPath(),
+	                     CUSTOM_MAP_OUTPUT_FILE_00001);
+}
 
-  private String[] getArgsWithAsAvroDataFileOption(
-      boolean withMapreduceOutputBasenameProperty) {
-    ArgumentArrayBuilder builder =
-        getArgumentArrayBuilderForUnitTestsWithFileFormatOption(
-            fileSystemRule.getTargetDirPath().toString(), "as-avrodatafile");
-    if (withMapreduceOutputBasenameProperty) {
-      builder.withProperty(MAPREDUCE_OUTPUT_BASENAME_PROPERTY,
-                           MAPREDUCE_OUTPUT_BASENAME);
-    }
-    return builder.build();
-  }
+private String[] getArgsWithAsAvroDataFileOption(
+	boolean withMapreduceOutputBasenameProperty) {
+	ArgumentArrayBuilder builder =
+		getArgumentArrayBuilderForUnitTestsWithFileFormatOption(
+			fileSystemRule.getTargetDirPath().toString(), "as-avrodatafile");
+	if (withMapreduceOutputBasenameProperty) {
+		builder.withProperty(MAPREDUCE_OUTPUT_BASENAME_PROPERTY,
+		                     MAPREDUCE_OUTPUT_BASENAME);
+	}
+	return builder.build();
+}
 
-  private String[] getIncrementalAppendArgsWithAsAvroDataFileOption(
-      boolean withMapreduceOutputBasenameProperty) {
-    ArgumentArrayBuilder builder =
-        getArgumentArrayBuilderForUnitTestsWithFileFormatOption(
-            fileSystemRule.getTargetDirPath().toString(), "as-avrodatafile");
-    builder = addIncrementalAppendImportArgs(
-        builder, fileSystemRule.getTemporaryRootDirPath().toString());
-    if (withMapreduceOutputBasenameProperty) {
-      builder.withProperty(MAPREDUCE_OUTPUT_BASENAME_PROPERTY,
-                           MAPREDUCE_OUTPUT_BASENAME);
-    }
-    return builder.build();
-  }
+private String[] getIncrementalAppendArgsWithAsAvroDataFileOption(
+	boolean withMapreduceOutputBasenameProperty) {
+	ArgumentArrayBuilder builder =
+		getArgumentArrayBuilderForUnitTestsWithFileFormatOption(
+			fileSystemRule.getTargetDirPath().toString(), "as-avrodatafile");
+	builder = addIncrementalAppendImportArgs(
+		builder, fileSystemRule.getTemporaryRootDirPath().toString());
+	if (withMapreduceOutputBasenameProperty) {
+		builder.withProperty(MAPREDUCE_OUTPUT_BASENAME_PROPERTY,
+		                     MAPREDUCE_OUTPUT_BASENAME);
+	}
+	return builder.build();
+}
 }

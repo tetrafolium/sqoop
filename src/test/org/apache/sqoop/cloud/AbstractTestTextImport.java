@@ -30,98 +30,98 @@ import org.junit.rules.ExpectedException;
 
 public abstract class AbstractTestTextImport extends CloudImportJobTestCase {
 
-  public static final Log LOG =
-      LogFactory.getLog(AbstractTestTextImport.class.getName());
+public static final Log LOG =
+	LogFactory.getLog(AbstractTestTextImport.class.getName());
 
-  @Rule public ExpectedException thrown = ExpectedException.none();
+@Rule public ExpectedException thrown = ExpectedException.none();
 
-  protected AbstractTestTextImport(CloudCredentialsRule credentialsRule) {
-    super(credentialsRule);
-  }
+protected AbstractTestTextImport(CloudCredentialsRule credentialsRule) {
+	super(credentialsRule);
+}
 
-  @Test
-  public void testImportWithoutDeleteTargetDirOptionWhenTargetDirDoesNotExist()
-      throws IOException {
-    String[] args = getArgs(false);
-    runImport(args);
-    TextFileTestUtils.verify(getDataSet().getExpectedTextOutput(),
-                             fileSystemRule.getCloudFileSystem(),
-                             fileSystemRule.getTargetDirPath());
-  }
+@Test
+public void testImportWithoutDeleteTargetDirOptionWhenTargetDirDoesNotExist()
+throws IOException {
+	String[] args = getArgs(false);
+	runImport(args);
+	TextFileTestUtils.verify(getDataSet().getExpectedTextOutput(),
+	                         fileSystemRule.getCloudFileSystem(),
+	                         fileSystemRule.getTargetDirPath());
+}
 
-  @Test
-  public void testImportWithDeleteTargetDirOptionWhenTargetDirAlreadyExists()
-      throws IOException {
-    String[] args = getArgs(false);
-    runImport(args);
+@Test
+public void testImportWithDeleteTargetDirOptionWhenTargetDirAlreadyExists()
+throws IOException {
+	String[] args = getArgs(false);
+	runImport(args);
 
-    args = getArgsWithDeleteTargetOption(false);
-    runImport(args);
-    TextFileTestUtils.verify(getDataSet().getExpectedTextOutput(),
-                             fileSystemRule.getCloudFileSystem(),
-                             fileSystemRule.getTargetDirPath());
-  }
+	args = getArgsWithDeleteTargetOption(false);
+	runImport(args);
+	TextFileTestUtils.verify(getDataSet().getExpectedTextOutput(),
+	                         fileSystemRule.getCloudFileSystem(),
+	                         fileSystemRule.getTargetDirPath());
+}
 
-  @Test
-  public void testImportWithoutDeleteTargetDirOptionWhenTargetDirAlreadyExists()
-      throws IOException {
-    String[] args = getArgs(false);
-    runImport(args);
+@Test
+public void testImportWithoutDeleteTargetDirOptionWhenTargetDirAlreadyExists()
+throws IOException {
+	String[] args = getArgs(false);
+	runImport(args);
 
-    thrown.expect(IOException.class);
-    runImport(args);
-  }
+	thrown.expect(IOException.class);
+	runImport(args);
+}
 
-  @Test
-  public void testImportAsTextFile() throws IOException {
-    String[] args = getArgs(true);
-    runImport(args);
-    TextFileTestUtils.verify(getDataSet().getExpectedTextOutput(),
-                             fileSystemRule.getCloudFileSystem(),
-                             fileSystemRule.getTargetDirPath());
-  }
+@Test
+public void testImportAsTextFile() throws IOException {
+	String[] args = getArgs(true);
+	runImport(args);
+	TextFileTestUtils.verify(getDataSet().getExpectedTextOutput(),
+	                         fileSystemRule.getCloudFileSystem(),
+	                         fileSystemRule.getTargetDirPath());
+}
 
-  @Test
-  public void
-  testImportAsTextFileWithDeleteTargetDirOptionWhenTargetDirAlreadyExists()
-      throws IOException {
-    String[] args = getArgs(true);
-    runImport(args);
+@Test
+public void
+testImportAsTextFileWithDeleteTargetDirOptionWhenTargetDirAlreadyExists()
+throws IOException {
+	String[] args = getArgs(true);
+	runImport(args);
 
-    args = getArgsWithDeleteTargetOption(true);
-    runImport(args);
-    TextFileTestUtils.verify(getDataSet().getExpectedTextOutput(),
-                             fileSystemRule.getCloudFileSystem(),
-                             fileSystemRule.getTargetDirPath());
-  }
+	args = getArgsWithDeleteTargetOption(true);
+	runImport(args);
+	TextFileTestUtils.verify(getDataSet().getExpectedTextOutput(),
+	                         fileSystemRule.getCloudFileSystem(),
+	                         fileSystemRule.getTargetDirPath());
+}
 
-  @Test
-  public void
-  testImportAsTextFileWithoutDeleteTargetDirOptionWhenTargetDirAlreadyExists()
-      throws IOException {
-    String[] args = getArgs(true);
-    runImport(args);
+@Test
+public void
+testImportAsTextFileWithoutDeleteTargetDirOptionWhenTargetDirAlreadyExists()
+throws IOException {
+	String[] args = getArgs(true);
+	runImport(args);
 
-    thrown.expect(IOException.class);
-    runImport(args);
-  }
+	thrown.expect(IOException.class);
+	runImport(args);
+}
 
-  private String[] getArgs(boolean withAsTextFileOption) {
-    ArgumentArrayBuilder builder = getArgumentArrayBuilderForUnitTests(
-        fileSystemRule.getTargetDirPath().toString());
-    if (withAsTextFileOption) {
-      builder.withOption("as-textfile");
-    }
-    return builder.build();
-  }
+private String[] getArgs(boolean withAsTextFileOption) {
+	ArgumentArrayBuilder builder = getArgumentArrayBuilderForUnitTests(
+		fileSystemRule.getTargetDirPath().toString());
+	if (withAsTextFileOption) {
+		builder.withOption("as-textfile");
+	}
+	return builder.build();
+}
 
-  private String[] getArgsWithDeleteTargetOption(boolean withAsTextFileOption) {
-    ArgumentArrayBuilder builder = getArgumentArrayBuilderForUnitTests(
-        fileSystemRule.getTargetDirPath().toString());
-    builder.withOption("delete-target-dir");
-    if (withAsTextFileOption) {
-      builder.withOption("as-textfile");
-    }
-    return builder.build();
-  }
+private String[] getArgsWithDeleteTargetOption(boolean withAsTextFileOption) {
+	ArgumentArrayBuilder builder = getArgumentArrayBuilderForUnitTests(
+		fileSystemRule.getTargetDirPath().toString());
+	builder.withOption("delete-target-dir");
+	if (withAsTextFileOption) {
+		builder.withOption("as-textfile");
+	}
+	return builder.build();
+}
 }

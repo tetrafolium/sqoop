@@ -31,20 +31,20 @@ import org.apache.sqoop.mapreduce.parquet.ParquetExportJobConfigurator;
  * the Hadoop Parquet library.
  */
 public class HadoopParquetExportJobConfigurator
-    implements ParquetExportJobConfigurator {
+	implements ParquetExportJobConfigurator {
 
-  @Override
-  public void configureInputFormat(Job job, Path inputPath) throws IOException {
-    // do nothing
-  }
+@Override
+public void configureInputFormat(Job job, Path inputPath) throws IOException {
+	// do nothing
+}
 
-  @Override
-  public Class<? extends Mapper> getMapperClass() {
-    return HadoopParquetExportMapper.class;
-  }
+@Override
+public Class<? extends Mapper> getMapperClass() {
+	return HadoopParquetExportMapper.class;
+}
 
-  @Override
-  public Class<? extends InputFormat> getInputFormatClass() {
-    return AvroParquetInputFormat.class;
-  }
+@Override
+public Class<? extends InputFormat> getInputFormatClass() {
+	return AvroParquetInputFormat.class;
+}
 }

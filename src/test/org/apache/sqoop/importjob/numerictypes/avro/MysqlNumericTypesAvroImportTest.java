@@ -28,16 +28,16 @@ import org.junit.experimental.categories.Category;
 
 @Category(MysqlTest.class)
 public class MysqlNumericTypesAvroImportTest
-    extends NumericTypesAvroImportTestBase {
+	extends NumericTypesAvroImportTestBase {
 
-  @Override
-  public DatabaseAdapter createAdapter() {
-    return new MysqlDatabaseAdapter();
-  }
+@Override
+public DatabaseAdapter createAdapter() {
+	return new MysqlDatabaseAdapter();
+}
 
-  public MysqlNumericTypesAvroImportTest() {
-    super(new MysqlImportJobTestConfiguration(),
-          NumericTypesTestUtils.SUCCEED_WITHOUT_EXTRA_ARGS,
-          NumericTypesTestUtils.SUCCEED_WITH_PADDING_ONLY);
-  }
+public MysqlNumericTypesAvroImportTest() {
+	super(new MysqlImportJobTestConfiguration(),
+	      NumericTypesTestUtils.SUCCEED_WITHOUT_EXTRA_ARGS,
+	      NumericTypesTestUtils.SUCCEED_WITH_PADDING_ONLY);
+}
 }

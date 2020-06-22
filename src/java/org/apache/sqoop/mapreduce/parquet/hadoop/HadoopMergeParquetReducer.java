@@ -27,11 +27,11 @@ import org.apache.sqoop.mapreduce.MergeParquetReducer;
  * Parquet library.
  */
 public class HadoopMergeParquetReducer
-    extends MergeParquetReducer<Void, GenericRecord> {
+	extends MergeParquetReducer<Void, GenericRecord> {
 
-  @Override
-  protected void write(Context context, GenericRecord record)
-      throws IOException, InterruptedException {
-    context.write(null, record);
-  }
+@Override
+protected void write(Context context, GenericRecord record)
+throws IOException, InterruptedException {
+	context.write(null, record);
+}
 }

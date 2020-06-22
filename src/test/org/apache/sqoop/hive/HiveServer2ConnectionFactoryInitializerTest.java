@@ -38,126 +38,126 @@ import org.junit.experimental.categories.Category;
 @Category(UnitTest.class)
 public class HiveServer2ConnectionFactoryInitializerTest {
 
-  private static final String TEST_HS2_URL =
-      "jdbc:hive2://myhost:10000/default";
+private static final String TEST_HS2_URL =
+	"jdbc:hive2://myhost:10000/default";
 
-  private static final String TEST_HS2_USER = "testuser";
+private static final String TEST_HS2_USER = "testuser";
 
-  private static final String TEST_HS2_PASSWORD = "testPass@123";
+private static final String TEST_HS2_PASSWORD = "testPass@123";
 
-  private static final String TEST_HS2_KEYTAB = "testkeytab";
+private static final String TEST_HS2_KEYTAB = "testkeytab";
 
-  private HiveServer2ConnectionFactoryInitializer connectionFactoryInitializer;
+private HiveServer2ConnectionFactoryInitializer connectionFactoryInitializer;
 
-  private SqoopOptions sqoopOptions;
+private SqoopOptions sqoopOptions;
 
-  private Configuration configuration;
+private Configuration configuration;
 
-  private SoftAssertions softly;
+private SoftAssertions softly;
 
-  @Before
-  public void before() {
-    connectionFactoryInitializer =
-        new HiveServer2ConnectionFactoryInitializer();
-    sqoopOptions = mock(SqoopOptions.class);
-    configuration = mock(Configuration.class);
-    softly = new SoftAssertions();
+@Before
+public void before() {
+	connectionFactoryInitializer =
+		new HiveServer2ConnectionFactoryInitializer();
+	sqoopOptions = mock(SqoopOptions.class);
+	configuration = mock(Configuration.class);
+	softly = new SoftAssertions();
 
-    when(sqoopOptions.getHs2User()).thenReturn(TEST_HS2_USER);
-    when(sqoopOptions.getConf()).thenReturn(configuration);
-  }
+	when(sqoopOptions.getHs2User()).thenReturn(TEST_HS2_USER);
+	when(sqoopOptions.getConf()).thenReturn(configuration);
+}
 
-  @Test
-  public void
-  testCreateJdbcConnectionFactoryWithoutKerberosConfiguredReturnsHiveServer2ConnectionFactory()
-      throws Exception {
-    JdbcConnectionFactory connectionFactory =
-        connectionFactoryInitializer.createJdbcConnectionFactory(sqoopOptions);
+@Test
+public void
+testCreateJdbcConnectionFactoryWithoutKerberosConfiguredReturnsHiveServer2ConnectionFactory()
+throws Exception {
+	JdbcConnectionFactory connectionFactory =
+		connectionFactoryInitializer.createJdbcConnectionFactory(sqoopOptions);
 
-    assertThat(connectionFactory,
-               instanceOf(HiveServer2ConnectionFactory.class));
-  }
+	assertThat(connectionFactory,
+	           instanceOf(HiveServer2ConnectionFactory.class));
+}
 
-  @Test
-  public void
-  testCreateJdbcConnectionFactoryInitializesConnectionStringProperly()
-      throws Exception {
-    when(sqoopOptions.getHs2Url()).thenReturn(TEST_HS2_URL);
-    HiveServer2ConnectionFactory connectionFactory =
-        (HiveServer2ConnectionFactory)connectionFactoryInitializer
-            .createJdbcConnectionFactory(sqoopOptions);
+@Test
+public void
+testCreateJdbcConnectionFactoryInitializesConnectionStringProperly()
+throws Exception {
+	when(sqoopOptions.getHs2Url()).thenReturn(TEST_HS2_URL);
+	HiveServer2ConnectionFactory connectionFactory =
+		(HiveServer2ConnectionFactory)connectionFactoryInitializer
+		.createJdbcConnectionFactory(sqoopOptions);
 
-    assertEquals(TEST_HS2_URL, connectionFactory.getConnectionString());
-  }
+	assertEquals(TEST_HS2_URL, connectionFactory.getConnectionString());
+}
 
-  @Test
-  public void
-  testCreateJdbcConnectionFactoryInitializesConnectionUsernameProperly()
-      throws Exception {
-    HiveServer2ConnectionFactory connectionFactory =
-        (HiveServer2ConnectionFactory)connectionFactoryInitializer
-            .createJdbcConnectionFactory(sqoopOptions);
+@Test
+public void
+testCreateJdbcConnectionFactoryInitializesConnectionUsernameProperly()
+throws Exception {
+	HiveServer2ConnectionFactory connectionFactory =
+		(HiveServer2ConnectionFactory)connectionFactoryInitializer
+		.createJdbcConnectionFactory(sqoopOptions);
 
-    assertEquals(TEST_HS2_USER, connectionFactory.getUsername());
-    assertEquals(null, connectionFactory.getPassword());
-  }
+	assertEquals(TEST_HS2_USER, connectionFactory.getUsername());
+	assertEquals(null, connectionFactory.getPassword());
+}
 
-  @Test
-  public void
-  testCreateJdbcConnectionFactoryWithoutHs2UserSpecifiedInitializesConnectionUsernameProperly()
-      throws Exception {
-    when(sqoopOptions.getHs2User()).thenReturn(null);
-    String expectedUsername = UserGroupInformation.getLoginUser().getUserName();
-    HiveServer2ConnectionFactory connectionFactory =
-        (HiveServer2ConnectionFactory)connectionFactoryInitializer
-            .createJdbcConnectionFactory(sqoopOptions);
+@Test
+public void
+testCreateJdbcConnectionFactoryWithoutHs2UserSpecifiedInitializesConnectionUsernameProperly()
+throws Exception {
+	when(sqoopOptions.getHs2User()).thenReturn(null);
+	String expectedUsername = UserGroupInformation.getLoginUser().getUserName();
+	HiveServer2ConnectionFactory connectionFactory =
+		(HiveServer2ConnectionFactory)connectionFactoryInitializer
+		.createJdbcConnectionFactory(sqoopOptions);
 
-    assertEquals(expectedUsername, connectionFactory.getUsername());
-  }
+	assertEquals(expectedUsername, connectionFactory.getUsername());
+}
 
-  @Test
-  public void
-  testCreateJdbcConnectionFactoryWithKerberosConfiguredReturnsKerberizedConnectionFactoryDecorator()
-      throws Exception {
-    when(sqoopOptions.getHs2Keytab()).thenReturn(TEST_HS2_KEYTAB);
+@Test
+public void
+testCreateJdbcConnectionFactoryWithKerberosConfiguredReturnsKerberizedConnectionFactoryDecorator()
+throws Exception {
+	when(sqoopOptions.getHs2Keytab()).thenReturn(TEST_HS2_KEYTAB);
 
-    JdbcConnectionFactory connectionFactory =
-        connectionFactoryInitializer.createJdbcConnectionFactory(sqoopOptions);
+	JdbcConnectionFactory connectionFactory =
+		connectionFactoryInitializer.createJdbcConnectionFactory(sqoopOptions);
 
-    assertThat(connectionFactory,
-               instanceOf(KerberizedConnectionFactoryDecorator.class));
-  }
+	assertThat(connectionFactory,
+	           instanceOf(KerberizedConnectionFactoryDecorator.class));
+}
 
-  @Test
-  public void
-  testCreateJdbcConnectionFactoryWithKerberosConfiguredInitializesDecoratorProperly()
-      throws Exception {
-    when(sqoopOptions.getHs2Keytab()).thenReturn(TEST_HS2_KEYTAB);
+@Test
+public void
+testCreateJdbcConnectionFactoryWithKerberosConfiguredInitializesDecoratorProperly()
+throws Exception {
+	when(sqoopOptions.getHs2Keytab()).thenReturn(TEST_HS2_KEYTAB);
 
-    KerberizedConnectionFactoryDecorator connectionFactory =
-        (KerberizedConnectionFactoryDecorator)connectionFactoryInitializer
-            .createJdbcConnectionFactory(sqoopOptions);
+	KerberizedConnectionFactoryDecorator connectionFactory =
+		(KerberizedConnectionFactoryDecorator)connectionFactoryInitializer
+		.createJdbcConnectionFactory(sqoopOptions);
 
-    softly.assertThat(connectionFactory.getDecorated())
-        .isInstanceOf(HiveServer2ConnectionFactory.class);
-    softly.assertThat(connectionFactory.getAuthenticator().getConfiguration())
-        .isSameAs(configuration);
-    softly.assertThat(connectionFactory.getAuthenticator().getPrincipal())
-        .isEqualTo(TEST_HS2_USER);
-    softly.assertThat(connectionFactory.getAuthenticator().getKeytabLocation())
-        .isEqualTo(TEST_HS2_KEYTAB);
+	softly.assertThat(connectionFactory.getDecorated())
+	.isInstanceOf(HiveServer2ConnectionFactory.class);
+	softly.assertThat(connectionFactory.getAuthenticator().getConfiguration())
+	.isSameAs(configuration);
+	softly.assertThat(connectionFactory.getAuthenticator().getPrincipal())
+	.isEqualTo(TEST_HS2_USER);
+	softly.assertThat(connectionFactory.getAuthenticator().getKeytabLocation())
+	.isEqualTo(TEST_HS2_KEYTAB);
 
-    softly.assertAll();
-  }
+	softly.assertAll();
+}
 
-  @Test
-  public void testConnectionFactoryWhenHivePasswordIsProvided() {
-    when(sqoopOptions.getHs2Password()).thenReturn(TEST_HS2_PASSWORD);
+@Test
+public void testConnectionFactoryWhenHivePasswordIsProvided() {
+	when(sqoopOptions.getHs2Password()).thenReturn(TEST_HS2_PASSWORD);
 
-    HiveServer2ConnectionFactory connectionFactory =
-        (HiveServer2ConnectionFactory)connectionFactoryInitializer
-            .createJdbcConnectionFactory(sqoopOptions);
+	HiveServer2ConnectionFactory connectionFactory =
+		(HiveServer2ConnectionFactory)connectionFactoryInitializer
+		.createJdbcConnectionFactory(sqoopOptions);
 
-    assertEquals(TEST_HS2_PASSWORD, connectionFactory.getPassword());
-  }
+	assertEquals(TEST_HS2_PASSWORD, connectionFactory.getPassword());
+}
 }

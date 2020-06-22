@@ -49,78 +49,78 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
  * adapted here to work with the "new" MapReduce API that's required in Sqoop.
  */
 public class AvroOutputFormat<T>
-    extends FileOutputFormat<AvroWrapper<T>, NullWritable> {
+	extends FileOutputFormat<AvroWrapper<T>, NullWritable> {
 
-  static <T> void configureDataFileWriter(DataFileWriter<T> writer,
-                                          TaskAttemptContext context)
-      throws UnsupportedEncodingException {
-    if (FileOutputFormat.getCompressOutput(context)) {
-      // Default level must be greater than 0.
-      int level = context.getConfiguration().getInt(DEFLATE_LEVEL_KEY,
-                                                    DEFAULT_DEFLATE_LEVEL);
-      String codecName = context.getConfiguration().get(
-          org.apache.avro.mapred.AvroJob.OUTPUT_CODEC, DEFLATE_CODEC);
-      CodecFactory factory = codecName.equals(DEFLATE_CODEC)
-                                 ? CodecFactory.deflateCodec(level)
-                                 : CodecFactory.fromString(codecName);
-      writer.setCodec(factory);
-    }
+static <T> void configureDataFileWriter(DataFileWriter<T> writer,
+                                        TaskAttemptContext context)
+throws UnsupportedEncodingException {
+	if (FileOutputFormat.getCompressOutput(context)) {
+		// Default level must be greater than 0.
+		int level = context.getConfiguration().getInt(DEFLATE_LEVEL_KEY,
+		                                              DEFAULT_DEFLATE_LEVEL);
+		String codecName = context.getConfiguration().get(
+			org.apache.avro.mapred.AvroJob.OUTPUT_CODEC, DEFLATE_CODEC);
+		CodecFactory factory = codecName.equals(DEFLATE_CODEC)
+		                 ? CodecFactory.deflateCodec(level)
+		                 : CodecFactory.fromString(codecName);
+		writer.setCodec(factory);
+	}
 
-    writer.setSyncInterval(context.getConfiguration().getInt(
-        SYNC_INTERVAL_KEY, DEFAULT_SYNC_INTERVAL));
+	writer.setSyncInterval(context.getConfiguration().getInt(
+				       SYNC_INTERVAL_KEY, DEFAULT_SYNC_INTERVAL));
 
-    // copy metadata from job
-    for (Map.Entry<String, String> e : context.getConfiguration()) {
-      if (e.getKey().startsWith(org.apache.avro.mapred.AvroJob.TEXT_PREFIX)) {
-        writer.setMeta(e.getKey().substring(
-                           org.apache.avro.mapred.AvroJob.TEXT_PREFIX.length()),
-                       e.getValue());
-      }
-      if (e.getKey().startsWith(org.apache.avro.mapred.AvroJob.BINARY_PREFIX)) {
-        writer.setMeta(
-            e.getKey().substring(
-                org.apache.avro.mapred.AvroJob.BINARY_PREFIX.length()),
-            URLDecoder.decode(e.getValue(), "ISO-8859-1")
-                .getBytes("ISO-8859-1"));
-      }
-    }
-  }
+	// copy metadata from job
+	for (Map.Entry<String, String> e : context.getConfiguration()) {
+		if (e.getKey().startsWith(org.apache.avro.mapred.AvroJob.TEXT_PREFIX)) {
+			writer.setMeta(e.getKey().substring(
+					       org.apache.avro.mapred.AvroJob.TEXT_PREFIX.length()),
+			               e.getValue());
+		}
+		if (e.getKey().startsWith(org.apache.avro.mapred.AvroJob.BINARY_PREFIX)) {
+			writer.setMeta(
+				e.getKey().substring(
+					org.apache.avro.mapred.AvroJob.BINARY_PREFIX.length()),
+				URLDecoder.decode(e.getValue(), "ISO-8859-1")
+				.getBytes("ISO-8859-1"));
+		}
+	}
+}
 
-  @Override
-  public RecordWriter<AvroWrapper<T>, NullWritable>
-  getRecordWriter(TaskAttemptContext context)
-      throws IOException, InterruptedException {
+@Override
+public RecordWriter<AvroWrapper<T>, NullWritable>
+getRecordWriter(TaskAttemptContext context)
+throws IOException, InterruptedException {
 
-    boolean isMapOnly = context.getNumReduceTasks() == 0;
-    Schema schema = isMapOnly
-                        ? AvroJob.getMapOutputSchema(context.getConfiguration())
-                        : AvroJob.getOutputSchema(context.getConfiguration());
+	boolean isMapOnly = context.getNumReduceTasks() == 0;
+	Schema schema = isMapOnly
+	                ? AvroJob.getMapOutputSchema(context.getConfiguration())
+	                : AvroJob.getOutputSchema(context.getConfiguration());
 
-    // Add decimal support
-    ReflectData.get().addLogicalTypeConversion(
-        new Conversions.DecimalConversion());
+	// Add decimal support
+	ReflectData.get().addLogicalTypeConversion(
+		new Conversions.DecimalConversion());
 
-    final DataFileWriter<T> WRITER =
-        new DataFileWriter<T>(new ReflectDatumWriter<T>());
+	final DataFileWriter<T> WRITER =
+		new DataFileWriter<T>(new ReflectDatumWriter<T>());
 
-    configureDataFileWriter(WRITER, context);
+	configureDataFileWriter(WRITER, context);
 
-    Path path = getDefaultWorkFile(context, EXT);
-    WRITER.create(schema,
-                  path.getFileSystem(context.getConfiguration()).create(path));
+	Path path = getDefaultWorkFile(context, EXT);
+	WRITER.create(schema,
+	              path.getFileSystem(context.getConfiguration()).create(path));
 
-    return new RecordWriter<AvroWrapper<T>, NullWritable>() {
-      @Override
-      public void write(AvroWrapper<T> wrapper, NullWritable ignore)
-          throws IOException {
-        WRITER.append(wrapper.datum());
-      }
+	return new RecordWriter<AvroWrapper<T>, NullWritable>() {
+		       @Override
+		       public void write(AvroWrapper<T> wrapper, NullWritable ignore)
+		       throws IOException {
+			       WRITER.append(wrapper.datum());
+		       }
 
-      @Override
-      public void close(TaskAttemptContext taskAttemptContext)
-          throws IOException, InterruptedException {
-        WRITER.close();
-      }
-    };
-  }
+		       @Override
+		       public void close(TaskAttemptContext taskAttemptContext)
+		       throws IOException, InterruptedException {
+			       WRITER.close();
+		       }
+	};
+}
 }

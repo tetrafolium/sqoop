@@ -32,28 +32,28 @@ import org.apache.sqoop.lib.SqoopRecord;
  */
 public class MergeTextMapper extends MergeMapperBase<LongWritable, Text> {
 
-  private SqoopRecord record;
+private SqoopRecord record;
 
-  @Override
-  protected void setup(Context c) throws IOException, InterruptedException {
-    Configuration conf = c.getConfiguration();
+@Override
+protected void setup(Context c) throws IOException, InterruptedException {
+	Configuration conf = c.getConfiguration();
 
-    Class<? extends SqoopRecord> recordClass =
-        (Class<? extends SqoopRecord>)conf.getClass(
-            MergeJob.MERGE_SQOOP_RECORD_KEY, SqoopRecord.class);
-    this.record = ReflectionUtils.newInstance(recordClass, conf);
+	Class<? extends SqoopRecord> recordClass =
+		(Class<? extends SqoopRecord>)conf.getClass(
+			MergeJob.MERGE_SQOOP_RECORD_KEY, SqoopRecord.class);
+	this.record = ReflectionUtils.newInstance(recordClass, conf);
 
-    super.setup(c);
-  }
+	super.setup(c);
+}
 
-  public void map(LongWritable key, Text val, Context c)
-      throws IOException, InterruptedException {
-    try {
-      this.record.parse(val);
-    } catch (RecordParser.ParseError pe) {
-      throw new IOException(pe);
-    }
+public void map(LongWritable key, Text val, Context c)
+throws IOException, InterruptedException {
+	try {
+		this.record.parse(val);
+	} catch (RecordParser.ParseError pe) {
+		throw new IOException(pe);
+	}
 
-    processRecord(this.record, c);
-  }
+	processRecord(this.record, c);
+}
 }

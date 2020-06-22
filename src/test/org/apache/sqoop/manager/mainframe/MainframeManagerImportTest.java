@@ -60,162 +60,162 @@ import org.junit.experimental.categories.Category;
  */
 @Category(MainFrameTest.class)
 public class MainframeManagerImportTest extends ImportJobTestCase {
-  private static final Log LOG =
-      LogFactory.getLog(MainframeManagerImportTest.class.getName());
+private static final Log LOG =
+	LogFactory.getLog(MainframeManagerImportTest.class.getName());
 
-  @Override
-  protected boolean useHsqldbTestServer() {
-    return false;
-  }
+@Override
+protected boolean useHsqldbTestServer() {
+	return false;
+}
 
-  /**
-   * Does the import and verify
-   * @param datasetName the mainframe dataset name
-   * @param datasetType the mainframe dataset type from MainframeConfiguration
-   *     (s/g/p)
-   * @param fileHashes  each HashMap entry is filename, expected md5sum
-   * @param extraArgs   extra arguments to the tool if required
-   * @throws IOException if it fails to delete the directory or read the file
-   * @throws RuntimeException if it fails to run the mainframe import
-   */
-  private void doImportAndVerify(String datasetName, String datasetType,
-                                 HashMap<String, String> fileHashes,
-                                 String... extraArgs)
-      throws IOException, RuntimeException {
-    Path tablePath = new Path(datasetName);
+/**
+ * Does the import and verify
+ * @param datasetName the mainframe dataset name
+ * @param datasetType the mainframe dataset type from MainframeConfiguration
+ *     (s/g/p)
+ * @param fileHashes  each HashMap entry is filename, expected md5sum
+ * @param extraArgs   extra arguments to the tool if required
+ * @throws IOException if it fails to delete the directory or read the file
+ * @throws RuntimeException if it fails to run the mainframe import
+ */
+private void doImportAndVerify(String datasetName, String datasetType,
+                               HashMap<String, String> fileHashes,
+                               String... extraArgs)
+throws IOException, RuntimeException {
+	Path tablePath = new Path(datasetName);
 
-    File tableFile = new File(tablePath.toString());
-    if (tableFile.exists() && tableFile.isDirectory()) {
-      // remove the directory before running the import.
-      LOG.info(String.format("Removing folder: %s", tableFile));
-      FileListing.recursiveDeleteDir(tableFile);
-    }
+	File tableFile = new File(tablePath.toString());
+	if (tableFile.exists() && tableFile.isDirectory()) {
+		// remove the directory before running the import.
+		LOG.info(String.format("Removing folder: %s", tableFile));
+		FileListing.recursiveDeleteDir(tableFile);
+	}
 
-    String[] argv = getArgv(datasetName, datasetType, extraArgs);
-    try {
-      MainframeImportTool tool = new MainframeImportTool();
-      runImport(tool, argv);
-    } catch (IOException ioe) {
-      LOG.error("Got IOException during import: " + ioe);
-      throw new RuntimeException(ioe);
-    }
+	String[] argv = getArgv(datasetName, datasetType, extraArgs);
+	try {
+		MainframeImportTool tool = new MainframeImportTool();
+		runImport(tool, argv);
+	} catch (IOException ioe) {
+		LOG.error("Got IOException during import: " + ioe);
+		throw new RuntimeException(ioe);
+	}
 
-    Set<String> keys = fileHashes.keySet();
-    for (String i : keys) {
-      Path filePath = new Path(tablePath, String.format("%s%s", i, "-m-00000"));
-      LOG.info(
-          String.format("Checking for presence of file: %s with MD5 hash %s",
-                        filePath, fileHashes.get(i)));
-      File f = new File(filePath.toString());
-      assertTrue("Could not find imported data file", f.exists());
-      FileInputStream fis = new FileInputStream(f);
-      String md5 = DigestUtils.md5Hex(fis);
-      fis.close();
-      assertTrue(
-          String.format(
-              "MD5 sums do not match for file: %s. Got MD5 of %s and expected %s",
-              filePath, md5, fileHashes.get(i)),
-          StringUtils.equalsIgnoreCase(md5, fileHashes.get(i)));
-    }
-  }
+	Set<String> keys = fileHashes.keySet();
+	for (String i : keys) {
+		Path filePath = new Path(tablePath, String.format("%s%s", i, "-m-00000"));
+		LOG.info(
+			String.format("Checking for presence of file: %s with MD5 hash %s",
+			              filePath, fileHashes.get(i)));
+		File f = new File(filePath.toString());
+		assertTrue("Could not find imported data file", f.exists());
+		FileInputStream fis = new FileInputStream(f);
+		String md5 = DigestUtils.md5Hex(fis);
+		fis.close();
+		assertTrue(
+			String.format(
+				"MD5 sums do not match for file: %s. Got MD5 of %s and expected %s",
+				filePath, md5, fileHashes.get(i)),
+			StringUtils.equalsIgnoreCase(md5, fileHashes.get(i)));
+	}
+}
 
-  @Test
-  public void testImportGdgText() throws IOException {
-    HashMap<String, String> files = new HashMap<String, String>();
-    files.put(MainframeTestUtil.GDG_DATASET_FILENAME,
-              MainframeTestUtil.EXPECTED_GDG_DATASET_MD5);
-    doImportAndVerify(MainframeTestUtil.GDG_DATASET_NAME,
-                      MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE_GDG,
-                      files);
-  }
+@Test
+public void testImportGdgText() throws IOException {
+	HashMap<String, String> files = new HashMap<String, String>();
+	files.put(MainframeTestUtil.GDG_DATASET_FILENAME,
+	          MainframeTestUtil.EXPECTED_GDG_DATASET_MD5);
+	doImportAndVerify(MainframeTestUtil.GDG_DATASET_NAME,
+	                  MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE_GDG,
+	                  files);
+}
 
-  @Test
-  public void testImportGdgBinary() throws IOException {
-    HashMap<String, String> files = new HashMap<String, String>();
-    files.put(MainframeTestUtil.GDG_BINARY_DATASET_FILENAME,
-              MainframeTestUtil.EXPECTED_GDG_BINARY_DATASET_MD5);
-    doImportAndVerify(MainframeTestUtil.GDG_BINARY_DATASET_NAME,
-                      MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE_GDG,
-                      files, "--as-binaryfile");
-  }
+@Test
+public void testImportGdgBinary() throws IOException {
+	HashMap<String, String> files = new HashMap<String, String>();
+	files.put(MainframeTestUtil.GDG_BINARY_DATASET_FILENAME,
+	          MainframeTestUtil.EXPECTED_GDG_BINARY_DATASET_MD5);
+	doImportAndVerify(MainframeTestUtil.GDG_BINARY_DATASET_NAME,
+	                  MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE_GDG,
+	                  files, "--as-binaryfile");
+}
 
-  @Test
-  public void testImportGdgBinaryWithBufferSize() throws IOException {
-    HashMap<String, String> files = new HashMap<String, String>();
-    files.put(MainframeTestUtil.GDG_BINARY_DATASET_FILENAME,
-              MainframeTestUtil.EXPECTED_GDG_BINARY_DATASET_MD5);
-    doImportAndVerify(MainframeTestUtil.GDG_BINARY_DATASET_NAME,
-                      MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE_GDG,
-                      files, "--as-binaryfile", "--buffersize", "64000");
-  }
+@Test
+public void testImportGdgBinaryWithBufferSize() throws IOException {
+	HashMap<String, String> files = new HashMap<String, String>();
+	files.put(MainframeTestUtil.GDG_BINARY_DATASET_FILENAME,
+	          MainframeTestUtil.EXPECTED_GDG_BINARY_DATASET_MD5);
+	doImportAndVerify(MainframeTestUtil.GDG_BINARY_DATASET_NAME,
+	                  MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE_GDG,
+	                  files, "--as-binaryfile", "--buffersize", "64000");
+}
 
-  @Test
-  public void testImportSequential() throws IOException {
-    // can reuse the same dataset as binary as the dataset is plain text
-    HashMap<String, String> files = new HashMap<String, String>();
-    files.put(MainframeTestUtil.SEQ_DATASET_FILENAME,
-              MainframeTestUtil.EXPECTED_SEQ_DATASET_MD5);
-    doImportAndVerify(
-        MainframeTestUtil.SEQ_DATASET_NAME,
-        MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE_SEQUENTIAL, files);
-  }
+@Test
+public void testImportSequential() throws IOException {
+	// can reuse the same dataset as binary as the dataset is plain text
+	HashMap<String, String> files = new HashMap<String, String>();
+	files.put(MainframeTestUtil.SEQ_DATASET_FILENAME,
+	          MainframeTestUtil.EXPECTED_SEQ_DATASET_MD5);
+	doImportAndVerify(
+		MainframeTestUtil.SEQ_DATASET_NAME,
+		MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE_SEQUENTIAL, files);
+}
 
-  @Test
-  public void testImportSequentialBinary() throws IOException {
-    HashMap<String, String> files = new HashMap<String, String>();
-    files.put(MainframeTestUtil.SEQ_BINARY_DATASET_FILENAME,
-              MainframeTestUtil.EXPECTED_SEQ_BINARY_DATASET_MD5);
-    doImportAndVerify(
-        MainframeTestUtil.SEQ_BINARY_DATASET_NAME,
-        MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE_SEQUENTIAL, files,
-        "--as-binaryfile");
-  }
+@Test
+public void testImportSequentialBinary() throws IOException {
+	HashMap<String, String> files = new HashMap<String, String>();
+	files.put(MainframeTestUtil.SEQ_BINARY_DATASET_FILENAME,
+	          MainframeTestUtil.EXPECTED_SEQ_BINARY_DATASET_MD5);
+	doImportAndVerify(
+		MainframeTestUtil.SEQ_BINARY_DATASET_NAME,
+		MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE_SEQUENTIAL, files,
+		"--as-binaryfile");
+}
 
-  @Test
-  public void testImportSequentialBinaryWithBufferSize() throws IOException {
-    HashMap<String, String> files = new HashMap<String, String>();
-    files.put(MainframeTestUtil.SEQ_BINARY_DATASET_FILENAME,
-              MainframeTestUtil.EXPECTED_SEQ_BINARY_DATASET_MD5);
-    doImportAndVerify(
-        MainframeTestUtil.SEQ_BINARY_DATASET_NAME,
-        MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE_SEQUENTIAL, files,
-        "--as-binaryfile", "--buffersize", "64000");
-  }
+@Test
+public void testImportSequentialBinaryWithBufferSize() throws IOException {
+	HashMap<String, String> files = new HashMap<String, String>();
+	files.put(MainframeTestUtil.SEQ_BINARY_DATASET_FILENAME,
+	          MainframeTestUtil.EXPECTED_SEQ_BINARY_DATASET_MD5);
+	doImportAndVerify(
+		MainframeTestUtil.SEQ_BINARY_DATASET_NAME,
+		MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE_SEQUENTIAL, files,
+		"--as-binaryfile", "--buffersize", "64000");
+}
 
-  @Test
-  public void testImportMixedBinaryWithBufferSize() throws IOException {
-    HashMap<String, String> files = new HashMap<String, String>();
-    files.put(MainframeTestUtil.MIXED_BINARY_DATASET_FILENAME,
-              MainframeTestUtil.EXPECTED_MIXED_BINARY_DATASET_MD5);
-    doImportAndVerify(MainframeTestUtil.MIXED_BINARY_DATASET_NAME,
-                      MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE_GDG,
-                      files, "--as-binaryfile", "--buffersize", "64000");
-  }
+@Test
+public void testImportMixedBinaryWithBufferSize() throws IOException {
+	HashMap<String, String> files = new HashMap<String, String>();
+	files.put(MainframeTestUtil.MIXED_BINARY_DATASET_FILENAME,
+	          MainframeTestUtil.EXPECTED_MIXED_BINARY_DATASET_MD5);
+	doImportAndVerify(MainframeTestUtil.MIXED_BINARY_DATASET_NAME,
+	                  MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE_GDG,
+	                  files, "--as-binaryfile", "--buffersize", "64000");
+}
 
-  private String[] getArgv(String datasetName, String datasetType,
-                           String... extraArgs) {
-    ArrayList<String> args = new ArrayList<String>();
+private String[] getArgv(String datasetName, String datasetType,
+                         String... extraArgs) {
+	ArrayList<String> args = new ArrayList<String>();
 
-    CommonArgs.addHadoopFlags(args);
+	CommonArgs.addHadoopFlags(args);
 
-    args.add("--connect");
-    args.add(
-        String.format("%s:%s", MainframeTestUtil.HOST, MainframeTestUtil.PORT));
-    args.add("--username");
-    args.add(MainframeTestUtil.USERNAME);
-    args.add("--password");
-    args.add(MainframeTestUtil.PASSWORD);
-    args.add("--dataset");
-    args.add(datasetName);
-    args.add("--datasettype");
-    args.add(datasetType);
+	args.add("--connect");
+	args.add(
+		String.format("%s:%s", MainframeTestUtil.HOST, MainframeTestUtil.PORT));
+	args.add("--username");
+	args.add(MainframeTestUtil.USERNAME);
+	args.add("--password");
+	args.add(MainframeTestUtil.PASSWORD);
+	args.add("--dataset");
+	args.add(datasetName);
+	args.add("--datasettype");
+	args.add(datasetType);
 
-    if (extraArgs.length > 0) {
-      for (String arg : extraArgs) {
-        args.add(arg);
-      }
-    }
+	if (extraArgs.length > 0) {
+		for (String arg : extraArgs) {
+			args.add(arg);
+		}
+	}
 
-    return args.toArray(new String[0]);
-  }
+	return args.toArray(new String[0]);
+}
 }

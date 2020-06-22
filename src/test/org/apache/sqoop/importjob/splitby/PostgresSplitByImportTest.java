@@ -26,8 +26,8 @@ import org.junit.experimental.categories.Category;
 @Category(PostgresqlTest.class)
 public class PostgresSplitByImportTest extends SplitByImportTestBase {
 
-  @Override
-  public DatabaseAdapter createAdapter() {
-    return new PostgresDatabaseAdapter();
-  }
+@Override
+public DatabaseAdapter createAdapter() {
+	return new PostgresDatabaseAdapter();
+}
 }

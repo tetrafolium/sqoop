@@ -24,7 +24,7 @@ package org.apache.sqoop.validation;
  */
 public interface ValidationThreshold {
 
-  void setThresholdValue(long value);
+void setThresholdValue(long value);
 
-  boolean compare(Comparable left, Comparable right);
+boolean compare(Comparable left, Comparable right);
 }

@@ -20,39 +20,39 @@ package org.apache.sqoop.manager.postgresql;
 
 public class PostgresqlTestUtil {
 
-  public static final String HOST_URL =
-      System.getProperty("sqoop.test.postgresql.connectstring.host_url",
-                         "jdbc:postgresql://localhost:15432/");
+public static final String HOST_URL =
+	System.getProperty("sqoop.test.postgresql.connectstring.host_url",
+	                   "jdbc:postgresql://localhost:15432/");
 
-  public static final String DATABASE_USER =
-      System.getProperty("sqoop.test.postgresql.username", "sqoop");
+public static final String DATABASE_USER =
+	System.getProperty("sqoop.test.postgresql.username", "sqoop");
 
-  public static final String DATABASE_NAME =
-      System.getProperty("sqoop.test.postgresql.database", "sqoop");
+public static final String DATABASE_NAME =
+	System.getProperty("sqoop.test.postgresql.database", "sqoop");
 
-  public static final String CONNECT_STRING = HOST_URL + DATABASE_NAME;
+public static final String CONNECT_STRING = HOST_URL + DATABASE_NAME;
 
-  public static final String PASSWORD =
-      System.getProperty("sqoop.test.postgresql.password", "Sqoop12345");
+public static final String PASSWORD =
+	System.getProperty("sqoop.test.postgresql.password", "Sqoop12345");
 
-  static final String TABLE_NAME = "EMPLOYEES_PG";
+static final String TABLE_NAME = "EMPLOYEES_PG";
 
-  static final String NULL_TABLE_NAME = "NULL_EMPLOYEES_PG";
+static final String NULL_TABLE_NAME = "NULL_EMPLOYEES_PG";
 
-  static final String SPECIAL_TABLE_NAME = "EMPLOYEES_PG's";
+static final String SPECIAL_TABLE_NAME = "EMPLOYEES_PG's";
 
-  static final String DIFFERENT_TABLE_NAME = "DIFFERENT_TABLE";
+static final String DIFFERENT_TABLE_NAME = "DIFFERENT_TABLE";
 
-  public static final String SCHEMA_PUBLIC = "public";
+public static final String SCHEMA_PUBLIC = "public";
 
-  public static final String SCHEMA_SPECIAL = "special";
+public static final String SCHEMA_SPECIAL = "special";
 
-  public static String quoteTableOrSchemaName(String tableName) {
-    return "\"" + tableName + "\"";
-  }
+public static String quoteTableOrSchemaName(String tableName) {
+	return "\"" + tableName + "\"";
+}
 
-  public static String getDropTableStatement(String tableName, String schema) {
-    return "DROP TABLE IF EXISTS " + quoteTableOrSchemaName(schema) + "." +
-        quoteTableOrSchemaName(tableName);
-  }
+public static String getDropTableStatement(String tableName, String schema) {
+	return "DROP TABLE IF EXISTS " + quoteTableOrSchemaName(schema) + "." +
+	       quoteTableOrSchemaName(tableName);
+}
 }

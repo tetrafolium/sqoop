@@ -29,64 +29,64 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 public abstract class AbstractTestSequenceFileImport
-    extends CloudImportJobTestCase {
+	extends CloudImportJobTestCase {
 
-  public static final Log LOG =
-      LogFactory.getLog(AbstractTestSequenceFileImport.class.getName());
+public static final Log LOG =
+	LogFactory.getLog(AbstractTestSequenceFileImport.class.getName());
 
-  @Rule public ExpectedException thrown = ExpectedException.none();
+@Rule public ExpectedException thrown = ExpectedException.none();
 
-  protected AbstractTestSequenceFileImport(
-      CloudCredentialsRule credentialsRule) {
-    super(credentialsRule);
-  }
+protected AbstractTestSequenceFileImport(
+	CloudCredentialsRule credentialsRule) {
+	super(credentialsRule);
+}
 
-  @Test
-  public void
-  testImportAsSequenceFileWithoutDeleteTargetDirOptionWhenTargetDirDoesNotExist()
-      throws Exception {
-    String[] args = getArgsWithAsSequenceFileOption();
-    runImport(args);
-    SequenceFileTestUtils.verify(
-        this, getDataSet().getExpectedSequenceFileOutput(),
-        fileSystemRule.getCloudFileSystem(), fileSystemRule.getTargetDirPath());
-  }
+@Test
+public void
+testImportAsSequenceFileWithoutDeleteTargetDirOptionWhenTargetDirDoesNotExist()
+throws Exception {
+	String[] args = getArgsWithAsSequenceFileOption();
+	runImport(args);
+	SequenceFileTestUtils.verify(
+		this, getDataSet().getExpectedSequenceFileOutput(),
+		fileSystemRule.getCloudFileSystem(), fileSystemRule.getTargetDirPath());
+}
 
-  @Test
-  public void
-  testImportAsSequenceFileWithDeleteTargetDirOptionWhenTargetDirAlreadyExists()
-      throws Exception {
-    String[] args = getArgsWithAsSequenceFileOption();
-    runImport(args);
+@Test
+public void
+testImportAsSequenceFileWithDeleteTargetDirOptionWhenTargetDirAlreadyExists()
+throws Exception {
+	String[] args = getArgsWithAsSequenceFileOption();
+	runImport(args);
 
-    args = getArgsWithAsSequenceFileAndDeleteTargetDirOption();
-    runImport(args);
-    SequenceFileTestUtils.verify(
-        this, getDataSet().getExpectedSequenceFileOutput(),
-        fileSystemRule.getCloudFileSystem(), fileSystemRule.getTargetDirPath());
-  }
+	args = getArgsWithAsSequenceFileAndDeleteTargetDirOption();
+	runImport(args);
+	SequenceFileTestUtils.verify(
+		this, getDataSet().getExpectedSequenceFileOutput(),
+		fileSystemRule.getCloudFileSystem(), fileSystemRule.getTargetDirPath());
+}
 
-  @Test
-  public void
-  testImportAsSequenceWithoutDeleteTargetDirOptionWhenTargetDirAlreadyExists()
-      throws Exception {
-    String[] args = getArgsWithAsSequenceFileOption();
-    runImport(args);
+@Test
+public void
+testImportAsSequenceWithoutDeleteTargetDirOptionWhenTargetDirAlreadyExists()
+throws Exception {
+	String[] args = getArgsWithAsSequenceFileOption();
+	runImport(args);
 
-    thrown.expect(IOException.class);
-    runImport(args);
-  }
+	thrown.expect(IOException.class);
+	runImport(args);
+}
 
-  private String[] getArgsWithAsSequenceFileOption() {
-    return getArgsForUnitTestsWithFileFormatOption(
-        fileSystemRule.getTargetDirPath().toString(), "as-sequencefile");
-  }
+private String[] getArgsWithAsSequenceFileOption() {
+	return getArgsForUnitTestsWithFileFormatOption(
+		fileSystemRule.getTargetDirPath().toString(), "as-sequencefile");
+}
 
-  private String[] getArgsWithAsSequenceFileAndDeleteTargetDirOption() {
-    ArgumentArrayBuilder builder =
-        getArgumentArrayBuilderForUnitTestsWithFileFormatOption(
-            fileSystemRule.getTargetDirPath().toString(), "as-sequencefile");
-    builder.withOption("delete-target-dir");
-    return builder.build();
-  }
+private String[] getArgsWithAsSequenceFileAndDeleteTargetDirOption() {
+	ArgumentArrayBuilder builder =
+		getArgumentArrayBuilderForUnitTestsWithFileFormatOption(
+			fileSystemRule.getTargetDirPath().toString(), "as-sequencefile");
+	builder.withOption("delete-target-dir");
+	return builder.build();
+}
 }

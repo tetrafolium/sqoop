@@ -22,7 +22,7 @@ import java.io.IOException;
 
 public interface HiveClient {
 
-  void importTable() throws IOException;
+void importTable() throws IOException;
 
-  void createTable() throws IOException;
+void createTable() throws IOException;
 }

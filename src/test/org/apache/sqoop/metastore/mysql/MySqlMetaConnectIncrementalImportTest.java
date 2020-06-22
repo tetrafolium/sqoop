@@ -45,12 +45,12 @@ import org.junit.experimental.categories.Category;
  */
 @Category(MysqlTest.class)
 public class MySqlMetaConnectIncrementalImportTest
-    extends MetaConnectIncrementalImportTestBase {
+	extends MetaConnectIncrementalImportTestBase {
 
-  private static MySQLTestUtils mySQLTestUtils = new MySQLTestUtils();
+private static MySQLTestUtils mySQLTestUtils = new MySQLTestUtils();
 
-  public MySqlMetaConnectIncrementalImportTest() {
-    super(mySQLTestUtils.getMySqlConnectString(), mySQLTestUtils.getUserName(),
-          mySQLTestUtils.getUserPass());
-  }
+public MySqlMetaConnectIncrementalImportTest() {
+	super(mySQLTestUtils.getMySqlConnectString(), mySQLTestUtils.getUserName(),
+	      mySQLTestUtils.getUserPass());
+}
 }

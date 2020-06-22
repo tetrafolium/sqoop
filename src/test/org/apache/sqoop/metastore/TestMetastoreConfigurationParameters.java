@@ -40,89 +40,89 @@ import org.junit.experimental.categories.Category;
 @Category(IntegrationTest.class)
 public class TestMetastoreConfigurationParameters {
 
-  private static final int STATUS_FAILURE = 1;
-  private static final int STATUS_SUCCESS = 0;
-  private static final String TEST_USER = "sqoop";
-  private static final String TEST_PASSWORD = "sqoop";
-  private static final String DEFAULT_HSQLDB_USER = "SA";
-  private static final String NON_DEFAULT_PASSWORD = "NOT_DEFAULT";
-  private static final String DEFAULT_PASSWORD = "";
-  private static HsqldbTestServer testHsqldbServer;
+private static final int STATUS_FAILURE = 1;
+private static final int STATUS_SUCCESS = 0;
+private static final String TEST_USER = "sqoop";
+private static final String TEST_PASSWORD = "sqoop";
+private static final String DEFAULT_HSQLDB_USER = "SA";
+private static final String NON_DEFAULT_PASSWORD = "NOT_DEFAULT";
+private static final String DEFAULT_PASSWORD = "";
+private static HsqldbTestServer testHsqldbServer;
 
-  private Sqoop sqoop;
+private Sqoop sqoop;
 
-  @BeforeClass
-  public static void beforeClass() throws Exception {
-    testHsqldbServer = new HsqldbTestServer();
-    testHsqldbServer.start();
-    setupUsersForTesting();
-  }
+@BeforeClass
+public static void beforeClass() throws Exception {
+	testHsqldbServer = new HsqldbTestServer();
+	testHsqldbServer.start();
+	setupUsersForTesting();
+}
 
-  @AfterClass
-  public static void afterClass() throws SQLException {
-    testHsqldbServer.changePasswordForUser(
-        DEFAULT_HSQLDB_USER, NON_DEFAULT_PASSWORD, DEFAULT_PASSWORD);
-    testHsqldbServer.stop();
-  }
+@AfterClass
+public static void afterClass() throws SQLException {
+	testHsqldbServer.changePasswordForUser(
+		DEFAULT_HSQLDB_USER, NON_DEFAULT_PASSWORD, DEFAULT_PASSWORD);
+	testHsqldbServer.stop();
+}
 
-  @Before
-  public void before() {
-    sqoop = new Sqoop(new JobTool());
-  }
+@Before
+public void before() {
+	sqoop = new Sqoop(new JobTool());
+}
 
-  @Test
-  public void testJobToolWithAutoConnectDisabledFails() throws IOException {
-    ArgumentArrayBuilder builder = new ArgumentArrayBuilder().withProperty(
-        "sqoop.metastore.client.enable.autoconnect", "false");
-    String[] arguments = builder.build();
-    assertEquals(STATUS_FAILURE, Sqoop.runSqoop(sqoop, arguments));
-  }
+@Test
+public void testJobToolWithAutoConnectDisabledFails() throws IOException {
+	ArgumentArrayBuilder builder = new ArgumentArrayBuilder().withProperty(
+		"sqoop.metastore.client.enable.autoconnect", "false");
+	String[] arguments = builder.build();
+	assertEquals(STATUS_FAILURE, Sqoop.runSqoop(sqoop, arguments));
+}
 
-  @Test
-  public void
-  testJobToolWithAutoConnectUrlAndCorrectUsernamePasswordSpecifiedSuccessfullyRuns() {
-    int status =
-        runJobToolWithAutoConnectUrlAndCorrectUsernamePasswordSpecified();
-    assertEquals(STATUS_SUCCESS, status);
-  }
+@Test
+public void
+testJobToolWithAutoConnectUrlAndCorrectUsernamePasswordSpecifiedSuccessfullyRuns() {
+	int status =
+		runJobToolWithAutoConnectUrlAndCorrectUsernamePasswordSpecified();
+	assertEquals(STATUS_SUCCESS, status);
+}
 
-  @Test
-  public void
-  testJobToolWithAutoConnectUrlAndCorrectUsernamePasswordSpecifiedInitializesSpecifiedDatabase()
-      throws SQLException {
-    runJobToolWithAutoConnectUrlAndCorrectUsernamePasswordSpecified();
-    verifyMetastoreIsInitialized();
-  }
+@Test
+public void
+testJobToolWithAutoConnectUrlAndCorrectUsernamePasswordSpecifiedInitializesSpecifiedDatabase()
+throws SQLException {
+	runJobToolWithAutoConnectUrlAndCorrectUsernamePasswordSpecified();
+	verifyMetastoreIsInitialized();
+}
 
-  private int
-  runJobToolWithAutoConnectUrlAndCorrectUsernamePasswordSpecified() {
-    ArgumentArrayBuilder builder =
-        new ArgumentArrayBuilder()
-            .withProperty("sqoop.metastore.client.autoconnect.url",
-                          HsqldbTestServer.getUrl())
-            .withProperty("sqoop.metastore.client.autoconnect.username",
-                          TEST_USER)
-            .withProperty("sqoop.metastore.client.autoconnect.password",
-                          TEST_PASSWORD)
-            .withOption("list");
-    String[] arguments = builder.build();
-    return Sqoop.runSqoop(sqoop, arguments);
-  }
+private int
+runJobToolWithAutoConnectUrlAndCorrectUsernamePasswordSpecified() {
+	ArgumentArrayBuilder builder =
+		new ArgumentArrayBuilder()
+		.withProperty("sqoop.metastore.client.autoconnect.url",
+		              HsqldbTestServer.getUrl())
+		.withProperty("sqoop.metastore.client.autoconnect.username",
+		              TEST_USER)
+		.withProperty("sqoop.metastore.client.autoconnect.password",
+		              TEST_PASSWORD)
+		.withOption("list");
+	String[] arguments = builder.build();
+	return Sqoop.runSqoop(sqoop, arguments);
+}
 
-  private static void setupUsersForTesting() throws SQLException {
-    // We create a new user and change the password of SA to make sure that
-    // Sqoop does not connect to metastore with the default user and password.
-    testHsqldbServer.createNewUser(TEST_USER, TEST_PASSWORD);
-    testHsqldbServer.changePasswordForUser(
-        DEFAULT_HSQLDB_USER, DEFAULT_PASSWORD, NON_DEFAULT_PASSWORD);
-  }
+private static void setupUsersForTesting() throws SQLException {
+	// We create a new user and change the password of SA to make sure that
+	// Sqoop does not connect to metastore with the default user and password.
+	testHsqldbServer.createNewUser(TEST_USER, TEST_PASSWORD);
+	testHsqldbServer.changePasswordForUser(
+		DEFAULT_HSQLDB_USER, DEFAULT_PASSWORD, NON_DEFAULT_PASSWORD);
+}
 
-  private void verifyMetastoreIsInitialized() throws SQLException {
-    try (Connection connection =
-             testHsqldbServer.getConnection(TEST_USER, TEST_PASSWORD);
-         Statement statement = connection.createStatement()) {
-      ResultSet resultSet = statement.executeQuery("SELECT * FROM SQOOP_ROOT");
-      assertTrue(resultSet.next());
-    }
-  }
+private void verifyMetastoreIsInitialized() throws SQLException {
+	try (Connection connection =
+		     testHsqldbServer.getConnection(TEST_USER, TEST_PASSWORD);
+	     Statement statement = connection.createStatement()) {
+		ResultSet resultSet = statement.executeQuery("SELECT * FROM SQOOP_ROOT");
+		assertTrue(resultSet.next());
+	}
+}
 }

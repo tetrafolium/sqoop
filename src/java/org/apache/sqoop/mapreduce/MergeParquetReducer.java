@@ -33,47 +33,47 @@ import org.apache.sqoop.avro.AvroUtil;
 import org.apache.sqoop.lib.SqoopRecord;
 
 public abstract class MergeParquetReducer<KEYOUT, VALUEOUT>
-    extends Reducer<Text, MergeRecord, KEYOUT, VALUEOUT> {
+	extends Reducer<Text, MergeRecord, KEYOUT, VALUEOUT> {
 
-  private Schema schema = null;
-  private boolean bigDecimalFormatString = true;
-  private Map<String, Pair<String, String>> sqoopRecordFields =
-      new HashMap<String, Pair<String, String>>();
+private Schema schema = null;
+private boolean bigDecimalFormatString = true;
+private Map<String, Pair<String, String> > sqoopRecordFields =
+	new HashMap<String, Pair<String, String> >();
 
-  @Override
-  protected void setup(Context context)
-      throws IOException, InterruptedException {
-    schema = new Schema.Parser().parse(
-        context.getConfiguration().get(SQOOP_PARQUET_AVRO_SCHEMA_KEY));
-    bigDecimalFormatString = context.getConfiguration().getBoolean(
-        ImportJobBase.PROPERTY_BIGDECIMAL_FORMAT,
-        ImportJobBase.PROPERTY_BIGDECIMAL_FORMAT_DEFAULT);
-  }
+@Override
+protected void setup(Context context)
+throws IOException, InterruptedException {
+	schema = new Schema.Parser().parse(
+		context.getConfiguration().get(SQOOP_PARQUET_AVRO_SCHEMA_KEY));
+	bigDecimalFormatString = context.getConfiguration().getBoolean(
+		ImportJobBase.PROPERTY_BIGDECIMAL_FORMAT,
+		ImportJobBase.PROPERTY_BIGDECIMAL_FORMAT_DEFAULT);
+}
 
-  @Override
-  public void reduce(Text key, Iterable<MergeRecord> vals, Context context)
-      throws IOException, InterruptedException {
-    SqoopRecord bestRecord = null;
-    try {
-      for (MergeRecord mergeRecord : vals) {
-        if (null == bestRecord && !mergeRecord.isNewRecord()) {
-          // Use an old record if we don't have a new record.
-          bestRecord = (SqoopRecord)mergeRecord.getSqoopRecord().clone();
-        } else if (mergeRecord.isNewRecord()) {
-          bestRecord = (SqoopRecord)mergeRecord.getSqoopRecord().clone();
-        }
-      }
-    } catch (CloneNotSupportedException cnse) {
-      throw new IOException(cnse);
-    }
+@Override
+public void reduce(Text key, Iterable<MergeRecord> vals, Context context)
+throws IOException, InterruptedException {
+	SqoopRecord bestRecord = null;
+	try {
+		for (MergeRecord mergeRecord : vals) {
+			if (null == bestRecord && !mergeRecord.isNewRecord()) {
+				// Use an old record if we don't have a new record.
+				bestRecord = (SqoopRecord)mergeRecord.getSqoopRecord().clone();
+			} else if (mergeRecord.isNewRecord()) {
+				bestRecord = (SqoopRecord)mergeRecord.getSqoopRecord().clone();
+			}
+		}
+	} catch (CloneNotSupportedException cnse) {
+		throw new IOException(cnse);
+	}
 
-    if (null != bestRecord) {
-      GenericRecord record = AvroUtil.toGenericRecord(
-          bestRecord.getFieldMap(), schema, bigDecimalFormatString);
-      write(context, record);
-    }
-  }
+	if (null != bestRecord) {
+		GenericRecord record = AvroUtil.toGenericRecord(
+			bestRecord.getFieldMap(), schema, bigDecimalFormatString);
+		write(context, record);
+	}
+}
 
-  protected abstract void write(Context context, GenericRecord record)
-      throws IOException, InterruptedException;
+protected abstract void write(Context context, GenericRecord record)
+throws IOException, InterruptedException;
 }

@@ -34,37 +34,37 @@ import org.junit.experimental.categories.Category;
 @Category(MysqlTest.class)
 public class MySQLAllTablesTest extends TestAllTables {
 
-  private MySQLTestUtils mySQLTestUtils = new MySQLTestUtils();
+private MySQLTestUtils mySQLTestUtils = new MySQLTestUtils();
 
-  @Override
-  protected boolean useHsqldbTestServer() {
-    return false;
-  }
+@Override
+protected boolean useHsqldbTestServer() {
+	return false;
+}
 
-  @Override
-  protected String getConnectString() {
-    return mySQLTestUtils.getMySqlConnectString();
-  }
+@Override
+protected String getConnectString() {
+	return mySQLTestUtils.getMySqlConnectString();
+}
 
-  @Override
-  protected SqoopOptions getSqoopOptions(Configuration conf) {
-    SqoopOptions opts = new SqoopOptions(conf);
-    opts.setUsername(mySQLTestUtils.getUserName());
-    mySQLTestUtils.addPasswordIfIsSet(opts);
-    return opts;
-  }
+@Override
+protected SqoopOptions getSqoopOptions(Configuration conf) {
+	SqoopOptions opts = new SqoopOptions(conf);
+	opts.setUsername(mySQLTestUtils.getUserName());
+	mySQLTestUtils.addPasswordIfIsSet(opts);
+	return opts;
+}
 
-  @Override
-  protected void dropTableIfExists(String table) throws SQLException {
-    Connection conn = getManager().getConnection();
-    PreparedStatement statement = conn.prepareStatement(
-        "DROP TABLE IF EXISTS " + table, ResultSet.TYPE_FORWARD_ONLY,
-        ResultSet.CONCUR_READ_ONLY);
-    try {
-      statement.executeUpdate();
-      conn.commit();
-    } finally {
-      statement.close();
-    }
-  }
+@Override
+protected void dropTableIfExists(String table) throws SQLException {
+	Connection conn = getManager().getConnection();
+	PreparedStatement statement = conn.prepareStatement(
+		"DROP TABLE IF EXISTS " + table, ResultSet.TYPE_FORWARD_ONLY,
+		ResultSet.CONCUR_READ_ONLY);
+	try {
+		statement.executeUpdate();
+		conn.commit();
+	} finally {
+		statement.close();
+	}
+}
 }

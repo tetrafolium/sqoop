@@ -35,85 +35,85 @@ import org.apache.sqoop.util.ClassLoaderStack;
 
 public class SequenceFileTestUtils {
 
-  private static final String OUTPUT_FILE_NAME = "/part-m-00000";
+private static final String OUTPUT_FILE_NAME = "/part-m-00000";
 
-  public static final Log LOG =
-      LogFactory.getLog(SequenceFileTestUtils.class.getName());
+public static final Log LOG =
+	LogFactory.getLog(SequenceFileTestUtils.class.getName());
 
-  /**
-   * Verify results at the given tablePath.
-   * @param testCase current instance of BaseSqoopTestCase
-   * @param expectedResults string array of expected results
-   * @param fileSystem current fileSystem
-   * @param tablePath path of the output table
-   */
-  public static void verify(BaseSqoopTestCase testCase,
-                            String[] expectedResults, FileSystem fileSystem,
-                            Path tablePath) throws Exception {
-    String outputFilePathString = tablePath.toString() + OUTPUT_FILE_NAME;
-    readAndVerify(testCase, expectedResults, fileSystem, outputFilePathString);
-  }
+/**
+ * Verify results at the given tablePath.
+ * @param testCase current instance of BaseSqoopTestCase
+ * @param expectedResults string array of expected results
+ * @param fileSystem current fileSystem
+ * @param tablePath path of the output table
+ */
+public static void verify(BaseSqoopTestCase testCase,
+                          String[] expectedResults, FileSystem fileSystem,
+                          Path tablePath) throws Exception {
+	String outputFilePathString = tablePath.toString() + OUTPUT_FILE_NAME;
+	readAndVerify(testCase, expectedResults, fileSystem, outputFilePathString);
+}
 
-  /**
-   * Verify results at the given tablePath.
-   * @param testCase current instance of BaseSqoopTestCase
-   * @param expectedResults string array of expected results
-   * @param fileSystem current fileSystem
-   * @param tablePath path of the output table
-   * @param outputFileName MapReduce output filename
-   */
-  public static void verify(BaseSqoopTestCase testCase,
-                            String[] expectedResults, FileSystem fileSystem,
-                            Path tablePath, String outputFileName)
-      throws Exception {
-    String outputFilePathString = tablePath.toString() + "/" + outputFileName;
-    readAndVerify(testCase, expectedResults, fileSystem, outputFilePathString);
-  }
+/**
+ * Verify results at the given tablePath.
+ * @param testCase current instance of BaseSqoopTestCase
+ * @param expectedResults string array of expected results
+ * @param fileSystem current fileSystem
+ * @param tablePath path of the output table
+ * @param outputFileName MapReduce output filename
+ */
+public static void verify(BaseSqoopTestCase testCase,
+                          String[] expectedResults, FileSystem fileSystem,
+                          Path tablePath, String outputFileName)
+throws Exception {
+	String outputFilePathString = tablePath.toString() + "/" + outputFileName;
+	readAndVerify(testCase, expectedResults, fileSystem, outputFilePathString);
+}
 
-  private static void
-  readAndVerify(BaseSqoopTestCase testCase, String[] expectedResults,
-                FileSystem fileSystem, String outputFilePathString)
-      throws Exception {
-    Path outputFilePath = new Path(outputFilePathString);
+private static void
+readAndVerify(BaseSqoopTestCase testCase, String[] expectedResults,
+              FileSystem fileSystem, String outputFilePathString)
+throws Exception {
+	Path outputFilePath = new Path(outputFilePathString);
 
-    Configuration conf = fileSystem.getConf();
+	Configuration conf = fileSystem.getConf();
 
-    ClassLoader prevClassLoader = ClassLoaderStack.addJarFile(
-        new Path(new Path(new SqoopOptions().getJarOutputDir()),
-                 testCase.getTableName() + ".jar")
-            .toString(),
-        testCase.getTableName());
+	ClassLoader prevClassLoader = ClassLoaderStack.addJarFile(
+		new Path(new Path(new SqoopOptions().getJarOutputDir()),
+		         testCase.getTableName() + ".jar")
+		.toString(),
+		testCase.getTableName());
 
-    // Needs to set the classLoader for the Configuration object otherwise
-    // SequenceFile cannot load custom classes
-    conf.setClassLoader(Thread.currentThread().getContextClassLoader());
+	// Needs to set the classLoader for the Configuration object otherwise
+	// SequenceFile cannot load custom classes
+	conf.setClassLoader(Thread.currentThread().getContextClassLoader());
 
-    try (SequenceFile.Reader reader = new SequenceFile.Reader(
-             conf, SequenceFile.Reader.file(outputFilePath))) {
-      WritableComparable key =
-          (WritableComparable)reader.getKeyClass().newInstance();
-      Writable value = (Writable)reader.getValueClass().newInstance();
-      boolean hasNextRecord = reader.next(key, value);
-      int i = 0;
+	try (SequenceFile.Reader reader = new SequenceFile.Reader(
+		     conf, SequenceFile.Reader.file(outputFilePath))) {
+		WritableComparable key =
+			(WritableComparable)reader.getKeyClass().newInstance();
+		Writable value = (Writable)reader.getValueClass().newInstance();
+		boolean hasNextRecord = reader.next(key, value);
+		int i = 0;
 
-      if (!hasNextRecord && expectedResults != null &&
-          expectedResults.length > 0) {
-        fail("Empty output file was not expected");
-      }
+		if (!hasNextRecord && expectedResults != null &&
+		    expectedResults.length > 0) {
+			fail("Empty output file was not expected");
+		}
 
-      while (hasNextRecord) {
-        assertEquals(expectedResults[i++], value.toString());
-        hasNextRecord = reader.next(key, value);
-      }
+		while (hasNextRecord) {
+			assertEquals(expectedResults[i++], value.toString());
+			hasNextRecord = reader.next(key, value);
+		}
 
-      if (expectedResults != null && expectedResults.length > i) {
-        fail("More output data was expected");
-      }
-    } catch (IOException ioe) {
-      LOG.error("Issue with verifying the output", ioe);
-      throw new RuntimeException(ioe);
-    } finally {
-      ClassLoaderStack.setCurrentClassLoader(prevClassLoader);
-    }
-  }
+		if (expectedResults != null && expectedResults.length > i) {
+			fail("More output data was expected");
+		}
+	} catch (IOException ioe) {
+		LOG.error("Issue with verifying the output", ioe);
+		throw new RuntimeException(ioe);
+	} finally {
+		ClassLoaderStack.setCurrentClassLoader(prevClassLoader);
+	}
+}
 }

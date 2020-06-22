@@ -30,35 +30,37 @@ import org.apache.hadoop.conf.Configuration;
  */
 public abstract class SQLFailureHandler {
 
-  // Job configuration for the currently running job
-  protected Configuration conf;
+// Job configuration for the currently running job
+protected Configuration conf;
 
-  /**
-   * Initialize the the handler with job configuration.
-   */
-  public void initialize(Configuration c) throws IOException { this.conf = c; }
+/**
+ * Initialize the the handler with job configuration.
+ */
+public void initialize(Configuration c) throws IOException {
+	this.conf = c;
+}
 
-  /**
-   * Check whether the given failure is supported by the connection failure
-   * handler.
-   */
-  public abstract boolean canHandleFailure(Throwable failureCause);
+/**
+ * Check whether the given failure is supported by the connection failure
+ * handler.
+ */
+public abstract boolean canHandleFailure(Throwable failureCause);
 
-  /**
-   * Provide specific handling for the connection failure and return a new
-   * valid connection.
-   */
-  public abstract Connection recover() throws IOException;
+/**
+ * Provide specific handling for the connection failure and return a new
+ * valid connection.
+ */
+public abstract Connection recover() throws IOException;
 
-  /**
-   * Establish a connection to the target database.
-   */
-  protected Connection getConnection()
-      throws ClassNotFoundException, SQLException {
-    // Get a DBConfiguration object from the current job configuration
-    DBConfiguration dbConf = new DBConfiguration(conf);
-    Connection conn = null;
-    conn = dbConf.getConnection();
-    return conn;
-  }
+/**
+ * Establish a connection to the target database.
+ */
+protected Connection getConnection()
+throws ClassNotFoundException, SQLException {
+	// Get a DBConfiguration object from the current job configuration
+	DBConfiguration dbConf = new DBConfiguration(conf);
+	Connection conn = null;
+	conn = dbConf.getConnection();
+	return conn;
+}
 }
