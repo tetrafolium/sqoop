@@ -1395,13 +1395,11 @@ public final class LobFile {
     @Override
     /** {@inheritDoc} */
     public InputStream readBlobRecord() throws IOException {
-      if (!isRecordAvailable()) {
-        // we're not currently aligned on a record-start.
-        // Try to get the next one.
-        if (!next()) {
-          // No more records available.
-          throw new EOFException("End of file reached.");
-        }
+      // we're not currently aligned on a record-start.
+      // Try to get the next one.
+      if ((!isRecordAvailable()) && (!next())) {
+        // No more records available.
+        throw new EOFException("End of file reached.");
       }
 
       // Ensure any previously-open user record stream is closed.

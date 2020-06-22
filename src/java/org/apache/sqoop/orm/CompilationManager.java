@@ -234,10 +234,8 @@ public class CompilationManager {
       File fOrig = new File(orig);
       File fDest = new File(dest);
       File fDestParent = fDest.getParentFile();
-      if (null != fDestParent && !fDestParent.exists()) {
-        if (!fDestParent.mkdirs()) {
-          LOG.error("Could not make directory: " + fDestParent);
-        }
+      if ((null != fDestParent && !fDestParent.exists()) && (!fDestParent.mkdirs())) {
+        LOG.error("Could not make directory: " + fDestParent);
       }
       try {
         LOG.debug("moving file from " + fOrig.getAbsolutePath() + " to " +

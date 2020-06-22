@@ -879,18 +879,16 @@ public class OraOopManagerFactory extends ManagerFactory {
     /* VALIDATION OF INPUTS */
     /* =========================== */
 
-    if (updateKeyCol == null || updateKeyCol.isEmpty()) {
-      // We're performing an "insert" export, not an "update" export.
-
-      // Check that the "oraoop.export.merge" property has not been specified,
-      // as this would be
-      // an invalid scenario...
-      if (OraOopUtilities.getExportUpdateMode(conf) == UpdateMode.Merge) {
-        throw new RuntimeException(
-            String.format("\n\nThe option \"%s\" can only be used if \"%s\" is "
-                              + "also used.\n",
-                          OraOopConstants.ORAOOP_EXPORT_MERGE, "--update-key"));
-      }
+    // We're performing an "insert" export, not an "update" export.
+    
+    // Check that the "oraoop.export.merge" property has not been specified,
+    // as this would be
+    // an invalid scenario...
+    if ((updateKeyCol == null || updateKeyCol.isEmpty()) && (OraOopUtilities.getExportUpdateMode(conf) == UpdateMode.Merge)) {
+      throw new RuntimeException(
+          String.format("\n\nThe option \"%s\" can only be used if \"%s\" is "
+                            + "also used.\n",
+                        OraOopConstants.ORAOOP_EXPORT_MERGE, "--update-key"));
     }
 
     if (OraOopUtilities.userWantsToCreatePartitionedExportTableFromTemplate(

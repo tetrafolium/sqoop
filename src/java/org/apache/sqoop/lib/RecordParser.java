@@ -327,14 +327,12 @@ public class RecordParser {
       }
     }
 
-    if (state == ParseState.FIELD_START && curChar == fieldDelim) {
-      // we hit an EOF/EOR as the last legal character and we need to mark
-      // that string as recorded. This if block is outside the for-loop since
-      // we don't have a physical 'epsilon' token in our string.
-      if (null != sb) {
-        outputs.add(sb.toString());
-        sb = new StringBuilder();
-      }
+    // we hit an EOF/EOR as the last legal character and we need to mark
+    // that string as recorded. This if block is outside the for-loop since
+    // we don't have a physical 'epsilon' token in our string.
+    if ((state == ParseState.FIELD_START && curChar == fieldDelim) && (null != sb)) {
+      outputs.add(sb.toString());
+      sb = new StringBuilder();
     }
 
     if (null != sb) {

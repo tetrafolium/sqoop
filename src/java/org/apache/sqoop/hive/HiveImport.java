@@ -211,13 +211,11 @@ public class HiveImport implements HiveClient {
         hiveClientCommon.cleanUp(configuration, finalPath);
       }
     } finally {
-      if (!isGenerateOnly()) {
-        // User isn't interested in saving the DDL. Remove the file.
-        if (!scriptFile.delete()) {
-          LOG.warn("Could not remove temporary file: " + scriptFile.toString());
-          // try to delete the file later.
-          scriptFile.deleteOnExit();
-        }
+      // User isn't interested in saving the DDL. Remove the file.
+      if ((!isGenerateOnly()) && (!scriptFile.delete())) {
+        LOG.warn("Could not remove temporary file: " + scriptFile.toString());
+        // try to delete the file later.
+        scriptFile.deleteOnExit();
       }
     }
   }

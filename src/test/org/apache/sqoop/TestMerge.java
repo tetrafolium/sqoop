@@ -353,11 +353,9 @@ public class TestMerge extends BaseSqoopTestCase {
 
     for (FileStatus stat : files) {
       Path p = stat.getPath();
-      if (p.getName().startsWith("part-") || p.getName().endsWith(".parquet")) {
-        if (checkFileForLine(fs, p, fileLayout, record)) {
-          // We found the line. Nothing further to do.
-          return true;
-        }
+      if ((p.getName().startsWith("part-") || p.getName().endsWith(".parquet")) && (checkFileForLine(fs, p, fileLayout, record))) {
+        // We found the line. Nothing further to do.
+        return true;
       }
     }
 

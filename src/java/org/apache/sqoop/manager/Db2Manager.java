@@ -290,10 +290,8 @@ public class Db2Manager extends org.apache.sqoop.manager.GenericJdbcManager {
 
     String colTypeName = columnTypeNames.get(colName);
 
-    if (colTypeName != null) {
-      if (colTypeName.toUpperCase().startsWith("XML")) {
-        return XML_TO_JAVA_DATA_TYPE;
-      }
+    if ((colTypeName != null) && (colTypeName.toUpperCase().startsWith("XML"))) {
+      return XML_TO_JAVA_DATA_TYPE;
     }
     return null;
   }
@@ -334,10 +332,8 @@ public class Db2Manager extends org.apache.sqoop.manager.GenericJdbcManager {
                                            options.getSqlQuery());
     }
     String colTypeName = columnTypeNames.get(colName);
-    if (colTypeName != null) {
-      if (colTypeName.equalsIgnoreCase("XML")) {
-        return XML_TO_JAVA_DATA_TYPE;
-      }
+    if ((colTypeName != null) && (colTypeName.equalsIgnoreCase("XML"))) {
+      return XML_TO_JAVA_DATA_TYPE;
     }
     return null;
   }

@@ -291,22 +291,18 @@ class OraOopDBRecordReader<T extends SqoopRecord>
 
       OracleTableColumn oracleTableColumn =
           tableColumns.findColumnByName(unescapedFieldName);
-      if (oracleTableColumn != null) {
-        if (oracleTableColumn.getDataType().equals(
-                OraOopConstants.Oracle.URITYPE)) {
-          fieldName = String.format("uritype.geturl(%s)", fieldName);
-        }
+      if ((oracleTableColumn != null) && (oracleTableColumn.getDataType().equals(
+                OraOopConstants.Oracle.URITYPE))) {
+        fieldName = String.format("uritype.geturl(%s)", fieldName);
       }
 
       // If this field is the "data_chunk_id" that we inserted during
       // getFields()
       // then we need to insert the value of that data_chunk_id now...
-      if (i == this.columnIndexDataChunkIdZeroBased &&
-          fieldName == OraOopConstants.COLUMN_NAME_DATA_CHUNK_ID) {
-        if (dataChunkId != null && !dataChunkId.isEmpty()) {
-          fieldName = String.format("'%s' %s", dataChunkId,
-                                    OraOopConstants.COLUMN_NAME_DATA_CHUNK_ID);
-        }
+      if ((i == this.columnIndexDataChunkIdZeroBased &&
+          fieldName == OraOopConstants.COLUMN_NAME_DATA_CHUNK_ID) && (dataChunkId != null && !dataChunkId.isEmpty())) {
+        fieldName = String.format("'%s' %s", dataChunkId,
+                                  OraOopConstants.COLUMN_NAME_DATA_CHUNK_ID);
       }
 
       result.append(fieldName);

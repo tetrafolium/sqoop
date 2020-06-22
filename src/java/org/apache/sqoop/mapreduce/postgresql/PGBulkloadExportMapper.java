@@ -235,12 +235,10 @@ public class PGBulkloadExportMapper
         }
       }
     }
-    if (null != passwordFilename) {
-      if (!new File(passwordFilename).delete()) {
-        LOG.error("Could not remove postgresql password file " +
-                  passwordFilename);
-        LOG.error("You should remove this file to protect your credentials.");
-      }
+    if ((null != passwordFilename) && (!new File(passwordFilename).delete())) {
+      LOG.error("Could not remove postgresql password file " +
+                passwordFilename);
+      LOG.error("You should remove this file to protect your credentials.");
     }
   }
 

@@ -53,9 +53,9 @@ public class TestBigDecimalSplitter {
   /* Test if the recurring decimal split sizes are generated as expected */
   @Test
   public void testRecurringTryDivide() {
-    BigDecimal numerator = new BigDecimal("1");
+    BigDecimal numerator = BigDecimal.ONE;
     BigDecimal denominator = new BigDecimal("3");
-    BigDecimal expected = new BigDecimal("1");
+    BigDecimal expected = BigDecimal.ONE;
     BigDecimalSplitter splitter = new BigDecimalSplitter();
     BigDecimal out = splitter.tryDivide(numerator, denominator);
     assertEquals(expected, out);

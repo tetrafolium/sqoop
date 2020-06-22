@@ -439,11 +439,9 @@ public class MySQLDumpMapper
       }
 
       // Remove the password file.
-      if (null != passwordFile) {
-        if (!new File(passwordFile).delete()) {
-          LOG.error("Could not remove mysql password file " + passwordFile);
-          LOG.error("You should remove this file to protect your credentials.");
-        }
+      if ((null != passwordFile) && (!new File(passwordFile).delete())) {
+        LOG.error("Could not remove mysql password file " + passwordFile);
+        LOG.error("You should remove this file to protect your credentials.");
       }
 
       // block until the stream sink is done too.

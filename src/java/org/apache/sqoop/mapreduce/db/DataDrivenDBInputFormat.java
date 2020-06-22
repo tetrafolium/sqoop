@@ -292,12 +292,10 @@ public class DataDrivenDBInputFormat<T extends DBWritable>
    * inside each split.
    */
   public static void setBoundingQuery(Configuration conf, String query) {
-    if (null != query) {
-      // If the user's settng a query, warn if they don't allow conditions.
-      if (query.indexOf(SUBSTITUTE_TOKEN) == -1) {
-        LOG.warn("Could not find " + SUBSTITUTE_TOKEN + " token in query: " +
-                 query + "; splits may not partition data.");
-      }
+    // If the user's settng a query, warn if they don't allow conditions.
+    if ((null != query) && (query.indexOf(SUBSTITUTE_TOKEN) == -1)) {
+      LOG.warn("Could not find " + SUBSTITUTE_TOKEN + " token in query: " +
+               query + "; splits may not partition data.");
     }
 
     conf.set(DBConfiguration.INPUT_BOUNDING_QUERY, query);

@@ -241,10 +241,8 @@ public class TestHiveImport extends ImportJobTestCase {
 
     // If it's already there, remove it before running the test to ensure
     // that it's the current test that generated the file.
-    if (fs.exists(ddlFile)) {
-      if (!fs.delete(ddlFile, false)) {
-        LOG.warn("Could not delete previous ddl file: " + ddlFile);
-      }
+    if ((fs.exists(ddlFile)) && (!fs.delete(ddlFile, false))) {
+      LOG.warn("Could not delete previous ddl file: " + ddlFile);
     }
 
     // Run a basic import, but specify that we're just generating definitions.
