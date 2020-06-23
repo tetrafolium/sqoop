@@ -29,20 +29,24 @@ inspecode:
   ## FAILURE: Build failed with an exception.
   ##
   ## * What went wrong:
-  ## Java heap space
+  ## Execution failed for task ':test'.
+  ## > Process 'Gradle Test Executor 1' finished with non-zero exit value 137
+  ##   This problem might be caused by incorrect test process configuration.
+  ##   Please refer to the test execution section in the User Manual at https://docs.gradle.org/5.4.1/userguide/java_testing.html#sec:test_execution
   ##
   ## * Try:
   ## Run with --stacktrace option to get the stack trace.  Run with --scan to get full insights.
   ##
   ## * Get more help at https://help.gradle.org
   ##---------------------------------------------------------------------------
-  ## Internal Error:   /opt/infer-linux64-v0.17.0/lib/infer/infer/bin/../lib/python/infer.py -j 1
+  ## ERROR: couldn't run compilation command `[u'./gradlew', '--debug', u'clean', u'build']`
+  ## Internal Error:   /opt/infer-linux64-v0.17.0/lib/infer/infer/bin/../lib/python/infer.py -j 2
   ##   --project-root /home/rocro/src/github.com/tetrafolium/sqoop --out
-  ##   /tmp/.infer.352206610 -- ./gradlew clean build:
+  ##   /tmp/.infer.484188225 -- ./gradlew clean build:
   ##   died after receiving sigkill (signal number 9)
   ##---------------------------------------------------------------------------
   infer:
-    machine: { cpu: 1.1 }
+    machine: { cpu: 1.1 }   # to avoid shortage Java heap space
     thresholds: { num-issues: 999 }
 
   jscpd:
