@@ -26,12 +26,12 @@ import org.apache.sqoop.lib.SqoopRecord;
  * based on the key, which is the index of the datasets in the input split.
  */
 public class MainframeDatasetImportMapper
-    extends AbstractMainframeDatasetImportMapper<Text> {
+	extends AbstractMainframeDatasetImportMapper<Text> {
 
-  @Override
-  protected Text createOutKey(SqoopRecord sqoopRecord) {
-    Text result = new Text();
-    result.set(sqoopRecord.toString());
-    return result;
-  }
+@Override
+protected Text createOutKey(SqoopRecord sqoopRecord) {
+	Text result = new Text();
+	result.set(sqoopRecord.toString());
+	return result;
+}
 }

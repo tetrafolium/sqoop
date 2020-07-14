@@ -36,51 +36,51 @@ import org.apache.sqoop.lib.SqoopRecord;
  * Imports records by transforming them to Avro records in an Avro data file.
  */
 public class AvroImportMapper
-    extends AutoProgressMapper<LongWritable, SqoopRecord,
-                               AvroWrapper<GenericRecord>, NullWritable> {
+	extends AutoProgressMapper<LongWritable, SqoopRecord,
+	                           AvroWrapper<GenericRecord>, NullWritable> {
 
-  private final AvroWrapper<GenericRecord> wrapper =
-      new AvroWrapper<GenericRecord>();
-  private Schema schema;
-  private LargeObjectLoader lobLoader;
-  private boolean bigDecimalFormatString;
-  private boolean bigDecimalPadding;
+private final AvroWrapper<GenericRecord> wrapper =
+	new AvroWrapper<GenericRecord>();
+private Schema schema;
+private LargeObjectLoader lobLoader;
+private boolean bigDecimalFormatString;
+private boolean bigDecimalPadding;
 
-  @Override
-  protected void setup(Context context)
-      throws IOException, InterruptedException {
-    Configuration conf = context.getConfiguration();
-    schema = AvroJob.getMapOutputSchema(conf);
-    lobLoader = new LargeObjectLoader(
-        conf, FileOutputFormat.getWorkOutputPath(context));
-    bigDecimalFormatString =
-        conf.getBoolean(ImportJobBase.PROPERTY_BIGDECIMAL_FORMAT,
-                        ImportJobBase.PROPERTY_BIGDECIMAL_FORMAT_DEFAULT);
-    bigDecimalPadding = conf.getBoolean(
-        ConfigurationConstants.PROP_ENABLE_AVRO_DECIMAL_PADDING, false);
-  }
+@Override
+protected void setup(Context context)
+throws IOException, InterruptedException {
+	Configuration conf = context.getConfiguration();
+	schema = AvroJob.getMapOutputSchema(conf);
+	lobLoader = new LargeObjectLoader(
+		conf, FileOutputFormat.getWorkOutputPath(context));
+	bigDecimalFormatString =
+		conf.getBoolean(ImportJobBase.PROPERTY_BIGDECIMAL_FORMAT,
+		                ImportJobBase.PROPERTY_BIGDECIMAL_FORMAT_DEFAULT);
+	bigDecimalPadding = conf.getBoolean(
+		ConfigurationConstants.PROP_ENABLE_AVRO_DECIMAL_PADDING, false);
+}
 
-  @Override
-  protected void map(LongWritable key, SqoopRecord val, Context context)
-      throws IOException, InterruptedException {
+@Override
+protected void map(LongWritable key, SqoopRecord val, Context context)
+throws IOException, InterruptedException {
 
-    try {
-      // Loading of LOBs was delayed until we have a Context.
-      val.loadLargeObjects(lobLoader);
-    } catch (SQLException sqlE) {
-      throw new IOException(sqlE);
-    }
+	try {
+		// Loading of LOBs was delayed until we have a Context.
+		val.loadLargeObjects(lobLoader);
+	} catch (SQLException sqlE) {
+		throw new IOException(sqlE);
+	}
 
-    GenericRecord outKey = AvroUtil.toGenericRecord(
-        val.getFieldMap(), schema, bigDecimalFormatString, bigDecimalPadding);
-    wrapper.datum(outKey);
-    context.write(wrapper, NullWritable.get());
-  }
+	GenericRecord outKey = AvroUtil.toGenericRecord(
+		val.getFieldMap(), schema, bigDecimalFormatString, bigDecimalPadding);
+	wrapper.datum(outKey);
+	context.write(wrapper, NullWritable.get());
+}
 
-  @Override
-  protected void cleanup(Context context) throws IOException {
-    if (null != lobLoader) {
-      lobLoader.close();
-    }
-  }
+@Override
+protected void cleanup(Context context) throws IOException {
+	if (null != lobLoader) {
+		lobLoader.close();
+	}
+}
 }

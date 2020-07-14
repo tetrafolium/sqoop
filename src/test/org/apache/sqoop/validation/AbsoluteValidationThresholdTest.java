@@ -31,15 +31,15 @@ import org.junit.experimental.categories.Category;
 @Category(UnitTest.class)
 public class AbsoluteValidationThresholdTest {
 
-  /**
-   * Test the implementation for AbsoluteValidationThreshold.
-   * Both arguments should be same else fail.
-   */
-  @Test
-  public void testAbsoluteValidationThreshold() {
-    ValidationThreshold validationThreshold = new AbsoluteValidationThreshold();
-    assertTrue(validationThreshold.compare(100, 100));
-    assertFalse(validationThreshold.compare(100, 90));
-    assertFalse(validationThreshold.compare(90, 100));
-  }
+/**
+ * Test the implementation for AbsoluteValidationThreshold.
+ * Both arguments should be same else fail.
+ */
+@Test
+public void testAbsoluteValidationThreshold() {
+	ValidationThreshold validationThreshold = new AbsoluteValidationThreshold();
+	assertTrue(validationThreshold.compare(100, 100));
+	assertFalse(validationThreshold.compare(100, 90));
+	assertFalse(validationThreshold.compare(90, 100));
+}
 }

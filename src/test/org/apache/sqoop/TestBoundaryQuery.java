@@ -43,141 +43,143 @@ import org.junit.Test;
  */
 public class TestBoundaryQuery extends ImportJobTestCase {
 
-  /**
-   * Create the argv to pass to Sqoop.
-   * @return the argv as an array of strings.
-   */
-  protected String[] getArgv(boolean includeHadoopFlags, boolean tableImport,
-                             String boundaryQuery, String targetDir,
-                             String... extraArgs) {
+/**
+ * Create the argv to pass to Sqoop.
+ * @return the argv as an array of strings.
+ */
+protected String[] getArgv(boolean includeHadoopFlags, boolean tableImport,
+                           String boundaryQuery, String targetDir,
+                           String... extraArgs) {
 
-    ArrayList<String> args = new ArrayList<String>();
+	ArrayList<String> args = new ArrayList<String>();
 
-    if (includeHadoopFlags) {
-      CommonArgs.addHadoopFlags(args);
-    }
+	if (includeHadoopFlags) {
+		CommonArgs.addHadoopFlags(args);
+	}
 
-    if (tableImport) {
-      args.add("--table");
-      args.add(HsqldbTestServer.getTableName());
-    } else {
-      args.add("--query");
-      args.add("SELECT INTFIELD1, INTFIELD2 FROM " +
-               HsqldbTestServer.getTableName() + " WHERE $CONDITIONS");
-    }
-    args.add("--connect");
-    args.add(HsqldbTestServer.getUrl());
-    if (boundaryQuery != null) {
-      args.add("--boundary-query");
-      args.add(boundaryQuery);
-    }
-    args.add("--as-sequencefile");
-    args.add("--target-dir");
-    args.add(targetDir);
-    args.add("--class-name");
-    args.add(getTableName());
-    args.add("--verbose");
-    for (String extraArg : extraArgs) {
-      args.add(extraArg);
-    }
+	if (tableImport) {
+		args.add("--table");
+		args.add(HsqldbTestServer.getTableName());
+	} else {
+		args.add("--query");
+		args.add("SELECT INTFIELD1, INTFIELD2 FROM " +
+		         HsqldbTestServer.getTableName() + " WHERE $CONDITIONS");
+	}
+	args.add("--connect");
+	args.add(HsqldbTestServer.getUrl());
+	if (boundaryQuery != null) {
+		args.add("--boundary-query");
+		args.add(boundaryQuery);
+	}
+	args.add("--as-sequencefile");
+	args.add("--target-dir");
+	args.add(targetDir);
+	args.add("--class-name");
+	args.add(getTableName());
+	args.add("--verbose");
+	for (String extraArg : extraArgs) {
+		args.add(extraArg);
+	}
 
-    return args.toArray(new String[0]);
-  }
+	return args.toArray(new String[0]);
+}
 
-  // this test just uses the two int table.
-  protected String getTableName() { return HsqldbTestServer.getTableName(); }
+// this test just uses the two int table.
+protected String getTableName() {
+	return HsqldbTestServer.getTableName();
+}
 
-  /**
-   * Given a comma-delimited list of integers, grab and parse the first int.
-   * @param str a comma-delimited list of values, the first of which is an int.
-   * @return the first field in the string, cast to int
-   */
-  private int getFirstInt(String str) {
-    String[] parts = str.split(",");
-    return Integer.parseInt(parts[0]);
-  }
+/**
+ * Given a comma-delimited list of integers, grab and parse the first int.
+ * @param str a comma-delimited list of values, the first of which is an int.
+ * @return the first field in the string, cast to int
+ */
+private int getFirstInt(String str) {
+	String[] parts = str.split(",");
+	return Integer.parseInt(parts[0]);
+}
 
-  public void runQueryTest(String query, boolean tableImport,
-                           int numExpectedResults, int expectedSum,
-                           String targetDir, String... extraArgs)
-      throws IOException {
+public void runQueryTest(String query, boolean tableImport,
+                         int numExpectedResults, int expectedSum,
+                         String targetDir, String... extraArgs)
+throws IOException {
 
-    ClassLoader prevClassLoader = null;
-    SequenceFile.Reader reader = null;
+	ClassLoader prevClassLoader = null;
+	SequenceFile.Reader reader = null;
 
-    String[] argv = getArgv(true, tableImport, query, targetDir, extraArgs);
-    runImport(argv);
-    try {
-      SqoopOptions opts = new ImportTool().parseArguments(
-          getArgv(false, tableImport, query, targetDir, extraArgs), null, null,
-          true);
+	String[] argv = getArgv(true, tableImport, query, targetDir, extraArgs);
+	runImport(argv);
+	try {
+		SqoopOptions opts = new ImportTool().parseArguments(
+			getArgv(false, tableImport, query, targetDir, extraArgs), null, null,
+			true);
 
-      CompilationManager compileMgr = new CompilationManager(opts);
-      String jarFileName = compileMgr.getJarFilename();
+		CompilationManager compileMgr = new CompilationManager(opts);
+		String jarFileName = compileMgr.getJarFilename();
 
-      prevClassLoader =
-          ClassLoaderStack.addJarFile(jarFileName, getTableName());
+		prevClassLoader =
+			ClassLoaderStack.addJarFile(jarFileName, getTableName());
 
-      reader = SeqFileReader.getSeqFileReader(getDataFilePath().toString());
+		reader = SeqFileReader.getSeqFileReader(getDataFilePath().toString());
 
-      // here we can actually instantiate (k, v) pairs.
-      Configuration conf = new Configuration();
-      Object key = ReflectionUtils.newInstance(reader.getKeyClass(), conf);
-      Object val = ReflectionUtils.newInstance(reader.getValueClass(), conf);
+		// here we can actually instantiate (k, v) pairs.
+		Configuration conf = new Configuration();
+		Object key = ReflectionUtils.newInstance(reader.getKeyClass(), conf);
+		Object val = ReflectionUtils.newInstance(reader.getValueClass(), conf);
 
-      if (reader.next(key) == null) {
-        fail("Empty SequenceFile during import");
-      }
+		if (reader.next(key) == null) {
+			fail("Empty SequenceFile during import");
+		}
 
-      // make sure that the value we think should be at the top, is.
-      reader.getCurrentValue(val);
+		// make sure that the value we think should be at the top, is.
+		reader.getCurrentValue(val);
 
-      // We know that these values are two ints separated by a ',' character.
-      // Since this is all dynamic, though, we don't want to actually link
-      // against the class and use its methods. So we just parse this back
-      // into int fields manually.  Sum them up and ensure that we get the
-      // expected total for the first column, to verify that we got all the
-      // results from the db into the file.
-      int curSum = getFirstInt(val.toString());
-      int totalResults = 1;
+		// We know that these values are two ints separated by a ',' character.
+		// Since this is all dynamic, though, we don't want to actually link
+		// against the class and use its methods. So we just parse this back
+		// into int fields manually.  Sum them up and ensure that we get the
+		// expected total for the first column, to verify that we got all the
+		// results from the db into the file.
+		int curSum = getFirstInt(val.toString());
+		int totalResults = 1;
 
-      // now sum up everything else in the file.
-      while (reader.next(key) != null) {
-        reader.getCurrentValue(val);
-        curSum += getFirstInt(val.toString());
-        totalResults++;
-      }
+		// now sum up everything else in the file.
+		while (reader.next(key) != null) {
+			reader.getCurrentValue(val);
+			curSum += getFirstInt(val.toString());
+			totalResults++;
+		}
 
-      assertEquals("Total sum of first db column mismatch", expectedSum,
-                   curSum);
-      assertEquals("Incorrect number of results for query", numExpectedResults,
-                   totalResults);
-    } catch (InvalidOptionsException ioe) {
-      fail(ioe.toString());
-    } catch (ParseException pe) {
-      fail(pe.toString());
-    } finally {
-      IOUtils.closeStream(reader);
+		assertEquals("Total sum of first db column mismatch", expectedSum,
+		             curSum);
+		assertEquals("Incorrect number of results for query", numExpectedResults,
+		             totalResults);
+	} catch (InvalidOptionsException ioe) {
+		fail(ioe.toString());
+	} catch (ParseException pe) {
+		fail(pe.toString());
+	} finally {
+		IOUtils.closeStream(reader);
 
-      if (null != prevClassLoader) {
-        ClassLoaderStack.setCurrentClassLoader(prevClassLoader);
-      }
-    }
-  }
+		if (null != prevClassLoader) {
+			ClassLoaderStack.setCurrentClassLoader(prevClassLoader);
+		}
+	}
+}
 
-  @Test
-  public void testBoundaryQuery() throws IOException {
-    System.out.println("PCYO");
-    String query = "select min(intfield1), max(intfield1) from " +
-                   getTableName() + " where intfield1 in (3, 5)";
+@Test
+public void testBoundaryQuery() throws IOException {
+	System.out.println("PCYO");
+	String query = "select min(intfield1), max(intfield1) from " +
+	               getTableName() + " where intfield1 in (3, 5)";
 
-    runQueryTest(query, true, 2, 8, getTablePath().toString(), "--m", "1",
-                 "--split-by", "INTFIELD1");
-  }
+	runQueryTest(query, true, 2, 8, getTablePath().toString(), "--m", "1",
+	             "--split-by", "INTFIELD1");
+}
 
-  @Test
-  public void testNoBoundaryQuerySingleMapper() throws IOException {
+@Test
+public void testNoBoundaryQuerySingleMapper() throws IOException {
 
-    runQueryTest(null, false, 4, 16, getTablePath().toString(), "--m", "1");
-  }
+	runQueryTest(null, false, 4, 16, getTablePath().toString(), "--m", "1");
+}
 }

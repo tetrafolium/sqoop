@@ -104,461 +104,463 @@ import org.junit.experimental.categories.Category;
 @Category(OracleTest.class)
 public class OracleManagerTest extends ImportJobTestCase {
 
-  public static final Log LOG =
-      LogFactory.getLog(OracleManagerTest.class.getName());
+public static final Log LOG =
+	LogFactory.getLog(OracleManagerTest.class.getName());
 
-  static final String TABLE_NAME = "EMPLOYEES";
-  static final String SECONDARY_TABLE_NAME = "CUSTOMER";
-  static final String QUALIFIED_SECONDARY_TABLE_NAME =
-      OracleUtils.ORACLE_SECONDARY_USER_NAME + "." + SECONDARY_TABLE_NAME;
+static final String TABLE_NAME = "EMPLOYEES";
+static final String SECONDARY_TABLE_NAME = "CUSTOMER";
+static final String QUALIFIED_SECONDARY_TABLE_NAME =
+	OracleUtils.ORACLE_SECONDARY_USER_NAME + "." + SECONDARY_TABLE_NAME;
 
-  /*
-   * Array containing SQL statements necessary to create and populate
-   * the main test table.
-   */
-  private static final String[] MAIN_TABLE_SQL_STMTS = new String[] {
-      "CREATE TABLE " + TABLE_NAME + " ("
-          + "id INT NOT NULL, "
-          + "name VARCHAR2(24) NOT NULL, "
-          + "start_date DATE, "
-          + "salary FLOAT, "
-          + "dept VARCHAR2(32), "
-          + "timestamp_tz TIMESTAMP WITH TIME ZONE, "
-          + "timestamp_ltz TIMESTAMP WITH LOCAL TIME ZONE, "
-          + "PRIMARY KEY (id))",
-      "INSERT INTO " + TABLE_NAME + " VALUES("
-          + "1,'Aaron',to_date('2009-05-14','yyyy-mm-dd'),"
-          +
-          "1000000.00,'engineering',TO_TIMESTAMP('29-DEC-09 12.00.00.000000000 PM', 'DD-MON-RR HH12.MI.SS.FF PM'),"
-          +
-          "TO_TIMESTAMP('29-DEC-09 12.00.00.000000000 PM', 'DD-MON-RR HH12.MI.SS.FF PM'))",
-      "INSERT INTO " + TABLE_NAME + " VALUES("
-          + "2,'Bob',to_date('2009-04-20','yyyy-mm-dd'),"
-          +
-          "400.00,'sales',TO_TIMESTAMP('30-DEC-09 12.00.00.000000000 PM', 'DD-MON-RR HH12.MI.SS.FF PM'),"
-          +
-          "TO_TIMESTAMP('30-DEC-09 12.00.00.000000000 PM', 'DD-MON-RR HH12.MI.SS.FF PM'))",
-      "INSERT INTO " + TABLE_NAME + " VALUES("
-          + "3,'Fred',to_date('2009-01-23','yyyy-mm-dd'),15.00,"
-          +
-          "'marketing', TO_TIMESTAMP('31-DEC-09 12.00.00.000000000 PM', 'DD-MON-RR HH12.MI.SS.FF PM'),"
-          +
-          "TO_TIMESTAMP('31-DEC-09 12.00.00.000000000 PM', 'DD-MON-RR HH12.MI.SS.FF PM'))",
-  };
+/*
+ * Array containing SQL statements necessary to create and populate
+ * the main test table.
+ */
+private static final String[] MAIN_TABLE_SQL_STMTS = new String[] {
+	"CREATE TABLE " + TABLE_NAME + " ("
+	+ "id INT NOT NULL, "
+	+ "name VARCHAR2(24) NOT NULL, "
+	+ "start_date DATE, "
+	+ "salary FLOAT, "
+	+ "dept VARCHAR2(32), "
+	+ "timestamp_tz TIMESTAMP WITH TIME ZONE, "
+	+ "timestamp_ltz TIMESTAMP WITH LOCAL TIME ZONE, "
+	+ "PRIMARY KEY (id))",
+	"INSERT INTO " + TABLE_NAME + " VALUES("
+	+ "1,'Aaron',to_date('2009-05-14','yyyy-mm-dd'),"
+	+
+	"1000000.00,'engineering',TO_TIMESTAMP('29-DEC-09 12.00.00.000000000 PM', 'DD-MON-RR HH12.MI.SS.FF PM'),"
+	+
+	"TO_TIMESTAMP('29-DEC-09 12.00.00.000000000 PM', 'DD-MON-RR HH12.MI.SS.FF PM'))",
+	"INSERT INTO " + TABLE_NAME + " VALUES("
+	+ "2,'Bob',to_date('2009-04-20','yyyy-mm-dd'),"
+	+
+	"400.00,'sales',TO_TIMESTAMP('30-DEC-09 12.00.00.000000000 PM', 'DD-MON-RR HH12.MI.SS.FF PM'),"
+	+
+	"TO_TIMESTAMP('30-DEC-09 12.00.00.000000000 PM', 'DD-MON-RR HH12.MI.SS.FF PM'))",
+	"INSERT INTO " + TABLE_NAME + " VALUES("
+	+ "3,'Fred',to_date('2009-01-23','yyyy-mm-dd'),15.00,"
+	+
+	"'marketing', TO_TIMESTAMP('31-DEC-09 12.00.00.000000000 PM', 'DD-MON-RR HH12.MI.SS.FF PM'),"
+	+
+	"TO_TIMESTAMP('31-DEC-09 12.00.00.000000000 PM', 'DD-MON-RR HH12.MI.SS.FF PM'))",
+};
 
-  /*
-   * Array containing SQL statements necessary to create, populate and
-   * provision the secondary test table.
-   */
-  private static final String[] SECONDARY_TABLE_SQL_STMTS = new String[] {
-      "CREATE TABLE " + SECONDARY_TABLE_NAME + " ("
-          + "id INT NOT NULL, "
-          + "name VARCHAR2(24) NOT NULL, "
-          + "PRIMARY KEY (id))",
-      "INSERT INTO " + SECONDARY_TABLE_NAME + " VALUES("
-          + "1,'MercuryCorp')",
-      "INSERT INTO " + SECONDARY_TABLE_NAME + " VALUES("
-          + "2,'VenusCorp')",
-      "INSERT INTO " + SECONDARY_TABLE_NAME + " VALUES("
-          + "3,'EarthCorp')",
-      "INSERT INTO " + SECONDARY_TABLE_NAME + " VALUES("
-          + "4,'MarsCorp')",
-      "INSERT INTO " + SECONDARY_TABLE_NAME + " VALUES("
-          + "5,'JupiterCorp')",
-      "INSERT INTO " + SECONDARY_TABLE_NAME + " VALUES("
-          + "6,'SaturnCorp')",
-      "GRANT SELECT, INSERT ON " + SECONDARY_TABLE_NAME + " TO " +
-          OracleUtils.ORACLE_USER_NAME,
-  };
+/*
+ * Array containing SQL statements necessary to create, populate and
+ * provision the secondary test table.
+ */
+private static final String[] SECONDARY_TABLE_SQL_STMTS = new String[] {
+	"CREATE TABLE " + SECONDARY_TABLE_NAME + " ("
+	+ "id INT NOT NULL, "
+	+ "name VARCHAR2(24) NOT NULL, "
+	+ "PRIMARY KEY (id))",
+	"INSERT INTO " + SECONDARY_TABLE_NAME + " VALUES("
+	+ "1,'MercuryCorp')",
+	"INSERT INTO " + SECONDARY_TABLE_NAME + " VALUES("
+	+ "2,'VenusCorp')",
+	"INSERT INTO " + SECONDARY_TABLE_NAME + " VALUES("
+	+ "3,'EarthCorp')",
+	"INSERT INTO " + SECONDARY_TABLE_NAME + " VALUES("
+	+ "4,'MarsCorp')",
+	"INSERT INTO " + SECONDARY_TABLE_NAME + " VALUES("
+	+ "5,'JupiterCorp')",
+	"INSERT INTO " + SECONDARY_TABLE_NAME + " VALUES("
+	+ "6,'SaturnCorp')",
+	"GRANT SELECT, INSERT ON " + SECONDARY_TABLE_NAME + " TO " +
+	OracleUtils.ORACLE_USER_NAME,
+};
 
-  // instance variables populated during setUp, used during tests
-  private OracleManager manager;
+// instance variables populated during setUp, used during tests
+private OracleManager manager;
 
-  @Override
-  protected boolean useHsqldbTestServer() {
-    return false;
-  }
+@Override
+protected boolean useHsqldbTestServer() {
+	return false;
+}
 
-  private void executeUpdates(OracleManager mgr, String[] sqlStmts) {
-    Connection connection = null;
-    Statement st = null;
+private void executeUpdates(OracleManager mgr, String[] sqlStmts) {
+	Connection connection = null;
+	Statement st = null;
 
-    try {
-      connection = mgr.getConnection();
-      connection.setAutoCommit(false);
-      st = connection.createStatement();
+	try {
+		connection = mgr.getConnection();
+		connection.setAutoCommit(false);
+		st = connection.createStatement();
 
-      for (String sql : sqlStmts) {
-        st.executeUpdate(sql);
-      }
-      connection.commit();
-    } catch (SQLException sqlE) {
-      LOG.error("Encountered SQL Exception: " + sqlE);
-      sqlE.printStackTrace();
-      fail("SQLException when running test setUp(): " + sqlE);
-    } finally {
-      try {
-        if (null != st) {
-          st.close();
-        }
+		for (String sql : sqlStmts) {
+			st.executeUpdate(sql);
+		}
+		connection.commit();
+	} catch (SQLException sqlE) {
+		LOG.error("Encountered SQL Exception: " + sqlE);
+		sqlE.printStackTrace();
+		fail("SQLException when running test setUp(): " + sqlE);
+	} finally {
+		try {
+			if (null != st) {
+				st.close();
+			}
 
-        if (null != connection) {
-          connection.close();
-        }
-      } catch (SQLException sqlE) {
-        LOG.warn("Got SQLException when closing connection: " + sqlE);
-      }
-    }
-  }
+			if (null != connection) {
+				connection.close();
+			}
+		} catch (SQLException sqlE) {
+			LOG.warn("Got SQLException when closing connection: " + sqlE);
+		}
+	}
+}
 
-  private void provisionSecondaryTable() {
-    SqoopOptions options =
-        new SqoopOptions(OracleUtils.CONNECT_STRING, SECONDARY_TABLE_NAME);
-    OracleUtils.setOracleSecondaryUserAuth(options);
+private void provisionSecondaryTable() {
+	SqoopOptions options =
+		new SqoopOptions(OracleUtils.CONNECT_STRING, SECONDARY_TABLE_NAME);
+	OracleUtils.setOracleSecondaryUserAuth(options);
 
-    OracleManager mgr = new OracleManager(options);
+	OracleManager mgr = new OracleManager(options);
 
-    // Drop the existing table if there is one
-    try {
-      OracleUtils.dropTable(SECONDARY_TABLE_NAME, mgr);
-    } catch (SQLException sqlE) {
-      fail("Could not drop table " + SECONDARY_TABLE_NAME + ": " + sqlE);
-    }
+	// Drop the existing table if there is one
+	try {
+		OracleUtils.dropTable(SECONDARY_TABLE_NAME, mgr);
+	} catch (SQLException sqlE) {
+		fail("Could not drop table " + SECONDARY_TABLE_NAME + ": " + sqlE);
+	}
 
-    executeUpdates(mgr, SECONDARY_TABLE_SQL_STMTS);
+	executeUpdates(mgr, SECONDARY_TABLE_SQL_STMTS);
 
-    try {
-      mgr.close();
-    } catch (SQLException sqlE) {
-      fail("Failed to close secondary manager instance : " + sqlE);
-    }
-  }
+	try {
+		mgr.close();
+	} catch (SQLException sqlE) {
+		fail("Failed to close secondary manager instance : " + sqlE);
+	}
+}
 
-  @Before
-  public void setUp() {
-    super.setUp();
+@Before
+public void setUp() {
+	super.setUp();
 
-    provisionSecondaryTable();
+	provisionSecondaryTable();
 
-    SqoopOptions options =
-        new SqoopOptions(OracleUtils.CONNECT_STRING, TABLE_NAME);
-    OracleUtils.setOracleAuth(options);
+	SqoopOptions options =
+		new SqoopOptions(OracleUtils.CONNECT_STRING, TABLE_NAME);
+	OracleUtils.setOracleAuth(options);
 
-    manager = new OracleManager(options);
-    options.getConf().set("oracle.sessionTimeZone", "US/Pacific");
+	manager = new OracleManager(options);
+	options.getConf().set("oracle.sessionTimeZone", "US/Pacific");
 
-    // Drop the existing table, if there is one.
-    try {
-      OracleUtils.dropTable(TABLE_NAME, manager);
-    } catch (SQLException sqlE) {
-      fail("Could not drop table " + TABLE_NAME + ": " + sqlE);
-    }
+	// Drop the existing table, if there is one.
+	try {
+		OracleUtils.dropTable(TABLE_NAME, manager);
+	} catch (SQLException sqlE) {
+		fail("Could not drop table " + TABLE_NAME + ": " + sqlE);
+	}
 
-    executeUpdates(manager, MAIN_TABLE_SQL_STMTS);
-  }
+	executeUpdates(manager, MAIN_TABLE_SQL_STMTS);
+}
 
-  @After
-  public void tearDown() {
-    super.tearDown();
-    try {
-      if (manager != null) {
-        manager.close();
-      }
-    } catch (SQLException sqlE) {
-      LOG.error("Got SQLException: " + sqlE.toString());
-      fail("Got SQLException: " + sqlE.toString());
-    }
-  }
+@After
+public void tearDown() {
+	super.tearDown();
+	try {
+		if (manager != null) {
+			manager.close();
+		}
+	} catch (SQLException sqlE) {
+		LOG.error("Got SQLException: " + sqlE.toString());
+		fail("Got SQLException: " + sqlE.toString());
+	}
+}
 
-  private String[] getArgv() { return getArgv(TABLE_NAME); }
+private String[] getArgv() {
+	return getArgv(TABLE_NAME);
+}
 
-  private String[] getArgv(String tableName) {
-    ArrayList<String> args = new ArrayList<String>();
+private String[] getArgv(String tableName) {
+	ArrayList<String> args = new ArrayList<String>();
 
-    CommonArgs.addHadoopFlags(args);
+	CommonArgs.addHadoopFlags(args);
 
-    args.add("-D");
-    args.add("oracle.sessionTimeZone=US/Pacific");
+	args.add("-D");
+	args.add("oracle.sessionTimeZone=US/Pacific");
 
-    args.add("--table");
-    args.add(tableName);
-    args.add("--warehouse-dir");
-    args.add(getWarehouseDir());
-    args.add("--connect");
-    args.add(OracleUtils.CONNECT_STRING);
-    args.add("--username");
-    args.add(OracleUtils.ORACLE_USER_NAME);
-    args.add("--password");
-    args.add(OracleUtils.ORACLE_USER_PASS);
-    args.add("--num-mappers");
-    args.add("1");
+	args.add("--table");
+	args.add(tableName);
+	args.add("--warehouse-dir");
+	args.add(getWarehouseDir());
+	args.add("--connect");
+	args.add(OracleUtils.CONNECT_STRING);
+	args.add("--username");
+	args.add(OracleUtils.ORACLE_USER_NAME);
+	args.add("--password");
+	args.add(OracleUtils.ORACLE_USER_PASS);
+	args.add("--num-mappers");
+	args.add("1");
 
-    return args.toArray(new String[0]);
-  }
+	return args.toArray(new String[0]);
+}
 
-  private void runSecondaryTableTest(String[] expectedResults)
-      throws IOException {
-    Path warehousePath = new Path(this.getWarehouseDir());
-    Path tablePath = new Path(warehousePath, QUALIFIED_SECONDARY_TABLE_NAME);
-    Path filePath = new Path(tablePath, "part-m-00000");
+private void runSecondaryTableTest(String[] expectedResults)
+throws IOException {
+	Path warehousePath = new Path(this.getWarehouseDir());
+	Path tablePath = new Path(warehousePath, QUALIFIED_SECONDARY_TABLE_NAME);
+	Path filePath = new Path(tablePath, "part-m-00000");
 
-    File tableFile = new File(tablePath.toString());
-    if (tableFile.exists() && tableFile.isDirectory()) {
-      // remove the directory before running the import
-      FileListing.recursiveDeleteDir(tableFile);
-    }
+	File tableFile = new File(tablePath.toString());
+	if (tableFile.exists() && tableFile.isDirectory()) {
+		// remove the directory before running the import
+		FileListing.recursiveDeleteDir(tableFile);
+	}
 
-    String[] argv = getArgv(QUALIFIED_SECONDARY_TABLE_NAME);
+	String[] argv = getArgv(QUALIFIED_SECONDARY_TABLE_NAME);
 
-    try {
-      runImport(argv);
-    } catch (IOException ioe) {
-      LOG.error("Got IOException during import: " + ioe.toString());
-      ioe.printStackTrace();
-      fail(ioe.toString());
-    }
+	try {
+		runImport(argv);
+	} catch (IOException ioe) {
+		LOG.error("Got IOException during import: " + ioe.toString());
+		ioe.printStackTrace();
+		fail(ioe.toString());
+	}
 
-    File f = new File(filePath.toString());
-    assertTrue("Could not find imported data file", f.exists());
-    BufferedReader r = null;
-    try {
-      // Read through the file and make sure it's all there.
-      r = new BufferedReader(new InputStreamReader(new FileInputStream(f)));
-      for (String expectedLine : expectedResults) {
-        compareRecords(expectedLine, r.readLine());
-      }
-    } catch (IOException ioe) {
-      LOG.error("Got IOException verifying results: " + ioe.toString());
-      ioe.printStackTrace();
-      fail(ioe.toString());
-    } finally {
-      IOUtils.closeStream(r);
-    }
-  }
+	File f = new File(filePath.toString());
+	assertTrue("Could not find imported data file", f.exists());
+	BufferedReader r = null;
+	try {
+		// Read through the file and make sure it's all there.
+		r = new BufferedReader(new InputStreamReader(new FileInputStream(f)));
+		for (String expectedLine : expectedResults) {
+			compareRecords(expectedLine, r.readLine());
+		}
+	} catch (IOException ioe) {
+		LOG.error("Got IOException verifying results: " + ioe.toString());
+		ioe.printStackTrace();
+		fail(ioe.toString());
+	} finally {
+		IOUtils.closeStream(r);
+	}
+}
 
-  private void runOracleTest(String[] expectedResults) throws IOException {
+private void runOracleTest(String[] expectedResults) throws IOException {
 
-    Path warehousePath = new Path(this.getWarehouseDir());
-    Path tablePath = new Path(warehousePath, TABLE_NAME);
-    Path filePath = new Path(tablePath, "part-m-00000");
+	Path warehousePath = new Path(this.getWarehouseDir());
+	Path tablePath = new Path(warehousePath, TABLE_NAME);
+	Path filePath = new Path(tablePath, "part-m-00000");
 
-    File tableFile = new File(tablePath.toString());
-    if (tableFile.exists() && tableFile.isDirectory()) {
-      // remove the directory before running the import.
-      FileListing.recursiveDeleteDir(tableFile);
-    }
+	File tableFile = new File(tablePath.toString());
+	if (tableFile.exists() && tableFile.isDirectory()) {
+		// remove the directory before running the import.
+		FileListing.recursiveDeleteDir(tableFile);
+	}
 
-    String[] argv = getArgv();
-    try {
-      runImport(argv);
-    } catch (IOException ioe) {
-      LOG.error("Got IOException during import: " + ioe.toString());
-      ioe.printStackTrace();
-      fail(ioe.toString());
-    }
+	String[] argv = getArgv();
+	try {
+		runImport(argv);
+	} catch (IOException ioe) {
+		LOG.error("Got IOException during import: " + ioe.toString());
+		ioe.printStackTrace();
+		fail(ioe.toString());
+	}
 
-    File f = new File(filePath.toString());
-    assertTrue("Could not find imported data file", f.exists());
-    BufferedReader r = null;
-    try {
-      // Read through the file and make sure it's all there.
-      r = new BufferedReader(new InputStreamReader(new FileInputStream(f)));
-      for (String expectedLine : expectedResults) {
-        compareRecords(expectedLine, r.readLine());
-      }
-    } catch (IOException ioe) {
-      LOG.error("Got IOException verifying results: " + ioe.toString());
-      ioe.printStackTrace();
-      fail(ioe.toString());
-    } finally {
-      IOUtils.closeStream(r);
-    }
-  }
+	File f = new File(filePath.toString());
+	assertTrue("Could not find imported data file", f.exists());
+	BufferedReader r = null;
+	try {
+		// Read through the file and make sure it's all there.
+		r = new BufferedReader(new InputStreamReader(new FileInputStream(f)));
+		for (String expectedLine : expectedResults) {
+			compareRecords(expectedLine, r.readLine());
+		}
+	} catch (IOException ioe) {
+		LOG.error("Got IOException verifying results: " + ioe.toString());
+		ioe.printStackTrace();
+		fail(ioe.toString());
+	} finally {
+		IOUtils.closeStream(r);
+	}
+}
 
-  @Test
-  public void testOracleImport() throws IOException {
-    // no quoting of strings allowed.  NOTE: Oracle JDBC 11.1 drivers
-    // auto-cast SQL DATE to java.sql.Timestamp.  Even if you define your
-    // columns as DATE in Oracle, they may still contain time information, so
-    // the JDBC drivers lie to us and will never tell us we have a strict DATE
-    // type. Thus we include HH:MM:SS.mmmmm below.
-    // See http://www.oracle.com
-    //     /technology/tech/java/sqlj_jdbc/htdocs/jdbc_faq.html#08_01
-    String[] expectedResults = {
-        "1,Aaron,2009-05-14 00:00:00.0,1000000,engineering,"
-            + "2009-12-29 12:00:00.0,2009-12-29 12:00:00.0",
-        "2,Bob,2009-04-20 00:00:00.0,400,sales,"
-            + "2009-12-30 12:00:00.0,2009-12-30 12:00:00.0",
-        "3,Fred,2009-01-23 00:00:00.0,15,marketing,"
-            + "2009-12-31 12:00:00.0,2009-12-31 12:00:00.0",
-    };
+@Test
+public void testOracleImport() throws IOException {
+	// no quoting of strings allowed.  NOTE: Oracle JDBC 11.1 drivers
+	// auto-cast SQL DATE to java.sql.Timestamp.  Even if you define your
+	// columns as DATE in Oracle, they may still contain time information, so
+	// the JDBC drivers lie to us and will never tell us we have a strict DATE
+	// type. Thus we include HH:MM:SS.mmmmm below.
+	// See http://www.oracle.com
+	//     /technology/tech/java/sqlj_jdbc/htdocs/jdbc_faq.html#08_01
+	String[] expectedResults = {
+		"1,Aaron,2009-05-14 00:00:00.0,1000000,engineering,"
+		+ "2009-12-29 12:00:00.0,2009-12-29 12:00:00.0",
+		"2,Bob,2009-04-20 00:00:00.0,400,sales,"
+		+ "2009-12-30 12:00:00.0,2009-12-30 12:00:00.0",
+		"3,Fred,2009-01-23 00:00:00.0,15,marketing,"
+		+ "2009-12-31 12:00:00.0,2009-12-31 12:00:00.0",
+	};
 
-    runOracleTest(expectedResults);
-  }
+	runOracleTest(expectedResults);
+}
 
-  @Test
-  public void testSecondaryTableImport() throws IOException {
+@Test
+public void testSecondaryTableImport() throws IOException {
 
-    String[] expectedResults = {
-        "1,MercuryCorp", "2,VenusCorp",   "3,EarthCorp",
-        "4,MarsCorp",    "5,JupiterCorp", "6,SaturnCorp",
-    };
-    runSecondaryTableTest(expectedResults);
-  }
+	String[] expectedResults = {
+		"1,MercuryCorp", "2,VenusCorp",   "3,EarthCorp",
+		"4,MarsCorp",    "5,JupiterCorp", "6,SaturnCorp",
+	};
+	runSecondaryTableTest(expectedResults);
+}
 
-  /**
-   * Compare two lines. Normalize the dates we receive based on the expected
-   * time zone.
-   * @param expectedLine    expected line
-   * @param receivedLine    received line
-   * @throws IOException    exception during lines comparison
-   */
-  private void compareRecords(String expectedLine, String receivedLine)
-      throws IOException {
-    // handle null case
-    if (expectedLine == null || receivedLine == null) {
-      return;
-    }
+/**
+ * Compare two lines. Normalize the dates we receive based on the expected
+ * time zone.
+ * @param expectedLine    expected line
+ * @param receivedLine    received line
+ * @throws IOException    exception during lines comparison
+ */
+private void compareRecords(String expectedLine, String receivedLine)
+throws IOException {
+	// handle null case
+	if (expectedLine == null || receivedLine == null) {
+		return;
+	}
 
-    // check if lines are equal
-    if (expectedLine.equals(receivedLine)) {
-      return;
-    }
+	// check if lines are equal
+	if (expectedLine.equals(receivedLine)) {
+		return;
+	}
 
-    // check if size is the same
-    String[] expectedValues = expectedLine.split(",");
-    String[] receivedValues = receivedLine.split(",");
-    if (expectedValues.length != 7 || receivedValues.length != 7) {
-      LOG.error("Number of expected fields did not match "
-                + "number of received fields");
-      throw new IOException("Number of expected fields did not match "
-                            + "number of received fields");
-    }
+	// check if size is the same
+	String[] expectedValues = expectedLine.split(",");
+	String[] receivedValues = receivedLine.split(",");
+	if (expectedValues.length != 7 || receivedValues.length != 7) {
+		LOG.error("Number of expected fields did not match "
+		          + "number of received fields");
+		throw new IOException("Number of expected fields did not match "
+		                      + "number of received fields");
+	}
 
-    // check first 5 values
-    boolean mismatch = false;
-    for (int i = 0; !mismatch && i < 5; i++) {
-      mismatch = !expectedValues[i].equals(receivedValues[i]);
-    }
-    if (mismatch) {
-      throw new IOException("Expected:<" + expectedLine + "> but was:<" +
-                            receivedLine + ">");
-    }
+	// check first 5 values
+	boolean mismatch = false;
+	for (int i = 0; !mismatch && i < 5; i++) {
+		mismatch = !expectedValues[i].equals(receivedValues[i]);
+	}
+	if (mismatch) {
+		throw new IOException("Expected:<" + expectedLine + "> but was:<" +
+		                      receivedLine + ">");
+	}
 
-    Date expectedDate = null;
-    Date receivedDate = null;
-    DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S");
-    int offset =
-        TimeZone.getDefault().getOffset(System.currentTimeMillis()) / 3600000;
-    for (int i = 5; i < 7; i++) {
-      // parse expected timestamp.
-      try {
-        expectedDate = df.parse(expectedValues[i]);
-      } catch (ParseException ex) {
-        LOG.error("Could not parse expected timestamp: " + expectedValues[i]);
-        throw new IOException("Could not parse expected timestamp: " +
-                              expectedValues[i]);
-      }
+	Date expectedDate = null;
+	Date receivedDate = null;
+	DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S");
+	int offset =
+		TimeZone.getDefault().getOffset(System.currentTimeMillis()) / 3600000;
+	for (int i = 5; i < 7; i++) {
+		// parse expected timestamp.
+		try {
+			expectedDate = df.parse(expectedValues[i]);
+		} catch (ParseException ex) {
+			LOG.error("Could not parse expected timestamp: " + expectedValues[i]);
+			throw new IOException("Could not parse expected timestamp: " +
+			                      expectedValues[i]);
+		}
 
-      // parse received timestamp
-      try {
-        receivedDate = df.parse(receivedValues[i]);
-      } catch (ParseException ex) {
-        LOG.error("Could not parse received timestamp: " + receivedValues[i]);
-        throw new IOException("Could not parse received timestamp: " +
-                              receivedValues[i]);
-      }
+		// parse received timestamp
+		try {
+			receivedDate = df.parse(receivedValues[i]);
+		} catch (ParseException ex) {
+			LOG.error("Could not parse received timestamp: " + receivedValues[i]);
+			throw new IOException("Could not parse received timestamp: " +
+			                      receivedValues[i]);
+		}
 
-      // compare two timestamps considering timezone offset
-      Calendar expectedCal = Calendar.getInstance();
-      expectedCal.setTime(expectedDate);
-      expectedCal.add(Calendar.HOUR, offset);
+		// compare two timestamps considering timezone offset
+		Calendar expectedCal = Calendar.getInstance();
+		expectedCal.setTime(expectedDate);
+		expectedCal.add(Calendar.HOUR, offset);
 
-      Calendar receivedCal = Calendar.getInstance();
-      receivedCal.setTime(receivedDate);
+		Calendar receivedCal = Calendar.getInstance();
+		receivedCal.setTime(receivedDate);
 
-      if (!expectedCal.equals(receivedCal)) {
-        throw new IOException("Expected:<" + expectedLine + "> but was:<" +
-                              receivedLine +
-                              ">, while timezone offset is: " + offset);
-      }
-    }
-  }
+		if (!expectedCal.equals(receivedCal)) {
+			throw new IOException("Expected:<" + expectedLine + "> but was:<" +
+			                      receivedLine +
+			                      ">, while timezone offset is: " + offset);
+		}
+	}
+}
 
-  @Test
-  public void testPurgeClosedConnections() throws Exception {
-    // Ensure that after an Oracle ConnManager releases any connections
-    // back into the cache (or closes them as redundant), it does not
-    // attempt to re-use the closed connection.
+@Test
+public void testPurgeClosedConnections() throws Exception {
+	// Ensure that after an Oracle ConnManager releases any connections
+	// back into the cache (or closes them as redundant), it does not
+	// attempt to re-use the closed connection.
 
-    SqoopOptions options =
-        new SqoopOptions(OracleUtils.CONNECT_STRING, TABLE_NAME);
-    OracleUtils.setOracleAuth(options);
+	SqoopOptions options =
+		new SqoopOptions(OracleUtils.CONNECT_STRING, TABLE_NAME);
+	OracleUtils.setOracleAuth(options);
 
-    // Create a connection manager, use it, and then recycle its connection
-    // into the cache.
-    ConnManager m1 = new OracleManager(options);
-    Connection c1 = m1.getConnection();
-    PreparedStatement s =
-        c1.prepareStatement("SELECT 1 FROM dual", ResultSet.TYPE_FORWARD_ONLY,
-                            ResultSet.CONCUR_READ_ONLY);
-    ResultSet rs = null;
-    try {
-      rs = s.executeQuery();
-      rs.close();
-    } finally {
-      s.close();
-    }
+	// Create a connection manager, use it, and then recycle its connection
+	// into the cache.
+	ConnManager m1 = new OracleManager(options);
+	Connection c1 = m1.getConnection();
+	PreparedStatement s =
+		c1.prepareStatement("SELECT 1 FROM dual", ResultSet.TYPE_FORWARD_ONLY,
+		                    ResultSet.CONCUR_READ_ONLY);
+	ResultSet rs = null;
+	try {
+		rs = s.executeQuery();
+		rs.close();
+	} finally {
+		s.close();
+	}
 
-    ConnManager m2 = new OracleManager(options);
-    Connection c2 = m2.getConnection(); // get a new connection.
+	ConnManager m2 = new OracleManager(options);
+	Connection c2 = m2.getConnection(); // get a new connection.
 
-    m1.close(); // c1 should now be cached.
+	m1.close(); // c1 should now be cached.
 
-    // Use the second connection to run a statement.
-    s = c2.prepareStatement("SELECT 2 FROM dual", ResultSet.TYPE_FORWARD_ONLY,
-                            ResultSet.CONCUR_READ_ONLY);
-    try {
-      rs = s.executeQuery();
-      rs.close();
-    } finally {
-      s.close();
-    }
+	// Use the second connection to run a statement.
+	s = c2.prepareStatement("SELECT 2 FROM dual", ResultSet.TYPE_FORWARD_ONLY,
+	                        ResultSet.CONCUR_READ_ONLY);
+	try {
+		rs = s.executeQuery();
+		rs.close();
+	} finally {
+		s.close();
+	}
 
-    m2.close(); // c2 should be discarded (c1 is already cached).
+	m2.close(); // c2 should be discarded (c1 is already cached).
 
-    // Try to get another connection from m2. This should result in
-    // a completely different connection getting served back to us.
-    Connection c2a = m2.getConnection();
+	// Try to get another connection from m2. This should result in
+	// a completely different connection getting served back to us.
+	Connection c2a = m2.getConnection();
 
-    assertFalse(c1.isClosed());
-    assertTrue(c2.isClosed());
-    assertFalse(c2a.isClosed());
+	assertFalse(c1.isClosed());
+	assertTrue(c2.isClosed());
+	assertFalse(c2a.isClosed());
 
-    s = c2a.prepareStatement("SELECT 3 FROM dual", ResultSet.TYPE_FORWARD_ONLY,
-                             ResultSet.CONCUR_READ_ONLY);
-    try {
-      rs = s.executeQuery();
-      rs.close();
-    } finally {
-      s.close();
-    }
+	s = c2a.prepareStatement("SELECT 3 FROM dual", ResultSet.TYPE_FORWARD_ONLY,
+	                         ResultSet.CONCUR_READ_ONLY);
+	try {
+		rs = s.executeQuery();
+		rs.close();
+	} finally {
+		s.close();
+	}
 
-    m2.close(); // Close the manager's active connection again.
-  }
+	m2.close(); // Close the manager's active connection again.
+}
 
-  @Test
-  public void testSessionUserName() throws Exception {
-    SqoopOptions options =
-        new SqoopOptions(OracleUtils.CONNECT_STRING, TABLE_NAME);
-    OracleUtils.setOracleAuth(options);
+@Test
+public void testSessionUserName() throws Exception {
+	SqoopOptions options =
+		new SqoopOptions(OracleUtils.CONNECT_STRING, TABLE_NAME);
+	OracleUtils.setOracleAuth(options);
 
-    // Create a connection manager and get a connection
-    OracleManager m1 = new OracleManager(options);
-    Connection c1 = m1.getConnection();
-    // Make sure that the session username is the same as the Oracle
-    // sqoop user name
-    String sessionUserName = m1.getSessionUser(c1);
-    Assert.assertEquals(OracleUtils.ORACLE_USER_NAME, sessionUserName);
-  }
+	// Create a connection manager and get a connection
+	OracleManager m1 = new OracleManager(options);
+	Connection c1 = m1.getConnection();
+	// Make sure that the session username is the same as the Oracle
+	// sqoop user name
+	String sessionUserName = m1.getSessionUser(c1);
+	Assert.assertEquals(OracleUtils.ORACLE_USER_NAME, sessionUserName);
+}
 }

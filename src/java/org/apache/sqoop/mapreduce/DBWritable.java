@@ -73,17 +73,17 @@ import java.sql.SQLException;
  */
 public interface DBWritable {
 
-  /**
-   * Sets the fields of the object in the {@link PreparedStatement}.
-   * @param statement the statement that the fields are put into.
-   * @throws SQLException
-   */
-  void write(PreparedStatement statement) throws SQLException;
+/**
+ * Sets the fields of the object in the {@link PreparedStatement}.
+ * @param statement the statement that the fields are put into.
+ * @throws SQLException
+ */
+void write(PreparedStatement statement) throws SQLException;
 
-  /**
-   * Reads the fields of the object from the {@link ResultSet}.
-   * @param resultSet the {@link ResultSet} to get the fields from.
-   * @throws SQLException
-   */
-  void readFields(ResultSet resultSet) throws SQLException;
+/**
+ * Reads the fields of the object from the {@link ResultSet}.
+ * @param resultSet the {@link ResultSet} to get the fields from.
+ * @throws SQLException
+ */
+void readFields(ResultSet resultSet) throws SQLException;
 }

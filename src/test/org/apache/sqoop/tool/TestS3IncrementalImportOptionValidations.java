@@ -44,83 +44,83 @@ import org.junit.runners.Parameterized;
 UseParametersRunnerFactory(BlockJUnit4ClassRunnerWithParametersFactory.class)
 public class TestS3IncrementalImportOptionValidations {
 
-  @Parameterized.Parameters(name = "incrementalMode = {0}")
-  public static Iterable<? extends Object> parameters() {
-    return Arrays.asList(AppendRows, DateLastModified);
-  }
+@Parameterized.Parameters(name = "incrementalMode = {0}")
+public static Iterable<? extends Object> parameters() {
+	return Arrays.asList(AppendRows, DateLastModified);
+}
 
-  private static final String TEST_TABLE = "testtable";
-  private static final String TEST_CONNECTION_STRING = "testconnectstring";
-  private static final String TEST_TARGET_DIR = "s3a://test-bucket";
-  private static final String TEST_NOT_S3_TEMPORARY_ROOTDIR =
-      "file:///test_temporary_rootdir";
-  private static final String TEST_S3_TEMPORARY_ROOTDIR =
-      "s3a://test_temporary_rootdir";
-  private static final String TEST_CHECK_COLUMN = "testcheckcolumn";
+private static final String TEST_TABLE = "testtable";
+private static final String TEST_CONNECTION_STRING = "testconnectstring";
+private static final String TEST_TARGET_DIR = "s3a://test-bucket";
+private static final String TEST_NOT_S3_TEMPORARY_ROOTDIR =
+	"file:///test_temporary_rootdir";
+private static final String TEST_S3_TEMPORARY_ROOTDIR =
+	"s3a://test_temporary_rootdir";
+private static final String TEST_CHECK_COLUMN = "testcheckcolumn";
 
-  @Rule public ExpectedException expectedException = ExpectedException.none();
+@Rule public ExpectedException expectedException = ExpectedException.none();
 
-  private final SqoopOptions.IncrementalMode incrementalMode;
+private final SqoopOptions.IncrementalMode incrementalMode;
 
-  private SqoopOptions sqoopOptions;
+private SqoopOptions sqoopOptions;
 
-  private ImportTool importTool;
+private ImportTool importTool;
 
-  public TestS3IncrementalImportOptionValidations(
-      SqoopOptions.IncrementalMode incrementalMode) {
-    this.incrementalMode = incrementalMode;
-  }
+public TestS3IncrementalImportOptionValidations(
+	SqoopOptions.IncrementalMode incrementalMode) {
+	this.incrementalMode = incrementalMode;
+}
 
-  @Before
-  public void before() {
-    sqoopOptions = mock(SqoopOptions.class);
-    when(sqoopOptions.getTableName()).thenReturn(TEST_TABLE);
-    when(sqoopOptions.getConnectString()).thenReturn(TEST_CONNECTION_STRING);
-    when(sqoopOptions.getTargetDir()).thenReturn(TEST_TARGET_DIR);
-    when(sqoopOptions.getIncrementalTestColumn()).thenReturn(TEST_CHECK_COLUMN);
-    when(sqoopOptions.getMapColumnHive()).thenReturn(new Properties());
+@Before
+public void before() {
+	sqoopOptions = mock(SqoopOptions.class);
+	when(sqoopOptions.getTableName()).thenReturn(TEST_TABLE);
+	when(sqoopOptions.getConnectString()).thenReturn(TEST_CONNECTION_STRING);
+	when(sqoopOptions.getTargetDir()).thenReturn(TEST_TARGET_DIR);
+	when(sqoopOptions.getIncrementalTestColumn()).thenReturn(TEST_CHECK_COLUMN);
+	when(sqoopOptions.getMapColumnHive()).thenReturn(new Properties());
 
-    importTool = new ImportTool();
-    importTool.extraArguments = new String[0];
-  }
+	importTool = new ImportTool();
+	importTool.extraArguments = new String[0];
+}
 
-  @Test
-  public void
-  testValidateOptionsThrowsWhenS3IncrementalImportIsPerformedWithoutTemporaryRootdir()
-      throws Exception {
-    expectedException.expect(SqoopOptions.InvalidOptionsException.class);
-    expectedException.expectMessage(
-        "For an " + INCREMENT_TYPE_ARG + " import into an S3 bucket --" +
-        TEMP_ROOTDIR_ARG + " option must be always set to a location in S3.");
+@Test
+public void
+testValidateOptionsThrowsWhenS3IncrementalImportIsPerformedWithoutTemporaryRootdir()
+throws Exception {
+	expectedException.expect(SqoopOptions.InvalidOptionsException.class);
+	expectedException.expectMessage(
+		"For an " + INCREMENT_TYPE_ARG + " import into an S3 bucket --" +
+		TEMP_ROOTDIR_ARG + " option must be always set to a location in S3.");
 
-    when(sqoopOptions.getIncrementalMode()).thenReturn(incrementalMode);
+	when(sqoopOptions.getIncrementalMode()).thenReturn(incrementalMode);
 
-    importTool.validateOptions(sqoopOptions);
-  }
+	importTool.validateOptions(sqoopOptions);
+}
 
-  @Test
-  public void
-  testValidateOptionsThrowsWhenS3IncrementalImportIsPerformedWithNotS3TemporaryRootdir()
-      throws Exception {
-    expectedException.expect(SqoopOptions.InvalidOptionsException.class);
-    expectedException.expectMessage(
-        "For an " + INCREMENT_TYPE_ARG + " import into an S3 bucket --" +
-        TEMP_ROOTDIR_ARG + " option must be always set to a location in S3.");
+@Test
+public void
+testValidateOptionsThrowsWhenS3IncrementalImportIsPerformedWithNotS3TemporaryRootdir()
+throws Exception {
+	expectedException.expect(SqoopOptions.InvalidOptionsException.class);
+	expectedException.expectMessage(
+		"For an " + INCREMENT_TYPE_ARG + " import into an S3 bucket --" +
+		TEMP_ROOTDIR_ARG + " option must be always set to a location in S3.");
 
-    when(sqoopOptions.getIncrementalMode()).thenReturn(incrementalMode);
-    when(sqoopOptions.getTempRootDir())
-        .thenReturn(TEST_NOT_S3_TEMPORARY_ROOTDIR);
+	when(sqoopOptions.getIncrementalMode()).thenReturn(incrementalMode);
+	when(sqoopOptions.getTempRootDir())
+	.thenReturn(TEST_NOT_S3_TEMPORARY_ROOTDIR);
 
-    importTool.validateOptions(sqoopOptions);
-  }
+	importTool.validateOptions(sqoopOptions);
+}
 
-  @Test
-  public void
-  testValidateOptionsSucceedsWhenS3IncrementalImportIsPerformedWithS3TemporaryRootdir()
-      throws Exception {
-    when(sqoopOptions.getIncrementalMode()).thenReturn(incrementalMode);
-    when(sqoopOptions.getTempRootDir()).thenReturn(TEST_S3_TEMPORARY_ROOTDIR);
+@Test
+public void
+testValidateOptionsSucceedsWhenS3IncrementalImportIsPerformedWithS3TemporaryRootdir()
+throws Exception {
+	when(sqoopOptions.getIncrementalMode()).thenReturn(incrementalMode);
+	when(sqoopOptions.getTempRootDir()).thenReturn(TEST_S3_TEMPORARY_ROOTDIR);
 
-    importTool.validateOptions(sqoopOptions);
-  }
+	importTool.validateOptions(sqoopOptions);
+}
 }

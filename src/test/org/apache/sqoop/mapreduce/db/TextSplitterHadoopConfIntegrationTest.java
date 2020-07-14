@@ -34,31 +34,31 @@ import org.junit.rules.ExpectedException;
 
 @Category(UnitTest.class)
 public class TextSplitterHadoopConfIntegrationTest {
-  private static final String TEXT_COL_NAME = "text_col_name";
+private static final String TEXT_COL_NAME = "text_col_name";
 
-  @Rule public ExpectedException thrown = ExpectedException.none();
+@Rule public ExpectedException thrown = ExpectedException.none();
 
-  @Test
-  public void testDefaultValueOfUnsetBooleanParam() throws Exception {
-    Configuration conf = Job.getInstance().getConfiguration();
-    TextSplitter splitter = new TextSplitter();
-    ResultSet rs = new MockResultSet();
+@Test
+public void testDefaultValueOfUnsetBooleanParam() throws Exception {
+	Configuration conf = Job.getInstance().getConfiguration();
+	TextSplitter splitter = new TextSplitter();
+	ResultSet rs = new MockResultSet();
 
-    String containedByExpectedExceptionMessage =
-        TextSplitter.ALLOW_TEXT_SPLITTER_PROPERTY;
+	String containedByExpectedExceptionMessage =
+		TextSplitter.ALLOW_TEXT_SPLITTER_PROPERTY;
 
-    thrown.expect(ValidationException.class);
-    thrown.expectMessage(containedByExpectedExceptionMessage);
-    splitter.split(conf, rs, TEXT_COL_NAME);
-  }
+	thrown.expect(ValidationException.class);
+	thrown.expectMessage(containedByExpectedExceptionMessage);
+	splitter.split(conf, rs, TEXT_COL_NAME);
+}
 
-  @Test
-  public void testBooleanParamValue() throws Exception {
-    Configuration conf = Job.getInstance().getConfiguration();
-    conf.set(TextSplitter.ALLOW_TEXT_SPLITTER_PROPERTY, "true");
-    TextSplitter splitter = new TextSplitter();
-    ResultSet rs = new MockResultSet();
-    List<InputSplit> splits = splitter.split(conf, rs, TEXT_COL_NAME);
-    assertFalse(splits.isEmpty());
-  }
+@Test
+public void testBooleanParamValue() throws Exception {
+	Configuration conf = Job.getInstance().getConfiguration();
+	conf.set(TextSplitter.ALLOW_TEXT_SPLITTER_PROPERTY, "true");
+	TextSplitter splitter = new TextSplitter();
+	ResultSet rs = new MockResultSet();
+	List<InputSplit> splits = splitter.split(conf, rs, TEXT_COL_NAME);
+	assertFalse(splits.isEmpty());
+}
 }

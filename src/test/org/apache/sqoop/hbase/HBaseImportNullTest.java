@@ -28,33 +28,33 @@ import org.junit.Test;
  */
 public class HBaseImportNullTest extends HBaseTestCase {
 
-  @Test
-  public void testNullRow() throws IOException {
-    String[] argv = getArgv(true, "nullRowT", "nullRowF", true, null);
-    String[] types = {"INT", "INT"};
-    String[] vals = {"0", "null"};
-    createTableWithColTypes(types, vals);
-    runImport(argv);
+@Test
+public void testNullRow() throws IOException {
+	String[] argv = getArgv(true, "nullRowT", "nullRowF", true, null);
+	String[] types = {"INT", "INT"};
+	String[] vals = {"0", "null"};
+	createTableWithColTypes(types, vals);
+	runImport(argv);
 
-    // This cell should not be placed in the results..
-    verifyHBaseCell("nullRowT", "0", "nullRowF", getColName(1), null);
+	// This cell should not be placed in the results..
+	verifyHBaseCell("nullRowT", "0", "nullRowF", getColName(1), null);
 
-    int rowCount = countHBaseTable("nullRowT", "nullRowF");
-    assertEquals(0, rowCount);
-  }
+	int rowCount = countHBaseTable("nullRowT", "nullRowF");
+	assertEquals(0, rowCount);
+}
 
-  @Test
-  public void testNulls() throws IOException {
-    String[] argv = getArgv(true, "nullT", "nullF", true, null);
-    String[] types = {"INT", "INT", "INT"};
-    String[] vals = {"0", "42", "null"};
-    createTableWithColTypes(types, vals);
-    runImport(argv);
+@Test
+public void testNulls() throws IOException {
+	String[] argv = getArgv(true, "nullT", "nullF", true, null);
+	String[] types = {"INT", "INT", "INT"};
+	String[] vals = {"0", "42", "null"};
+	createTableWithColTypes(types, vals);
+	runImport(argv);
 
-    // This cell should import correctly.
-    verifyHBaseCell("nullT", "0", "nullF", getColName(1), "42");
+	// This cell should import correctly.
+	verifyHBaseCell("nullT", "0", "nullF", getColName(1), "42");
 
-    // This cell should not be placed in the results..
-    verifyHBaseCell("nullT", "0", "nullF", getColName(2), null);
-  }
+	// This cell should not be placed in the results..
+	verifyHBaseCell("nullT", "0", "nullF", getColName(2), null);
+}
 }

@@ -22,40 +22,40 @@ package org.apache.sqoop.manager.oracle;
  * Represents an individual log message.
  */
 public class OraOopLogMessage {
-  private OraOopConstants.Logging.Level level;
-  private String message;
+private OraOopConstants.Logging.Level level;
+private String message;
 
-  public OraOopLogMessage(OraOopConstants.Logging.Level level, String message) {
+public OraOopLogMessage(OraOopConstants.Logging.Level level, String message) {
 
-    this.level = level;
-    this.message = message;
-  }
+	this.level = level;
+	this.message = message;
+}
 
-  public void log(OraOopLog log) {
+public void log(OraOopLog log) {
 
-    switch (this.level) {
-    case TRACE:
-      log.trace(this.message);
-      break;
-    case DEBUG:
-      log.debug(this.message);
-      break;
-    case INFO:
-      log.info(this.message);
-      break;
-    case WARN:
-      log.warn(this.message);
-      break;
-    case ERROR:
-      log.error(this.message);
-      break;
-    case FATAL:
-      log.fatal(this.message);
-      break;
-    default:
-      throw new RuntimeException(String.format(
-          "%s needs to be updated to cater for the message level \"%s\".",
-          OraOopUtilities.getCurrentMethodName(), this.level.toString()));
-    }
-  }
+	switch (this.level) {
+	case TRACE:
+		log.trace(this.message);
+		break;
+	case DEBUG:
+		log.debug(this.message);
+		break;
+	case INFO:
+		log.info(this.message);
+		break;
+	case WARN:
+		log.warn(this.message);
+		break;
+	case ERROR:
+		log.error(this.message);
+		break;
+	case FATAL:
+		log.fatal(this.message);
+		break;
+	default:
+		throw new RuntimeException(String.format(
+						   "%s needs to be updated to cater for the message level \"%s\".",
+						   OraOopUtilities.getCurrentMethodName(), this.level.toString()));
+	}
+}
 }

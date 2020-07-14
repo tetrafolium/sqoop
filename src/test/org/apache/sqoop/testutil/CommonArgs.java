@@ -25,33 +25,34 @@ import java.util.List;
  */
 public final class CommonArgs {
 
-  private CommonArgs() {}
+private CommonArgs() {
+}
 
-  public static final String LOCAL_FS = "file:///";
-  // this key is deprecated past 0.21
-  public static final String FS_DEFAULT_NAME = "fs.defaultfs.name";
-  public static final String FS_DEFAULTFS = "fs.defaultFS";
+public static final String LOCAL_FS = "file:///";
+// this key is deprecated past 0.21
+public static final String FS_DEFAULT_NAME = "fs.defaultfs.name";
+public static final String FS_DEFAULTFS = "fs.defaultFS";
 
-  public static String getJobtrackerAddress() {
-    return System.getProperty("mapreduce.jobtracker.address", "local");
-  }
-  public static String getDefaultFS() {
-    return System.getProperty(FS_DEFAULT_NAME, LOCAL_FS);
-  }
-  /**
-   * Craft a list of arguments that are common to (virtually)
-   * all Sqoop programs.
-   */
-  public static void addHadoopFlags(List<String> args) {
-    args.add("-D");
-    args.add("mapreduce.jobtracker.address=local");
-    args.add("-D");
-    args.add("mapreduce.job.maps=1");
-    args.add("-D");
-    args.add("fs.defaultFS=file:///");
-    args.add("-D");
-    args.add("jobclient.completion.poll.interval=50");
-    args.add("-D");
-    args.add("jobclient.progress.monitor.poll.interval=50");
-  }
+public static String getJobtrackerAddress() {
+	return System.getProperty("mapreduce.jobtracker.address", "local");
+}
+public static String getDefaultFS() {
+	return System.getProperty(FS_DEFAULT_NAME, LOCAL_FS);
+}
+/**
+ * Craft a list of arguments that are common to (virtually)
+ * all Sqoop programs.
+ */
+public static void addHadoopFlags(List<String> args) {
+	args.add("-D");
+	args.add("mapreduce.jobtracker.address=local");
+	args.add("-D");
+	args.add("mapreduce.job.maps=1");
+	args.add("-D");
+	args.add("fs.defaultFS=file:///");
+	args.add("-D");
+	args.add("jobclient.completion.poll.interval=50");
+	args.add("-D");
+	args.add("jobclient.progress.monitor.poll.interval=50");
+}
 }

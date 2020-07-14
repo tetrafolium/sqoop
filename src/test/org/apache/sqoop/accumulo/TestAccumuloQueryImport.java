@@ -28,40 +28,40 @@ import org.junit.Test;
  */
 public class TestAccumuloQueryImport extends AccumuloTestCase {
 
-  @Test
-  public void testImportFromQuery() throws IOException {
-    String[] types = {"INT", "INT", "INT"};
-    String[] vals = {"0", "42", "43"};
-    createTableWithColTypes(types, vals);
+@Test
+public void testImportFromQuery() throws IOException {
+	String[] types = {"INT", "INT", "INT"};
+	String[] vals = {"0", "42", "43"};
+	createTableWithColTypes(types, vals);
 
-    String[] argv =
-        getArgv("queryT", "queryF", true,
-                "SELECT " + getColName(0) + ", " + getColName(1) + " FROM " +
-                    getTableName() + " WHERE $CONDITIONS");
-    runImport(argv);
+	String[] argv =
+		getArgv("queryT", "queryF", true,
+		        "SELECT " + getColName(0) + ", " + getColName(1) + " FROM " +
+		        getTableName() + " WHERE $CONDITIONS");
+	runImport(argv);
 
-    // This cell should import correctly.
-    verifyAccumuloCell("queryT", "0", "queryF", getColName(1), "42");
+	// This cell should import correctly.
+	verifyAccumuloCell("queryT", "0", "queryF", getColName(1), "42");
 
-    // This cell should not be placed in the results..
-    verifyAccumuloCell("queryT", "0", "queryF", getColName(2), null);
-  }
+	// This cell should not be placed in the results..
+	verifyAccumuloCell("queryT", "0", "queryF", getColName(2), null);
+}
 
-  @Test
-  public void testExitFailure() throws IOException {
-    String[] argv = getArgv("NoAccumuloT", "NoAccumuloF", true, null);
-    String[] types = {"INT", "INT", "INT"};
-    String[] vals = {"0", "42", "43"};
-    createTableWithColTypes(types, vals);
-    try {
-      AccumuloUtil.setAlwaysNoAccumuloJarMode(true);
-      runImport(argv);
-      fail("should have gotten exception");
-    } catch (IOException e) {
-      // Got the exception, so we're happy
-      LOG.info("Got exception -- ok; we expected that to fail.");
-    } finally {
-      AccumuloUtil.setAlwaysNoAccumuloJarMode(false);
-    }
-  }
+@Test
+public void testExitFailure() throws IOException {
+	String[] argv = getArgv("NoAccumuloT", "NoAccumuloF", true, null);
+	String[] types = {"INT", "INT", "INT"};
+	String[] vals = {"0", "42", "43"};
+	createTableWithColTypes(types, vals);
+	try {
+		AccumuloUtil.setAlwaysNoAccumuloJarMode(true);
+		runImport(argv);
+		fail("should have gotten exception");
+	} catch (IOException e) {
+		// Got the exception, so we're happy
+		LOG.info("Got exception -- ok; we expected that to fail.");
+	} finally {
+		AccumuloUtil.setAlwaysNoAccumuloJarMode(false);
+	}
+}
 }

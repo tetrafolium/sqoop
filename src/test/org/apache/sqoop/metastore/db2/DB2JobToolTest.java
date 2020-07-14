@@ -51,7 +51,7 @@ import org.junit.experimental.categories.Category;
 @Category(Db2Test.class)
 public class DB2JobToolTest extends JobToolTestBase {
 
-  public DB2JobToolTest() {
-    super(CONNECT_STRING, DATABASE_USER, DATABASE_PASSWORD);
-  }
+public DB2JobToolTest() {
+	super(CONNECT_STRING, DATABASE_USER, DATABASE_PASSWORD);
+}
 }

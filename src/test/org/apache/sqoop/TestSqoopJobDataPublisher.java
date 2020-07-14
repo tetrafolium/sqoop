@@ -39,121 +39,121 @@ import org.junit.Test;
 
 public class TestSqoopJobDataPublisher extends ImportJobTestCase {
 
-  public static final Log LOG =
-      LogFactory.getLog(TestSqoopJobDataPublisher.class.getName());
+public static final Log LOG =
+	LogFactory.getLog(TestSqoopJobDataPublisher.class.getName());
 
-  @Before
-  public void setUp() {
-    super.setUp();
-    HiveImport.setTestMode(true);
-  }
+@Before
+public void setUp() {
+	super.setUp();
+	HiveImport.setTestMode(true);
+}
 
-  @After
-  public void tearDown() {
-    super.tearDown();
-    HiveImport.setTestMode(false);
-  }
-  /**
-   * Create the argv to pass to Sqoop.
-   * @return the argv as an array of strings.
-   */
-  protected String[] getArgv(boolean includeHadoopFlags, String[] moreArgs) {
-    ArrayList<String> args = new ArrayList<String>();
+@After
+public void tearDown() {
+	super.tearDown();
+	HiveImport.setTestMode(false);
+}
+/**
+ * Create the argv to pass to Sqoop.
+ * @return the argv as an array of strings.
+ */
+protected String[] getArgv(boolean includeHadoopFlags, String[] moreArgs) {
+	ArrayList<String> args = new ArrayList<String>();
 
-    if (includeHadoopFlags) {
-      CommonArgs.addHadoopFlags(args);
-    }
+	if (includeHadoopFlags) {
+		CommonArgs.addHadoopFlags(args);
+	}
 
-    args.add("-D");
-    args.add(ConfigurationConstants.DATA_PUBLISH_CLASS + "=" +
-             DummyDataPublisher.class.getName());
+	args.add("-D");
+	args.add(ConfigurationConstants.DATA_PUBLISH_CLASS + "=" +
+	         DummyDataPublisher.class.getName());
 
-    if (null != moreArgs) {
-      for (String arg : moreArgs) {
-        args.add(arg);
-      }
-    }
+	if (null != moreArgs) {
+		for (String arg : moreArgs) {
+			args.add(arg);
+		}
+	}
 
-    args.add("--table");
-    args.add(getTableName());
-    args.add("--warehouse-dir");
-    args.add(getWarehouseDir());
-    args.add("--connect");
-    args.add(getConnectString());
-    args.add("--hive-import");
-    String[] colNames = getColNames();
-    if (null != colNames) {
-      args.add("--split-by");
-      args.add(colNames[0]);
-    } else {
-      fail("Could not determine column names.");
-    }
+	args.add("--table");
+	args.add(getTableName());
+	args.add("--warehouse-dir");
+	args.add(getWarehouseDir());
+	args.add("--connect");
+	args.add(getConnectString());
+	args.add("--hive-import");
+	String[] colNames = getColNames();
+	if (null != colNames) {
+		args.add("--split-by");
+		args.add(colNames[0]);
+	} else {
+		fail("Could not determine column names.");
+	}
 
-    args.add("--num-mappers");
-    args.add("1");
+	args.add("--num-mappers");
+	args.add("1");
 
-    for (String a : args) {
-      LOG.debug("ARG : " + a);
-    }
+	for (String a : args) {
+		LOG.debug("ARG : " + a);
+	}
 
-    return args.toArray(new String[0]);
-  }
+	return args.toArray(new String[0]);
+}
 
-  private void runImportTest(String tableName, String[] types, String[] values,
-                             String verificationScript, String[] args,
-                             SqoopTool tool) throws IOException {
+private void runImportTest(String tableName, String[] types, String[] values,
+                           String verificationScript, String[] args,
+                           SqoopTool tool) throws IOException {
 
-    // create a table and populate it with a row...
-    createTableWithColTypes(types, values);
+	// create a table and populate it with a row...
+	createTableWithColTypes(types, values);
 
-    // set up our mock hive shell to compare our generated script
-    // against the correct expected one.
-    SqoopOptions options = getSqoopOptions(args, tool);
-    String hiveHome = options.getHiveHome();
-    assertNotNull("hive.home was not set", hiveHome);
-    String testDataPath =
-        new Path(new Path(hiveHome), "scripts/" + verificationScript)
-            .toString();
-    System.setProperty("expected.script",
-                       new File(testDataPath).getAbsolutePath());
+	// set up our mock hive shell to compare our generated script
+	// against the correct expected one.
+	SqoopOptions options = getSqoopOptions(args, tool);
+	String hiveHome = options.getHiveHome();
+	assertNotNull("hive.home was not set", hiveHome);
+	String testDataPath =
+		new Path(new Path(hiveHome), "scripts/" + verificationScript)
+		.toString();
+	System.setProperty("expected.script",
+	                   new File(testDataPath).getAbsolutePath());
 
-    // verify that we can import it correctly into hive.
-    runImport(tool, args);
-  }
+	// verify that we can import it correctly into hive.
+	runImport(tool, args);
+}
 
-  private SqoopOptions getSqoopOptions(String[] args, SqoopTool tool) {
-    SqoopOptions opts = null;
-    try {
-      opts = tool.parseArguments(args, null, null, true);
-    } catch (Exception e) {
-      fail("Invalid options: " + e.toString());
-    }
+private SqoopOptions getSqoopOptions(String[] args, SqoopTool tool) {
+	SqoopOptions opts = null;
+	try {
+		opts = tool.parseArguments(args, null, null, true);
+	} catch (Exception e) {
+		fail("Invalid options: " + e.toString());
+	}
 
-    return opts;
-  }
+	return opts;
+}
 
-  protected void setNumCols(int numCols) {
-    String[] cols = new String[numCols];
-    for (int i = 0; i < numCols; i++) {
-      cols[i] = "DATA_COL" + i;
-    }
+protected void setNumCols(int numCols) {
+	String[] cols = new String[numCols];
+	for (int i = 0; i < numCols; i++) {
+		cols[i] = "DATA_COL" + i;
+	}
 
-    setColNames(cols);
-  }
+	setColNames(cols);
+}
 
-  /** Test that strings and ints are handled in the normal fashion. */
-  @Test
-  public void testNormalHiveImport() throws IOException {
-    final String TABLE_NAME = "NORMAL_HIVE_IMPORT";
-    setCurTableName(TABLE_NAME);
-    setNumCols(3);
-    String[] types = {"VARCHAR(32)", "INTEGER", "CHAR(64)"};
-    String[] vals = {"'test'", "42", "'somestring'"};
-    runImportTest(TABLE_NAME, types, vals, "normalImport.q",
-                  getArgv(false, null), new ImportTool());
-    assert (DummyDataPublisher.hiveTable.equals("NORMAL_HIVE_IMPORT"));
-    assert (DummyDataPublisher.storeTable.equals("NORMAL_HIVE_IMPORT"));
-    assert (DummyDataPublisher.storeType.equals("hsqldb"));
-    assert (DummyDataPublisher.operation.equals("import"));
-  }
+/** Test that strings and ints are handled in the normal fashion. */
+@Test
+public void testNormalHiveImport() throws IOException {
+	final String TABLE_NAME = "NORMAL_HIVE_IMPORT";
+	setCurTableName(TABLE_NAME);
+	setNumCols(3);
+	String[] types = {"VARCHAR(32)", "INTEGER", "CHAR(64)"};
+	String[] vals = {"'test'", "42", "'somestring'"};
+	runImportTest(TABLE_NAME, types, vals, "normalImport.q",
+	              getArgv(false, null), new ImportTool());
+	assert (DummyDataPublisher.hiveTable.equals("NORMAL_HIVE_IMPORT"));
+	assert (DummyDataPublisher.storeTable.equals("NORMAL_HIVE_IMPORT"));
+	assert (DummyDataPublisher.storeType.equals("hsqldb"));
+	assert (DummyDataPublisher.operation.equals("import"));
+}
 }

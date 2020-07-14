@@ -36,49 +36,49 @@ import org.apache.sqoop.mapreduce.DBWritable;
  * connection failures based on set recovery options in job configurations
  */
 public class SQLServerDBInputFormat<T extends SqoopRecord>
-    extends DataDrivenDBInputFormat<T> implements Configurable {
+	extends DataDrivenDBInputFormat<T> implements Configurable {
 
-  private static final Log LOG =
-      LogFactory.getLog(SQLServerDBInputFormat.class);
+private static final Log LOG =
+	LogFactory.getLog(SQLServerDBInputFormat.class);
 
-  public static final String IMPORT_FAILURE_HANDLER_CLASS =
-      "sqoop.import.failure.handler.class";
+public static final String IMPORT_FAILURE_HANDLER_CLASS =
+	"sqoop.import.failure.handler.class";
 
-  @Override
-  /** {@inheritDoc} */
-  protected RecordReader<LongWritable, T>
-  createDBRecordReader(DBInputSplit split, Configuration conf)
-      throws IOException {
+@Override
+/** {@inheritDoc} */
+protected RecordReader<LongWritable, T>
+createDBRecordReader(DBInputSplit split, Configuration conf)
+throws IOException {
 
-    DBConfiguration dbConf = getDBConf();
-    Class<T> inputClass = (Class<T>)(dbConf.getInputClass());
-    String dbProductName = getDBProductName();
-    LOG.debug("Creating db record reader for db product: " + dbProductName);
+	DBConfiguration dbConf = getDBConf();
+	Class<T> inputClass = (Class<T>)(dbConf.getInputClass());
+	String dbProductName = getDBProductName();
+	LOG.debug("Creating db record reader for db product: " + dbProductName);
 
-    try {
-      return new SQLServerDBRecordReader<T>(
-          split, inputClass, conf, getConnection(), dbConf,
-          dbConf.getInputConditions(), dbConf.getInputFieldNames(),
-          dbConf.getInputTableName(), dbProductName);
-    } catch (SQLException ex) {
-      throw new IOException(ex);
-    }
-  }
+	try {
+		return new SQLServerDBRecordReader<T>(
+			split, inputClass, conf, getConnection(), dbConf,
+			dbConf.getInputConditions(), dbConf.getInputFieldNames(),
+			dbConf.getInputTableName(), dbProductName);
+	} catch (SQLException ex) {
+		throw new IOException(ex);
+	}
+}
 
-  /** Set Input for table. */
-  public static void setInput(Job job, Class<? extends DBWritable> inputClass,
-                              String tableName, String conditions,
-                              String splitBy, String... fieldNames) {
-    DataDrivenDBInputFormat.setInput(job, inputClass, tableName, conditions,
-                                     splitBy, fieldNames);
-    job.setInputFormatClass(SQLServerDBInputFormat.class);
-  }
+/** Set Input for table. */
+public static void setInput(Job job, Class<? extends DBWritable> inputClass,
+                            String tableName, String conditions,
+                            String splitBy, String... fieldNames) {
+	DataDrivenDBInputFormat.setInput(job, inputClass, tableName, conditions,
+	                                 splitBy, fieldNames);
+	job.setInputFormatClass(SQLServerDBInputFormat.class);
+}
 
-  /** Set Input for query. */
-  public static void setInput(Job job, Class<? extends DBWritable> inputClass,
-                              String inputQuery, String inputBoundingQuery) {
-    DataDrivenDBInputFormat.setInput(job, inputClass, inputQuery,
-                                     inputBoundingQuery);
-    job.setInputFormatClass(SQLServerDBInputFormat.class);
-  }
+/** Set Input for query. */
+public static void setInput(Job job, Class<? extends DBWritable> inputClass,
+                            String inputQuery, String inputBoundingQuery) {
+	DataDrivenDBInputFormat.setInput(job, inputClass, inputQuery,
+	                                 inputBoundingQuery);
+	job.setInputFormatClass(SQLServerDBInputFormat.class);
+}
 }

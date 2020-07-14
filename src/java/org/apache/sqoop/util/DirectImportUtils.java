@@ -41,80 +41,81 @@ import org.apache.sqoop.manager.ImportJobContext;
  */
 public final class DirectImportUtils {
 
-  public static final Log LOG =
-      LogFactory.getLog(DirectImportUtils.class.getName());
+public static final Log LOG =
+	LogFactory.getLog(DirectImportUtils.class.getName());
 
-  private DirectImportUtils() {}
+private DirectImportUtils() {
+}
 
-  /**
-   * Executes chmod on the specified file, passing in the mode string 'modstr'
-   * which may be e.g. "a+x" or "0600", etc.
-   * @throws IOException if chmod failed.
-   */
-  public static void setFilePermissions(File file, String modstr)
-      throws IOException {
-    // Set this file to be 0600. Java doesn't have a built-in mechanism for this
-    // so we need to go out to the shell to execute chmod.
-    try {
-      Shell.execCommand("chmod", modstr, file.toString());
-    } catch (IOException ioe) {
-      // Shell.execCommand will throw IOException on exit code != 0.
-      LOG.error("Could not chmod " + modstr + " " + file.toString());
-      throw new IOException("Could not ensure password file security.", ioe);
-    }
-  }
+/**
+ * Executes chmod on the specified file, passing in the mode string 'modstr'
+ * which may be e.g. "a+x" or "0600", etc.
+ * @throws IOException if chmod failed.
+ */
+public static void setFilePermissions(File file, String modstr)
+throws IOException {
+	// Set this file to be 0600. Java doesn't have a built-in mechanism for this
+	// so we need to go out to the shell to execute chmod.
+	try {
+		Shell.execCommand("chmod", modstr, file.toString());
+	} catch (IOException ioe) {
+		// Shell.execCommand will throw IOException on exit code != 0.
+		LOG.error("Could not chmod " + modstr + " " + file.toString());
+		throw new IOException("Could not ensure password file security.", ioe);
+	}
+}
 
-  /**
-   * Open a file in HDFS for write to hold the data associated with a table.
-   * Creates any necessary directories, and returns the OutputStream to write
-   * to. The caller is responsible for calling the close() method on the
-   * returned stream.
-   */
-  public static SplittableBufferedWriter
-  createHdfsSink(Configuration conf, SqoopOptions options,
-                 ImportJobContext context) throws IOException {
+/**
+ * Open a file in HDFS for write to hold the data associated with a table.
+ * Creates any necessary directories, and returns the OutputStream to write
+ * to. The caller is responsible for calling the close() method on the
+ * returned stream.
+ */
+public static SplittableBufferedWriter
+createHdfsSink(Configuration conf, SqoopOptions options,
+               ImportJobContext context) throws IOException {
 
-    Path destDir = context.getDestination();
-    FileSystem fs = destDir.getFileSystem(conf);
+	Path destDir = context.getDestination();
+	FileSystem fs = destDir.getFileSystem(conf);
 
-    LOG.debug("Writing to filesystem: " + fs.getUri());
-    LOG.debug("Creating destination directory " + destDir);
-    fs.mkdirs(destDir);
+	LOG.debug("Writing to filesystem: " + fs.getUri());
+	LOG.debug("Creating destination directory " + destDir);
+	fs.mkdirs(destDir);
 
-    // This Writer will be closed by the caller.
-    return new SplittableBufferedWriter(new SplittingOutputStream(
-        conf, destDir, "part-m-", options.getDirectSplitSize(),
-        getCodec(conf, options)));
-  }
+	// This Writer will be closed by the caller.
+	return new SplittableBufferedWriter(new SplittingOutputStream(
+						    conf, destDir, "part-m-", options.getDirectSplitSize(),
+						    getCodec(conf, options)));
+}
 
-  private static CompressionCodec getCodec(Configuration conf,
-                                           SqoopOptions options)
-      throws IOException {
-    if (options.shouldUseCompression()) {
-      if (options.getCompressionCodec() == null) {
-        return new GzipCodec();
-      } else {
-        return CodecMap.getCodec(options.getCompressionCodec(), conf);
-      }
-    }
-    return null;
-  }
+private static CompressionCodec getCodec(Configuration conf,
+                                         SqoopOptions options)
+throws IOException {
+	if (options.shouldUseCompression()) {
+		if (options.getCompressionCodec() == null) {
+			return new GzipCodec();
+		} else {
+			return CodecMap.getCodec(options.getCompressionCodec(), conf);
+		}
+	}
+	return null;
+}
 
-  /**
-   * @return true if someHost refers to localhost.
-   */
-  public static boolean isLocalhost(String someHost) {
-    if (null == someHost) {
-      return false;
-    }
+/**
+ * @return true if someHost refers to localhost.
+ */
+public static boolean isLocalhost(String someHost) {
+	if (null == someHost) {
+		return false;
+	}
 
-    try {
-      InetAddress localHostAddr = InetAddress.getLocalHost();
-      InetAddress someAddr = InetAddress.getByName(someHost);
+	try {
+		InetAddress localHostAddr = InetAddress.getLocalHost();
+		InetAddress someAddr = InetAddress.getByName(someHost);
 
-      return localHostAddr.equals(someAddr);
-    } catch (UnknownHostException uhe) {
-      return false;
-    }
-  }
+		return localHostAddr.equals(someAddr);
+	} catch (UnknownHostException uhe) {
+		return false;
+	}
+}
 }

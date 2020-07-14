@@ -36,74 +36,76 @@ import org.apache.sqoop.mapreduce.db.DBConfiguration;
  * value.
  */
 public abstract class MainframeDatasetRecordReader<T extends DBWritable>
-    extends RecordReader<LongWritable, T> {
-  private Class<T> inputClass;
-  private Configuration conf;
-  private MainframeDatasetInputSplit split;
-  private LongWritable key;
-  private T datasetRecord;
-  private long numberRecordRead;
-  private int datasetProcessed;
+	extends RecordReader<LongWritable, T> {
+private Class<T> inputClass;
+private Configuration conf;
+private MainframeDatasetInputSplit split;
+private LongWritable key;
+private T datasetRecord;
+private long numberRecordRead;
+private int datasetProcessed;
 
-  private static final Log LOG =
-      LogFactory.getLog(MainframeDatasetRecordReader.class.getName());
+private static final Log LOG =
+	LogFactory.getLog(MainframeDatasetRecordReader.class.getName());
 
-  @Override
-  public void initialize(InputSplit inputSplit,
-                         TaskAttemptContext taskAttemptContext)
-      throws IOException, InterruptedException {
+@Override
+public void initialize(InputSplit inputSplit,
+                       TaskAttemptContext taskAttemptContext)
+throws IOException, InterruptedException {
 
-    split = (MainframeDatasetInputSplit)inputSplit;
-    conf = taskAttemptContext.getConfiguration();
-    inputClass =
-        (Class<T>)(conf.getClass(DBConfiguration.INPUT_CLASS_PROPERTY, null));
-    key = null;
-    datasetRecord = null;
-    numberRecordRead = 0;
-    datasetProcessed = 0;
-  }
+	split = (MainframeDatasetInputSplit)inputSplit;
+	conf = taskAttemptContext.getConfiguration();
+	inputClass =
+		(Class<T>)(conf.getClass(DBConfiguration.INPUT_CLASS_PROPERTY, null));
+	key = null;
+	datasetRecord = null;
+	numberRecordRead = 0;
+	datasetProcessed = 0;
+}
 
-  @Override
-  public boolean nextKeyValue() throws IOException, InterruptedException {
-    if (key == null) {
-      key = new LongWritable();
-    }
-    if (datasetRecord == null) {
-      datasetRecord = ReflectionUtils.newInstance(inputClass, conf);
-    }
-    if (getNextRecord(datasetRecord)) {
-      numberRecordRead++;
-      key.set(numberRecordRead);
-      return true;
-    }
-    return false;
-  }
+@Override
+public boolean nextKeyValue() throws IOException, InterruptedException {
+	if (key == null) {
+		key = new LongWritable();
+	}
+	if (datasetRecord == null) {
+		datasetRecord = ReflectionUtils.newInstance(inputClass, conf);
+	}
+	if (getNextRecord(datasetRecord)) {
+		numberRecordRead++;
+		key.set(numberRecordRead);
+		return true;
+	}
+	return false;
+}
 
-  @Override
-  public LongWritable getCurrentKey() throws IOException, InterruptedException {
-    return key;
-  }
+@Override
+public LongWritable getCurrentKey() throws IOException, InterruptedException {
+	return key;
+}
 
-  @Override
-  public T getCurrentValue() throws IOException, InterruptedException {
-    return datasetRecord;
-  }
+@Override
+public T getCurrentValue() throws IOException, InterruptedException {
+	return datasetRecord;
+}
 
-  @Override
-  public float getProgress() throws IOException, InterruptedException {
-    return datasetProcessed / (float)split.getLength();
-  }
+@Override
+public float getProgress() throws IOException, InterruptedException {
+	return datasetProcessed / (float)split.getLength();
+}
 
-  protected String getNextDataset() {
-    String datasetName = split.getNextDataset();
-    if (datasetName != null) {
-      datasetProcessed++;
-      LOG.info("Starting transfer of " + datasetName);
-    }
-    return datasetName;
-  }
+protected String getNextDataset() {
+	String datasetName = split.getNextDataset();
+	if (datasetName != null) {
+		datasetProcessed++;
+		LOG.info("Starting transfer of " + datasetName);
+	}
+	return datasetName;
+}
 
-  protected Configuration getConfiguration() { return conf; }
+protected Configuration getConfiguration() {
+	return conf;
+}
 
-  protected abstract boolean getNextRecord(T datasetRecord) throws IOException;
+protected abstract boolean getNextRecord(T datasetRecord) throws IOException;
 }

@@ -21,19 +21,19 @@ package org.apache.sqoop.tool;
 import java.sql.Connection;
 
 enum JDBCTransactionLevels {
-  TRANSACTION_NONE(Connection.TRANSACTION_NONE),
-  TRANSACTION_READ_UNCOMMITTED(Connection.TRANSACTION_READ_UNCOMMITTED),
-  TRANSACTION_READ_COMMITTED(Connection.TRANSACTION_READ_COMMITTED),
-  TRANSACTION_REPEATABLE_READ(Connection.TRANSACTION_REPEATABLE_READ),
-  TRANSACTION_SERIALIZABLE(Connection.TRANSACTION_SERIALIZABLE);
+	TRANSACTION_NONE(Connection.TRANSACTION_NONE),
+	TRANSACTION_READ_UNCOMMITTED(Connection.TRANSACTION_READ_UNCOMMITTED),
+	TRANSACTION_READ_COMMITTED(Connection.TRANSACTION_READ_COMMITTED),
+	TRANSACTION_REPEATABLE_READ(Connection.TRANSACTION_REPEATABLE_READ),
+	TRANSACTION_SERIALIZABLE(Connection.TRANSACTION_SERIALIZABLE);
 
-  private final int transactionLevelValue;
+	private final int transactionLevelValue;
 
-  private JDBCTransactionLevels(int transactionLevelValue) {
-    this.transactionLevelValue = transactionLevelValue;
-  }
+	private JDBCTransactionLevels(int transactionLevelValue) {
+		this.transactionLevelValue = transactionLevelValue;
+	}
 
-  public int getTransactionIsolationLevelValue() {
-    return transactionLevelValue;
-  }
+	public int getTransactionIsolationLevelValue() {
+		return transactionLevelValue;
+	}
 }

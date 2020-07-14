@@ -46,12 +46,12 @@ import org.junit.experimental.categories.Category;
  */
 @Category(SqlServerTest.class)
 public class SqlServerMetaConnectIncrementalImportTest
-    extends MetaConnectIncrementalImportTestBase {
+	extends MetaConnectIncrementalImportTestBase {
 
-  private static MSSQLTestUtils msSQLTestUtils = new MSSQLTestUtils();
+private static MSSQLTestUtils msSQLTestUtils = new MSSQLTestUtils();
 
-  public SqlServerMetaConnectIncrementalImportTest() {
-    super(msSQLTestUtils.getDBConnectString(), msSQLTestUtils.getDBUserName(),
-          msSQLTestUtils.getDBPassWord());
-  }
+public SqlServerMetaConnectIncrementalImportTest() {
+	super(msSQLTestUtils.getDBConnectString(), msSQLTestUtils.getDBUserName(),
+	      msSQLTestUtils.getDBPassWord());
+}
 }

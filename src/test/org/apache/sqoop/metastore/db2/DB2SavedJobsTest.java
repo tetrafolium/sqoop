@@ -52,8 +52,8 @@ import org.junit.experimental.categories.Category;
 @Category(Db2Test.class)
 public class DB2SavedJobsTest extends SavedJobsTestBase {
 
-  public DB2SavedJobsTest() {
-    super(CONNECT_STRING, DATABASE_USER, DATABASE_PASSWORD,
-          JdbcDrivers.DB2.getDriverClass());
-  }
+public DB2SavedJobsTest() {
+	super(CONNECT_STRING, DATABASE_USER, DATABASE_PASSWORD,
+	      JdbcDrivers.DB2.getDriverClass());
+}
 }

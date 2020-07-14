@@ -68,118 +68,120 @@ import org.junit.experimental.categories.Category;
 @Category({ManualTest.class, PostgresqlTest.class})
 public class PGBulkloadManagerManualTest extends TestExport {
 
-  public static final Log LOG =
-      LogFactory.getLog(PGBulkloadManagerManualTest.class.getName());
-  private DBConfiguration dbConf;
-  static final String TABLESPACE =
-      System.getProperty("sqoop.test.postgresql.tablespace", "sqoop");
-  static final String PG_BULKLOAD =
-      System.getProperty("sqoop.test.postgresql.pg_bulkload", "pg_bulkload");
+public static final Log LOG =
+	LogFactory.getLog(PGBulkloadManagerManualTest.class.getName());
+private DBConfiguration dbConf;
+static final String TABLESPACE =
+	System.getProperty("sqoop.test.postgresql.tablespace", "sqoop");
+static final String PG_BULKLOAD =
+	System.getProperty("sqoop.test.postgresql.pg_bulkload", "pg_bulkload");
 
-  public PGBulkloadManagerManualTest() {
-    JobConf conf = new JobConf(getConf());
-    DBConfiguration.configureDB(conf, "org.postgresql.Driver",
-                                getConnectString(), getUserName(), (String)null,
-                                (Integer)null);
-    dbConf = new DBConfiguration(conf);
-  }
+public PGBulkloadManagerManualTest() {
+	JobConf conf = new JobConf(getConf());
+	DBConfiguration.configureDB(conf, "org.postgresql.Driver",
+	                            getConnectString(), getUserName(), (String)null,
+	                            (Integer)null);
+	dbConf = new DBConfiguration(conf);
+}
 
-  @Override
-  protected boolean useHsqldbTestServer() {
-    return false;
-  }
+@Override
+protected boolean useHsqldbTestServer() {
+	return false;
+}
 
-  @Override
-  protected String getConnectString() {
-    return CONNECT_STRING;
-  }
+@Override
+protected String getConnectString() {
+	return CONNECT_STRING;
+}
 
-  protected String getUserName() { return DATABASE_USER; }
+protected String getUserName() {
+	return DATABASE_USER;
+}
 
-  @Override
-  protected String getTablePrefix() {
-    return super.getTablePrefix().toLowerCase();
-  }
+@Override
+protected String getTablePrefix() {
+	return super.getTablePrefix().toLowerCase();
+}
 
-  @Override
-  protected String getTableName() {
-    return super.getTableName().toLowerCase();
-  }
+@Override
+protected String getTableName() {
+	return super.getTableName().toLowerCase();
+}
 
-  @Override
-  public String getStagingTableName() {
-    return super.getStagingTableName().toLowerCase();
-  }
+@Override
+public String getStagingTableName() {
+	return super.getStagingTableName().toLowerCase();
+}
 
-  @Override
-  protected Connection getConnection() {
-    try {
-      Connection conn = dbConf.getConnection();
-      conn.setAutoCommit(false);
-      PreparedStatement stmt =
-          conn.prepareStatement("SET extra_float_digits TO 0");
-      stmt.executeUpdate();
-      conn.commit();
-      return conn;
-    } catch (SQLException sqlE) {
-      LOG.error("Could not get connection to test server: " + sqlE);
-      return null;
-    } catch (ClassNotFoundException cnfE) {
-      LOG.error("Could not find driver class: " + cnfE);
-      return null;
-    }
-  }
+@Override
+protected Connection getConnection() {
+	try {
+		Connection conn = dbConf.getConnection();
+		conn.setAutoCommit(false);
+		PreparedStatement stmt =
+			conn.prepareStatement("SET extra_float_digits TO 0");
+		stmt.executeUpdate();
+		conn.commit();
+		return conn;
+	} catch (SQLException sqlE) {
+		LOG.error("Could not get connection to test server: " + sqlE);
+		return null;
+	} catch (ClassNotFoundException cnfE) {
+		LOG.error("Could not find driver class: " + cnfE);
+		return null;
+	}
+}
 
-  @Override
-  protected String getDropTableStatement(String tableName) {
-    return "DROP TABLE IF EXISTS " + tableName;
-  }
+@Override
+protected String getDropTableStatement(String tableName) {
+	return "DROP TABLE IF EXISTS " + tableName;
+}
 
-  @Override
-  protected String[] getArgv(boolean includeHadoopFlags, int rowsPerStatement,
-                             int statementsPerTx, String... additionalArgv) {
-    ArrayList<String> args =
-        new ArrayList<String>(Arrays.asList(additionalArgv));
-    args.add("-D");
-    args.add("pgbulkload.bin=" + PG_BULKLOAD);
-    args.add("--username");
-    args.add(getUserName());
-    args.add("--connection-manager");
-    args.add("org.apache.sqoop.manager.PGBulkloadManager");
-    args.add("--staging-table");
-    args.add("dummy");
-    args.add("--clear-staging-table");
-    return super.getArgv(includeHadoopFlags, rowsPerStatement, statementsPerTx,
-                         args.toArray(new String[0]));
-  }
+@Override
+protected String[] getArgv(boolean includeHadoopFlags, int rowsPerStatement,
+                           int statementsPerTx, String... additionalArgv) {
+	ArrayList<String> args =
+		new ArrayList<String>(Arrays.asList(additionalArgv));
+	args.add("-D");
+	args.add("pgbulkload.bin=" + PG_BULKLOAD);
+	args.add("--username");
+	args.add(getUserName());
+	args.add("--connection-manager");
+	args.add("org.apache.sqoop.manager.PGBulkloadManager");
+	args.add("--staging-table");
+	args.add("dummy");
+	args.add("--clear-staging-table");
+	return super.getArgv(includeHadoopFlags, rowsPerStatement, statementsPerTx,
+	                     args.toArray(new String[0]));
+}
 
-  @Override
-  protected String[] getCodeGenArgv(String... extraArgs) {
-    ArrayList<String> args = new ArrayList<String>(Arrays.asList(extraArgs));
-    args.add("--username");
-    args.add(getUserName());
-    return super.getCodeGenArgv(args.toArray(new String[0]));
-  }
+@Override
+protected String[] getCodeGenArgv(String... extraArgs) {
+	ArrayList<String> args = new ArrayList<String>(Arrays.asList(extraArgs));
+	args.add("--username");
+	args.add(getUserName());
+	return super.getCodeGenArgv(args.toArray(new String[0]));
+}
 
-  @Override
-  public void testColumnsExport() throws IOException, SQLException {
-    // PGBulkloadManager does not support --columns option.
-  }
+@Override
+public void testColumnsExport() throws IOException, SQLException {
+	// PGBulkloadManager does not support --columns option.
+}
 
-  @Test
-  public void testMultiReduceExport() throws IOException, SQLException {
-    multiFileTest(2, 10, 2, "-D", "mapred.reduce.tasks=2");
-  }
+@Test
+public void testMultiReduceExport() throws IOException, SQLException {
+	multiFileTest(2, 10, 2, "-D", "mapred.reduce.tasks=2");
+}
 
-  @Test
-  public void testMultiReduceExportWithNewProp()
-      throws IOException, SQLException {
-    multiFileTest(2, 10, 2, "-D", "mapreduce.job.reduces=2");
-  }
+@Test
+public void testMultiReduceExportWithNewProp()
+throws IOException, SQLException {
+	multiFileTest(2, 10, 2, "-D", "mapreduce.job.reduces=2");
+}
 
-  @Test
-  public void testExportWithTablespace() throws IOException, SQLException {
-    multiFileTest(1, 10, 1, "-D",
-                  "pgbulkload.staging.tablespace=" + TABLESPACE);
-  }
+@Test
+public void testExportWithTablespace() throws IOException, SQLException {
+	multiFileTest(1, 10, 1, "-D",
+	              "pgbulkload.staging.tablespace=" + TABLESPACE);
+}
 }

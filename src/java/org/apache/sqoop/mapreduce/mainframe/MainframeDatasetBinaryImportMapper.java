@@ -27,17 +27,17 @@ import org.apache.sqoop.lib.SqoopRecord;
  * split.
  */
 public class MainframeDatasetBinaryImportMapper
-    extends AbstractMainframeDatasetImportMapper<BytesWritable> {
+	extends AbstractMainframeDatasetImportMapper<BytesWritable> {
 
-  @Override
-  protected BytesWritable createOutKey(SqoopRecord sqoopRecord) {
-    BytesWritable result = new BytesWritable();
-    byte[] bytes = (byte[])sqoopRecord.getFieldMap()
-                       .entrySet()
-                       .iterator()
-                       .next()
-                       .getValue();
-    result.set(bytes, 0, bytes.length);
-    return result;
-  }
+@Override
+protected BytesWritable createOutKey(SqoopRecord sqoopRecord) {
+	BytesWritable result = new BytesWritable();
+	byte[] bytes = (byte[])sqoopRecord.getFieldMap()
+	               .entrySet()
+	               .iterator()
+	               .next()
+	               .getValue();
+	result.set(bytes, 0, bytes.length);
+	return result;
+}
 }

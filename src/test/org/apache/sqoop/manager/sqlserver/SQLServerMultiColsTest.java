@@ -55,83 +55,85 @@ import org.junit.experimental.categories.Category;
 @Category(SqlServerTest.class)
 public class SQLServerMultiColsTest extends TestMultiCols {
 
-  protected boolean useHsqldbTestServer() { return false; }
+protected boolean useHsqldbTestServer() {
+	return false;
+}
 
-  protected String getConnectString() {
-    return MSSQLTestUtils.getDBConnectString();
-  }
+protected String getConnectString() {
+	return MSSQLTestUtils.getDBConnectString();
+}
 
-  /**
-   * Drop a table if it already exists in the database.
-   *
-   * @param table
-   *            the name of the table to drop.
-   * @throws SQLException
-   *             if something goes wrong.
-   */
-  protected void dropTableIfExists(String table) throws SQLException {
-    Connection conn = getManager().getConnection();
-    String sqlStmt =
-        "IF OBJECT_ID('" + table + "') IS NOT NULL  DROP TABLE " + table;
-    PreparedStatement statement = conn.prepareStatement(
-        sqlStmt, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-    try {
-      statement.executeUpdate();
-      conn.commit();
-    } finally {
-      statement.close();
-    }
-  }
+/**
+ * Drop a table if it already exists in the database.
+ *
+ * @param table
+ *            the name of the table to drop.
+ * @throws SQLException
+ *             if something goes wrong.
+ */
+protected void dropTableIfExists(String table) throws SQLException {
+	Connection conn = getManager().getConnection();
+	String sqlStmt =
+		"IF OBJECT_ID('" + table + "') IS NOT NULL  DROP TABLE " + table;
+	PreparedStatement statement = conn.prepareStatement(
+		sqlStmt, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+	try {
+		statement.executeUpdate();
+		conn.commit();
+	} finally {
+		statement.close();
+	}
+}
 
-  protected SqoopOptions getSqoopOptions(Configuration conf) {
+protected SqoopOptions getSqoopOptions(Configuration conf) {
 
-    String username = MSSQLTestUtils.getDBUserName();
-    String password = MSSQLTestUtils.getDBPassWord();
-    SqoopOptions opts = new SqoopOptions(conf);
-    opts.setUsername(username);
-    opts.setPassword(password);
+	String username = MSSQLTestUtils.getDBUserName();
+	String password = MSSQLTestUtils.getDBPassWord();
+	SqoopOptions opts = new SqoopOptions(conf);
+	opts.setUsername(username);
+	opts.setPassword(password);
 
-    return opts;
-  }
+	return opts;
+}
 
-  @After
-  public void tearDown() {
-    try {
-      dropTableIfExists(getTableName());
-    } catch (SQLException sqle) {
-      LOG.info("Table clean-up failed: " + sqle);
-    } finally {
-      super.tearDown();
-    }
-  }
+@After
+public void tearDown() {
+	try {
+		dropTableIfExists(getTableName());
+	} catch (SQLException sqle) {
+		LOG.info("Table clean-up failed: " + sqle);
+	} finally {
+		super.tearDown();
+	}
+}
 
-  @Test
-  public void testMixed4() {
-    // Overridden to bypass test case invalid for MSSQL server
-  }
+@Test
+public void testMixed4() {
+	// Overridden to bypass test case invalid for MSSQL server
+}
 
-  @Test
-  public void testMixed5() {
-    // Overridden to bypass test case invalid for MSSQL server
-  }
+@Test
+public void testMixed5() {
+	// Overridden to bypass test case invalid for MSSQL server
+}
 
-  @Test
-  public void testMixed6() {
-    // Overridden to bypass test case invalid for MSSQL server
-  }
+@Test
+public void testMixed6() {
+	// Overridden to bypass test case invalid for MSSQL server
+}
 
-  @Test
-  public void testSkipFirstCol() {
-    // Overridden to bypass test case invalid for MSSQL server
-  }
+@Test
+public void testSkipFirstCol() {
+	// Overridden to bypass test case invalid for MSSQL server
+}
 
-  @Test
-  public void testSkipSecondCol() {
-    // Overridden to bypass test case invalid for MSSQL server
-  }
+@Test
+public void testSkipSecondCol() {
+	// Overridden to bypass test case invalid for MSSQL server
+}
 
-  @Test
-  public void testSkipThirdCol() {
-    // Overridden to bypass test case invalid for MSSQL server
-  }
+@Test
+public void testSkipThirdCol() {
+	// Overridden to bypass test case invalid for MSSQL server
+}
 }

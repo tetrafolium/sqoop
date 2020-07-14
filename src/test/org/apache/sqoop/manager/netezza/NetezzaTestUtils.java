@@ -31,109 +31,110 @@ import org.apache.sqoop.TestExport.ColumnGenerator;
  */
 public final class NetezzaTestUtils {
 
-  public static final Log LOG =
-      LogFactory.getLog(NetezzaTestUtils.class.getName());
+public static final Log LOG =
+	LogFactory.getLog(NetezzaTestUtils.class.getName());
 
-  public static final String NZ_HOST =
-      System.getProperty("sqoop.test.netezza.host", "nz-host");
-  public static final String NZ_PORT =
-      System.getProperty("sqoop.test.netezza.port", "5480");
-  public static final String NZ_JDBC_URL_PREFIX = "jdbc:netezza:";
+public static final String NZ_HOST =
+	System.getProperty("sqoop.test.netezza.host", "nz-host");
+public static final String NZ_PORT =
+	System.getProperty("sqoop.test.netezza.port", "5480");
+public static final String NZ_JDBC_URL_PREFIX = "jdbc:netezza:";
 
-  public static final String NZ_DB_USER =
-      System.getProperty("sqoop.test.netezza.username", "ADMIN");
+public static final String NZ_DB_USER =
+	System.getProperty("sqoop.test.netezza.username", "ADMIN");
 
-  public static final String NZ_DB_PASSWORD =
-      System.getProperty("sqoop.test.netezza.password", "password");
+public static final String NZ_DB_PASSWORD =
+	System.getProperty("sqoop.test.netezza.password", "password");
 
-  public static final String NZ_DB_NAME =
-      System.getProperty("sqoop.test.netezza.db.name", "SQOOP");
-  public static final String TABLE_NAME =
-      System.getProperty("sqoop.test.netezza.table.name", "EMPNZ");
+public static final String NZ_DB_NAME =
+	System.getProperty("sqoop.test.netezza.db.name", "SQOOP");
+public static final String TABLE_NAME =
+	System.getProperty("sqoop.test.netezza.table.name", "EMPNZ");
 
-  private NetezzaTestUtils() {}
+private NetezzaTestUtils() {
+}
 
-  /** @return the current username. */
-  public static String getNZUser() {
-    // First, check the $NZ_USER environment variable.
-    String nzUser = System.getenv("NZ_USER");
-    if (nzUser == null) {
-      // Else return what is in the NZ Properties
-      nzUser = NZ_DB_USER;
-    }
-    return nzUser;
-  }
+/** @return the current username. */
+public static String getNZUser() {
+	// First, check the $NZ_USER environment variable.
+	String nzUser = System.getenv("NZ_USER");
+	if (nzUser == null) {
+		// Else return what is in the NZ Properties
+		nzUser = NZ_DB_USER;
+	}
+	return nzUser;
+}
 
-  public static String getNZPassword() {
-    String nzPass = System.getenv("NZ_PASSWORD");
-    if (nzPass == null) {
-      nzPass = NZ_DB_PASSWORD;
-    }
-    return nzPass;
-  }
+public static String getNZPassword() {
+	String nzPass = System.getenv("NZ_PASSWORD");
+	if (nzPass == null) {
+		nzPass = NZ_DB_PASSWORD;
+	}
+	return nzPass;
+}
 
-  public static String getNZConnectString() {
-    String nzHost = System.getenv("NZ_HOST");
-    if (nzHost == null) {
-      nzHost = NZ_HOST;
-    }
+public static String getNZConnectString() {
+	String nzHost = System.getenv("NZ_HOST");
+	if (nzHost == null) {
+		nzHost = NZ_HOST;
+	}
 
-    String nzPort = System.getenv("NZ_PORT");
-    if (nzPort == null) {
-      nzPort = NZ_PORT;
-    }
-    String nzDB = System.getenv("NZ_DB_NAME");
-    if (nzDB == null) {
-      nzDB = NZ_DB_NAME;
-    }
+	String nzPort = System.getenv("NZ_PORT");
+	if (nzPort == null) {
+		nzPort = NZ_PORT;
+	}
+	String nzDB = System.getenv("NZ_DB_NAME");
+	if (nzDB == null) {
+		nzDB = NZ_DB_NAME;
+	}
 
-    StringBuilder url = new StringBuilder(NZ_JDBC_URL_PREFIX);
-    url.append("//").append(nzHost).append(':').append(nzPort);
-    url.append('/').append(nzDB);
+	StringBuilder url = new StringBuilder(NZ_JDBC_URL_PREFIX);
+	url.append("//").append(nzHost).append(':').append(nzPort);
+	url.append('/').append(nzDB);
 
-    LOG.info("NZ Connect string generated : " + url.toString());
-    return url.toString();
-  }
+	LOG.info("NZ Connect string generated : " + url.toString());
+	return url.toString();
+}
 
-  public static String getNZDropTableStatement(String tableName) {
-    return "DROP TABLE " + tableName;
-  }
+public static String getNZDropTableStatement(String tableName) {
+	return "DROP TABLE " + tableName;
+}
 
-  public static void createTableNZ(Connection conn, String tableName,
-                                   ColumnGenerator... extraCols)
-      throws SQLException {
-    String sqlStatement = getNZDropTableStatement(tableName);
-    conn.rollback();
-    LOG.info("Executing drop statement : " + sqlStatement);
-    PreparedStatement statement = conn.prepareStatement(
-        sqlStatement, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-    try {
-      statement.executeUpdate();
-      conn.commit();
-    } catch (SQLException sqle) {
-      conn.rollback();
-    } finally {
-      statement.close();
-    }
+public static void createTableNZ(Connection conn, String tableName,
+                                 ColumnGenerator... extraCols)
+throws SQLException {
+	String sqlStatement = getNZDropTableStatement(tableName);
+	conn.rollback();
+	LOG.info("Executing drop statement : " + sqlStatement);
+	PreparedStatement statement = conn.prepareStatement(
+		sqlStatement, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+	try {
+		statement.executeUpdate();
+		conn.commit();
+	} catch (SQLException sqle) {
+		conn.rollback();
+	} finally {
+		statement.close();
+	}
 
-    StringBuilder sb = new StringBuilder();
-    sb.append("CREATE TABLE ");
-    sb.append(tableName);
-    sb.append(" (id INT NOT NULL PRIMARY KEY, msg VARCHAR(64)");
-    int colNum = 0;
-    for (ColumnGenerator gen : extraCols) {
-      sb.append(", col").append(colNum++).append(' ').append(gen.getType());
-    }
-    sb.append(")");
-    sqlStatement = sb.toString();
-    LOG.info("Executing create statement : " + sqlStatement);
-    statement = conn.prepareStatement(sqlStatement, ResultSet.TYPE_FORWARD_ONLY,
-                                      ResultSet.CONCUR_READ_ONLY);
-    try {
-      statement.executeUpdate();
-      conn.commit();
-    } finally {
-      statement.close();
-    }
-  }
+	StringBuilder sb = new StringBuilder();
+	sb.append("CREATE TABLE ");
+	sb.append(tableName);
+	sb.append(" (id INT NOT NULL PRIMARY KEY, msg VARCHAR(64)");
+	int colNum = 0;
+	for (ColumnGenerator gen : extraCols) {
+		sb.append(", col").append(colNum++).append(' ').append(gen.getType());
+	}
+	sb.append(")");
+	sqlStatement = sb.toString();
+	LOG.info("Executing create statement : " + sqlStatement);
+	statement = conn.prepareStatement(sqlStatement, ResultSet.TYPE_FORWARD_ONLY,
+	                                  ResultSet.CONCUR_READ_ONLY);
+	try {
+		statement.executeUpdate();
+		conn.commit();
+	} finally {
+		statement.close();
+	}
+}
 }

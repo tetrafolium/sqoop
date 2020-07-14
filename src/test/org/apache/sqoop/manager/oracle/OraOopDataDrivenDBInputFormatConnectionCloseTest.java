@@ -42,74 +42,74 @@ import org.junit.experimental.categories.Category;
 @Category({UnitTest.class, OracleTest.class})
 public class OraOopDataDrivenDBInputFormatConnectionCloseTest {
 
-  private static final OraOopLog LOG = OraOopLogFactory.getLog(
-      TestOraOopDataDrivenDBInputFormat.class.getName());
+private static final OraOopLog LOG = OraOopLogFactory.getLog(
+	TestOraOopDataDrivenDBInputFormat.class.getName());
 
-  private static final String ORACLE_PREPARED_STATEMENT_CLASS =
-      "oracle.jdbc.OraclePreparedStatement";
+private static final String ORACLE_PREPARED_STATEMENT_CLASS =
+	"oracle.jdbc.OraclePreparedStatement";
 
-  private OraOopDataDrivenDBInputFormat inputFormat;
+private OraOopDataDrivenDBInputFormat inputFormat;
 
-  private Connection mockConnection;
+private Connection mockConnection;
 
-  private JobContext mockJobContext;
+private JobContext mockJobContext;
 
-  @Before
-  public void setUp() throws Exception {
-    Configuration configuration = new Configuration();
-    configuration.set(DBConfiguration.USERNAME_PROPERTY, "Oracle user");
-    configuration.setInt(OraOopConstants.ORAOOP_DESIRED_NUMBER_OF_MAPPERS, 1);
+@Before
+public void setUp() throws Exception {
+	Configuration configuration = new Configuration();
+	configuration.set(DBConfiguration.USERNAME_PROPERTY, "Oracle user");
+	configuration.setInt(OraOopConstants.ORAOOP_DESIRED_NUMBER_OF_MAPPERS, 1);
 
-    Class<? extends PreparedStatement> preparedStatementClass =
-        (Class<? extends PreparedStatement>)Class.forName(
-            ORACLE_PREPARED_STATEMENT_CLASS);
-    PreparedStatement mockPreparedStatement = mock(preparedStatementClass);
-    ResultSet mockResultSet = mock(ResultSet.class);
-    when(mockResultSet.next()).thenReturn(true).thenReturn(false);
-    when(mockPreparedStatement.executeQuery()).thenReturn(mockResultSet);
+	Class<? extends PreparedStatement> preparedStatementClass =
+		(Class<? extends PreparedStatement>)Class.forName(
+			ORACLE_PREPARED_STATEMENT_CLASS);
+	PreparedStatement mockPreparedStatement = mock(preparedStatementClass);
+	ResultSet mockResultSet = mock(ResultSet.class);
+	when(mockResultSet.next()).thenReturn(true).thenReturn(false);
+	when(mockPreparedStatement.executeQuery()).thenReturn(mockResultSet);
 
-    mockConnection = mock(Connection.class);
-    DatabaseMetaData dbMetaData = mock(DatabaseMetaData.class);
-    when(dbMetaData.getDatabaseProductName()).thenReturn("Oracle");
-    when(mockConnection.getMetaData()).thenReturn(dbMetaData);
-    when(mockConnection.prepareStatement(anyString()))
-        .thenReturn(mockPreparedStatement);
+	mockConnection = mock(Connection.class);
+	DatabaseMetaData dbMetaData = mock(DatabaseMetaData.class);
+	when(dbMetaData.getDatabaseProductName()).thenReturn("Oracle");
+	when(mockConnection.getMetaData()).thenReturn(dbMetaData);
+	when(mockConnection.prepareStatement(anyString()))
+	.thenReturn(mockPreparedStatement);
 
-    DBConfiguration dbConf = mock(DBConfiguration.class);
-    when(dbConf.getConnection()).thenReturn(mockConnection);
-    when(dbConf.getConf()).thenReturn(configuration);
-    when(dbConf.getInputTableName()).thenReturn("InputTable");
+	DBConfiguration dbConf = mock(DBConfiguration.class);
+	when(dbConf.getConnection()).thenReturn(mockConnection);
+	when(dbConf.getConf()).thenReturn(configuration);
+	when(dbConf.getInputTableName()).thenReturn("InputTable");
 
-    mockJobContext = mock(JobContext.class);
-    when(mockJobContext.getConfiguration()).thenReturn(configuration);
+	mockJobContext = mock(JobContext.class);
+	when(mockJobContext.getConfiguration()).thenReturn(configuration);
 
-    inputFormat = new OraOopDataDrivenDBInputFormat();
-    inputFormat.setDbConf(dbConf);
-  }
+	inputFormat = new OraOopDataDrivenDBInputFormat();
+	inputFormat.setDbConf(dbConf);
+}
 
-  @Test
-  public void testGetSplitsClosesConnectionProperly() throws Exception {
-    inputFormat.getSplits(mockJobContext);
-    verify(mockConnection).commit();
-    verify(mockConnection).close();
-  }
+@Test
+public void testGetSplitsClosesConnectionProperly() throws Exception {
+	inputFormat.getSplits(mockJobContext);
+	verify(mockConnection).commit();
+	verify(mockConnection).close();
+}
 
-  @Test
-  public void testGetSplitsClosesConnectionProperlyWhenExceptionIsThrown()
-      throws Exception {
+@Test
+public void testGetSplitsClosesConnectionProperlyWhenExceptionIsThrown()
+throws Exception {
 
-    doThrow(new SQLException("For the sake of testing the commit fails."))
-        .when(mockConnection)
-        .commit();
+	doThrow(new SQLException("For the sake of testing the commit fails."))
+	.when(mockConnection)
+	.commit();
 
-    try {
-      inputFormat.getSplits(mockJobContext);
-    } catch (IOException e) {
-      LOG.debug(
-          "An expected exception is thrown in testSplitsClosesConnectionProperlyWhenExceptionIsThrown, ignoring.");
-    }
+	try {
+		inputFormat.getSplits(mockJobContext);
+	} catch (IOException e) {
+		LOG.debug(
+			"An expected exception is thrown in testSplitsClosesConnectionProperlyWhenExceptionIsThrown, ignoring.");
+	}
 
-    verify(mockConnection).rollback();
-    verify(mockConnection).close();
-  }
+	verify(mockConnection).rollback();
+	verify(mockConnection).close();
+}
 }

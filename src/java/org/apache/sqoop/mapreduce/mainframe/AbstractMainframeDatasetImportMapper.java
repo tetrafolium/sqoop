@@ -27,38 +27,38 @@ import org.apache.sqoop.lib.SqoopRecord;
 import org.apache.sqoop.mapreduce.AutoProgressMapper;
 
 public abstract class AbstractMainframeDatasetImportMapper<KEY>
-    extends AutoProgressMapper<LongWritable, SqoopRecord, KEY, NullWritable> {
+	extends AutoProgressMapper<LongWritable, SqoopRecord, KEY, NullWritable> {
 
-  private MainframeDatasetInputSplit inputSplit;
-  private MultipleOutputs<KEY, NullWritable> multiFileWriter;
-  private long numberOfRecords;
+private MainframeDatasetInputSplit inputSplit;
+private MultipleOutputs<KEY, NullWritable> multiFileWriter;
+private long numberOfRecords;
 
-  public void map(LongWritable key, SqoopRecord val, Context context)
-      throws IOException, InterruptedException {
-    String dataset = inputSplit.getCurrentDataset();
-    numberOfRecords++;
-    multiFileWriter.write(createOutKey(val), NullWritable.get(), dataset);
-  }
+public void map(LongWritable key, SqoopRecord val, Context context)
+throws IOException, InterruptedException {
+	String dataset = inputSplit.getCurrentDataset();
+	numberOfRecords++;
+	multiFileWriter.write(createOutKey(val), NullWritable.get(), dataset);
+}
 
-  @Override
-  protected void setup(Context context)
-      throws IOException, InterruptedException {
-    super.setup(context);
-    inputSplit = (MainframeDatasetInputSplit)context.getInputSplit();
-    multiFileWriter = new MultipleOutputs<>(context);
-    numberOfRecords = 0;
-  }
+@Override
+protected void setup(Context context)
+throws IOException, InterruptedException {
+	super.setup(context);
+	inputSplit = (MainframeDatasetInputSplit)context.getInputSplit();
+	multiFileWriter = new MultipleOutputs<>(context);
+	numberOfRecords = 0;
+}
 
-  @Override
-  protected void cleanup(Context context)
-      throws IOException, InterruptedException {
-    super.cleanup(context);
-    multiFileWriter.close();
-    context
-        .getCounter(ConfigurationConstants.COUNTER_GROUP_MAPRED_TASK_COUNTERS,
-                    ConfigurationConstants.COUNTER_MAP_OUTPUT_RECORDS)
-        .increment(numberOfRecords);
-  }
+@Override
+protected void cleanup(Context context)
+throws IOException, InterruptedException {
+	super.cleanup(context);
+	multiFileWriter.close();
+	context
+	.getCounter(ConfigurationConstants.COUNTER_GROUP_MAPRED_TASK_COUNTERS,
+	            ConfigurationConstants.COUNTER_MAP_OUTPUT_RECORDS)
+	.increment(numberOfRecords);
+}
 
-  protected abstract KEY createOutKey(SqoopRecord sqoopRecord);
+protected abstract KEY createOutKey(SqoopRecord sqoopRecord);
 }

@@ -41,28 +41,28 @@ import org.junit.runners.Parameterized;
 @Parameterized.
 UseParametersRunnerFactory(BlockJUnit4ClassRunnerWithParametersFactory.class)
 public class OracleNumericTypesParquetImportTest<
-    T extends AvroTestConfiguration & ParquetTestConfiguration>
-    extends NumericTypesAvroImportTestBase<T> {
+		T extends AvroTestConfiguration & ParquetTestConfiguration>
+	extends NumericTypesAvroImportTestBase<T> {
 
-  @Override
-  public DatabaseAdapter createAdapter() {
-    return new OracleDatabaseAdapter();
-  }
+@Override
+public DatabaseAdapter createAdapter() {
+	return new OracleDatabaseAdapter();
+}
 
-  @Parameterized.Parameters(
-      name = "Config: {0}| failWithoutExtraArgs: {1}| failWithPadding: {2}")
-  public static Iterable<? extends Object>
-  testConfigurations() {
-    return Arrays.asList(
-        new Object[] {new OracleImportJobTestConfigurationForNumber(),
-                      FAIL_WITHOUT_EXTRA_ARGS, FAIL_WITH_PADDING_ONLY},
-        new Object[] {new OracleImportJobTestConfiguration(),
-                      FAIL_WITHOUT_EXTRA_ARGS, SUCCEED_WITH_PADDING_ONLY});
-  }
+@Parameterized.Parameters(
+	name = "Config: {0}| failWithoutExtraArgs: {1}| failWithPadding: {2}")
+public static Iterable<? extends Object>
+testConfigurations() {
+	return Arrays.asList(
+		new Object[] {new OracleImportJobTestConfigurationForNumber(),
+		              FAIL_WITHOUT_EXTRA_ARGS, FAIL_WITH_PADDING_ONLY},
+		new Object[] {new OracleImportJobTestConfiguration(),
+		              FAIL_WITHOUT_EXTRA_ARGS, SUCCEED_WITH_PADDING_ONLY});
+}
 
-  public OracleNumericTypesParquetImportTest(T configuration,
-                                             boolean failWithoutExtraArgs,
-                                             boolean failWithPaddingOnly) {
-    super(configuration, failWithoutExtraArgs, failWithPaddingOnly);
-  }
+public OracleNumericTypesParquetImportTest(T configuration,
+                                           boolean failWithoutExtraArgs,
+                                           boolean failWithPaddingOnly) {
+	super(configuration, failWithoutExtraArgs, failWithPaddingOnly);
+}
 }

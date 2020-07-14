@@ -25,31 +25,31 @@ import java.math.BigInteger;
  * Generates test data for Oracle FLOAT columns.
  */
 public class FloatGenerator extends OraOopTestDataGenerator<BigDecimal> {
-  private static final int MIN_SCALE = -125;
-  private static final int MAX_SCALE = 125;
-  private final int precision;
+private static final int MIN_SCALE = -125;
+private static final int MAX_SCALE = 125;
+private final int precision;
 
-  /**
-   * Create a float generator with the specified binary precision.
-   *
-   * @param precision
-   *          The number of bits in the value of generated numbers
-   */
-  public FloatGenerator(int precision) {
-    super();
-    this.precision = precision;
-  }
+/**
+ * Create a float generator with the specified binary precision.
+ *
+ * @param precision
+ *          The number of bits in the value of generated numbers
+ */
+public FloatGenerator(int precision) {
+	super();
+	this.precision = precision;
+}
 
-  @Override
-  public BigDecimal next() {
-    BigInteger unscaled = new BigInteger(precision, rng);
-    BigDecimal unscaledBD = new BigDecimal(unscaled);
-    int scale = rng.nextInt(MAX_SCALE - MIN_SCALE + 1) + MIN_SCALE -
-                unscaledBD.precision();
-    BigDecimal result = new BigDecimal(unscaled, -scale);
-    if (rng.nextBoolean()) {
-      result = result.negate();
-    }
-    return result;
-  }
+@Override
+public BigDecimal next() {
+	BigInteger unscaled = new BigInteger(precision, rng);
+	BigDecimal unscaledBD = new BigDecimal(unscaled);
+	int scale = rng.nextInt(MAX_SCALE - MIN_SCALE + 1) + MIN_SCALE -
+	            unscaledBD.precision();
+	BigDecimal result = new BigDecimal(unscaled, -scale);
+	if (rng.nextBoolean()) {
+		result = result.negate();
+	}
+	return result;
+}
 }

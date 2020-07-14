@@ -24,10 +24,10 @@ import org.apache.sqoop.manager.ConnManager;
 
 public interface DatabaseAdapter {
 
-  String getConnectionString();
+String getConnectionString();
 
-  SqoopOptions injectConnectionParameters(SqoopOptions options);
+SqoopOptions injectConnectionParameters(SqoopOptions options);
 
-  void dropTableIfExists(String tableName, ConnManager manager)
-      throws SQLException;
+void dropTableIfExists(String tableName, ConnManager manager)
+throws SQLException;
 }

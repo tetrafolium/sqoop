@@ -36,51 +36,51 @@ import org.apache.sqoop.lib.SqoopRecord;
  * each record with a bit specifying whether it is a new or old record.
  */
 public class MergeMapperBase<INKEY, INVAL>
-    extends Mapper<INKEY, INVAL, Text, MergeRecord> {
+	extends Mapper<INKEY, INVAL, Text, MergeRecord> {
 
-  public static final Log LOG =
-      LogFactory.getLog(MergeMapperBase.class.getName());
+public static final Log LOG =
+	LogFactory.getLog(MergeMapperBase.class.getName());
 
-  private String keyColName; // name of the key column.
-  private boolean isNew;     // true if this split is from the new dataset.
+private String keyColName;   // name of the key column.
+private boolean isNew;       // true if this split is from the new dataset.
 
-  @Override
-  protected void setup(Context context)
-      throws IOException, InterruptedException {
-    Configuration conf = context.getConfiguration();
-    keyColName = conf.get(MergeJob.MERGE_KEY_COL_KEY);
+@Override
+protected void setup(Context context)
+throws IOException, InterruptedException {
+	Configuration conf = context.getConfiguration();
+	keyColName = conf.get(MergeJob.MERGE_KEY_COL_KEY);
 
-    InputSplit is = context.getInputSplit();
-    FileSplit fs = (FileSplit)is;
-    Path splitPath = fs.getPath();
+	InputSplit is = context.getInputSplit();
+	FileSplit fs = (FileSplit)is;
+	Path splitPath = fs.getPath();
 
-    if (splitPath.toString().startsWith(
-            conf.get(MergeJob.MERGE_NEW_PATH_KEY))) {
-      this.isNew = true;
-    } else if (splitPath.toString().startsWith(
-                   conf.get(MergeJob.MERGE_OLD_PATH_KEY))) {
-      this.isNew = false;
-    } else {
-      throw new IOException("File " + splitPath + " is not under new path " +
-                            conf.get(MergeJob.MERGE_NEW_PATH_KEY) +
-                            " or old path " +
-                            conf.get(MergeJob.MERGE_OLD_PATH_KEY));
-    }
-  }
+	if (splitPath.toString().startsWith(
+		    conf.get(MergeJob.MERGE_NEW_PATH_KEY))) {
+		this.isNew = true;
+	} else if (splitPath.toString().startsWith(
+			   conf.get(MergeJob.MERGE_OLD_PATH_KEY))) {
+		this.isNew = false;
+	} else {
+		throw new IOException("File " + splitPath + " is not under new path " +
+		                      conf.get(MergeJob.MERGE_NEW_PATH_KEY) +
+		                      " or old path " +
+		                      conf.get(MergeJob.MERGE_OLD_PATH_KEY));
+	}
+}
 
-  protected void processRecord(SqoopRecord r, Context c)
-      throws IOException, InterruptedException {
-    MergeRecord mr = new MergeRecord(r, isNew);
-    Map<String, Object> fieldMap = r.getFieldMap();
-    if (null == fieldMap) {
-      throw new IOException("No field map in record " + r);
-    }
-    Object keyObj = fieldMap.get(keyColName);
-    if (null == keyObj) {
-      throw new IOException("Cannot join values on null key. "
-                            + "Did you specify a key column that exists?");
-    } else {
-      c.write(new Text(keyObj.toString()), mr);
-    }
-  }
+protected void processRecord(SqoopRecord r, Context c)
+throws IOException, InterruptedException {
+	MergeRecord mr = new MergeRecord(r, isNew);
+	Map<String, Object> fieldMap = r.getFieldMap();
+	if (null == fieldMap) {
+		throw new IOException("No field map in record " + r);
+	}
+	Object keyObj = fieldMap.get(keyColName);
+	if (null == keyObj) {
+		throw new IOException("Cannot join values on null key. "
+		                      + "Did you specify a key column that exists?");
+	} else {
+		c.write(new Text(keyObj.toString()), mr);
+	}
+}
 }

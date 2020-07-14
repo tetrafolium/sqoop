@@ -31,63 +31,75 @@ import org.apache.sqoop.util.Jars;
  */
 public class ImportJobContext {
 
-  private String tableName;
-  private String jarFile;
-  private SqoopOptions options;
-  private Class<? extends InputFormat> inputFormatClass;
-  private Path destination;
-  private ConnManager manager;
+private String tableName;
+private String jarFile;
+private SqoopOptions options;
+private Class<? extends InputFormat> inputFormatClass;
+private Path destination;
+private ConnManager manager;
 
-  public ImportJobContext(final String table, final String jar,
-                          final SqoopOptions opts, final Path destination) {
-    this.tableName = table;
-    this.jarFile = jar;
-    if (this.jarFile == null) {
-      // Set the jarFile to the hadoop core jar file.
-      this.jarFile = Jars.getJarPathForClass(Configuration.class);
-    }
-    this.options = opts;
-    this.inputFormatClass = DataDrivenDBInputFormat.class;
-    this.destination = destination;
-  }
+public ImportJobContext(final String table, final String jar,
+                        final SqoopOptions opts, final Path destination) {
+	this.tableName = table;
+	this.jarFile = jar;
+	if (this.jarFile == null) {
+		// Set the jarFile to the hadoop core jar file.
+		this.jarFile = Jars.getJarPathForClass(Configuration.class);
+	}
+	this.options = opts;
+	this.inputFormatClass = DataDrivenDBInputFormat.class;
+	this.destination = destination;
+}
 
-  /** @return the name of the table to import. */
-  public String getTableName() { return tableName; }
+/** @return the name of the table to import. */
+public String getTableName() {
+	return tableName;
+}
 
-  /**
-   * @return the name of the jar file containing the user's compiled
-   * ORM classes to use during the import.
-   */
-  public String getJarFile() { return jarFile; }
+/**
+ * @return the name of the jar file containing the user's compiled
+ * ORM classes to use during the import.
+ */
+public String getJarFile() {
+	return jarFile;
+}
 
-  /** @return the SqoopOptions configured by the user */
-  public SqoopOptions getOptions() { return options; }
+/** @return the SqoopOptions configured by the user */
+public SqoopOptions getOptions() {
+	return options;
+}
 
-  /** Set the InputFormat to use for the import job. */
-  public void setInputFormat(Class<? extends InputFormat> ifClass) {
-    this.inputFormatClass = ifClass;
-  }
+/** Set the InputFormat to use for the import job. */
+public void setInputFormat(Class<? extends InputFormat> ifClass) {
+	this.inputFormatClass = ifClass;
+}
 
-  /** @return the InputFormat to use for the import job. */
-  public Class<? extends InputFormat> getInputFormat() {
-    return this.inputFormatClass;
-  }
+/** @return the InputFormat to use for the import job. */
+public Class<? extends InputFormat> getInputFormat() {
+	return this.inputFormatClass;
+}
 
-  /**
-   * @return the destination path to where the output files will
-   * be first saved.
-   */
-  public Path getDestination() { return this.destination; }
+/**
+ * @return the destination path to where the output files will
+ * be first saved.
+ */
+public Path getDestination() {
+	return this.destination;
+}
 
-  /**
-   * Set the ConnManager instance to be used during the import's
-   * configuration.
-   */
-  public void setConnManager(ConnManager mgr) { this.manager = mgr; }
+/**
+ * Set the ConnManager instance to be used during the import's
+ * configuration.
+ */
+public void setConnManager(ConnManager mgr) {
+	this.manager = mgr;
+}
 
-  /**
-   * Get the ConnManager instance to use during an import's
-   * configuration stage.
-   */
-  public ConnManager getConnManager() { return this.manager; }
+/**
+ * Get the ConnManager instance to use during an import's
+ * configuration stage.
+ */
+public ConnManager getConnManager() {
+	return this.manager;
+}
 }

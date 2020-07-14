@@ -39,131 +39,132 @@ import org.apache.sqoop.config.ConfigurationHelper;
  * Accumulo is pulled automatically by ivy)
  */
 public final class AccumuloUtil {
-  private static final Log LOG = LogFactory.getLog(AccumuloUtil.class);
-  private static boolean testingMode = false;
+private static final Log LOG = LogFactory.getLog(AccumuloUtil.class);
+private static boolean testingMode = false;
 
-  private static final String INSTANCE_CLASS =
-      "org.apache.accumulo.core.client.Instance";
+private static final String INSTANCE_CLASS =
+	"org.apache.accumulo.core.client.Instance";
 
-  // Prevent instantiation
-  private AccumuloUtil() {}
+// Prevent instantiation
+private AccumuloUtil() {
+}
 
-  /**
-   * This is a way to make this always return false for testing.
-   */
-  public static void setAlwaysNoAccumuloJarMode(boolean mode) {
-    testingMode = mode;
-  }
+/**
+ * This is a way to make this always return false for testing.
+ */
+public static void setAlwaysNoAccumuloJarMode(boolean mode) {
+	testingMode = mode;
+}
 
-  public static boolean isAccumuloJarPresent() {
-    if (testingMode) {
-      return false;
-    }
-    try {
-      Class.forName(INSTANCE_CLASS);
-    } catch (ClassNotFoundException cnfe) {
-      return false;
-    }
-    return true;
-  }
+public static boolean isAccumuloJarPresent() {
+	if (testingMode) {
+		return false;
+	}
+	try {
+		Class.forName(INSTANCE_CLASS);
+	} catch (ClassNotFoundException cnfe) {
+		return false;
+	}
+	return true;
+}
 
-  /**
-   * Add the Accumulo jar files to local classpath and dist cache.
-   * @throws IOException
-   */
-  public static void addJars(Job job, SqoopOptions options) throws IOException {
+/**
+ * Add the Accumulo jar files to local classpath and dist cache.
+ * @throws IOException
+ */
+public static void addJars(Job job, SqoopOptions options) throws IOException {
 
-    if (ConfigurationHelper.isLocalJobTracker(job.getConfiguration())) {
-      LOG.info("Not adding Accumulo jars to distributed cache in local mode");
-    } else if (options.isSkipDistCache()) {
-      LOG.info("Not adding Accumulo jars to distributed cache as requested");
-    } else {
-      Configuration conf = job.getConfiguration();
-      String accumuloHome = null;
-      String zookeeperHome = null;
-      FileSystem fs = FileSystem.getLocal(conf);
-      if (options != null) {
-        accumuloHome = options.getAccumuloHome();
-      }
-      if (accumuloHome == null) {
-        accumuloHome = SqoopOptions.getAccumuloHomeDefault();
-      }
-      LOG.info("Accumulo job : Accumulo Home = " + accumuloHome);
-      if (options != null) {
-        zookeeperHome = options.getZookeeperHome();
-      }
-      if (zookeeperHome == null) {
-        zookeeperHome = SqoopOptions.getZookeeperHomeDefault();
-      }
-      LOG.info("Accumulo job : Zookeeper Home = " + zookeeperHome);
+	if (ConfigurationHelper.isLocalJobTracker(job.getConfiguration())) {
+		LOG.info("Not adding Accumulo jars to distributed cache in local mode");
+	} else if (options.isSkipDistCache()) {
+		LOG.info("Not adding Accumulo jars to distributed cache as requested");
+	} else {
+		Configuration conf = job.getConfiguration();
+		String accumuloHome = null;
+		String zookeeperHome = null;
+		FileSystem fs = FileSystem.getLocal(conf);
+		if (options != null) {
+			accumuloHome = options.getAccumuloHome();
+		}
+		if (accumuloHome == null) {
+			accumuloHome = SqoopOptions.getAccumuloHomeDefault();
+		}
+		LOG.info("Accumulo job : Accumulo Home = " + accumuloHome);
+		if (options != null) {
+			zookeeperHome = options.getZookeeperHome();
+		}
+		if (zookeeperHome == null) {
+			zookeeperHome = SqoopOptions.getZookeeperHomeDefault();
+		}
+		LOG.info("Accumulo job : Zookeeper Home = " + zookeeperHome);
 
-      conf.addResource(accumuloHome + AccumuloConstants.ACCUMULO_SITE_XML_PATH);
+		conf.addResource(accumuloHome + AccumuloConstants.ACCUMULO_SITE_XML_PATH);
 
-      // Add any libjars already specified
-      Set<String> localUrls = new HashSet<String>();
-      localUrls.addAll(conf.getStringCollection(
-          ConfigurationConstants.MAPRED_DISTCACHE_CONF_PARAM));
+		// Add any libjars already specified
+		Set<String> localUrls = new HashSet<String>();
+		localUrls.addAll(conf.getStringCollection(
+					 ConfigurationConstants.MAPRED_DISTCACHE_CONF_PARAM));
 
-      if (null == accumuloHome) {
-        throw new IllegalArgumentException("ACCUMULO_HOME is not set.");
-      } else {
-        File dir = new File(accumuloHome, "lib");
-        String path = dir.getPath();
-        LOG.info("Adding jar files under " + path + " to distributed cache");
-        addDirToCache(dir, fs, localUrls, false);
-      }
+		if (null == accumuloHome) {
+			throw new IllegalArgumentException("ACCUMULO_HOME is not set.");
+		} else {
+			File dir = new File(accumuloHome, "lib");
+			String path = dir.getPath();
+			LOG.info("Adding jar files under " + path + " to distributed cache");
+			addDirToCache(dir, fs, localUrls, false);
+		}
 
-      if (null == zookeeperHome) {
-        throw new IllegalArgumentException("ZOOKEEPER_HOME is not set.");
-      } else {
-        String dir = zookeeperHome;
-        LOG.info("Adding jar files under " + dir + " to distributed cache");
-        addDirToCache(new File(dir), fs, localUrls, false);
-      }
+		if (null == zookeeperHome) {
+			throw new IllegalArgumentException("ZOOKEEPER_HOME is not set.");
+		} else {
+			String dir = zookeeperHome;
+			LOG.info("Adding jar files under " + dir + " to distributed cache");
+			addDirToCache(new File(dir), fs, localUrls, false);
+		}
 
-      String tmpjars =
-          conf.get(ConfigurationConstants.MAPRED_DISTCACHE_CONF_PARAM);
-      StringBuilder sb = new StringBuilder(1024);
-      if (null != tmpjars) {
-        sb.append(tmpjars);
-        sb.append(",");
-      }
-      sb.append(StringUtils.arrayToString(localUrls.toArray(new String[0])));
-      conf.set(ConfigurationConstants.MAPRED_DISTCACHE_CONF_PARAM,
-               sb.toString());
-    }
-  }
+		String tmpjars =
+			conf.get(ConfigurationConstants.MAPRED_DISTCACHE_CONF_PARAM);
+		StringBuilder sb = new StringBuilder(1024);
+		if (null != tmpjars) {
+			sb.append(tmpjars);
+			sb.append(",");
+		}
+		sb.append(StringUtils.arrayToString(localUrls.toArray(new String[0])));
+		conf.set(ConfigurationConstants.MAPRED_DISTCACHE_CONF_PARAM,
+		         sb.toString());
+	}
+}
 
-  /**
-   * Add the .jar elements of a directory to the DCache classpath, optionally
-   * recursively.
-   */
-  private static void addDirToCache(File dir, FileSystem fs,
-                                    Set<String> localUrls, boolean recursive) {
-    if (dir != null) {
-      File[] fileList = dir.listFiles();
+/**
+ * Add the .jar elements of a directory to the DCache classpath, optionally
+ * recursively.
+ */
+private static void addDirToCache(File dir, FileSystem fs,
+                                  Set<String> localUrls, boolean recursive) {
+	if (dir != null) {
+		File[] fileList = dir.listFiles();
 
-      if (fileList != null) {
-        for (File libFile : dir.listFiles()) {
-          if (libFile.exists() && !libFile.isDirectory() &&
-              libFile.getName().endsWith("jar")) {
-            Path p = new Path(libFile.toString());
-            if (libFile.canRead()) {
-              String qualified = p.makeQualified(fs).toString();
-              LOG.info("Adding to job classpath: " + qualified);
-              localUrls.add(qualified);
-            } else {
-              LOG.warn("Ignoring unreadable file " + libFile);
-            }
-          }
-          if (recursive && libFile.isDirectory()) {
-            addDirToCache(libFile, fs, localUrls, recursive);
-          }
-        }
-      } else {
-        LOG.warn("No files under " + dir +
-                 " to add to distributed cache for Accumulo job");
-      }
-    }
-  }
+		if (fileList != null) {
+			for (File libFile : dir.listFiles()) {
+				if (libFile.exists() && !libFile.isDirectory() &&
+				    libFile.getName().endsWith("jar")) {
+					Path p = new Path(libFile.toString());
+					if (libFile.canRead()) {
+						String qualified = p.makeQualified(fs).toString();
+						LOG.info("Adding to job classpath: " + qualified);
+						localUrls.add(qualified);
+					} else {
+						LOG.warn("Ignoring unreadable file " + libFile);
+					}
+				}
+				if (recursive && libFile.isDirectory()) {
+					addDirToCache(libFile, fs, localUrls, recursive);
+				}
+			}
+		} else {
+			LOG.warn("No files under " + dir +
+			         " to add to distributed cache for Accumulo job");
+		}
+	}
+}
 }

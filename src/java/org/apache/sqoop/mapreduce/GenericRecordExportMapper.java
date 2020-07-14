@@ -38,79 +38,79 @@ import org.apache.sqoop.orm.ClassWriter;
  * Exports records (type GenericRecord) from a data source.
  */
 public class GenericRecordExportMapper<K, V>
-    extends AutoProgressMapper<K, V, SqoopRecord, NullWritable> {
+	extends AutoProgressMapper<K, V, SqoopRecord, NullWritable> {
 
-  public static final String AVRO_COLUMN_TYPES_MAP =
-      "sqoop.avro.column.types.map";
+public static final String AVRO_COLUMN_TYPES_MAP =
+	"sqoop.avro.column.types.map";
 
-  protected MapWritable columnTypes;
+protected MapWritable columnTypes;
 
-  private SqoopRecord recordImpl;
+private SqoopRecord recordImpl;
 
-  @Override
-  protected void setup(Context context)
-      throws IOException, InterruptedException {
-    super.setup(context);
+@Override
+protected void setup(Context context)
+throws IOException, InterruptedException {
+	super.setup(context);
 
-    Configuration conf = context.getConfiguration();
+	Configuration conf = context.getConfiguration();
 
-    // Instantiate a copy of the user's class to hold and parse the record.
-    String recordClassName =
-        conf.get(ExportJobBase.SQOOP_EXPORT_TABLE_CLASS_KEY);
-    if (null == recordClassName) {
-      throw new IOException("Export table class name (" +
-                            ExportJobBase.SQOOP_EXPORT_TABLE_CLASS_KEY +
-                            ") is not set!");
-    }
+	// Instantiate a copy of the user's class to hold and parse the record.
+	String recordClassName =
+		conf.get(ExportJobBase.SQOOP_EXPORT_TABLE_CLASS_KEY);
+	if (null == recordClassName) {
+		throw new IOException("Export table class name (" +
+		                      ExportJobBase.SQOOP_EXPORT_TABLE_CLASS_KEY +
+		                      ") is not set!");
+	}
 
-    try {
-      Class cls = Class.forName(recordClassName, true,
-                                Thread.currentThread().getContextClassLoader());
-      recordImpl = (SqoopRecord)ReflectionUtils.newInstance(cls, conf);
-    } catch (ClassNotFoundException cnfe) {
-      throw new IOException(cnfe);
-    }
+	try {
+		Class cls = Class.forName(recordClassName, true,
+		                          Thread.currentThread().getContextClassLoader());
+		recordImpl = (SqoopRecord)ReflectionUtils.newInstance(cls, conf);
+	} catch (ClassNotFoundException cnfe) {
+		throw new IOException(cnfe);
+	}
 
-    if (null == recordImpl) {
-      throw new IOException("Could not instantiate object of type " +
-                            recordClassName);
-    }
+	if (null == recordImpl) {
+		throw new IOException("Could not instantiate object of type " +
+		                      recordClassName);
+	}
 
-    columnTypes =
-        DefaultStringifier.load(conf, AVRO_COLUMN_TYPES_MAP, MapWritable.class);
+	columnTypes =
+		DefaultStringifier.load(conf, AVRO_COLUMN_TYPES_MAP, MapWritable.class);
 
-    // Add decimal support
-    GenericData.get().addLogicalTypeConversion(
-        new Conversions.DecimalConversion());
-  }
+	// Add decimal support
+	GenericData.get().addLogicalTypeConversion(
+		new Conversions.DecimalConversion());
+}
 
-  protected SqoopRecord toSqoopRecord(GenericRecord record) throws IOException {
-    Schema avroSchema = record.getSchema();
-    for (Map.Entry<Writable, Writable> e : columnTypes.entrySet()) {
-      String columnName = e.getKey().toString();
-      String columnType = e.getValue().toString();
-      String cleanedCol = ClassWriter.toIdentifier(columnName);
-      Schema.Field field = getFieldIgnoreCase(avroSchema, cleanedCol);
-      if (null == field) {
-        throw new IOException("Cannot find field " + cleanedCol +
-                              " in Avro schema " + avroSchema);
-      }
+protected SqoopRecord toSqoopRecord(GenericRecord record) throws IOException {
+	Schema avroSchema = record.getSchema();
+	for (Map.Entry<Writable, Writable> e : columnTypes.entrySet()) {
+		String columnName = e.getKey().toString();
+		String columnType = e.getValue().toString();
+		String cleanedCol = ClassWriter.toIdentifier(columnName);
+		Schema.Field field = getFieldIgnoreCase(avroSchema, cleanedCol);
+		if (null == field) {
+			throw new IOException("Cannot find field " + cleanedCol +
+			                      " in Avro schema " + avroSchema);
+		}
 
-      Object avroObject = record.get(field.name());
-      Object fieldVal =
-          AvroUtil.fromAvro(avroObject, field.schema(), columnType);
-      recordImpl.setField(cleanedCol, fieldVal);
-    }
-    return recordImpl;
-  }
+		Object avroObject = record.get(field.name());
+		Object fieldVal =
+			AvroUtil.fromAvro(avroObject, field.schema(), columnType);
+		recordImpl.setField(cleanedCol, fieldVal);
+	}
+	return recordImpl;
+}
 
-  private static Schema.Field getFieldIgnoreCase(Schema avroSchema,
-                                                 String fieldName) {
-    for (Schema.Field field : avroSchema.getFields()) {
-      if (field.name().equalsIgnoreCase(fieldName)) {
-        return field;
-      }
-    }
-    return null;
-  }
+private static Schema.Field getFieldIgnoreCase(Schema avroSchema,
+                                               String fieldName) {
+	for (Schema.Field field : avroSchema.getFields()) {
+		if (field.name().equalsIgnoreCase(fieldName)) {
+			return field;
+		}
+	}
+	return null;
+}
 }

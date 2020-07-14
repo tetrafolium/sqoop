@@ -44,167 +44,168 @@ import org.apache.sqoop.lib.ProcessingException;
  * that contains all the fields of the record.
  */
 public class HBasePutProcessor
-    implements Closeable, Configurable, FieldMapProcessor {
+	implements Closeable, Configurable, FieldMapProcessor {
 
-  public static final Log LOG =
-      LogFactory.getLog(HBasePutProcessor.class.getName());
+public static final Log LOG =
+	LogFactory.getLog(HBasePutProcessor.class.getName());
 
-  /** Configuration key specifying the table to insert into. */
-  public static final String TABLE_NAME_KEY = "sqoop.hbase.insert.table";
+/** Configuration key specifying the table to insert into. */
+public static final String TABLE_NAME_KEY = "sqoop.hbase.insert.table";
 
-  /** Configuration key specifying the column family to insert into. */
-  public static final String COL_FAMILY_KEY =
-      "sqoop.hbase.insert.column.family";
+/** Configuration key specifying the column family to insert into. */
+public static final String COL_FAMILY_KEY =
+	"sqoop.hbase.insert.column.family";
 
-  /**
-   * Configuration key specifying the column of the input whose value
-   * should be used as the row id.
-   */
-  public static final String ROW_KEY_COLUMN_KEY =
-      "sqoop.hbase.insert.row.key.column";
+/**
+ * Configuration key specifying the column of the input whose value
+ * should be used as the row id.
+ */
+public static final String ROW_KEY_COLUMN_KEY =
+	"sqoop.hbase.insert.row.key.column";
 
-  public static final String NULL_INCREMENTAL_MODE =
-      "hbase.null.incremental.mode";
+public static final String NULL_INCREMENTAL_MODE =
+	"hbase.null.incremental.mode";
 
-  /**
-   * Configuration key specifying the PutTransformer implementation to use.
-   */
-  public static final String TRANSFORMER_CLASS_KEY =
-      "sqoop.hbase.insert.put.transformer.class";
+/**
+ * Configuration key specifying the PutTransformer implementation to use.
+ */
+public static final String TRANSFORMER_CLASS_KEY =
+	"sqoop.hbase.insert.put.transformer.class";
 
-  /**
-   *  Configuration key to enable/disable hbase bulkLoad.
-   */
-  public static final String BULK_LOAD_ENABLED_KEY =
-      "sqoop.hbase.bulk.load.enabled";
+/**
+ *  Configuration key to enable/disable hbase bulkLoad.
+ */
+public static final String BULK_LOAD_ENABLED_KEY =
+	"sqoop.hbase.bulk.load.enabled";
 
-  /**
-   * Configuration key to specify whether to add the row key column into
-   *  HBase. Set to false by default.
-   */
-  public static final String ADD_ROW_KEY = "sqoop.hbase.add.row.key";
-  public static final boolean ADD_ROW_KEY_DEFAULT = false;
+/**
+ * Configuration key to specify whether to add the row key column into
+ *  HBase. Set to false by default.
+ */
+public static final String ADD_ROW_KEY = "sqoop.hbase.add.row.key";
+public static final boolean ADD_ROW_KEY_DEFAULT = false;
 
-  private Configuration conf;
+private Configuration conf;
 
-  // An object that can transform a map of fieldName->object
-  // into a Put command.
-  private PutTransformer putTransformer;
+// An object that can transform a map of fieldName->object
+// into a Put command.
+private PutTransformer putTransformer;
 
-  private Connection hbaseConnection;
-  private BufferedMutator bufferedMutator;
+private Connection hbaseConnection;
+private BufferedMutator bufferedMutator;
 
-  public HBasePutProcessor() {}
+public HBasePutProcessor() {
+}
 
-  HBasePutProcessor(Configuration conf, PutTransformer putTransformer,
-                    Connection hbaseConnection,
-                    BufferedMutator bufferedMutator) {
-    this.conf = conf;
-    this.putTransformer = putTransformer;
-    this.hbaseConnection = hbaseConnection;
-    this.bufferedMutator = bufferedMutator;
-  }
+HBasePutProcessor(Configuration conf, PutTransformer putTransformer,
+                  Connection hbaseConnection,
+                  BufferedMutator bufferedMutator) {
+	this.conf = conf;
+	this.putTransformer = putTransformer;
+	this.hbaseConnection = hbaseConnection;
+	this.bufferedMutator = bufferedMutator;
+}
 
-  @Override
-  @SuppressWarnings("unchecked")
-  public void setConf(Configuration config) {
-    this.conf = config;
+@Override
+@SuppressWarnings("unchecked")
+public void setConf(Configuration config) {
+	this.conf = config;
 
-    // Get the implementation of PutTransformer to use.
-    // By default, we call toString() on every non-null field.
-    Class<? extends PutTransformer> xformerClass =
-        (Class<? extends PutTransformer>)this.conf.getClass(
-            TRANSFORMER_CLASS_KEY, ToStringPutTransformer.class);
-    this.putTransformer =
-        (PutTransformer)ReflectionUtils.newInstance(xformerClass, this.conf);
-    if (null == putTransformer) {
-      throw new RuntimeException("Could not instantiate PutTransformer.");
-    }
-    putTransformer.init(conf);
-    initHBaseMutator();
-  }
+	// Get the implementation of PutTransformer to use.
+	// By default, we call toString() on every non-null field.
+	Class<? extends PutTransformer> xformerClass =
+		(Class<? extends PutTransformer>)this.conf.getClass(
+			TRANSFORMER_CLASS_KEY, ToStringPutTransformer.class);
+	this.putTransformer =
+		(PutTransformer)ReflectionUtils.newInstance(xformerClass, this.conf);
+	if (null == putTransformer) {
+		throw new RuntimeException("Could not instantiate PutTransformer.");
+	}
+	putTransformer.init(conf);
+	initHBaseMutator();
+}
 
-  private void initHBaseMutator() {
-    String tableName = conf.get(TABLE_NAME_KEY, null);
-    try {
-      hbaseConnection = ConnectionFactory.createConnection(conf);
-      bufferedMutator =
-          hbaseConnection.getBufferedMutator(TableName.valueOf(tableName));
-    } catch (IOException e) {
-      if (hbaseConnection != null) {
-        try {
-          hbaseConnection.close();
-        } catch (IOException connCloseException) {
-          LOG.error("Cannot close HBase connection.", connCloseException);
-        }
-      }
-      throw new RuntimeException(
-          "Could not create mutator for HBase table " + tableName, e);
-    }
-  }
+private void initHBaseMutator() {
+	String tableName = conf.get(TABLE_NAME_KEY, null);
+	try {
+		hbaseConnection = ConnectionFactory.createConnection(conf);
+		bufferedMutator =
+			hbaseConnection.getBufferedMutator(TableName.valueOf(tableName));
+	} catch (IOException e) {
+		if (hbaseConnection != null) {
+			try {
+				hbaseConnection.close();
+			} catch (IOException connCloseException) {
+				LOG.error("Cannot close HBase connection.", connCloseException);
+			}
+		}
+		throw new RuntimeException(
+			      "Could not create mutator for HBase table " + tableName, e);
+	}
+}
 
-  @Override
-  public Configuration getConf() {
-    return this.conf;
-  }
+@Override
+public Configuration getConf() {
+	return this.conf;
+}
 
-  @Override
-  /**
-   * Processes a record by extracting its field map and converting
-   * it into a list of Put commands into HBase.
-   */
-  public void accept(FieldMappable record)
-      throws IOException, ProcessingException {
-    Map<String, Object> fields = record.getFieldMap();
-    List<Mutation> mutationList = putTransformer.getMutationCommand(fields);
-    if (mutationList == null) {
-      return;
-    }
-    for (Mutation mutation : mutationList) {
-      if (!canAccept(mutation)) {
-        continue;
-      }
-      if (!mutation.isEmpty()) {
-        bufferedMutator.mutate(mutation);
-      } else {
-        logEmptyMutation(mutation);
-      }
-    }
-  }
+@Override
+/**
+ * Processes a record by extracting its field map and converting
+ * it into a list of Put commands into HBase.
+ */
+public void accept(FieldMappable record)
+throws IOException, ProcessingException {
+	Map<String, Object> fields = record.getFieldMap();
+	List<Mutation> mutationList = putTransformer.getMutationCommand(fields);
+	if (mutationList == null) {
+		return;
+	}
+	for (Mutation mutation : mutationList) {
+		if (!canAccept(mutation)) {
+			continue;
+		}
+		if (!mutation.isEmpty()) {
+			bufferedMutator.mutate(mutation);
+		} else {
+			logEmptyMutation(mutation);
+		}
+	}
+}
 
-  private void logEmptyMutation(Mutation mutation) {
-    String action = null;
-    if (mutation instanceof Put) {
-      action = "insert";
-    } else if (mutation instanceof Delete) {
-      action = "delete";
-    }
-    LOG.warn("Could not " + action + " row with no columns "
-             + "for row-key column: " + Bytes.toString(mutation.getRow()));
-  }
+private void logEmptyMutation(Mutation mutation) {
+	String action = null;
+	if (mutation instanceof Put) {
+		action = "insert";
+	} else if (mutation instanceof Delete) {
+		action = "delete";
+	}
+	LOG.warn("Could not " + action + " row with no columns "
+	         + "for row-key column: " + Bytes.toString(mutation.getRow()));
+}
 
-  private boolean canAccept(Mutation mutation) {
-    return mutation != null &&
-        (mutation instanceof Put || mutation instanceof Delete);
-  }
+private boolean canAccept(Mutation mutation) {
+	return mutation != null &&
+	       (mutation instanceof Put || mutation instanceof Delete);
+}
 
-  @Override
-  /**
-   * Closes the HBase table and commits all pending operations.
-   */
-  public void close() throws IOException {
-    try {
-      bufferedMutator.flush();
-    } finally {
-      try {
-        bufferedMutator.close();
-      } finally {
-        try {
-          hbaseConnection.close();
-        } catch (IOException e) {
-          LOG.error("Cannot close HBase connection.", e);
-        }
-      }
-    }
-  }
+@Override
+/**
+ * Closes the HBase table and commits all pending operations.
+ */
+public void close() throws IOException {
+	try {
+		bufferedMutator.flush();
+	} finally {
+		try {
+			bufferedMutator.close();
+		} finally {
+			try {
+				hbaseConnection.close();
+			} catch (IOException e) {
+				LOG.error("Cannot close HBase connection.", e);
+			}
+		}
+	}
+}
 }

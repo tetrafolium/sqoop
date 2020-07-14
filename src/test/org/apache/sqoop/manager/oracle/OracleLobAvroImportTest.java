@@ -38,54 +38,54 @@ import org.junit.experimental.categories.Category;
 @Category(OracleTest.class)
 public class OracleLobAvroImportTest extends LobAvroImportTestCase {
 
-  public static final Log LOG =
-      LogFactory.getLog(OracleCompatTest.class.getName());
+public static final Log LOG =
+	LogFactory.getLog(OracleCompatTest.class.getName());
 
-  @Override
-  protected Log getLogger() {
-    return LOG;
-  }
+@Override
+protected Log getLogger() {
+	return LOG;
+}
 
-  @Override
-  protected String getDbFriendlyName() {
-    return "Oracle";
-  }
+@Override
+protected String getDbFriendlyName() {
+	return "Oracle";
+}
 
-  @Override
-  protected String getConnectString() {
-    return OracleUtils.CONNECT_STRING;
-  }
+@Override
+protected String getConnectString() {
+	return OracleUtils.CONNECT_STRING;
+}
 
-  @Override
-  protected SqoopOptions getSqoopOptions(Configuration conf) {
-    SqoopOptions opts = new SqoopOptions(conf);
-    OracleUtils.setOracleAuth(opts);
-    return opts;
-  }
+@Override
+protected SqoopOptions getSqoopOptions(Configuration conf) {
+	SqoopOptions opts = new SqoopOptions(conf);
+	OracleUtils.setOracleAuth(opts);
+	return opts;
+}
 
-  @Override
-  protected void dropTableIfExists(String table) throws SQLException {
-    OracleUtils.dropTable(table, getManager());
-  }
+@Override
+protected void dropTableIfExists(String table) throws SQLException {
+	OracleUtils.dropTable(table, getManager());
+}
 
-  @Override
-  protected String getBlobInsertStr(String blobData) {
-    // Oracle wants blob data encoded as hex (e.g. '01fca3b5').
+@Override
+protected String getBlobInsertStr(String blobData) {
+	// Oracle wants blob data encoded as hex (e.g. '01fca3b5').
 
-    StringBuilder sb = new StringBuilder();
-    sb.append("'");
+	StringBuilder sb = new StringBuilder();
+	sb.append("'");
 
-    Formatter fmt = new Formatter(sb);
-    try {
-      for (byte b : blobData.getBytes("UTF-8")) {
-        fmt.format("%02X", b);
-      }
-    } catch (UnsupportedEncodingException uee) {
-      // Should not happen; Java always supports UTF-8.
-      fail("Could not get utf-8 bytes for blob string");
-      return null;
-    }
-    sb.append("'");
-    return sb.toString();
-  }
+	Formatter fmt = new Formatter(sb);
+	try {
+		for (byte b : blobData.getBytes("UTF-8")) {
+			fmt.format("%02X", b);
+		}
+	} catch (UnsupportedEncodingException uee) {
+		// Should not happen; Java always supports UTF-8.
+		fail("Could not get utf-8 bytes for blob string");
+		return null;
+	}
+	sb.append("'");
+	return sb.toString();
+}
 }

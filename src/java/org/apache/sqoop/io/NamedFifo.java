@@ -27,61 +27,69 @@ import org.apache.log4j.Logger;
  */
 public class NamedFifo {
 
-  private static final Logger LOG = Logger.getLogger(NamedFifo.class);
+private static final Logger LOG = Logger.getLogger(NamedFifo.class);
 
-  private File fifoFile;
+private File fifoFile;
 
-  /** Create a named FIFO object at the local fs path given by 'pathname'. */
-  public NamedFifo(String pathname) { this.fifoFile = new File(pathname); }
+/** Create a named FIFO object at the local fs path given by 'pathname'. */
+public NamedFifo(String pathname) {
+	this.fifoFile = new File(pathname);
+}
 
-  /**
-   * Create a named FIFO object at the local fs path given by the 'fifo' File
-   * object.
-   */
-  public NamedFifo(File fifo) { this.fifoFile = fifo; }
+/**
+ * Create a named FIFO object at the local fs path given by the 'fifo' File
+ * object.
+ */
+public NamedFifo(File fifo) {
+	this.fifoFile = fifo;
+}
 
-  /**
-   * Return the File object representing the FIFO.
-   */
-  public File getFile() { return this.fifoFile; }
+/**
+ * Return the File object representing the FIFO.
+ */
+public File getFile() {
+	return this.fifoFile;
+}
 
-  /**
-   * Create a named FIFO object.
-   * The pipe will be created with permissions 0600.
-   * @throws IOException on failure.
-   */
-  public void create() throws IOException { create(0600); }
+/**
+ * Create a named FIFO object.
+ * The pipe will be created with permissions 0600.
+ * @throws IOException on failure.
+ */
+public void create() throws IOException {
+	create(0600);
+}
 
-  /**
-   * Create a named FIFO object with the specified fs permissions.
-   * This depends on the 'mknod' or 'mkfifo' (Mac OS X) system utility
-   * existing. (for example, provided by Linux coreutils). This object
-   * will be deleted when the process exits.
-   * @throws IOException on failure.
-   */
-  public void create(int permissions) throws IOException {
-    String filename = fifoFile.toString();
+/**
+ * Create a named FIFO object with the specified fs permissions.
+ * This depends on the 'mknod' or 'mkfifo' (Mac OS X) system utility
+ * existing. (for example, provided by Linux coreutils). This object
+ * will be deleted when the process exits.
+ * @throws IOException on failure.
+ */
+public void create(int permissions) throws IOException {
+	String filename = fifoFile.toString();
 
-    // Format permissions as a mode string in base 8.
-    String modeStr = Integer.toString(permissions, 8);
+	// Format permissions as a mode string in base 8.
+	String modeStr = Integer.toString(permissions, 8);
 
-    // Create the FIFO itself.
-    try {
-      String output =
-          Shell.execCommand("mknod", "--mode=0" + modeStr, filename, "p");
-      LOG.info("mknod output:\n" + output);
-    } catch (IOException ex) {
-      LOG.info("IO error running mknod: " + ex.getMessage());
-      LOG.debug("IO error running mknod", ex);
-    }
-    if (!this.fifoFile.exists()) {
-      LOG.info("mknod failed, falling back to mkfifo");
-      String output =
-          Shell.execCommand("mkfifo", "-m", "0" + modeStr, filename);
-      LOG.info("mkfifo output:\n" + output);
-    }
+	// Create the FIFO itself.
+	try {
+		String output =
+			Shell.execCommand("mknod", "--mode=0" + modeStr, filename, "p");
+		LOG.info("mknod output:\n" + output);
+	} catch (IOException ex) {
+		LOG.info("IO error running mknod: " + ex.getMessage());
+		LOG.debug("IO error running mknod", ex);
+	}
+	if (!this.fifoFile.exists()) {
+		LOG.info("mknod failed, falling back to mkfifo");
+		String output =
+			Shell.execCommand("mkfifo", "-m", "0" + modeStr, filename);
+		LOG.info("mkfifo output:\n" + output);
+	}
 
-    // Schedule the FIFO to be cleaned up when we exit.
-    this.fifoFile.deleteOnExit();
-  }
+	// Schedule the FIFO to be cleaned up when we exit.
+	this.fifoFile.deleteOnExit();
+}
 }

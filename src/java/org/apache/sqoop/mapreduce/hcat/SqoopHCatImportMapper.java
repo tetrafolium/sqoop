@@ -31,27 +31,27 @@ import org.apache.sqoop.mapreduce.SqoopMapper;
  * A mapper for HCatalog import.
  */
 public class SqoopHCatImportMapper
-    extends SqoopMapper<WritableComparable, SqoopRecord, WritableComparable,
-                        HCatRecord> {
-  public static final Log LOG =
-      LogFactory.getLog(SqoopHCatImportMapper.class.getName());
-  private SqoopHCatImportHelper helper;
+	extends SqoopMapper<WritableComparable, SqoopRecord, WritableComparable,
+	                    HCatRecord> {
+public static final Log LOG =
+	LogFactory.getLog(SqoopHCatImportMapper.class.getName());
+private SqoopHCatImportHelper helper;
 
-  @Override
-  protected void setup(Context context)
-      throws IOException, InterruptedException {
-    Configuration conf = context.getConfiguration();
-    helper = new SqoopHCatImportHelper(conf);
-  }
+@Override
+protected void setup(Context context)
+throws IOException, InterruptedException {
+	Configuration conf = context.getConfiguration();
+	helper = new SqoopHCatImportHelper(conf);
+}
 
-  @Override
-  public void map(WritableComparable key, SqoopRecord value, Context context)
-      throws IOException, InterruptedException {
-    context.write(key, helper.convertToHCatRecord(value));
-  }
+@Override
+public void map(WritableComparable key, SqoopRecord value, Context context)
+throws IOException, InterruptedException {
+	context.write(key, helper.convertToHCatRecord(value));
+}
 
-  @Override
-  protected void cleanup(Context context) throws IOException {
-    helper.cleanup();
-  }
+@Override
+protected void cleanup(Context context) throws IOException {
+	helper.cleanup();
+}
 }

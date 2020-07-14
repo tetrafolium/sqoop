@@ -41,110 +41,112 @@ import org.junit.rules.ExpectedException;
  */
 public class TestTargetDir extends ImportJobTestCase {
 
-  public static final Log LOG =
-      LogFactory.getLog(TestTargetDir.class.getName());
+public static final Log LOG =
+	LogFactory.getLog(TestTargetDir.class.getName());
 
-  @Rule public ExpectedException thrown = ExpectedException.none();
+@Rule public ExpectedException thrown = ExpectedException.none();
 
-  /**
-   * Create the argv to pass to Sqoop.
-   *
-   * @return the argv as an array of strings.
-   */
-  protected ArrayList getOutputArgv(boolean includeHadoopFlags) {
-    ArrayList<String> args = new ArrayList<String>();
+/**
+ * Create the argv to pass to Sqoop.
+ *
+ * @return the argv as an array of strings.
+ */
+protected ArrayList getOutputArgv(boolean includeHadoopFlags) {
+	ArrayList<String> args = new ArrayList<String>();
 
-    if (includeHadoopFlags) {
-      CommonArgs.addHadoopFlags(args);
-    }
+	if (includeHadoopFlags) {
+		CommonArgs.addHadoopFlags(args);
+	}
 
-    args.add("--table");
-    args.add(HsqldbTestServer.getTableName());
-    args.add("--connect");
-    args.add(HsqldbTestServer.getUrl());
-    args.add("--split-by");
-    args.add("INTFIELD1");
-    args.add("--as-sequencefile");
+	args.add("--table");
+	args.add(HsqldbTestServer.getTableName());
+	args.add("--connect");
+	args.add(HsqldbTestServer.getUrl());
+	args.add("--split-by");
+	args.add("INTFIELD1");
+	args.add("--as-sequencefile");
 
-    return args;
-  }
+	return args;
+}
 
-  // this test just uses the two int table.
-  protected String getTableName() { return HsqldbTestServer.getTableName(); }
+// this test just uses the two int table.
+protected String getTableName() {
+	return HsqldbTestServer.getTableName();
+}
 
-  /** test invalid argument exception if several output options. */
-  @Test
-  public void testSeveralOutputsIOException() throws IOException {
-    ArrayList args = getOutputArgv(true);
-    args.add("--warehouse-dir");
-    args.add(getWarehouseDir());
-    args.add("--target-dir");
-    args.add(getWarehouseDir());
+/** test invalid argument exception if several output options. */
+@Test
+public void testSeveralOutputsIOException() throws IOException {
+	ArrayList args = getOutputArgv(true);
+	args.add("--warehouse-dir");
+	args.add(getWarehouseDir());
+	args.add("--target-dir");
+	args.add(getWarehouseDir());
 
-    String[] argv = (String[])args.toArray(new String[0]);
+	String[] argv = (String[])args.toArray(new String[0]);
 
-    thrown.expect(IOException.class);
-    thrown.reportMissingExceptionWithMessage(
-        "Expected IOException on several output options");
-    runImport(argv);
-  }
+	thrown.expect(IOException.class);
+	thrown.reportMissingExceptionWithMessage(
+		"Expected IOException on several output options");
+	runImport(argv);
+}
 
-  /** test target-dir contains imported files. */
-  @Test
-  public void testTargetDir() throws IOException {
+/** test target-dir contains imported files. */
+@Test
+public void testTargetDir() throws IOException {
 
-    try {
-      String targetDir = getWarehouseDir() + "/tempTargetDir";
+	try {
+		String targetDir = getWarehouseDir() + "/tempTargetDir";
 
-      ArrayList args = getOutputArgv(true);
-      args.add("--target-dir");
-      args.add(targetDir);
+		ArrayList args = getOutputArgv(true);
+		args.add("--target-dir");
+		args.add(targetDir);
 
-      // delete target-dir if exists and recreate it
-      FileSystem fs = FileSystem.get(getConf());
-      Path outputPath = new Path(targetDir);
-      if (fs.exists(outputPath)) {
-        fs.delete(outputPath, true);
-      }
+		// delete target-dir if exists and recreate it
+		FileSystem fs = FileSystem.get(getConf());
+		Path outputPath = new Path(targetDir);
+		if (fs.exists(outputPath)) {
+			fs.delete(outputPath, true);
+		}
 
-      String[] argv = (String[])args.toArray(new String[0]);
-      runImport(argv);
+		String[] argv = (String[])args.toArray(new String[0]);
+		runImport(argv);
 
-      ContentSummary summ = fs.getContentSummary(outputPath);
+		ContentSummary summ = fs.getContentSummary(outputPath);
 
-      assertTrue("There's no new imported files in target-dir",
-                 summ.getFileCount() > 0);
+		assertTrue("There's no new imported files in target-dir",
+		           summ.getFileCount() > 0);
 
-    } catch (Exception e) {
-      LOG.error("Got Exception: " + StringUtils.stringifyException(e));
-      fail(e.toString());
-    }
-  }
+	} catch (Exception e) {
+		LOG.error("Got Exception: " + StringUtils.stringifyException(e));
+		fail(e.toString());
+	}
+}
 
-  /**
-   * test target-dir breaks if already existing
-   * (only allowed in append mode).
-   */
-  @Test
-  public void testExistingTargetDir() throws IOException {
-    String targetDir = getWarehouseDir() + "/tempTargetDir";
+/**
+ * test target-dir breaks if already existing
+ * (only allowed in append mode).
+ */
+@Test
+public void testExistingTargetDir() throws IOException {
+	String targetDir = getWarehouseDir() + "/tempTargetDir";
 
-    ArrayList args = getOutputArgv(true);
-    args.add("--target-dir");
-    args.add(targetDir);
+	ArrayList args = getOutputArgv(true);
+	args.add("--target-dir");
+	args.add(targetDir);
 
-    // delete target-dir if exists and recreate it
-    FileSystem fs = FileSystem.get(getConf());
-    Path outputPath = new Path(targetDir);
-    if (!fs.exists(outputPath)) {
-      fs.mkdirs(outputPath);
-    }
+	// delete target-dir if exists and recreate it
+	FileSystem fs = FileSystem.get(getConf());
+	Path outputPath = new Path(targetDir);
+	if (!fs.exists(outputPath)) {
+		fs.mkdirs(outputPath);
+	}
 
-    String[] argv = (String[])args.toArray(new String[0]);
+	String[] argv = (String[])args.toArray(new String[0]);
 
-    thrown.expect(IOException.class);
-    thrown.reportMissingExceptionWithMessage(
-        "Expected IOException on --target-dir if target dir already exists");
-    runImport(argv);
-  }
+	thrown.expect(IOException.class);
+	thrown.reportMissingExceptionWithMessage(
+		"Expected IOException on --target-dir if target dir already exists");
+	runImport(argv);
+}
 }

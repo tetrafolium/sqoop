@@ -45,106 +45,106 @@ import org.junit.runners.Parameterized.Parameters;
 UseParametersRunnerFactory(BlockJUnit4ClassRunnerWithParametersFactory.class)
 public class TestHiveServer2OptionValidations {
 
-  @Parameters(name = "sqoopTool = {0}")
-  public static Iterable<? extends Object> parameters() {
-    return Arrays.asList(new ImportTool(), new ImportAllTablesTool(),
-                         new CreateHiveTableTool());
-  }
+@Parameters(name = "sqoopTool = {0}")
+public static Iterable<? extends Object> parameters() {
+	return Arrays.asList(new ImportTool(), new ImportAllTablesTool(),
+	                     new CreateHiveTableTool());
+}
 
-  private static final String TEST_HS2_URL = "test-hs2-url";
-  private static final String TEST_HS2_USER = "test-hs2-user";
-  private static final String TEST_HS2_KEYTAB = "test-hs2-keytab";
-  private static final String TEST_TABLE = "testtable";
-  private static final String TEST_CONNECTION_STRING = "testconnectstring";
+private static final String TEST_HS2_URL = "test-hs2-url";
+private static final String TEST_HS2_USER = "test-hs2-user";
+private static final String TEST_HS2_KEYTAB = "test-hs2-keytab";
+private static final String TEST_TABLE = "testtable";
+private static final String TEST_CONNECTION_STRING = "testconnectstring";
 
-  @Rule public ExpectedException expectedException = ExpectedException.none();
+@Rule public ExpectedException expectedException = ExpectedException.none();
 
-  private final BaseSqoopTool sqoopTool;
+private final BaseSqoopTool sqoopTool;
 
-  private SqoopOptions sqoopOptions;
+private SqoopOptions sqoopOptions;
 
-  public TestHiveServer2OptionValidations(BaseSqoopTool sqoopTool) {
-    this.sqoopTool = spy(sqoopTool);
-  }
+public TestHiveServer2OptionValidations(BaseSqoopTool sqoopTool) {
+	this.sqoopTool = spy(sqoopTool);
+}
 
-  @Before
-  public void before() {
-    sqoopOptions = mock(SqoopOptions.class);
-    when(sqoopOptions.getTableName()).thenReturn(TEST_TABLE);
-    when(sqoopOptions.getIncrementalMode()).thenReturn(None);
-    when(sqoopOptions.getConnectString()).thenReturn(TEST_CONNECTION_STRING);
-    when(sqoopOptions.getMapColumnHive()).thenReturn(new Properties());
+@Before
+public void before() {
+	sqoopOptions = mock(SqoopOptions.class);
+	when(sqoopOptions.getTableName()).thenReturn(TEST_TABLE);
+	when(sqoopOptions.getIncrementalMode()).thenReturn(None);
+	when(sqoopOptions.getConnectString()).thenReturn(TEST_CONNECTION_STRING);
+	when(sqoopOptions.getMapColumnHive()).thenReturn(new Properties());
 
-    doReturn(0).when(sqoopTool).getDashPosition(any(String[].class));
-  }
+	doReturn(0).when(sqoopTool).getDashPosition(any(String[].class));
+}
 
-  @Test
-  public void testValidateOptionsThrowsWhenHs2UrlIsUsedWithoutHiveImport()
-      throws Exception {
-    expectedException.expect(SqoopOptions.InvalidOptionsException.class);
-    expectedException.expectMessage(
-        "The hs2-url option cannot be used without the hive-import option.");
+@Test
+public void testValidateOptionsThrowsWhenHs2UrlIsUsedWithoutHiveImport()
+throws Exception {
+	expectedException.expect(SqoopOptions.InvalidOptionsException.class);
+	expectedException.expectMessage(
+		"The hs2-url option cannot be used without the hive-import option.");
 
-    when(sqoopOptions.doHiveImport()).thenReturn(false);
-    when(sqoopOptions.getHs2Url()).thenReturn(TEST_HS2_URL);
+	when(sqoopOptions.doHiveImport()).thenReturn(false);
+	when(sqoopOptions.getHs2Url()).thenReturn(TEST_HS2_URL);
 
-    sqoopTool.validateOptions(sqoopOptions);
-  }
+	sqoopTool.validateOptions(sqoopOptions);
+}
 
-  @Test
-  public void testValidateOptionsThrowsWhenHs2UrlIsUsedWithHCatalogImport()
-      throws Exception {
-    expectedException.expect(SqoopOptions.InvalidOptionsException.class);
-    expectedException.expectMessage(
-        "The hs2-url option cannot be used without the hive-import option.");
+@Test
+public void testValidateOptionsThrowsWhenHs2UrlIsUsedWithHCatalogImport()
+throws Exception {
+	expectedException.expect(SqoopOptions.InvalidOptionsException.class);
+	expectedException.expectMessage(
+		"The hs2-url option cannot be used without the hive-import option.");
 
-    when(sqoopOptions.getHCatTableName()).thenReturn(TEST_TABLE);
-    when(sqoopOptions.getHs2Url()).thenReturn(TEST_HS2_URL);
+	when(sqoopOptions.getHCatTableName()).thenReturn(TEST_TABLE);
+	when(sqoopOptions.getHs2Url()).thenReturn(TEST_HS2_URL);
 
-    sqoopTool.validateOptions(sqoopOptions);
-  }
+	sqoopTool.validateOptions(sqoopOptions);
+}
 
-  @Test
-  public void testValidateOptionsThrowsWhenHs2UserIsUsedWithoutHs2Url()
-      throws Exception {
-    expectedException.expect(SqoopOptions.InvalidOptionsException.class);
-    expectedException.expectMessage(
-        "The hs2-user option cannot be used without the hs2-url option.");
+@Test
+public void testValidateOptionsThrowsWhenHs2UserIsUsedWithoutHs2Url()
+throws Exception {
+	expectedException.expect(SqoopOptions.InvalidOptionsException.class);
+	expectedException.expectMessage(
+		"The hs2-user option cannot be used without the hs2-url option.");
 
-    when(sqoopOptions.getHs2User()).thenReturn(TEST_HS2_USER);
+	when(sqoopOptions.getHs2User()).thenReturn(TEST_HS2_USER);
 
-    sqoopTool.validateOptions(sqoopOptions);
-  }
+	sqoopTool.validateOptions(sqoopOptions);
+}
 
-  @Test
-  public void testValidateOptionsThrowsWhenHs2KeytabIsUsedWithoutHs2User()
-      throws Exception {
-    expectedException.expect(SqoopOptions.InvalidOptionsException.class);
-    expectedException.expectMessage(
-        "The hs2-keytab option cannot be used without the hs2-user option.");
+@Test
+public void testValidateOptionsThrowsWhenHs2KeytabIsUsedWithoutHs2User()
+throws Exception {
+	expectedException.expect(SqoopOptions.InvalidOptionsException.class);
+	expectedException.expectMessage(
+		"The hs2-keytab option cannot be used without the hs2-user option.");
 
-    when(sqoopOptions.getHs2Keytab()).thenReturn(TEST_HS2_KEYTAB);
+	when(sqoopOptions.getHs2Keytab()).thenReturn(TEST_HS2_KEYTAB);
 
-    sqoopTool.validateOptions(sqoopOptions);
-  }
+	sqoopTool.validateOptions(sqoopOptions);
+}
 
-  @Test
-  public void testValidateOptionsSucceedsWhenHs2UrlIsUsedWithHiveImport()
-      throws Exception {
-    when(sqoopOptions.doHiveImport()).thenReturn(true);
-    when(sqoopOptions.getHs2Url()).thenReturn(TEST_HS2_URL);
+@Test
+public void testValidateOptionsSucceedsWhenHs2UrlIsUsedWithHiveImport()
+throws Exception {
+	when(sqoopOptions.doHiveImport()).thenReturn(true);
+	when(sqoopOptions.getHs2Url()).thenReturn(TEST_HS2_URL);
 
-    sqoopTool.validateOptions(sqoopOptions);
-  }
+	sqoopTool.validateOptions(sqoopOptions);
+}
 
-  @Test
-  public void
-  testValidateOptionsSucceedsWhenHs2UrlIsUsedWithHiveImportAndHs2UserButWithoutHs2Keytab()
-      throws Exception {
-    when(sqoopOptions.doHiveImport()).thenReturn(true);
-    when(sqoopOptions.getHs2Url()).thenReturn(TEST_HS2_URL);
-    when(sqoopOptions.getHs2User()).thenReturn(TEST_HS2_URL);
+@Test
+public void
+testValidateOptionsSucceedsWhenHs2UrlIsUsedWithHiveImportAndHs2UserButWithoutHs2Keytab()
+throws Exception {
+	when(sqoopOptions.doHiveImport()).thenReturn(true);
+	when(sqoopOptions.getHs2Url()).thenReturn(TEST_HS2_URL);
+	when(sqoopOptions.getHs2User()).thenReturn(TEST_HS2_URL);
 
-    sqoopTool.validateOptions(sqoopOptions);
-  }
+	sqoopTool.validateOptions(sqoopOptions);
+}
 }

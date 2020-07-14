@@ -48,147 +48,147 @@ import org.junit.rules.TemporaryFolder;
 @Category(UnitTest.class)
 public class TestNetezzaExternalTableImportMapper {
 
-  @Rule public TemporaryFolder tmpFolder = new TemporaryFolder();
+@Rule public TemporaryFolder tmpFolder = new TemporaryFolder();
 
-  @Rule public final ExpectedException exception = ExpectedException.none();
+@Rule public final ExpectedException exception = ExpectedException.none();
 
-  private static final SQLException testException =
-      new SQLException("failed in test");
+private static final SQLException testException =
+	new SQLException("failed in test");
 
-  private NetezzaExternalTableImportMapper<LongWritable, Text> mapper;
-  private Mapper.Context context;
+private NetezzaExternalTableImportMapper<LongWritable, Text> mapper;
+private Mapper.Context context;
 
-  @Before
-  public void setUp() {
-    mapper = basicMockingOfMapper();
-    context = getContext();
-  }
+@Before
+public void setUp() {
+	mapper = basicMockingOfMapper();
+	context = getContext();
+}
 
-  @Test
-  public void testPassingJDBC() throws Exception {
-    withNoopJDBCOperation(mapper).map(1, null, context);
-  }
+@Test
+public void testPassingJDBC() throws Exception {
+	withNoopJDBCOperation(mapper).map(1, null, context);
+}
 
-  @Test
-  public void testFailingJDBC() throws Exception {
-    withFailingJDBCOperation(mapper);
+@Test
+public void testFailingJDBC() throws Exception {
+	withFailingJDBCOperation(mapper);
 
-    exception.expect(IOException.class);
-    exception.expectCause(is(equalTo(testException)));
-    mapper.map(1, null, context);
-  }
+	exception.expect(IOException.class);
+	exception.expectCause(is(equalTo(testException)));
+	mapper.map(1, null, context);
+}
 
-  /**
-   * Creates an instance of NetezzaExternalTableExportMapper with the
-   * necessary fields mocked to be able to call the run() method without errors.
-   * @return
-   */
-  private NetezzaExternalTableImportMapper<LongWritable, Text>
-  basicMockingOfMapper() {
-    return new NetezzaExternalTableImportMapper<LongWritable, Text>() {
-      @Override
-      protected void writeRecord(Text text, Context context) {
-        // no-op. Don't read from context, mock won't be ready to handle that.
-      }
-    };
-  }
+/**
+ * Creates an instance of NetezzaExternalTableExportMapper with the
+ * necessary fields mocked to be able to call the run() method without errors.
+ * @return
+ */
+private NetezzaExternalTableImportMapper<LongWritable, Text>
+basicMockingOfMapper() {
+	return new NetezzaExternalTableImportMapper<LongWritable, Text>() {
+		       @Override
+		       protected void writeRecord(Text text, Context context) {
+			       // no-op. Don't read from context, mock won't be ready to handle that.
+		       }
+	};
+}
 
-  /**
-   * Mocks mapper's DB connection in a way that leads to SQLException during the
-   * JDBC operation.
-   * @param mapper will modify this object
-   * @return modified mapper
-   * @throws Exception
-   */
-  private NetezzaExternalTableImportMapper<LongWritable, Text>
-  withFailingJDBCOperation(
-      NetezzaExternalTableImportMapper<LongWritable, Text> mapper)
-      throws Exception {
-    Connection connectionMock = mock(Connection.class);
+/**
+ * Mocks mapper's DB connection in a way that leads to SQLException during the
+ * JDBC operation.
+ * @param mapper will modify this object
+ * @return modified mapper
+ * @throws Exception
+ */
+private NetezzaExternalTableImportMapper<LongWritable, Text>
+withFailingJDBCOperation(
+	NetezzaExternalTableImportMapper<LongWritable, Text> mapper)
+throws Exception {
+	Connection connectionMock = mock(Connection.class);
 
-    // PreparadStatement mock should imitate loading stuff from FIFO into
-    // Netezza
-    PreparedStatement psMock = mock(PreparedStatement.class);
-    when(psMock.execute()).then(invocation -> {
-      // Write log file under taskAttemptDir to be able to check log upload
-      File logFile = mapper.taskAttemptDir.toPath()
-                         .resolve("job__0000-0-0")
-                         .resolve("TEST.nzlog")
-                         .toFile();
-      FileUtils.writeStringToFile(logFile, "test log");
+	// PreparadStatement mock should imitate loading stuff from FIFO into
+	// Netezza
+	PreparedStatement psMock = mock(PreparedStatement.class);
+	when(psMock.execute()).then(invocation->{
+			// Write log file under taskAttemptDir to be able to check log upload
+			File logFile = mapper.taskAttemptDir.toPath()
+			               .resolve("job__0000-0-0")
+			               .resolve("TEST.nzlog")
+			               .toFile();
+			FileUtils.writeStringToFile(logFile, "test log");
 
-      // Need to open FIFO for writing, otherwise reading would hang
-      FileOutputStream fos =
-          new FileOutputStream(mapper.fifoFile.getAbsoluteFile());
+			// Need to open FIFO for writing, otherwise reading would hang
+			FileOutputStream fos =
+				new FileOutputStream(mapper.fifoFile.getAbsoluteFile());
 
-      // Simulate delay
-      Thread.sleep(200);
+			// Simulate delay
+			Thread.sleep(200);
 
-      // Write single record, then throw
-      fos.write("test record".getBytes());
-      fos.close();
-      throw testException;
-    });
-    when(connectionMock.prepareStatement(anyString())).thenReturn(psMock);
+			// Write single record, then throw
+			fos.write("test record".getBytes());
+			fos.close();
+			throw testException;
+		});
+	when(connectionMock.prepareStatement(anyString())).thenReturn(psMock);
 
-    DBConfiguration dbcMock = mock(DBConfiguration.class);
-    when(dbcMock.getConnection()).thenReturn(connectionMock);
-    mapper.dbc = dbcMock;
-    return mapper;
-  }
+	DBConfiguration dbcMock = mock(DBConfiguration.class);
+	when(dbcMock.getConnection()).thenReturn(connectionMock);
+	mapper.dbc = dbcMock;
+	return mapper;
+}
 
-  /**
-   * Mocks mapper's DB connection to execute a no-op JDBC operation.
-   * @param mapper will modify this object
-   * @return modified mapper
-   * @throws Exception
-   */
-  private NetezzaExternalTableImportMapper<LongWritable, Text>
-  withNoopJDBCOperation(
-      NetezzaExternalTableImportMapper<LongWritable, Text> mapper)
-      throws Exception {
-    Connection connectionMock = mock(Connection.class);
+/**
+ * Mocks mapper's DB connection to execute a no-op JDBC operation.
+ * @param mapper will modify this object
+ * @return modified mapper
+ * @throws Exception
+ */
+private NetezzaExternalTableImportMapper<LongWritable, Text>
+withNoopJDBCOperation(
+	NetezzaExternalTableImportMapper<LongWritable, Text> mapper)
+throws Exception {
+	Connection connectionMock = mock(Connection.class);
 
-    // PreparadStatement mock should imitate loading stuff from FIFO into
-    // Netezza
-    PreparedStatement psMock = mock(PreparedStatement.class);
-    when(psMock.execute()).then(invocation -> {
-      // Need to open FIFO for writing, otherwise reading would hang
-      FileOutputStream fos =
-          new FileOutputStream(mapper.fifoFile.getAbsoluteFile());
+	// PreparadStatement mock should imitate loading stuff from FIFO into
+	// Netezza
+	PreparedStatement psMock = mock(PreparedStatement.class);
+	when(psMock.execute()).then(invocation->{
+			// Need to open FIFO for writing, otherwise reading would hang
+			FileOutputStream fos =
+				new FileOutputStream(mapper.fifoFile.getAbsoluteFile());
 
-      // Simulate delay
-      Thread.sleep(200);
+			// Simulate delay
+			Thread.sleep(200);
 
-      // Write single record and return
-      fos.write("test record".getBytes());
-      fos.close();
-      return true;
-    });
-    when(connectionMock.prepareStatement(anyString())).thenReturn(psMock);
+			// Write single record and return
+			fos.write("test record".getBytes());
+			fos.close();
+			return true;
+		});
+	when(connectionMock.prepareStatement(anyString())).thenReturn(psMock);
 
-    DBConfiguration dbcMock = mock(DBConfiguration.class);
-    when(dbcMock.getConnection()).thenReturn(connectionMock);
-    mapper.dbc = dbcMock;
-    return mapper;
-  }
+	DBConfiguration dbcMock = mock(DBConfiguration.class);
+	when(dbcMock.getConnection()).thenReturn(connectionMock);
+	mapper.dbc = dbcMock;
+	return mapper;
+}
 
-  /**
-   * Creates simple mapreduce context that says it has a single record but won't
-   * actually return any records as tests are not expected to read the records.
-   * @return
-   * @throws IOException
-   * @throws InterruptedException
-   */
-  private Mapper.Context getContext() {
-    Mapper.Context context = mock(Mapper.Context.class);
+/**
+ * Creates simple mapreduce context that says it has a single record but won't
+ * actually return any records as tests are not expected to read the records.
+ * @return
+ * @throws IOException
+ * @throws InterruptedException
+ */
+private Mapper.Context getContext() {
+	Mapper.Context context = mock(Mapper.Context.class);
 
-    Configuration conf = new Configuration();
-    when(context.getConfiguration()).thenReturn(conf);
+	Configuration conf = new Configuration();
+	when(context.getConfiguration()).thenReturn(conf);
 
-    TaskAttemptID taskAttemptID = new TaskAttemptID();
-    when(context.getTaskAttemptID()).thenReturn(taskAttemptID);
+	TaskAttemptID taskAttemptID = new TaskAttemptID();
+	when(context.getTaskAttemptID()).thenReturn(taskAttemptID);
 
-    return context;
-  }
+	return context;
+}
 }

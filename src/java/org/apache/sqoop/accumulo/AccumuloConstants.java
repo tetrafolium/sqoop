@@ -22,52 +22,53 @@ package org.apache.sqoop.accumulo;
  * Accumulo imports.
  */
 public final class AccumuloConstants {
-  // Some defaults to use if these aren't specified.
-  // Default buffer size for BatchWriter
-  public static final long DEFAULT_BATCH_SIZE = 10240000L;
-  // Default latency for BatchWriter
-  public static final long DEFAULT_LATENCY = 5000L;
+// Some defaults to use if these aren't specified.
+// Default buffer size for BatchWriter
+public static final long DEFAULT_BATCH_SIZE = 10240000L;
+// Default latency for BatchWriter
+public static final long DEFAULT_LATENCY = 5000L;
 
-  /** Configuration key specifying the table to insert into. */
-  public static final String TABLE_NAME_KEY = "sqoop.accumulo.insert.table";
+/** Configuration key specifying the table to insert into. */
+public static final String TABLE_NAME_KEY = "sqoop.accumulo.insert.table";
 
-  /** Configuration key specifying the column family to insert into. */
-  public static final String COL_FAMILY_KEY =
-      "sqoop.accumulo.insert.column.family";
+/** Configuration key specifying the column family to insert into. */
+public static final String COL_FAMILY_KEY =
+	"sqoop.accumulo.insert.column.family";
 
-  /**
-   * Configuration key specifying the column of the input whose value
-   * should be used as the row id.
-   */
-  public static final String ROW_KEY_COLUMN_KEY =
-      "sqoop.accumulo.insert.row.key.column";
+/**
+ * Configuration key specifying the column of the input whose value
+ * should be used as the row id.
+ */
+public static final String ROW_KEY_COLUMN_KEY =
+	"sqoop.accumulo.insert.row.key.column";
 
-  /**
-   * Configuration key specifying the column of the input whose value
-   * should be used as the row id.
-   */
-  public static final String VISIBILITY_KEY =
-      "sqoop.accumulo.insert.visibility";
-  /**
-   * Configuration key specifying the Transformer implementation to use.
-   */
-  public static final String TRANSFORMER_CLASS_KEY =
-      "sqoop.accumulo.insert.put.transformer.class";
+/**
+ * Configuration key specifying the column of the input whose value
+ * should be used as the row id.
+ */
+public static final String VISIBILITY_KEY =
+	"sqoop.accumulo.insert.visibility";
+/**
+ * Configuration key specifying the Transformer implementation to use.
+ */
+public static final String TRANSFORMER_CLASS_KEY =
+	"sqoop.accumulo.insert.put.transformer.class";
 
-  public static final String MAX_LATENCY = "sqoop.accumulo.max.latency";
+public static final String MAX_LATENCY = "sqoop.accumulo.max.latency";
 
-  public static final String BATCH_SIZE = "sqoop.accumulo.batch.size";
+public static final String BATCH_SIZE = "sqoop.accumulo.batch.size";
 
-  public static final String ZOOKEEPERS = "sqoop.accumulo.zookeeper.hostnames";
+public static final String ZOOKEEPERS = "sqoop.accumulo.zookeeper.hostnames";
 
-  public static final String ACCUMULO_INSTANCE = "sqoop.accumulo.instance.name";
+public static final String ACCUMULO_INSTANCE = "sqoop.accumulo.instance.name";
 
-  public static final String ACCUMULO_USER_NAME = "sqoop.accumulo.user.name";
+public static final String ACCUMULO_USER_NAME = "sqoop.accumulo.user.name";
 
-  public static final String ACCUMULO_PASSWORD = "sqoop.accumulo.password";
+public static final String ACCUMULO_PASSWORD = "sqoop.accumulo.password";
 
-  public static final String ACCUMULO_SITE_XML_PATH = "/conf/accumulo-site.xml";
+public static final String ACCUMULO_SITE_XML_PATH = "/conf/accumulo-site.xml";
 
-  // Prevent instantiation.
-  private AccumuloConstants() {}
+// Prevent instantiation.
+private AccumuloConstants() {
+}
 }

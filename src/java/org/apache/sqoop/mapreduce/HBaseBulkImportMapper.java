@@ -41,59 +41,59 @@ import org.apache.sqoop.lib.SqoopRecord;
  * and the HBasePutProcessor.
  */
 public class HBaseBulkImportMapper
-    extends AutoProgressMapper<LongWritable, SqoopRecord,
-                               ImmutableBytesWritable, Put> {
+	extends AutoProgressMapper<LongWritable, SqoopRecord,
+	                           ImmutableBytesWritable, Put> {
 
-  private LargeObjectLoader lobLoader;
-  // An object that can transform a map of fieldName->object
-  // into a Put command.
-  private PutTransformer putTransformer;
-  private Configuration conf;
-  @Override
-  protected void setup(Context context)
-      throws IOException, InterruptedException {
-    this.conf = context.getConfiguration();
-    this.lobLoader = new LargeObjectLoader(
-        this.conf, new Path(this.conf.get("sqoop.hbase.lob.extern.dir",
-                                          "/tmp/sqoop-hbase-" +
-                                              context.getTaskAttemptID())));
+private LargeObjectLoader lobLoader;
+// An object that can transform a map of fieldName->object
+// into a Put command.
+private PutTransformer putTransformer;
+private Configuration conf;
+@Override
+protected void setup(Context context)
+throws IOException, InterruptedException {
+	this.conf = context.getConfiguration();
+	this.lobLoader = new LargeObjectLoader(
+		this.conf, new Path(this.conf.get("sqoop.hbase.lob.extern.dir",
+		                                  "/tmp/sqoop-hbase-" +
+		                                  context.getTaskAttemptID())));
 
-    // Get the implementation of PutTransformer to use.
-    // By default, we call toString() on every non-null field.
-    Class<? extends PutTransformer> xformerClass =
-        (Class<? extends PutTransformer>)this.conf.getClass(
-            TRANSFORMER_CLASS_KEY, ToStringPutTransformer.class);
-    this.putTransformer =
-        (PutTransformer)ReflectionUtils.newInstance(xformerClass, this.conf);
-    if (null == putTransformer) {
-      throw new RuntimeException("Could not instantiate PutTransformer.");
-    }
-    putTransformer.init(conf);
-  }
-  @Override
-  public void map(LongWritable key, SqoopRecord val, Context context)
-      throws IOException, InterruptedException {
-    try {
-      // Loading of LOBs was delayed until we have a Context.
-      val.loadLargeObjects(lobLoader);
-    } catch (SQLException sqlE) {
-      throw new IOException(sqlE);
-    }
-    Map<String, Object> fields = val.getFieldMap();
+	// Get the implementation of PutTransformer to use.
+	// By default, we call toString() on every non-null field.
+	Class<? extends PutTransformer> xformerClass =
+		(Class<? extends PutTransformer>)this.conf.getClass(
+			TRANSFORMER_CLASS_KEY, ToStringPutTransformer.class);
+	this.putTransformer =
+		(PutTransformer)ReflectionUtils.newInstance(xformerClass, this.conf);
+	if (null == putTransformer) {
+		throw new RuntimeException("Could not instantiate PutTransformer.");
+	}
+	putTransformer.init(conf);
+}
+@Override
+public void map(LongWritable key, SqoopRecord val, Context context)
+throws IOException, InterruptedException {
+	try {
+		// Loading of LOBs was delayed until we have a Context.
+		val.loadLargeObjects(lobLoader);
+	} catch (SQLException sqlE) {
+		throw new IOException(sqlE);
+	}
+	Map<String, Object> fields = val.getFieldMap();
 
-    List<Mutation> mutationList = putTransformer.getMutationCommand(fields);
-    for (Mutation mutation : mutationList) {
-      if (mutation != null && mutation instanceof Put) {
-        Put putObject = (Put)mutation;
-        context.write(new ImmutableBytesWritable(putObject.getRow()),
-                      putObject);
-      }
-    }
-  }
-  @Override
-  protected void cleanup(Context context) throws IOException {
-    if (null != lobLoader) {
-      lobLoader.close();
-    }
-  }
+	List<Mutation> mutationList = putTransformer.getMutationCommand(fields);
+	for (Mutation mutation : mutationList) {
+		if (mutation != null && mutation instanceof Put) {
+			Put putObject = (Put)mutation;
+			context.write(new ImmutableBytesWritable(putObject.getRow()),
+			              putObject);
+		}
+	}
+}
+@Override
+protected void cleanup(Context context) throws IOException {
+	if (null != lobLoader) {
+		lobLoader.close();
+	}
+}
 }

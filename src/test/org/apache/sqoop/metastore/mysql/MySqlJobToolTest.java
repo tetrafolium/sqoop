@@ -46,10 +46,10 @@ import org.junit.experimental.categories.Category;
 @Category(MysqlTest.class)
 public class MySqlJobToolTest extends JobToolTestBase {
 
-  private static MySQLTestUtils mySQLTestUtils = new MySQLTestUtils();
+private static MySQLTestUtils mySQLTestUtils = new MySQLTestUtils();
 
-  public MySqlJobToolTest() {
-    super(mySQLTestUtils.getMySqlConnectString(), mySQLTestUtils.getUserName(),
-          mySQLTestUtils.getUserPass());
-  }
+public MySqlJobToolTest() {
+	super(mySQLTestUtils.getMySqlConnectString(), mySQLTestUtils.getUserName(),
+	      mySQLTestUtils.getUserPass());
+}
 }

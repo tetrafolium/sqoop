@@ -41,114 +41,114 @@ import org.mockito.ArgumentCaptor;
 
 public class ExpectedLogMessage implements TestRule {
 
-  private static class LoggingEventMatcher
-      extends TypeSafeMatcher<LoggingEvent> {
+private static class LoggingEventMatcher
+	extends TypeSafeMatcher<LoggingEvent> {
 
-    private final String msg;
+private final String msg;
 
-    private final Level level;
+private final Level level;
 
-    private LoggingEventMatcher(String msg, Level level) {
-      this.msg = msg;
-      this.level = level;
-    }
+private LoggingEventMatcher(String msg, Level level) {
+	this.msg = msg;
+	this.level = level;
+}
 
-    @Override
-    public boolean matchesSafely(LoggingEvent o) {
-      return contains(extractEventMessage(o), msg) &&
-          level.equals(o.getLevel());
-    }
+@Override
+public boolean matchesSafely(LoggingEvent o) {
+	return contains(extractEventMessage(o), msg) &&
+	       level.equals(o.getLevel());
+}
 
-    @Override
-    public void describeTo(org.hamcrest.Description description) {
-      description.appendText(eventToString(msg, level));
-    }
+@Override
+public void describeTo(org.hamcrest.Description description) {
+	description.appendText(eventToString(msg, level));
+}
 
-    @Override
-    protected void
-    describeMismatchSafely(LoggingEvent item,
-                           org.hamcrest.Description mismatchDescription) {
-      mismatchDescription.appendText(
-          eventToString(extractEventMessage(item), item.getLevel()));
-    }
+@Override
+protected void
+describeMismatchSafely(LoggingEvent item,
+                       org.hamcrest.Description mismatchDescription) {
+	mismatchDescription.appendText(
+		eventToString(extractEventMessage(item), item.getLevel()));
+}
 
-    private String extractEventMessage(LoggingEvent item) {
-      final String eventMsg = item.getRenderedMessage();
-      final String exceptionMessage =
-          extractExceptionMessage(item.getThrowableInformation());
+private String extractEventMessage(LoggingEvent item) {
+	final String eventMsg = item.getRenderedMessage();
+	final String exceptionMessage =
+		extractExceptionMessage(item.getThrowableInformation());
 
-      return eventMsg + exceptionMessage;
-    }
+	return eventMsg + exceptionMessage;
+}
 
-    private String extractExceptionMessage(ThrowableInformation throwableInfo) {
-      if (throwableInfo == null) {
-        return EMPTY;
-      }
+private String extractExceptionMessage(ThrowableInformation throwableInfo) {
+	if (throwableInfo == null) {
+		return EMPTY;
+	}
 
-      Throwable throwable = throwableInfo.getThrowable();
-      if (throwable == null) {
-        return EMPTY;
-      }
+	Throwable throwable = throwableInfo.getThrowable();
+	if (throwable == null) {
+		return EMPTY;
+	}
 
-      return defaultString(throwable.getMessage());
-    }
+	return defaultString(throwable.getMessage());
+}
 
-    private String eventToString(String msg, Level level) {
-      return "Log entry [ " + msg + ", " + level + " ]";
-    }
-  }
+private String eventToString(String msg, Level level) {
+	return "Log entry [ " + msg + ", " + level + " ]";
+}
+}
 
-  private Matcher<LoggingEvent> loggingEventMatcher;
+private Matcher<LoggingEvent> loggingEventMatcher;
 
-  @Override
-  public Statement apply(final Statement base, Description description) {
-    return new Statement() {
-      @Override
-      public void evaluate() throws Throwable {
+@Override
+public Statement apply(final Statement base, Description description) {
+	return new Statement() {
+		       @Override
+		       public void evaluate() throws Throwable {
 
-        Logger rootLogger = Logger.getRootLogger();
-        Appender mockAppender = mock(Appender.class);
-        rootLogger.addAppender(mockAppender);
+			       Logger rootLogger = Logger.getRootLogger();
+			       Appender mockAppender = mock(Appender.class);
+			       rootLogger.addAppender(mockAppender);
 
-        try {
-          base.evaluate();
-          if (loggingEventMatcher != null) {
-            ArgumentCaptor<LoggingEvent> argumentCaptor =
-                ArgumentCaptor.forClass(LoggingEvent.class);
-            verify(mockAppender, atMost(Integer.MAX_VALUE))
-                .doAppend(argumentCaptor.capture());
-            assertThat(argumentCaptor.getAllValues(),
-                       hasItem(loggingEventMatcher));
-          }
-        } finally {
-          rootLogger.removeAppender(mockAppender);
-          loggingEventMatcher = null;
-        }
-      }
-    };
-  }
+			       try {
+				       base.evaluate();
+				       if (loggingEventMatcher != null) {
+					       ArgumentCaptor<LoggingEvent> argumentCaptor =
+						       ArgumentCaptor.forClass(LoggingEvent.class);
+					       verify(mockAppender, atMost(Integer.MAX_VALUE))
+					       .doAppend(argumentCaptor.capture());
+					       assertThat(argumentCaptor.getAllValues(),
+					                  hasItem(loggingEventMatcher));
+				       }
+			       } finally {
+				       rootLogger.removeAppender(mockAppender);
+				       loggingEventMatcher = null;
+			       }
+		       }
+	};
+}
 
-  public void expectFatal(String msg) {
-    loggingEventMatcher = new LoggingEventMatcher(msg, Level.FATAL);
-  }
+public void expectFatal(String msg) {
+	loggingEventMatcher = new LoggingEventMatcher(msg, Level.FATAL);
+}
 
-  public void expectError(String msg) {
-    loggingEventMatcher = new LoggingEventMatcher(msg, Level.ERROR);
-  }
+public void expectError(String msg) {
+	loggingEventMatcher = new LoggingEventMatcher(msg, Level.ERROR);
+}
 
-  public void expectWarn(String msg) {
-    loggingEventMatcher = new LoggingEventMatcher(msg, Level.WARN);
-  }
+public void expectWarn(String msg) {
+	loggingEventMatcher = new LoggingEventMatcher(msg, Level.WARN);
+}
 
-  public void expectInfo(String msg) {
-    loggingEventMatcher = new LoggingEventMatcher(msg, Level.INFO);
-  }
+public void expectInfo(String msg) {
+	loggingEventMatcher = new LoggingEventMatcher(msg, Level.INFO);
+}
 
-  public void expectDebug(String msg) {
-    loggingEventMatcher = new LoggingEventMatcher(msg, Level.DEBUG);
-  }
+public void expectDebug(String msg) {
+	loggingEventMatcher = new LoggingEventMatcher(msg, Level.DEBUG);
+}
 
-  public void expectTrace(String msg) {
-    loggingEventMatcher = new LoggingEventMatcher(msg, Level.TRACE);
-  }
+public void expectTrace(String msg) {
+	loggingEventMatcher = new LoggingEventMatcher(msg, Level.TRACE);
+}
 }

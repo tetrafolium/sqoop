@@ -28,12 +28,12 @@ import org.apache.sqoop.lib.SqoopRecord;
  * and the HBasePutProcessor.
  */
 public class HBaseImportMapper
-    extends AutoProgressMapper<LongWritable, SqoopRecord, SqoopRecord,
-                               NullWritable> {
+	extends AutoProgressMapper<LongWritable, SqoopRecord, SqoopRecord,
+	                           NullWritable> {
 
-  @Override
-  public void map(LongWritable key, SqoopRecord val, Context context)
-      throws IOException, InterruptedException {
-    context.write(val, NullWritable.get());
-  }
+@Override
+public void map(LongWritable key, SqoopRecord val, Context context)
+throws IOException, InterruptedException {
+	context.write(val, NullWritable.get());
+}
 }

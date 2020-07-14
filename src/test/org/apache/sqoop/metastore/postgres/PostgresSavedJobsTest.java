@@ -46,8 +46,8 @@ import org.junit.experimental.categories.Category;
 @Category(PostgresqlTest.class)
 public class PostgresSavedJobsTest extends SavedJobsTestBase {
 
-  public PostgresSavedJobsTest() {
-    super(CONNECT_STRING, DATABASE_USER, PASSWORD,
-          JdbcDrivers.POSTGRES.getDriverClass());
-  }
+public PostgresSavedJobsTest() {
+	super(CONNECT_STRING, DATABASE_USER, PASSWORD,
+	      JdbcDrivers.POSTGRES.getDriverClass());
+}
 }

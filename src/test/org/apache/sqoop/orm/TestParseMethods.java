@@ -51,226 +51,226 @@ import org.junit.Test;
  */
 public class TestParseMethods extends ImportJobTestCase {
 
-  /**
-   * Create the argv to pass to Sqoop.
-   * @return the argv as an array of strings.
-   */
-  private String[] getArgv(boolean includeHadoopFlags, String fieldTerminator,
-                           String lineTerminator, String encloser,
-                           String escape, boolean encloserRequired) {
+/**
+ * Create the argv to pass to Sqoop.
+ * @return the argv as an array of strings.
+ */
+private String[] getArgv(boolean includeHadoopFlags, String fieldTerminator,
+                         String lineTerminator, String encloser,
+                         String escape, boolean encloserRequired) {
 
-    ArrayList<String> args = new ArrayList<String>();
+	ArrayList<String> args = new ArrayList<String>();
 
-    if (includeHadoopFlags) {
-      CommonArgs.addHadoopFlags(args);
-    }
+	if (includeHadoopFlags) {
+		CommonArgs.addHadoopFlags(args);
+	}
 
-    args.add("--table");
-    args.add(getTableName());
-    args.add("--warehouse-dir");
-    args.add(getWarehouseDir());
-    args.add("--connect");
-    args.add(HsqldbTestServer.getUrl());
-    args.add("--as-textfile");
-    args.add("--split-by");
-    args.add("DATA_COL0"); // always split by first column.
-    args.add("--fields-terminated-by");
-    args.add(fieldTerminator);
-    args.add("--lines-terminated-by");
-    args.add(lineTerminator);
-    args.add("--escaped-by");
-    args.add(escape);
-    if (encloserRequired) {
-      args.add("--enclosed-by");
-    } else {
-      args.add("--optionally-enclosed-by");
-    }
-    args.add(encloser);
-    args.add("--num-mappers");
-    args.add("1");
+	args.add("--table");
+	args.add(getTableName());
+	args.add("--warehouse-dir");
+	args.add(getWarehouseDir());
+	args.add("--connect");
+	args.add(HsqldbTestServer.getUrl());
+	args.add("--as-textfile");
+	args.add("--split-by");
+	args.add("DATA_COL0"); // always split by first column.
+	args.add("--fields-terminated-by");
+	args.add(fieldTerminator);
+	args.add("--lines-terminated-by");
+	args.add(lineTerminator);
+	args.add("--escaped-by");
+	args.add(escape);
+	if (encloserRequired) {
+		args.add("--enclosed-by");
+	} else {
+		args.add("--optionally-enclosed-by");
+	}
+	args.add(encloser);
+	args.add("--num-mappers");
+	args.add("1");
 
-    return args.toArray(new String[0]);
-  }
+	return args.toArray(new String[0]);
+}
 
-  @Test
-  public void testTemporaryRootDirParse() throws Exception {
-    String customRoot = "customroot";
-    String[] args =
-        new String[] {"--" + BaseSqoopTool.TEMP_ROOTDIR_ARG, customRoot};
+@Test
+public void testTemporaryRootDirParse() throws Exception {
+	String customRoot = "customroot";
+	String[] args =
+		new String[] {"--" + BaseSqoopTool.TEMP_ROOTDIR_ARG, customRoot};
 
-    SqoopOptions opts = new ImportTool().parseArguments(args, null, null, true);
+	SqoopOptions opts = new ImportTool().parseArguments(args, null, null, true);
 
-    assertEquals(customRoot, opts.getTempRootDir());
-  }
+	assertEquals(customRoot, opts.getTempRootDir());
+}
 
-  public void runParseTest(String fieldTerminator, String lineTerminator,
-                           String encloser, String escape,
-                           boolean encloseRequired) throws IOException {
+public void runParseTest(String fieldTerminator, String lineTerminator,
+                         String encloser, String escape,
+                         boolean encloseRequired) throws IOException {
 
-    ClassLoader prevClassLoader = null;
+	ClassLoader prevClassLoader = null;
 
-    String[] argv = getArgv(true, fieldTerminator, lineTerminator, encloser,
-                            escape, encloseRequired);
-    runImport(argv);
-    try {
-      String tableClassName = getTableName();
+	String[] argv = getArgv(true, fieldTerminator, lineTerminator, encloser,
+	                        escape, encloseRequired);
+	runImport(argv);
+	try {
+		String tableClassName = getTableName();
 
-      argv = getArgv(false, fieldTerminator, lineTerminator, encloser, escape,
-                     encloseRequired);
-      SqoopOptions opts =
-          new ImportTool().parseArguments(argv, null, null, true);
+		argv = getArgv(false, fieldTerminator, lineTerminator, encloser, escape,
+		               encloseRequired);
+		SqoopOptions opts =
+			new ImportTool().parseArguments(argv, null, null, true);
 
-      CompilationManager compileMgr = new CompilationManager(opts);
-      String jarFileName = compileMgr.getJarFilename();
+		CompilationManager compileMgr = new CompilationManager(opts);
+		String jarFileName = compileMgr.getJarFilename();
 
-      // Make sure the user's class is loaded into our address space.
-      prevClassLoader =
-          ClassLoaderStack.addJarFile(jarFileName, tableClassName);
+		// Make sure the user's class is loaded into our address space.
+		prevClassLoader =
+			ClassLoaderStack.addJarFile(jarFileName, tableClassName);
 
-      JobConf job = new JobConf();
-      job.setJar(jarFileName);
+		JobConf job = new JobConf();
+		job.setJar(jarFileName);
 
-      // Tell the job what class we're testing.
-      job.set(ReparseMapper.USER_TYPE_NAME_KEY, tableClassName);
+		// Tell the job what class we're testing.
+		job.set(ReparseMapper.USER_TYPE_NAME_KEY, tableClassName);
 
-      if (!BaseSqoopTestCase.isOnPhysicalCluster()) {
-        job.set(CommonArgs.FS_DEFAULT_NAME, CommonArgs.LOCAL_FS);
-      }
-      String warehouseDir = getWarehouseDir();
-      Path warehousePath = new Path(warehouseDir);
-      Path inputPath = new Path(warehousePath, getTableName());
-      Path outputPath = new Path(warehousePath, getTableName() + "-out");
+		if (!BaseSqoopTestCase.isOnPhysicalCluster()) {
+			job.set(CommonArgs.FS_DEFAULT_NAME, CommonArgs.LOCAL_FS);
+		}
+		String warehouseDir = getWarehouseDir();
+		Path warehousePath = new Path(warehouseDir);
+		Path inputPath = new Path(warehousePath, getTableName());
+		Path outputPath = new Path(warehousePath, getTableName() + "-out");
 
-      job.setMapperClass(ReparseMapper.class);
-      job.setNumReduceTasks(0);
-      FileInputFormat.addInputPath(job, inputPath);
-      FileOutputFormat.setOutputPath(job, outputPath);
+		job.setMapperClass(ReparseMapper.class);
+		job.setNumReduceTasks(0);
+		FileInputFormat.addInputPath(job, inputPath);
+		FileOutputFormat.setOutputPath(job, outputPath);
 
-      job.setOutputKeyClass(Text.class);
-      job.setOutputValueClass(NullWritable.class);
+		job.setOutputKeyClass(Text.class);
+		job.setOutputValueClass(NullWritable.class);
 
-      JobClient.runJob(job);
-    } catch (InvalidOptionsException ioe) {
-      fail(ioe.toString());
-    } catch (ParseException pe) {
-      fail(pe.toString());
-    } finally {
-      if (null != prevClassLoader) {
-        ClassLoaderStack.setCurrentClassLoader(prevClassLoader);
-      }
-    }
-  }
+		JobClient.runJob(job);
+	} catch (InvalidOptionsException ioe) {
+		fail(ioe.toString());
+	} catch (ParseException pe) {
+		fail(pe.toString());
+	} finally {
+		if (null != prevClassLoader) {
+			ClassLoaderStack.setCurrentClassLoader(prevClassLoader);
+		}
+	}
+}
 
-  @Test
-  public void testDefaults() throws IOException {
-    String[] types = {"INTEGER", "VARCHAR(32)", "INTEGER"};
-    String[] vals = {"64", "'foo'", "128"};
+@Test
+public void testDefaults() throws IOException {
+	String[] types = {"INTEGER", "VARCHAR(32)", "INTEGER"};
+	String[] vals = {"64", "'foo'", "128"};
 
-    createTableWithColTypes(types, vals);
-    runParseTest(",", "\\n", "\\\"", "\\", false);
-  }
+	createTableWithColTypes(types, vals);
+	runParseTest(",", "\\n", "\\\"", "\\", false);
+}
 
-  @Test
-  public void testRequiredEnclose() throws IOException {
-    String[] types = {"INTEGER", "VARCHAR(32)", "INTEGER"};
-    String[] vals = {"64", "'foo'", "128"};
+@Test
+public void testRequiredEnclose() throws IOException {
+	String[] types = {"INTEGER", "VARCHAR(32)", "INTEGER"};
+	String[] vals = {"64", "'foo'", "128"};
 
-    createTableWithColTypes(types, vals);
-    runParseTest(",", "\\n", "\\\"", "\\", true);
-  }
+	createTableWithColTypes(types, vals);
+	runParseTest(",", "\\n", "\\\"", "\\", true);
+}
 
-  @Test
-  public void testStringEscapes() throws IOException {
-    String[] types = {
-        "VARCHAR(32)", "VARCHAR(32)", "VARCHAR(32)",
-        "VARCHAR(32)", "VARCHAR(32)",
-    };
-    String[] vals = {
-        "'foo'", "'foo,bar'", "'foo''bar'", "'foo\\bar'", "'foo,bar''baz'",
-    };
+@Test
+public void testStringEscapes() throws IOException {
+	String[] types = {
+		"VARCHAR(32)", "VARCHAR(32)", "VARCHAR(32)",
+		"VARCHAR(32)", "VARCHAR(32)",
+	};
+	String[] vals = {
+		"'foo'", "'foo,bar'", "'foo''bar'", "'foo\\bar'", "'foo,bar''baz'",
+	};
 
-    createTableWithColTypes(types, vals);
-    runParseTest(",", "\\n", "\\\'", "\\", false);
-  }
+	createTableWithColTypes(types, vals);
+	runParseTest(",", "\\n", "\\\'", "\\", false);
+}
 
-  @Test
-  public void testNumericTypes() throws IOException {
-    String[] types = {
-        "INTEGER", "REAL",      "FLOAT",   "DATE",
-        "TIME",    "TIMESTAMP", "NUMERIC", "BOOLEAN",
-    };
-    String[] vals = {
-        "42",
-        "36.0",
-        "127.1",
-        "'2009-07-02'",
-        "'11:24:00'",
-        "'2009-08-13 20:32:00.1234567'",
-        "92104916282869291837672829102857271948687.287475322",
-        "true",
-    };
+@Test
+public void testNumericTypes() throws IOException {
+	String[] types = {
+		"INTEGER", "REAL",      "FLOAT",   "DATE",
+		"TIME",    "TIMESTAMP", "NUMERIC", "BOOLEAN",
+	};
+	String[] vals = {
+		"42",
+		"36.0",
+		"127.1",
+		"'2009-07-02'",
+		"'11:24:00'",
+		"'2009-08-13 20:32:00.1234567'",
+		"92104916282869291837672829102857271948687.287475322",
+		"true",
+	};
 
-    createTableWithColTypes(types, vals);
-    runParseTest(",", "\\n", "\\\'", "\\", false);
-  }
+	createTableWithColTypes(types, vals);
+	runParseTest(",", "\\n", "\\\'", "\\", false);
+}
 
-  @Test
-  public void testFieldSetter() throws IOException {
-    ClassLoader prevClassLoader = null;
+@Test
+public void testFieldSetter() throws IOException {
+	ClassLoader prevClassLoader = null;
 
-    String[] types = {"VARCHAR(32)", "VARCHAR(32)"};
-    String[] vals = {"'meep'", "'foo'"};
-    createTableWithColTypes(types, vals);
+	String[] types = {"VARCHAR(32)", "VARCHAR(32)"};
+	String[] vals = {"'meep'", "'foo'"};
+	createTableWithColTypes(types, vals);
 
-    String[] argv = getArgv(true, ",", "\\n", "\\\'", "\\", false);
-    runImport(argv);
-    try {
-      String tableClassName = getTableName();
+	String[] argv = getArgv(true, ",", "\\n", "\\\'", "\\", false);
+	runImport(argv);
+	try {
+		String tableClassName = getTableName();
 
-      argv = getArgv(false, ",", "\\n", "\\\'", "\\", false);
-      SqoopOptions opts =
-          new ImportTool().parseArguments(argv, null, null, true);
+		argv = getArgv(false, ",", "\\n", "\\\'", "\\", false);
+		SqoopOptions opts =
+			new ImportTool().parseArguments(argv, null, null, true);
 
-      CompilationManager compileMgr = new CompilationManager(opts);
-      String jarFileName = compileMgr.getJarFilename();
+		CompilationManager compileMgr = new CompilationManager(opts);
+		String jarFileName = compileMgr.getJarFilename();
 
-      // Make sure the user's class is loaded into our address space.
-      prevClassLoader =
-          ClassLoaderStack.addJarFile(jarFileName, tableClassName);
+		// Make sure the user's class is loaded into our address space.
+		prevClassLoader =
+			ClassLoaderStack.addJarFile(jarFileName, tableClassName);
 
-      JobConf job = new JobConf();
-      job.setJar(jarFileName);
+		JobConf job = new JobConf();
+		job.setJar(jarFileName);
 
-      // Tell the job what class we're testing.
-      job.set(ExplicitSetMapper.USER_TYPE_NAME_KEY, tableClassName);
-      job.set(ExplicitSetMapper.SET_COL_KEY, BASE_COL_NAME + "0");
-      job.set(ExplicitSetMapper.SET_VAL_KEY, "this-is-a-test");
+		// Tell the job what class we're testing.
+		job.set(ExplicitSetMapper.USER_TYPE_NAME_KEY, tableClassName);
+		job.set(ExplicitSetMapper.SET_COL_KEY, BASE_COL_NAME + "0");
+		job.set(ExplicitSetMapper.SET_VAL_KEY, "this-is-a-test");
 
-      if (!BaseSqoopTestCase.isOnPhysicalCluster()) {
-        job.set(CommonArgs.FS_DEFAULT_NAME, CommonArgs.LOCAL_FS);
-      }
-      String warehouseDir = getWarehouseDir();
-      Path warehousePath = new Path(warehouseDir);
-      Path inputPath = new Path(warehousePath, getTableName());
-      Path outputPath = new Path(warehousePath, getTableName() + "-out");
+		if (!BaseSqoopTestCase.isOnPhysicalCluster()) {
+			job.set(CommonArgs.FS_DEFAULT_NAME, CommonArgs.LOCAL_FS);
+		}
+		String warehouseDir = getWarehouseDir();
+		Path warehousePath = new Path(warehouseDir);
+		Path inputPath = new Path(warehousePath, getTableName());
+		Path outputPath = new Path(warehousePath, getTableName() + "-out");
 
-      job.setMapperClass(ExplicitSetMapper.class);
-      job.setNumReduceTasks(0);
-      FileInputFormat.addInputPath(job, inputPath);
-      FileOutputFormat.setOutputPath(job, outputPath);
+		job.setMapperClass(ExplicitSetMapper.class);
+		job.setNumReduceTasks(0);
+		FileInputFormat.addInputPath(job, inputPath);
+		FileOutputFormat.setOutputPath(job, outputPath);
 
-      job.setOutputKeyClass(Text.class);
-      job.setOutputValueClass(NullWritable.class);
+		job.setOutputKeyClass(Text.class);
+		job.setOutputValueClass(NullWritable.class);
 
-      JobClient.runJob(job);
-    } catch (InvalidOptionsException ioe) {
-      fail(ioe.toString());
-    } catch (ParseException pe) {
-      fail(pe.toString());
-    } finally {
-      if (null != prevClassLoader) {
-        ClassLoaderStack.setCurrentClassLoader(prevClassLoader);
-      }
-    }
-  }
+		JobClient.runJob(job);
+	} catch (InvalidOptionsException ioe) {
+		fail(ioe.toString());
+	} catch (ParseException pe) {
+		fail(pe.toString());
+	} finally {
+		if (null != prevClassLoader) {
+			ClassLoaderStack.setCurrentClassLoader(prevClassLoader);
+		}
+	}
+}
 }

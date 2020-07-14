@@ -26,8 +26,8 @@ import org.junit.experimental.categories.Category;
 @Category(OracleTest.class)
 public class OracleSplitByImportTest extends SplitByImportTestBase {
 
-  @Override
-  public DatabaseAdapter createAdapter() {
-    return new OracleDatabaseAdapter();
-  }
+@Override
+public DatabaseAdapter createAdapter() {
+	return new OracleDatabaseAdapter();
+}
 }

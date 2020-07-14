@@ -24,14 +24,14 @@ package org.apache.sqoop.util;
  */
 public abstract class ErrorableAsyncSink extends AsyncSink {
 
-  protected ErrorableThread child;
+protected ErrorableThread child;
 
-  public int join() throws InterruptedException {
-    child.join();
-    if (child.isErrored()) {
-      return 1;
-    } else {
-      return 0;
-    }
-  }
+public int join() throws InterruptedException {
+	child.join();
+	if (child.isErrored()) {
+		return 1;
+	} else {
+		return 0;
+	}
+}
 }

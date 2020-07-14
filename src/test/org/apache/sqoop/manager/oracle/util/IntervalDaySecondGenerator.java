@@ -22,42 +22,42 @@ package org.apache.sqoop.manager.oracle.util;
  * Generates test data for Oracle INTERVAL DAY TO SECOND columns.
  */
 public class IntervalDaySecondGenerator
-    extends OraOopTestDataGenerator<String> {
-  private final int daysPrecision;
-  private final int minDays;
-  private final int maxDays;
-  private final int secondsPrecision;
-  private final int maxFractionalSeconds;
+	extends OraOopTestDataGenerator<String> {
+private final int daysPrecision;
+private final int minDays;
+private final int maxDays;
+private final int secondsPrecision;
+private final int maxFractionalSeconds;
 
-  /**
-   * Create a generator that will generate intervals with the specified
-   * precision for days and seconds.
-   *
-   * @param daysPrecision
-   *          Number of decimal digits in the days part of each interval
-   * @param secondsPrecision
-   *          Number of decimal digits after the decimal point in seconds part
-   *          of each interval.
-   */
-  public IntervalDaySecondGenerator(int daysPrecision, int secondsPrecision) {
-    super();
-    this.daysPrecision = daysPrecision;
-    this.minDays = -(int)Math.pow(10, daysPrecision) + 1;
-    this.maxDays = (int)Math.pow(10, daysPrecision) - 1;
-    this.secondsPrecision = secondsPrecision;
-    this.maxFractionalSeconds = (int)Math.pow(10, secondsPrecision);
-  }
+/**
+ * Create a generator that will generate intervals with the specified
+ * precision for days and seconds.
+ *
+ * @param daysPrecision
+ *          Number of decimal digits in the days part of each interval
+ * @param secondsPrecision
+ *          Number of decimal digits after the decimal point in seconds part
+ *          of each interval.
+ */
+public IntervalDaySecondGenerator(int daysPrecision, int secondsPrecision) {
+	super();
+	this.daysPrecision = daysPrecision;
+	this.minDays = -(int)Math.pow(10, daysPrecision) + 1;
+	this.maxDays = (int)Math.pow(10, daysPrecision) - 1;
+	this.secondsPrecision = secondsPrecision;
+	this.maxFractionalSeconds = (int)Math.pow(10, secondsPrecision);
+}
 
-  @Override
-  public String next() {
-    int days = minDays + rng.nextInt(maxDays - minDays + 1);
-    int hours = rng.nextInt(24);
-    int minutes = rng.nextInt(60);
-    int seconds = rng.nextInt(60);
-    int fractionalSeconds = rng.nextInt(maxFractionalSeconds);
-    String val = String.format(
-        "%+0" + daysPrecision + "d %02d:%02d:%02d.%0" + secondsPrecision + "d",
-        days, hours, minutes, seconds, fractionalSeconds);
-    return val;
-  }
+@Override
+public String next() {
+	int days = minDays + rng.nextInt(maxDays - minDays + 1);
+	int hours = rng.nextInt(24);
+	int minutes = rng.nextInt(60);
+	int seconds = rng.nextInt(60);
+	int fractionalSeconds = rng.nextInt(maxFractionalSeconds);
+	String val = String.format(
+		"%+0" + daysPrecision + "d %02d:%02d:%02d.%0" + secondsPrecision + "d",
+		days, hours, minutes, seconds, fractionalSeconds);
+	return val;
+}
 }

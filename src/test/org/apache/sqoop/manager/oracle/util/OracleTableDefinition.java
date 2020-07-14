@@ -34,130 +34,141 @@ import org.w3c.dom.NodeList;
  */
 public class OracleTableDefinition {
 
-  private String tableName;
-  private List<OracleDataDefinition> columnList =
-      new ArrayList<OracleDataDefinition>();
-  private List<String> primaryKeyColumns = new ArrayList<String>();
-  private List<String> uniqueKeyColumns = new ArrayList<String>();
-  private String partitionClause;
-  private boolean indexOrganizedTable = false;
+private String tableName;
+private List<OracleDataDefinition> columnList =
+	new ArrayList<OracleDataDefinition>();
+private List<String> primaryKeyColumns = new ArrayList<String>();
+private List<String> uniqueKeyColumns = new ArrayList<String>();
+private String partitionClause;
+private boolean indexOrganizedTable = false;
 
-  public List<String> getUniqueKeyColumns() { return uniqueKeyColumns; }
+public List<String> getUniqueKeyColumns() {
+	return uniqueKeyColumns;
+}
 
-  public void setUniqueKeyColumns(List<String> newUniqueKeyColumns) {
-    this.uniqueKeyColumns = newUniqueKeyColumns;
-  }
+public void setUniqueKeyColumns(List<String> newUniqueKeyColumns) {
+	this.uniqueKeyColumns = newUniqueKeyColumns;
+}
 
-  public List<String> getPrimaryKeyColumns() { return primaryKeyColumns; }
+public List<String> getPrimaryKeyColumns() {
+	return primaryKeyColumns;
+}
 
-  public void setPrimaryKeyColumns(List<String> newPrimaryKeyColumns) {
-    this.primaryKeyColumns = newPrimaryKeyColumns;
-  }
+public void setPrimaryKeyColumns(List<String> newPrimaryKeyColumns) {
+	this.primaryKeyColumns = newPrimaryKeyColumns;
+}
 
-  public List<OracleDataDefinition> getColumnList() { return columnList; }
+public List<OracleDataDefinition> getColumnList() {
+	return columnList;
+}
 
-  public void setColumnList(List<OracleDataDefinition> newColumnList) {
-    this.columnList = newColumnList;
-  }
+public void setColumnList(List<OracleDataDefinition> newColumnList) {
+	this.columnList = newColumnList;
+}
 
-  public String getTableName() { return tableName; }
+public String getTableName() {
+	return tableName;
+}
 
-  public void setTableName(String newTableName) {
-    this.tableName = newTableName;
-  }
+public void setTableName(String newTableName) {
+	this.tableName = newTableName;
+}
 
-  public String getPartitionClause() {
-    return partitionClause == null ? "" : partitionClause;
-  }
+public String getPartitionClause() {
+	return partitionClause == null ? "" : partitionClause;
+}
 
-  public void setPartitionClause(String newPartitionClause) {
-    this.partitionClause = newPartitionClause;
-  }
+public void setPartitionClause(String newPartitionClause) {
+	this.partitionClause = newPartitionClause;
+}
 
-  public boolean isIndexOrganizedTable() { return indexOrganizedTable; }
+public boolean isIndexOrganizedTable() {
+	return indexOrganizedTable;
+}
 
-  public void setIndexOrganizedTable(boolean newIndexOrganizedTable) {
-    this.indexOrganizedTable = newIndexOrganizedTable;
-  }
+public void setIndexOrganizedTable(boolean newIndexOrganizedTable) {
+	this.indexOrganizedTable = newIndexOrganizedTable;
+}
 
-  public OracleTableDefinition() {}
+public OracleTableDefinition() {
+}
 
-  public OracleTableDefinition(URL url) {
-    try {
-      DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-      DocumentBuilder builder = factory.newDocumentBuilder();
-      Document doc = builder.parse(new File(url.toURI()));
+public OracleTableDefinition(URL url) {
+	try {
+		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+		DocumentBuilder builder = factory.newDocumentBuilder();
+		Document doc = builder.parse(new File(url.toURI()));
 
-      Element table = doc.getDocumentElement();
-      this.tableName = table.getElementsByTagName("name")
-                           .item(0)
-                           .getChildNodes()
-                           .item(0)
-                           .getNodeValue();
-      NodeList columns = table.getElementsByTagName("column");
-      for (int i = 0; i < columns.getLength(); i++) {
-        Node columnNode = columns.item(i);
-        if (columnNode.getNodeType() == Node.ELEMENT_NODE) {
-          Element columnElement = (Element)columnNode;
-          String name = columnElement.getElementsByTagName("name")
-                            .item(0)
-                            .getChildNodes()
-                            .item(0)
-                            .getNodeValue();
-          String dataType = columnElement.getElementsByTagName("dataType")
-                                .item(0)
-                                .getChildNodes()
-                                .item(0)
-                                .getNodeValue();
-          String dataExpression =
-              columnElement.getElementsByTagName("dataExpression")
-                  .item(0)
-                  .getChildNodes()
-                  .item(0)
-                  .getNodeValue();
-          this.columnList.add(
-              new OracleDataDefinition(name, dataType, dataExpression));
-        }
-      }
+		Element table = doc.getDocumentElement();
+		this.tableName = table.getElementsByTagName("name")
+		                 .item(0)
+		                 .getChildNodes()
+		                 .item(0)
+		                 .getNodeValue();
+		NodeList columns = table.getElementsByTagName("column");
+		for (int i = 0; i < columns.getLength(); i++) {
+			Node columnNode = columns.item(i);
+			if (columnNode.getNodeType() == Node.ELEMENT_NODE) {
+				Element columnElement = (Element)columnNode;
+				String name = columnElement.getElementsByTagName("name")
+				              .item(0)
+				              .getChildNodes()
+				              .item(0)
+				              .getNodeValue();
+				String dataType = columnElement.getElementsByTagName("dataType")
+				                  .item(0)
+				                  .getChildNodes()
+				                  .item(0)
+				                  .getNodeValue();
+				String dataExpression =
+					columnElement.getElementsByTagName("dataExpression")
+					.item(0)
+					.getChildNodes()
+					.item(0)
+					.getNodeValue();
+				this.columnList.add(
+					new OracleDataDefinition(name, dataType, dataExpression));
+			}
+		}
 
-      NodeList primaryKeyColumnsNodeList =
-          table.getElementsByTagName("primaryKeyColumn");
-      for (int i = 0; i < primaryKeyColumnsNodeList.getLength(); i++) {
-        Node primaryKeyColumnNode = primaryKeyColumnsNodeList.item(i);
-        if (primaryKeyColumnNode.getNodeType() == Node.ELEMENT_NODE) {
-          Element primaryKeyColumnElement = (Element)primaryKeyColumnNode;
-          this.primaryKeyColumns.add(
-              primaryKeyColumnElement.getChildNodes().item(0).getNodeValue());
-        }
-      }
+		NodeList primaryKeyColumnsNodeList =
+			table.getElementsByTagName("primaryKeyColumn");
+		for (int i = 0; i < primaryKeyColumnsNodeList.getLength(); i++) {
+			Node primaryKeyColumnNode = primaryKeyColumnsNodeList.item(i);
+			if (primaryKeyColumnNode.getNodeType() == Node.ELEMENT_NODE) {
+				Element primaryKeyColumnElement = (Element)primaryKeyColumnNode;
+				this.primaryKeyColumns.add(
+					primaryKeyColumnElement.getChildNodes().item(0).getNodeValue());
+			}
+		}
 
-      NodeList uniqueKeyColumnsNodeList =
-          table.getElementsByTagName("uniqueKeyColumn");
-      for (int i = 0; i < uniqueKeyColumnsNodeList.getLength(); i++) {
-        Node uniqueKeyColumnNode = uniqueKeyColumnsNodeList.item(i);
-        if (uniqueKeyColumnNode.getNodeType() == Node.ELEMENT_NODE) {
-          Element uniqueKeyColumnElement = (Element)uniqueKeyColumnNode;
-          this.uniqueKeyColumns.add(
-              uniqueKeyColumnElement.getChildNodes().item(0).getNodeValue());
-        }
-      }
+		NodeList uniqueKeyColumnsNodeList =
+			table.getElementsByTagName("uniqueKeyColumn");
+		for (int i = 0; i < uniqueKeyColumnsNodeList.getLength(); i++) {
+			Node uniqueKeyColumnNode = uniqueKeyColumnsNodeList.item(i);
+			if (uniqueKeyColumnNode.getNodeType() == Node.ELEMENT_NODE) {
+				Element uniqueKeyColumnElement = (Element)uniqueKeyColumnNode;
+				this.uniqueKeyColumns.add(
+					uniqueKeyColumnElement.getChildNodes().item(0).getNodeValue());
+			}
+		}
 
-      Node partitionClauseNode =
-          table.getElementsByTagName("partitionClause").item(0);
-      if (partitionClauseNode != null) {
-        this.partitionClause =
-            partitionClauseNode.getChildNodes().item(0).getNodeValue();
-      }
+		Node partitionClauseNode =
+			table.getElementsByTagName("partitionClause").item(0);
+		if (partitionClauseNode != null) {
+			this.partitionClause =
+				partitionClauseNode.getChildNodes().item(0).getNodeValue();
+		}
 
-      Node indexOrganizedTableNode =
-          table.getElementsByTagName("indexOrganizedTable").item(0);
-      if (indexOrganizedTableNode != null) {
-        String indexOrganizedTableStr =
-            indexOrganizedTableNode.getChildNodes().item(0).getNodeValue();
-        this.indexOrganizedTable = Boolean.parseBoolean(indexOrganizedTableStr);
-      }
-    } catch (Exception e) {
-      throw new RuntimeException("Could not load table configuration", e);
-    }
-  }
+		Node indexOrganizedTableNode =
+			table.getElementsByTagName("indexOrganizedTable").item(0);
+		if (indexOrganizedTableNode != null) {
+			String indexOrganizedTableStr =
+				indexOrganizedTableNode.getChildNodes().item(0).getNodeValue();
+			this.indexOrganizedTable = Boolean.parseBoolean(indexOrganizedTableStr);
+		}
+	} catch (Exception e) {
+		throw new RuntimeException("Could not load table configuration", e);
+	}
+}
 }

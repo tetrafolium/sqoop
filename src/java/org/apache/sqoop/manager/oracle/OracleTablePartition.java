@@ -23,21 +23,27 @@ package org.apache.sqoop.manager.oracle;
  */
 public class OracleTablePartition {
 
-  private String name;
-  private boolean isSubPartition;
+private String name;
+private boolean isSubPartition;
 
-  public OracleTablePartition(String name, boolean isSubPartition) {
-    this.setName(name);
-    this.setSubPartition(isSubPartition);
-  }
+public OracleTablePartition(String name, boolean isSubPartition) {
+	this.setName(name);
+	this.setSubPartition(isSubPartition);
+}
 
-  public String getName() { return name; }
+public String getName() {
+	return name;
+}
 
-  public void setName(String newName) { this.name = newName; }
+public void setName(String newName) {
+	this.name = newName;
+}
 
-  public boolean isSubPartition() { return isSubPartition; }
+public boolean isSubPartition() {
+	return isSubPartition;
+}
 
-  public void setSubPartition(boolean newIsSubPartition) {
-    this.isSubPartition = newIsSubPartition;
-  }
+public void setSubPartition(boolean newIsSubPartition) {
+	this.isSubPartition = newIsSubPartition;
+}
 }

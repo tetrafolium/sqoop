@@ -62,330 +62,330 @@ import org.junit.Test;
  */
 public class TestImportJob extends ImportJobTestCase {
 
-  @Test
-  public void testFailedImportDueToIOException() throws IOException {
-    // Make sure that if a MapReduce job to do the import fails due
-    // to an IOException, we tell the user about it.
+@Test
+public void testFailedImportDueToIOException() throws IOException {
+	// Make sure that if a MapReduce job to do the import fails due
+	// to an IOException, we tell the user about it.
 
-    // Create a table to attempt to import.
-    createTableForColType("VARCHAR(32)", "'meep'");
+	// Create a table to attempt to import.
+	createTableForColType("VARCHAR(32)", "'meep'");
 
-    Configuration conf = new Configuration();
+	Configuration conf = new Configuration();
 
-    LogFactory.getLog(getClass())
-        .info(" getWarehouseDir() " + getWarehouseDir());
+	LogFactory.getLog(getClass())
+	.info(" getWarehouseDir() " + getWarehouseDir());
 
-    // Make the output dir exist so we know the job will fail via IOException.
-    Path outputPath = new Path(new Path(getWarehouseDir()), getTableName());
-    FileSystem fs = FileSystem.getLocal(conf);
-    fs.mkdirs(outputPath);
+	// Make the output dir exist so we know the job will fail via IOException.
+	Path outputPath = new Path(new Path(getWarehouseDir()), getTableName());
+	FileSystem fs = FileSystem.getLocal(conf);
+	fs.mkdirs(outputPath);
 
-    assertTrue(fs.exists(outputPath));
+	assertTrue(fs.exists(outputPath));
 
-    String[] argv = getArgv(true, new String[] {"DATA_COL0"}, conf);
+	String[] argv = getArgv(true, new String[] {"DATA_COL0"}, conf);
 
-    Sqoop importer = new Sqoop(new ImportTool());
-    try {
-      int ret = Sqoop.runSqoop(importer, argv);
-      assertTrue("Expected ImportException running this job.", 1 == ret);
-    } catch (Exception e) {
-      // In debug mode, IOException is wrapped in RuntimeException.
-      LOG.info("Got exceptional return (expected: ok). msg is: " + e);
-    }
-  }
+	Sqoop importer = new Sqoop(new ImportTool());
+	try {
+		int ret = Sqoop.runSqoop(importer, argv);
+		assertTrue("Expected ImportException running this job.", 1 == ret);
+	} catch (Exception e) {
+		// In debug mode, IOException is wrapped in RuntimeException.
+		LOG.info("Got exceptional return (expected: ok). msg is: " + e);
+	}
+}
 
-  /** A mapper that is guaranteed to cause the task to fail. */
-  public static class NullDereferenceMapper
-      extends AutoProgressMapper<Object, Object, Text, NullWritable> {
+/** A mapper that is guaranteed to cause the task to fail. */
+public static class NullDereferenceMapper
+	extends AutoProgressMapper<Object, Object, Text, NullWritable> {
 
-    public void map(Object key, Object val, Context c)
-        throws IOException, InterruptedException {
-      String s = null;
-      s.length(); // This will throw a NullPointerException.
-    }
-  }
+public void map(Object key, Object val, Context c)
+throws IOException, InterruptedException {
+	String s = null;
+	s.length(); // This will throw a NullPointerException.
+}
+}
 
-  /** Run a "job" that just delivers a record to the mapper. */
-  public static class DummyImportJob extends ImportJobBase {
-    @Override
-    public void configureInputFormat(Job job, String tableName,
-                                     String tableClassName, String splitByCol)
-        throws ClassNotFoundException, IOException {
+/** Run a "job" that just delivers a record to the mapper. */
+public static class DummyImportJob extends ImportJobBase {
+@Override
+public void configureInputFormat(Job job, String tableName,
+                                 String tableClassName, String splitByCol)
+throws ClassNotFoundException, IOException {
 
-      // Write a line of text into a file so that we can get
-      // a record to the map task.
-      Path dir = new Path(this.options.getTempDir());
-      Path p = new Path(dir, "sqoop-dummy-import-job-file.txt");
-      FileSystem fs = FileSystem.getLocal(this.options.getConf());
-      if (fs.exists(p)) {
-        boolean result = fs.delete(p, false);
-        assertTrue("Couldn't delete temp file!", result);
-      }
+	// Write a line of text into a file so that we can get
+	// a record to the map task.
+	Path dir = new Path(this.options.getTempDir());
+	Path p = new Path(dir, "sqoop-dummy-import-job-file.txt");
+	FileSystem fs = FileSystem.getLocal(this.options.getConf());
+	if (fs.exists(p)) {
+		boolean result = fs.delete(p, false);
+		assertTrue("Couldn't delete temp file!", result);
+	}
 
-      BufferedWriter w =
-          new BufferedWriter(new OutputStreamWriter(fs.create(p)));
-      w.append("This is a line!");
-      w.close();
+	BufferedWriter w =
+		new BufferedWriter(new OutputStreamWriter(fs.create(p)));
+	w.append("This is a line!");
+	w.close();
 
-      FileInputFormat.addInputPath(job, p);
+	FileInputFormat.addInputPath(job, p);
 
-      // And set the InputFormat itself.
-      super.configureInputFormat(job, tableName, tableClassName, splitByCol);
-    }
-  }
+	// And set the InputFormat itself.
+	super.configureInputFormat(job, tableName, tableClassName, splitByCol);
+}
+}
 
-  @Test
-  public void testFailedImportDueToJobFail() throws IOException {
-    // Test that if the job returns 'false' it still fails and informs
-    // the user.
+@Test
+public void testFailedImportDueToJobFail() throws IOException {
+	// Test that if the job returns 'false' it still fails and informs
+	// the user.
 
-    // Create a table to attempt to import.
-    createTableForColType("VARCHAR(32)", "'meep2'");
+	// Create a table to attempt to import.
+	createTableForColType("VARCHAR(32)", "'meep2'");
 
-    Configuration conf = new Configuration();
+	Configuration conf = new Configuration();
 
-    // Use the dependency-injection manager.
-    conf.setClass(ConnFactory.FACTORY_CLASS_NAMES_KEY,
-                  InjectableManagerFactory.class, ManagerFactory.class);
+	// Use the dependency-injection manager.
+	conf.setClass(ConnFactory.FACTORY_CLASS_NAMES_KEY,
+	              InjectableManagerFactory.class, ManagerFactory.class);
 
-    String[] argv = getArgv(true, new String[] {"DATA_COL0"}, conf);
+	String[] argv = getArgv(true, new String[] {"DATA_COL0"}, conf);
 
-    // Use dependency injection to specify a mapper that we know
-    // will fail.
-    conf.setClass(InjectableConnManager.MAPPER_KEY, NullDereferenceMapper.class,
-                  Mapper.class);
+	// Use dependency injection to specify a mapper that we know
+	// will fail.
+	conf.setClass(InjectableConnManager.MAPPER_KEY, NullDereferenceMapper.class,
+	              Mapper.class);
 
-    conf.setClass(InjectableConnManager.IMPORT_JOB_KEY, DummyImportJob.class,
-                  ImportJobBase.class);
+	conf.setClass(InjectableConnManager.IMPORT_JOB_KEY, DummyImportJob.class,
+	              ImportJobBase.class);
 
-    Sqoop importer = new Sqoop(new ImportTool(), conf);
-    try {
-      int ret = Sqoop.runSqoop(importer, argv);
-      assertTrue("Expected ImportException running this job.", 1 == ret);
-    } catch (Exception e) {
-      // In debug mode, ImportException is wrapped in RuntimeException.
-      LOG.info("Got exceptional return (expected: ok). msg is: " + e);
-    }
-  }
+	Sqoop importer = new Sqoop(new ImportTool(), conf);
+	try {
+		int ret = Sqoop.runSqoop(importer, argv);
+		assertTrue("Expected ImportException running this job.", 1 == ret);
+	} catch (Exception e) {
+		// In debug mode, ImportException is wrapped in RuntimeException.
+		LOG.info("Got exceptional return (expected: ok). msg is: " + e);
+	}
+}
 
-  @Test
-  public void testFailedNoColumns() throws IOException {
-    // Make sure that if a MapReduce job to do the import fails due
-    // to an IOException, we tell the user about it.
+@Test
+public void testFailedNoColumns() throws IOException {
+	// Make sure that if a MapReduce job to do the import fails due
+	// to an IOException, we tell the user about it.
 
-    // Create a table to attempt to import.
-    createTableForColType("VARCHAR(32)", "'meep'");
+	// Create a table to attempt to import.
+	createTableForColType("VARCHAR(32)", "'meep'");
 
-    Configuration conf = new Configuration();
+	Configuration conf = new Configuration();
 
-    // Make the output dir exist so we know the job will fail via IOException.
-    Path outputPath = new Path(new Path(getWarehouseDir()), getTableName());
-    FileSystem fs = FileSystem.getLocal(conf);
-    fs.mkdirs(outputPath);
-    assertTrue(fs.exists(outputPath));
+	// Make the output dir exist so we know the job will fail via IOException.
+	Path outputPath = new Path(new Path(getWarehouseDir()), getTableName());
+	FileSystem fs = FileSystem.getLocal(conf);
+	fs.mkdirs(outputPath);
+	assertTrue(fs.exists(outputPath));
 
-    String[] argv = getArgv(true, new String[] {""}, conf);
+	String[] argv = getArgv(true, new String[] {""}, conf);
 
-    Sqoop importer = new Sqoop(new ImportTool());
-    try {
-      int ret = Sqoop.runSqoop(importer, argv);
-      assertTrue("Expected job to fail due to no colnames.", 1 == ret);
-    } catch (Exception e) {
-      // In debug mode, IOException is wrapped in RuntimeException.
-      LOG.info("Got exceptional return (expected: ok). msg is: " + e);
-    }
-  }
+	Sqoop importer = new Sqoop(new ImportTool());
+	try {
+		int ret = Sqoop.runSqoop(importer, argv);
+		assertTrue("Expected job to fail due to no colnames.", 1 == ret);
+	} catch (Exception e) {
+		// In debug mode, IOException is wrapped in RuntimeException.
+		LOG.info("Got exceptional return (expected: ok). msg is: " + e);
+	}
+}
 
-  @Test
-  public void testFailedIllegalColumns() throws IOException {
-    // Make sure that if a MapReduce job to do the import fails due
-    // to an IOException, we tell the user about it.
+@Test
+public void testFailedIllegalColumns() throws IOException {
+	// Make sure that if a MapReduce job to do the import fails due
+	// to an IOException, we tell the user about it.
 
-    // Create a table to attempt to import.
-    createTableForColType("VARCHAR(32)", "'meep'");
+	// Create a table to attempt to import.
+	createTableForColType("VARCHAR(32)", "'meep'");
 
-    Configuration conf = new Configuration();
+	Configuration conf = new Configuration();
 
-    // Make the output dir exist so we know the job will fail via IOException.
-    Path outputPath = new Path(new Path(getWarehouseDir()), getTableName());
-    FileSystem fs = FileSystem.getLocal(conf);
-    fs.mkdirs(outputPath);
+	// Make the output dir exist so we know the job will fail via IOException.
+	Path outputPath = new Path(new Path(getWarehouseDir()), getTableName());
+	FileSystem fs = FileSystem.getLocal(conf);
+	fs.mkdirs(outputPath);
 
-    assertTrue(fs.exists(outputPath));
+	assertTrue(fs.exists(outputPath));
 
-    // DATA_COL0 ok, by zyzzyva not good
-    String[] argv = getArgv(true, new String[] {"DATA_COL0", "zyzzyva"}, conf);
+	// DATA_COL0 ok, by zyzzyva not good
+	String[] argv = getArgv(true, new String[] {"DATA_COL0", "zyzzyva"}, conf);
 
-    Sqoop importer = new Sqoop(new ImportTool());
-    try {
-      int ret = Sqoop.runSqoop(importer, argv);
-      assertTrue("Expected job to fail due bad colname.", 1 == ret);
-    } catch (Exception e) {
-      // In debug mode, IOException is wrapped in RuntimeException.
-      LOG.info("Got exceptional return (expected: ok). msg is: " + e);
-    }
-  }
+	Sqoop importer = new Sqoop(new ImportTool());
+	try {
+		int ret = Sqoop.runSqoop(importer, argv);
+		assertTrue("Expected job to fail due bad colname.", 1 == ret);
+	} catch (Exception e) {
+		// In debug mode, IOException is wrapped in RuntimeException.
+		LOG.info("Got exceptional return (expected: ok). msg is: " + e);
+	}
+}
 
-  @Test
-  public void testDuplicateColumns() throws IOException {
-    // Make sure that if a MapReduce job to do the import fails due
-    // to an IOException, we tell the user about it.
+@Test
+public void testDuplicateColumns() throws IOException {
+	// Make sure that if a MapReduce job to do the import fails due
+	// to an IOException, we tell the user about it.
 
-    // Create a table to attempt to import.
-    createTableForColType("VARCHAR(32)", "'meep'");
+	// Create a table to attempt to import.
+	createTableForColType("VARCHAR(32)", "'meep'");
 
-    Configuration conf = new Configuration();
+	Configuration conf = new Configuration();
 
-    // Make the output dir exist so we know the job will fail via IOException.
-    Path outputPath = new Path(new Path(getWarehouseDir()), getTableName());
-    FileSystem fs = FileSystem.getLocal(conf);
-    fs.mkdirs(outputPath);
-    assertTrue(fs.exists(outputPath));
+	// Make the output dir exist so we know the job will fail via IOException.
+	Path outputPath = new Path(new Path(getWarehouseDir()), getTableName());
+	FileSystem fs = FileSystem.getLocal(conf);
+	fs.mkdirs(outputPath);
+	assertTrue(fs.exists(outputPath));
 
-    String[] argv = getArgv(true, new String[] {"DATA_COL0,DATA_COL0"}, conf);
+	String[] argv = getArgv(true, new String[] {"DATA_COL0,DATA_COL0"}, conf);
 
-    Sqoop importer = new Sqoop(new ImportTool());
-    try {
-      int ret = Sqoop.runSqoop(importer, argv);
-      assertTrue("Expected job to fail!", 1 == ret);
-    } catch (Exception e) {
-      // In debug mode, ImportException is wrapped in RuntimeException.
-      LOG.info("Got exceptional return (expected: ok). msg is: " + e);
-    }
-  }
+	Sqoop importer = new Sqoop(new ImportTool());
+	try {
+		int ret = Sqoop.runSqoop(importer, argv);
+		assertTrue("Expected job to fail!", 1 == ret);
+	} catch (Exception e) {
+		// In debug mode, ImportException is wrapped in RuntimeException.
+		LOG.info("Got exceptional return (expected: ok). msg is: " + e);
+	}
+}
 
-  // helper method to get contents of a given dir containing sequence files
-  private String[] getContent(Configuration conf, Path path) throws Exception {
-    ClassLoader prevClassLoader = ClassLoaderStack.addJarFile(
-        new Path(new Path(new SqoopOptions().getJarOutputDir()),
-                 getTableName() + ".jar")
-            .toString(),
-        getTableName());
+// helper method to get contents of a given dir containing sequence files
+private String[] getContent(Configuration conf, Path path) throws Exception {
+	ClassLoader prevClassLoader = ClassLoaderStack.addJarFile(
+		new Path(new Path(new SqoopOptions().getJarOutputDir()),
+		         getTableName() + ".jar")
+		.toString(),
+		getTableName());
 
-    FileSystem fs = FileSystem.getLocal(conf);
-    FileStatus[] stats = fs.listStatus(path);
-    Path[] paths = new Path[stats.length];
-    for (int i = 0; i < stats.length; i++) {
-      paths[i] = stats[i].getPath();
-    }
+	FileSystem fs = FileSystem.getLocal(conf);
+	FileStatus[] stats = fs.listStatus(path);
+	Path[] paths = new Path[stats.length];
+	for (int i = 0; i < stats.length; i++) {
+		paths[i] = stats[i].getPath();
+	}
 
-    // Read all the files adding the value lines to the list.
-    List<String> strings = new ArrayList<String>();
-    for (Path filePath : paths) {
-      if (filePath.getName().startsWith("_") ||
-          filePath.getName().startsWith(".")) {
-        continue;
-      }
+	// Read all the files adding the value lines to the list.
+	List<String> strings = new ArrayList<String>();
+	for (Path filePath : paths) {
+		if (filePath.getName().startsWith("_") ||
+		    filePath.getName().startsWith(".")) {
+			continue;
+		}
 
-      // Need to use new configuration object so that it has the proper
-      // classloaders.
-      SequenceFile.Reader reader =
-          new SequenceFile.Reader(fs, filePath, new Configuration());
-      WritableComparable key =
-          (WritableComparable)reader.getKeyClass().newInstance();
-      Writable value = (Writable)reader.getValueClass().newInstance();
-      while (reader.next(key, value)) {
-        strings.add(value.toString());
-      }
-    }
+		// Need to use new configuration object so that it has the proper
+		// classloaders.
+		SequenceFile.Reader reader =
+			new SequenceFile.Reader(fs, filePath, new Configuration());
+		WritableComparable key =
+			(WritableComparable)reader.getKeyClass().newInstance();
+		Writable value = (Writable)reader.getValueClass().newInstance();
+		while (reader.next(key, value)) {
+			strings.add(value.toString());
+		}
+	}
 
-    ClassLoaderStack.setCurrentClassLoader(prevClassLoader);
-    return strings.toArray(new String[0]);
-  }
+	ClassLoaderStack.setCurrentClassLoader(prevClassLoader);
+	return strings.toArray(new String[0]);
+}
 
-  @Test
-  public void testDeleteTargetDir() throws Exception {
-    // Make sure that if a MapReduce job to do the import fails due
-    // to an IOException, we tell the user about it.
+@Test
+public void testDeleteTargetDir() throws Exception {
+	// Make sure that if a MapReduce job to do the import fails due
+	// to an IOException, we tell the user about it.
 
-    // Create a table to attempt to import.
-    createTableForColType("VARCHAR(32)", "'meep'");
+	// Create a table to attempt to import.
+	createTableForColType("VARCHAR(32)", "'meep'");
 
-    Configuration conf = new Configuration();
+	Configuration conf = new Configuration();
 
-    // Make the output dir does not exist
-    Path outputPath = new Path(new Path(getWarehouseDir()), getTableName());
-    FileSystem fs = FileSystem.getLocal(conf);
-    fs.delete(outputPath, true);
-    assertTrue(!fs.exists(outputPath));
+	// Make the output dir does not exist
+	Path outputPath = new Path(new Path(getWarehouseDir()), getTableName());
+	FileSystem fs = FileSystem.getLocal(conf);
+	fs.delete(outputPath, true);
+	assertTrue(!fs.exists(outputPath));
 
-    String[] argv = getArgv(true, new String[] {"DATA_COL0"}, conf);
-    argv = Arrays.copyOf(argv, argv.length + 1);
-    argv[argv.length - 1] = "--delete-target-dir";
+	String[] argv = getArgv(true, new String[] {"DATA_COL0"}, conf);
+	argv = Arrays.copyOf(argv, argv.length + 1);
+	argv[argv.length - 1] = "--delete-target-dir";
 
-    Sqoop importer = new Sqoop(new ImportTool());
-    try {
-      int ret = Sqoop.runSqoop(importer, argv);
-      assertTrue("Expected job to go through if target directory"
-                     + " does not exist.",
-                 0 == ret);
-      assertTrue(fs.exists(outputPath));
-      // expecting one _SUCCESS file and one file containing data
-      assertTrue("Expecting two files in the directory.",
-                 fs.listStatus(outputPath).length == 2);
-      String[] output = getContent(conf, outputPath);
-      assertEquals("Expected output and actual output should be same.",
-                   "meep\n", output[0]);
+	Sqoop importer = new Sqoop(new ImportTool());
+	try {
+		int ret = Sqoop.runSqoop(importer, argv);
+		assertTrue("Expected job to go through if target directory"
+		           + " does not exist.",
+		           0 == ret);
+		assertTrue(fs.exists(outputPath));
+		// expecting one _SUCCESS file and one file containing data
+		assertTrue("Expecting two files in the directory.",
+		           fs.listStatus(outputPath).length == 2);
+		String[] output = getContent(conf, outputPath);
+		assertEquals("Expected output and actual output should be same.",
+		             "meep\n", output[0]);
 
-      ret = Sqoop.runSqoop(importer, argv);
-      assertTrue("Expected job to go through if target directory exists.",
-                 0 == ret);
-      assertTrue(fs.exists(outputPath));
-      // expecting one _SUCCESS file and one file containing data
-      assertTrue("Expecting two files in the directory.",
-                 fs.listStatus(outputPath).length == 2);
-      output = getContent(conf, outputPath);
-      assertEquals("Expected output and actual output should be same.",
-                   "meep\n", output[0]);
-    } catch (Exception e) {
-      // In debug mode, ImportException is wrapped in RuntimeException.
-      LOG.info("Got exceptional return (expected: ok). msg is: " + e);
-    }
-  }
+		ret = Sqoop.runSqoop(importer, argv);
+		assertTrue("Expected job to go through if target directory exists.",
+		           0 == ret);
+		assertTrue(fs.exists(outputPath));
+		// expecting one _SUCCESS file and one file containing data
+		assertTrue("Expecting two files in the directory.",
+		           fs.listStatus(outputPath).length == 2);
+		output = getContent(conf, outputPath);
+		assertEquals("Expected output and actual output should be same.",
+		             "meep\n", output[0]);
+	} catch (Exception e) {
+		// In debug mode, ImportException is wrapped in RuntimeException.
+		LOG.info("Got exceptional return (expected: ok). msg is: " + e);
+	}
+}
 
-  @Test
-  public void testManyColumns() throws Exception {
-    int numberOfColumns = 7500;
+@Test
+public void testManyColumns() throws Exception {
+	int numberOfColumns = 7500;
 
-    // Create a bunch of columns
-    String[] colNames = new String[numberOfColumns];
-    String[] colTypes = new String[numberOfColumns];
-    String[] colVals = new String[numberOfColumns];
-    List<String> testColVals = new ArrayList<String>(numberOfColumns);
-    for (int i = 0; i < numberOfColumns; ++i) {
-      colNames[i] = BASE_COL_NAME + Integer.toString(i);
-      colTypes[i] = "VARCHAR(32)";
-      colVals[i] = "'meep'";
-      testColVals.add("meep");
-    }
-    createTableWithColTypesAndNames(colNames, colTypes, colVals);
+	// Create a bunch of columns
+	String[] colNames = new String[numberOfColumns];
+	String[] colTypes = new String[numberOfColumns];
+	String[] colVals = new String[numberOfColumns];
+	List<String> testColVals = new ArrayList<String>(numberOfColumns);
+	for (int i = 0; i < numberOfColumns; ++i) {
+		colNames[i] = BASE_COL_NAME + Integer.toString(i);
+		colTypes[i] = "VARCHAR(32)";
+		colVals[i] = "'meep'";
+		testColVals.add("meep");
+	}
+	createTableWithColTypesAndNames(colNames, colTypes, colVals);
 
-    Configuration conf = new Configuration();
+	Configuration conf = new Configuration();
 
-    // Make sure the output dir does not exist
-    Path outputPath = new Path(new Path(getWarehouseDir()), getTableName());
-    FileSystem fs = FileSystem.getLocal(conf);
-    fs.delete(outputPath, true);
-    assertTrue(!fs.exists(outputPath));
+	// Make sure the output dir does not exist
+	Path outputPath = new Path(new Path(getWarehouseDir()), getTableName());
+	FileSystem fs = FileSystem.getLocal(conf);
+	fs.delete(outputPath, true);
+	assertTrue(!fs.exists(outputPath));
 
-    String[] argv = getArgv(true, colNames, conf);
+	String[] argv = getArgv(true, colNames, conf);
 
-    Sqoop importer = new Sqoop(new ImportTool());
-    try {
-      int ret = Sqoop.runSqoop(importer, argv);
-      assertTrue("Expected job to go through if target directory"
-                     + " does not exist.",
-                 0 == ret);
-      assertTrue(fs.exists(outputPath));
-      // expecting one _SUCCESS file and one file containing data
-      assertTrue("Expecting two files in the directory.",
-                 fs.listStatus(outputPath).length == 2);
-      String[] output = getContent(conf, outputPath);
-      assertEquals("Expected output and actual output should be same.",
-                   StringUtils.join(",", testColVals) + "\n", output[0]);
-    } catch (Exception e) {
-      // In debug mode, ImportException is wrapped in RuntimeException.
-      LOG.info("Got exceptional return (expected: ok). msg is: " + e);
-    }
-  }
+	Sqoop importer = new Sqoop(new ImportTool());
+	try {
+		int ret = Sqoop.runSqoop(importer, argv);
+		assertTrue("Expected job to go through if target directory"
+		           + " does not exist.",
+		           0 == ret);
+		assertTrue(fs.exists(outputPath));
+		// expecting one _SUCCESS file and one file containing data
+		assertTrue("Expecting two files in the directory.",
+		           fs.listStatus(outputPath).length == 2);
+		String[] output = getContent(conf, outputPath);
+		assertEquals("Expected output and actual output should be same.",
+		             StringUtils.join(",", testColVals) + "\n", output[0]);
+	} catch (Exception e) {
+		// In debug mode, ImportException is wrapped in RuntimeException.
+		LOG.info("Got exceptional return (expected: ok). msg is: " + e);
+	}
+}
 }

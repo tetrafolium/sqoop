@@ -54,157 +54,165 @@ import org.junit.experimental.categories.Category;
  */
 @Category({ManualTest.class, NetezzaTest.class})
 public class NetezzaExportManualTest extends TestExport {
-  public static final Log LOG =
-      LogFactory.getLog(NetezzaExportManualTest.class.getName());
-  static final String TABLE_PREFIX = "EMPNZ_EXP_";
-  // instance variables populated during setUp, used during tests
-  protected NetezzaManager manager;
-  protected Connection conn;
+public static final Log LOG =
+	LogFactory.getLog(NetezzaExportManualTest.class.getName());
+static final String TABLE_PREFIX = "EMPNZ_EXP_";
+// instance variables populated during setUp, used during tests
+protected NetezzaManager manager;
+protected Connection conn;
 
-  @Override
-  protected boolean useHsqldbTestServer() {
-    return false;
-  }
+@Override
+protected boolean useHsqldbTestServer() {
+	return false;
+}
 
-  protected boolean isDirectMode() { return false; }
+protected boolean isDirectMode() {
+	return false;
+}
 
-  @Override
-  protected Connection getConnection() {
-    return conn;
-  }
+@Override
+protected Connection getConnection() {
+	return conn;
+}
 
-  @Override
-  protected String getConnectString() {
-    return NetezzaTestUtils.getNZConnectString();
-  }
+@Override
+protected String getConnectString() {
+	return NetezzaTestUtils.getNZConnectString();
+}
 
-  @Override
-  protected String getTablePrefix() {
-    return TABLE_PREFIX;
-  }
+@Override
+protected String getTablePrefix() {
+	return TABLE_PREFIX;
+}
 
-  @Override
-  protected String getDropTableStatement(String tableName) {
-    return "DROP TABLE " + tableName;
-  }
+@Override
+protected String getDropTableStatement(String tableName) {
+	return "DROP TABLE " + tableName;
+}
 
-  /**
-   * Create the table definition to export to, removing any prior table. By
-   * specifying ColumnGenerator arguments, you can add extra columns to the
-   * table of arbitrary type.
-   */
-  @Override
-  public void createTable(ColumnGenerator... extraColumns) throws SQLException {
-    NetezzaTestUtils.createTableNZ(conn, getTableName(), extraColumns);
-  }
+/**
+ * Create the table definition to export to, removing any prior table. By
+ * specifying ColumnGenerator arguments, you can add extra columns to the
+ * table of arbitrary type.
+ */
+@Override
+public void createTable(ColumnGenerator... extraColumns) throws SQLException {
+	NetezzaTestUtils.createTableNZ(conn, getTableName(), extraColumns);
+}
 
-  /**
-   * Creates the staging table.
-   *
-   * @param extraColumns
-   *          extra columns that go in the staging table
-   * @throws SQLException
-   *           if an error occurs during export
-   */
-  @Override
-  public void createStagingTable(ColumnGenerator... extraColumns)
-      throws SQLException {
-    NetezzaTestUtils.createTableNZ(conn, getStagingTableName(), extraColumns);
-  }
+/**
+ * Creates the staging table.
+ *
+ * @param extraColumns
+ *          extra columns that go in the staging table
+ * @throws SQLException
+ *           if an error occurs during export
+ */
+@Override
+public void createStagingTable(ColumnGenerator... extraColumns)
+throws SQLException {
+	NetezzaTestUtils.createTableNZ(conn, getStagingTableName(), extraColumns);
+}
 
-  @Before
-  public void setUp() {
-    super.setUp();
-    SqoopOptions options =
-        new SqoopOptions(NetezzaTestUtils.getNZConnectString(), getTableName());
-    options.setUsername(NetezzaTestUtils.getNZUser());
-    options.setPassword(NetezzaTestUtils.getNZPassword());
-    if (isDirectMode()) {
-      this.manager = new DirectNetezzaManager(options);
-    } else {
-      this.manager = new NetezzaManager(options);
-    }
+@Before
+public void setUp() {
+	super.setUp();
+	SqoopOptions options =
+		new SqoopOptions(NetezzaTestUtils.getNZConnectString(), getTableName());
+	options.setUsername(NetezzaTestUtils.getNZUser());
+	options.setPassword(NetezzaTestUtils.getNZPassword());
+	if (isDirectMode()) {
+		this.manager = new DirectNetezzaManager(options);
+	} else {
+		this.manager = new NetezzaManager(options);
+	}
 
-    try {
-      this.conn = manager.getConnection();
-      this.conn.setAutoCommit(false);
-    } catch (SQLException sqlE) {
-      LOG.error("Encountered SQL Exception: " + sqlE);
-      sqlE.printStackTrace();
-      fail("SQLException when running test setUp(): " + sqlE);
-    }
-  }
+	try {
+		this.conn = manager.getConnection();
+		this.conn.setAutoCommit(false);
+	} catch (SQLException sqlE) {
+		LOG.error("Encountered SQL Exception: " + sqlE);
+		sqlE.printStackTrace();
+		fail("SQLException when running test setUp(): " + sqlE);
+	}
+}
 
-  @Override
-  protected String[] getArgv(boolean includeHadoopFlags, int rowsPerStatement,
-                             int statementsPerTx, String... additionalArgv) {
+@Override
+protected String[] getArgv(boolean includeHadoopFlags, int rowsPerStatement,
+                           int statementsPerTx, String... additionalArgv) {
 
-    String[] argV =
-        super.getArgv(includeHadoopFlags, rowsPerStatement, statementsPerTx);
-    String[] subArgV =
-        newStrArray(argV, "--username", NetezzaTestUtils.getNZUser(),
-                    "--password", NetezzaTestUtils.getNZPassword());
-    String[] newArgV = new String[subArgV.length + additionalArgv.length];
-    int i = 0;
-    for (String s : subArgV) {
-      newArgV[i++] = s;
-    }
-    for (String s : additionalArgv) {
-      newArgV[i++] = s;
-    }
-    return newArgV;
-  }
+	String[] argV =
+		super.getArgv(includeHadoopFlags, rowsPerStatement, statementsPerTx);
+	String[] subArgV =
+		newStrArray(argV, "--username", NetezzaTestUtils.getNZUser(),
+		            "--password", NetezzaTestUtils.getNZPassword());
+	String[] newArgV = new String[subArgV.length + additionalArgv.length];
+	int i = 0;
+	for (String s : subArgV) {
+		newArgV[i++] = s;
+	}
+	for (String s : additionalArgv) {
+		newArgV[i++] = s;
+	}
+	return newArgV;
+}
 
-  @Override
-  protected String[] getCodeGenArgv(String... extraArgs) {
-    String[] moreArgs;
+@Override
+protected String[] getCodeGenArgv(String... extraArgs) {
+	String[] moreArgs;
 
-    moreArgs = new String[extraArgs.length + 4];
+	moreArgs = new String[extraArgs.length + 4];
 
-    int i = 0;
-    for (i = 0; i < extraArgs.length; i++) {
-      moreArgs[i] = extraArgs[i];
-    }
+	int i = 0;
+	for (i = 0; i < extraArgs.length; i++) {
+		moreArgs[i] = extraArgs[i];
+	}
 
-    // Add username argument for netezza.
-    moreArgs[i++] = "--username";
-    moreArgs[i++] = NetezzaTestUtils.getNZUser();
-    moreArgs[i++] = "--password";
-    moreArgs[i++] = NetezzaTestUtils.getNZPassword();
+	// Add username argument for netezza.
+	moreArgs[i++] = "--username";
+	moreArgs[i++] = NetezzaTestUtils.getNZUser();
+	moreArgs[i++] = "--password";
+	moreArgs[i++] = NetezzaTestUtils.getNZPassword();
 
-    return super.getCodeGenArgv(moreArgs);
-  }
+	return super.getCodeGenArgv(moreArgs);
+}
 
-  protected void createExportFile(ColumnGenerator... extraCols)
-      throws IOException {
-    String ext = ".txt";
+protected void createExportFile(ColumnGenerator... extraCols)
+throws IOException {
+	String ext = ".txt";
 
-    Path tablePath = getTablePath();
-    Path filePath = new Path(tablePath, "part0" + ext);
+	Path tablePath = getTablePath();
+	Path filePath = new Path(tablePath, "part0" + ext);
 
-    Configuration conf = new Configuration();
-    if (!BaseSqoopTestCase.isOnPhysicalCluster()) {
-      conf.set(CommonArgs.FS_DEFAULT_NAME, CommonArgs.LOCAL_FS);
-    }
-    FileSystem fs = FileSystem.get(conf);
-    fs.mkdirs(tablePath);
-    OutputStream os = fs.create(filePath);
+	Configuration conf = new Configuration();
+	if (!BaseSqoopTestCase.isOnPhysicalCluster()) {
+		conf.set(CommonArgs.FS_DEFAULT_NAME, CommonArgs.LOCAL_FS);
+	}
+	FileSystem fs = FileSystem.get(conf);
+	fs.mkdirs(tablePath);
+	OutputStream os = fs.create(filePath);
 
-    BufferedWriter w = new BufferedWriter(new OutputStreamWriter(os));
-    for (int i = 0; i < 3; i++) {
-      String line = getRecordLine(i, extraCols);
-      w.write(line);
-      LOG.debug("Create Export file - Writing line : " + line);
-    }
-    w.close();
-    os.close();
-  }
+	BufferedWriter w = new BufferedWriter(new OutputStreamWriter(os));
+	for (int i = 0; i < 3; i++) {
+		String line = getRecordLine(i, extraCols);
+		w.write(line);
+		LOG.debug("Create Export file - Writing line : " + line);
+	}
+	w.close();
+	os.close();
+}
 
-  protected class NullColumnGenerator implements ColumnGenerator {
-    public String getExportText(int rowNum) { return "\\N"; }
+protected class NullColumnGenerator implements ColumnGenerator {
+public String getExportText(int rowNum) {
+	return "\\N";
+}
 
-    public String getVerifyText(int rowNum) { return null; }
+public String getVerifyText(int rowNum) {
+	return null;
+}
 
-    public String getType() { return "INTEGER"; }
-  }
+public String getType() {
+	return "INTEGER";
+}
+}
 }

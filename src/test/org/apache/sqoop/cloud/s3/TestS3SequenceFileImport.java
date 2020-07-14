@@ -26,8 +26,10 @@ import org.junit.experimental.categories.Category;
 @Category(S3Test.class)
 public class TestS3SequenceFileImport extends AbstractTestSequenceFileImport {
 
-  @ClassRule
-  public static S3CredentialsRule credentialsRule = new S3CredentialsRule();
+@ClassRule
+public static S3CredentialsRule credentialsRule = new S3CredentialsRule();
 
-  public TestS3SequenceFileImport() { super(credentialsRule); }
+public TestS3SequenceFileImport() {
+	super(credentialsRule);
+}
 }

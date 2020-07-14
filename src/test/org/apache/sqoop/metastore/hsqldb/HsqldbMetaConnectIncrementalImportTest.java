@@ -32,9 +32,9 @@ import org.apache.sqoop.metastore.MetaConnectIncrementalImportTestBase;
  */
 
 public class HsqldbMetaConnectIncrementalImportTest
-    extends MetaConnectIncrementalImportTestBase {
+	extends MetaConnectIncrementalImportTestBase {
 
-  public HsqldbMetaConnectIncrementalImportTest() {
-    super("jdbc:hsqldb:mem:sqoopmetastore", "SA", "");
-  }
+public HsqldbMetaConnectIncrementalImportTest() {
+	super("jdbc:hsqldb:mem:sqoopmetastore", "SA", "");
+}
 }

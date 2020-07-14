@@ -31,27 +31,27 @@ import org.apache.commons.logging.LogFactory;
  */
 public class SqlTypeMap<K, V> extends HashMap<K, V> {
 
-  private static final long serialVersionUID = 1L;
+private static final long serialVersionUID = 1L;
 
-  public static final Log LOG = LogFactory.getLog(SqlTypeMap.class.getName());
+public static final Log LOG = LogFactory.getLog(SqlTypeMap.class.getName());
 
-  @Override
-  public V get(Object col) {
-    V sqlType = super.get(col);
-    if (sqlType == null) {
-      LOG.error("It seems like you are looking up a column that does not");
-      LOG.error("exist in the table. Please ensure that you've specified");
-      LOG.error("correct column names in Sqoop options.");
-      throw new IllegalArgumentException("column not found: " + col);
-    }
-    return sqlType;
-  }
+@Override
+public V get(Object col) {
+	V sqlType = super.get(col);
+	if (sqlType == null) {
+		LOG.error("It seems like you are looking up a column that does not");
+		LOG.error("exist in the table. Please ensure that you've specified");
+		LOG.error("correct column names in Sqoop options.");
+		throw new IllegalArgumentException("column not found: " + col);
+	}
+	return sqlType;
+}
 
-  @Override
-  public V put(K col, V sqlType) {
-    if (sqlType == null) {
-      throw new IllegalArgumentException("sql type cannot be null");
-    }
-    return super.put(col, sqlType);
-  }
+@Override
+public V put(K col, V sqlType) {
+	if (sqlType == null) {
+		throw new IllegalArgumentException("sql type cannot be null");
+	}
+	return super.put(col, sqlType);
+}
 }

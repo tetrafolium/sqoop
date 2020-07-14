@@ -48,11 +48,11 @@ import org.junit.experimental.categories.Category;
 @Category(SqlServerTest.class)
 public class SqlServerSavedJobsTest extends SavedJobsTestBase {
 
-  private static MSSQLTestUtils msSQLTestUtils = new MSSQLTestUtils();
+private static MSSQLTestUtils msSQLTestUtils = new MSSQLTestUtils();
 
-  public SqlServerSavedJobsTest() {
-    super(msSQLTestUtils.getDBConnectString(), msSQLTestUtils.getDBUserName(),
-          msSQLTestUtils.getDBPassWord(),
-          JdbcDrivers.SQLSERVER.getDriverClass());
-  }
+public SqlServerSavedJobsTest() {
+	super(msSQLTestUtils.getDBConnectString(), msSQLTestUtils.getDBUserName(),
+	      msSQLTestUtils.getDBPassWord(),
+	      JdbcDrivers.SQLSERVER.getDriverClass());
+}
 }

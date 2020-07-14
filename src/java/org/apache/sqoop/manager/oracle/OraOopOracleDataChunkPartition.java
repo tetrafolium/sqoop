@@ -28,55 +28,56 @@ import org.apache.hadoop.io.Text;
  */
 public class OraOopOracleDataChunkPartition extends OraOopOracleDataChunk {
 
-  private boolean isSubPartition;
-  private long blocks;
+private boolean isSubPartition;
+private long blocks;
 
-  OraOopOracleDataChunkPartition() {}
+OraOopOracleDataChunkPartition() {
+}
 
-  OraOopOracleDataChunkPartition(String partitionName, boolean isSubPartition,
-                                 long blocks) {
-    this.setId(partitionName);
-    this.isSubPartition = isSubPartition;
-    this.blocks = blocks;
-  }
+OraOopOracleDataChunkPartition(String partitionName, boolean isSubPartition,
+                               long blocks) {
+	this.setId(partitionName);
+	this.isSubPartition = isSubPartition;
+	this.blocks = blocks;
+}
 
-  @Override
-  public long getNumberOfBlocks() {
-    return this.blocks;
-  }
+@Override
+public long getNumberOfBlocks() {
+	return this.blocks;
+}
 
-  @Override
-  public void write(DataOutput output) throws IOException {
-    Text.writeString(output, this.getId());
-    output.writeBoolean(this.isSubPartition);
-    output.writeLong(this.blocks);
-  }
+@Override
+public void write(DataOutput output) throws IOException {
+	Text.writeString(output, this.getId());
+	output.writeBoolean(this.isSubPartition);
+	output.writeLong(this.blocks);
+}
 
-  @Override
-  public void readFields(DataInput input) throws IOException {
-    this.setId(Text.readString(input));
-    this.isSubPartition = input.readBoolean();
-    this.blocks = input.readLong();
-  }
+@Override
+public void readFields(DataInput input) throws IOException {
+	this.setId(Text.readString(input));
+	this.isSubPartition = input.readBoolean();
+	this.blocks = input.readLong();
+}
 
-  @Override
-  public String getPartitionClause() {
-    StringBuilder sb = new StringBuilder();
-    sb.append(" ");
-    if (this.isSubPartition) {
-      sb.append("SUBPARTITION");
-    } else {
-      sb.append("PARTITION");
-    }
-    sb.append("(\"").append(this.getId()).append("\")");
-    return sb.toString();
-  }
+@Override
+public String getPartitionClause() {
+	StringBuilder sb = new StringBuilder();
+	sb.append(" ");
+	if (this.isSubPartition) {
+		sb.append("SUBPARTITION");
+	} else {
+		sb.append("PARTITION");
+	}
+	sb.append("(\"").append(this.getId()).append("\")");
+	return sb.toString();
+}
 
-  public String toString() {
-    StringBuilder result = new StringBuilder();
-    result.append("\n\t\t id = ").append(getId());
-    result.append("\n\t\t isSubPartition = ").append(isSubPartition);
-    result.append("\n\t\t blocks = ").append(blocks);
-    return result.toString();
-  }
+public String toString() {
+	StringBuilder result = new StringBuilder();
+	result.append("\n\t\t id = ").append(getId());
+	result.append("\n\t\t isSubPartition = ").append(isSubPartition);
+	result.append("\n\t\t blocks = ").append(blocks);
+	return result.toString();
+}
 }

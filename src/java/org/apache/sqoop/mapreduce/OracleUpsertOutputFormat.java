@@ -35,104 +35,104 @@ import org.apache.sqoop.manager.oracle.OracleUtils;
  * does not contain the row yet.
  */
 public class OracleUpsertOutputFormat<K extends SqoopRecord, V>
-    extends UpdateOutputFormat<K, V> {
+	extends UpdateOutputFormat<K, V> {
 
-  private static final Log LOG =
-      LogFactory.getLog(OracleUpsertOutputFormat.class);
+private static final Log LOG =
+	LogFactory.getLog(OracleUpsertOutputFormat.class);
 
-  @Override
-  /** {@inheritDoc} */
-  public RecordWriter<K, V> getRecordWriter(TaskAttemptContext context)
-      throws IOException {
-    try {
-      return new OracleUpsertRecordWriter(context);
-    } catch (Exception e) {
-      throw new IOException(e);
-    }
-  }
+@Override
+/** {@inheritDoc} */
+public RecordWriter<K, V> getRecordWriter(TaskAttemptContext context)
+throws IOException {
+	try {
+		return new OracleUpsertRecordWriter(context);
+	} catch (Exception e) {
+		throw new IOException(e);
+	}
+}
 
-  /**
-   * RecordWriter to write the output to UPDATE/INSERT statements.
-   */
-  public class OracleUpsertRecordWriter extends UpdateRecordWriter {
+/**
+ * RecordWriter to write the output to UPDATE/INSERT statements.
+ */
+public class OracleUpsertRecordWriter extends UpdateRecordWriter {
 
-    public OracleUpsertRecordWriter(TaskAttemptContext context)
-        throws ClassNotFoundException, SQLException {
-      super(context);
-    }
+public OracleUpsertRecordWriter(TaskAttemptContext context)
+throws ClassNotFoundException, SQLException {
+	super(context);
+}
 
-    /**
-     * @return an UPDATE/INSERT statement that modifies/inserts a row
-     * depending on whether the row already exist in the table or not.
-     */
-    protected String getUpdateStatement() {
-      boolean first;
+/**
+ * @return an UPDATE/INSERT statement that modifies/inserts a row
+ * depending on whether the row already exist in the table or not.
+ */
+protected String getUpdateStatement() {
+	boolean first;
 
-      // lookup table for update columns
-      Set<String> updateKeyLookup = new LinkedHashSet<String>();
-      for (String updateKey : updateCols) {
-        updateKeyLookup.add(OracleUtils.escapeIdentifier(
-            updateKey, isOracleEscapingDisabled()));
-      }
+	// lookup table for update columns
+	Set<String> updateKeyLookup = new LinkedHashSet<String>();
+	for (String updateKey : updateCols) {
+		updateKeyLookup.add(OracleUtils.escapeIdentifier(
+					    updateKey, isOracleEscapingDisabled()));
+	}
 
-      StringBuilder sb = new StringBuilder();
-      sb.append("MERGE INTO ");
-      sb.append(tableName);
-      sb.append(" USING dual ON ( ");
-      first = true;
-      for (int i = 0; i < updateCols.length; i++) {
-        if (first) {
-          first = false;
-        } else {
-          sb.append(" AND ");
-        }
-        sb.append(OracleUtils.escapeIdentifier(updateCols[i],
-                                               isOracleEscapingDisabled()));
-        sb.append(" = ?");
-      }
-      sb.append(" )");
+	StringBuilder sb = new StringBuilder();
+	sb.append("MERGE INTO ");
+	sb.append(tableName);
+	sb.append(" USING dual ON ( ");
+	first = true;
+	for (int i = 0; i < updateCols.length; i++) {
+		if (first) {
+			first = false;
+		} else {
+			sb.append(" AND ");
+		}
+		sb.append(OracleUtils.escapeIdentifier(updateCols[i],
+		                                       isOracleEscapingDisabled()));
+		sb.append(" = ?");
+	}
+	sb.append(" )");
 
-      sb.append("  WHEN MATCHED THEN UPDATE SET ");
-      first = true;
-      for (String col : columnNames) {
-        if (!updateKeyLookup.contains(col)) {
-          if (first) {
-            first = false;
-          } else {
-            sb.append(", ");
-          }
-          sb.append(col);
-          sb.append(" = ?");
-        }
-      }
+	sb.append("  WHEN MATCHED THEN UPDATE SET ");
+	first = true;
+	for (String col : columnNames) {
+		if (!updateKeyLookup.contains(col)) {
+			if (first) {
+				first = false;
+			} else {
+				sb.append(", ");
+			}
+			sb.append(col);
+			sb.append(" = ?");
+		}
+	}
 
-      sb.append("  WHEN NOT MATCHED THEN INSERT ( ");
-      first = true;
-      for (String col : columnNames) {
-        if (first) {
-          first = false;
-        } else {
-          sb.append(", ");
-        }
-        sb.append(col);
-      }
-      sb.append(" ) VALUES ( ");
-      first = true;
-      for (String col : columnNames) {
-        if (first) {
-          first = false;
-        } else {
-          sb.append(", ");
-        }
-        sb.append("?");
-      }
-      sb.append(" )");
+	sb.append("  WHEN NOT MATCHED THEN INSERT ( ");
+	first = true;
+	for (String col : columnNames) {
+		if (first) {
+			first = false;
+		} else {
+			sb.append(", ");
+		}
+		sb.append(col);
+	}
+	sb.append(" ) VALUES ( ");
+	first = true;
+	for (String col : columnNames) {
+		if (first) {
+			first = false;
+		} else {
+			sb.append(", ");
+		}
+		sb.append("?");
+	}
+	sb.append(" )");
 
-      return sb.toString();
-    }
+	return sb.toString();
+}
 
-    private boolean isOracleEscapingDisabled() {
-      return OracleUtils.isOracleEscapingDisabled(getConf());
-    }
-  }
+private boolean isOracleEscapingDisabled() {
+	return OracleUtils.isOracleEscapingDisabled(getConf());
+}
+}
 }

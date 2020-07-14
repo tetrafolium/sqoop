@@ -42,40 +42,41 @@ import org.apache.hadoop.io.Text;
  */
 public final class BigDecimalSerializer {
 
-  private BigDecimalSerializer() {}
+private BigDecimalSerializer() {
+}
 
-  public static final BigInteger LONG_MAX_AS_BIGINT =
-      BigInteger.valueOf(Long.MAX_VALUE);
-  public static final BigInteger LONG_MIN_AS_BIGINT =
-      BigInteger.valueOf(Long.MIN_VALUE);
+public static final BigInteger LONG_MAX_AS_BIGINT =
+	BigInteger.valueOf(Long.MAX_VALUE);
+public static final BigInteger LONG_MIN_AS_BIGINT =
+	BigInteger.valueOf(Long.MIN_VALUE);
 
-  public static void write(BigDecimal d, DataOutput out) throws IOException {
-    int scale = d.scale();
-    BigInteger bigIntPart = d.unscaledValue();
-    boolean fastpath = bigIntPart.compareTo(LONG_MAX_AS_BIGINT) < 0 &&
-                       bigIntPart.compareTo(LONG_MIN_AS_BIGINT) > 0;
+public static void write(BigDecimal d, DataOutput out) throws IOException {
+	int scale = d.scale();
+	BigInteger bigIntPart = d.unscaledValue();
+	boolean fastpath = bigIntPart.compareTo(LONG_MAX_AS_BIGINT) < 0 &&
+	                   bigIntPart.compareTo(LONG_MIN_AS_BIGINT) > 0;
 
-    out.writeInt(scale);
-    out.writeBoolean(fastpath);
-    if (fastpath) {
-      out.writeLong(bigIntPart.longValue());
-    } else {
-      Text.writeString(out, bigIntPart.toString());
-    }
-  }
+	out.writeInt(scale);
+	out.writeBoolean(fastpath);
+	if (fastpath) {
+		out.writeLong(bigIntPart.longValue());
+	} else {
+		Text.writeString(out, bigIntPart.toString());
+	}
+}
 
-  public static BigDecimal readFields(DataInput in) throws IOException {
-    int scale = in.readInt();
-    boolean fastpath = in.readBoolean();
-    BigInteger unscaledIntPart;
-    if (fastpath) {
-      long unscaledValue = in.readLong();
-      unscaledIntPart = BigInteger.valueOf(unscaledValue);
-    } else {
-      String unscaledValueStr = Text.readString(in);
-      unscaledIntPart = new BigInteger(unscaledValueStr);
-    }
+public static BigDecimal readFields(DataInput in) throws IOException {
+	int scale = in.readInt();
+	boolean fastpath = in.readBoolean();
+	BigInteger unscaledIntPart;
+	if (fastpath) {
+		long unscaledValue = in.readLong();
+		unscaledIntPart = BigInteger.valueOf(unscaledValue);
+	} else {
+		String unscaledValueStr = Text.readString(in);
+		unscaledIntPart = new BigInteger(unscaledValueStr);
+	}
 
-    return new BigDecimal(unscaledIntPart, scale);
-  }
+	return new BigDecimal(unscaledIntPart, scale);
+}
 }

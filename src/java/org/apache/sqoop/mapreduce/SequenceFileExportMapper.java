@@ -28,13 +28,14 @@ import org.apache.sqoop.lib.SqoopRecord;
  * that DBWritable to the OutputFormat for writeback to the database.
  */
 public class SequenceFileExportMapper
-    extends AutoProgressMapper<LongWritable, SqoopRecord, SqoopRecord,
-                               NullWritable> {
+	extends AutoProgressMapper<LongWritable, SqoopRecord, SqoopRecord,
+	                           NullWritable> {
 
-  public SequenceFileExportMapper() {}
+public SequenceFileExportMapper() {
+}
 
-  public void map(LongWritable key, SqoopRecord val, Context context)
-      throws IOException, InterruptedException {
-    context.write(val, NullWritable.get());
-  }
+public void map(LongWritable key, SqoopRecord val, Context context)
+throws IOException, InterruptedException {
+	context.write(val, NullWritable.get());
+}
 }

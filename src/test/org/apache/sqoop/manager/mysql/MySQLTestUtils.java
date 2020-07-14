@@ -34,100 +34,110 @@ import org.apache.sqoop.manager.ConnManager;
  */
 public final class MySQLTestUtils {
 
-  public static final Log LOG =
-      LogFactory.getLog(MySQLTestUtils.class.getName());
+public static final Log LOG =
+	LogFactory.getLog(MySQLTestUtils.class.getName());
 
-  private String hostUrl;
+private String hostUrl;
 
-  private String userName;
-  private String userPass;
+private String userName;
+private String userPass;
 
-  private String mysqlDbName;
-  private String mySqlConnectString;
+private String mysqlDbName;
+private String mySqlConnectString;
 
-  public MySQLTestUtils() {
-    hostUrl = System.getProperty("sqoop.test.mysql.connectstring.host_url",
-                                 "jdbc:mysql://127.0.0.1:13306/");
-    userName = System.getProperty("sqoop.test.mysql.username", "sqoop");
-    userPass = System.getProperty("sqoop.test.mysql.password", "Sqoop12345");
+public MySQLTestUtils() {
+	hostUrl = System.getProperty("sqoop.test.mysql.connectstring.host_url",
+	                             "jdbc:mysql://127.0.0.1:13306/");
+	userName = System.getProperty("sqoop.test.mysql.username", "sqoop");
+	userPass = System.getProperty("sqoop.test.mysql.password", "Sqoop12345");
 
-    mysqlDbName = System.getProperty("sqoop.test.mysql.databasename", "sqoop");
-    mySqlConnectString = getHostUrl() + getMysqlDbName();
-  }
+	mysqlDbName = System.getProperty("sqoop.test.mysql.databasename", "sqoop");
+	mySqlConnectString = getHostUrl() + getMysqlDbName();
+}
 
-  public String getHostUrl() { return hostUrl; }
+public String getHostUrl() {
+	return hostUrl;
+}
 
-  public String getUserName() { return userName; }
+public String getUserName() {
+	return userName;
+}
 
-  public String getUserPass() { return userPass; }
+public String getUserPass() {
+	return userPass;
+}
 
-  public String getMysqlDbName() { return mysqlDbName; }
+public String getMysqlDbName() {
+	return mysqlDbName;
+}
 
-  public String getMySqlConnectString() { return mySqlConnectString; }
+public String getMySqlConnectString() {
+	return mySqlConnectString;
+}
 
-  public String[] addUserNameAndPasswordToArgs(String[] extraArgs) {
-    int extraLength = isSet(getUserPass()) ? 4 : 2;
-    String[] moreArgs = new String[extraArgs.length + extraLength];
-    int i = 0;
-    for (i = 0; i < extraArgs.length; i++) {
-      moreArgs[i] = extraArgs[i];
-    }
+public String[] addUserNameAndPasswordToArgs(String[] extraArgs) {
+	int extraLength = isSet(getUserPass()) ? 4 : 2;
+	String[] moreArgs = new String[extraArgs.length + extraLength];
+	int i = 0;
+	for (i = 0; i < extraArgs.length; i++) {
+		moreArgs[i] = extraArgs[i];
+	}
 
-    // Add username argument for mysql.
-    moreArgs[i++] = "--username";
-    moreArgs[i++] = getUserName();
-    if (isSet(userPass)) {
-      moreArgs[i++] = "--password";
-      moreArgs[i++] = getUserPass();
-    }
-    return moreArgs;
-  }
+	// Add username argument for mysql.
+	moreArgs[i++] = "--username";
+	moreArgs[i++] = getUserName();
+	if (isSet(userPass)) {
+		moreArgs[i++] = "--password";
+		moreArgs[i++] = getUserPass();
+	}
+	return moreArgs;
+}
 
-  private static String getCurrentUser() {
-    // First, check the $USER environment variable.
-    String envUser = System.getenv("USER");
-    if (null != envUser) {
-      return envUser;
-    }
-    // Fall back to user.name system property
-    envUser = System.getProperty("user.name");
-    if (null != envUser) {
-      return envUser;
-    }
-    throw new RuntimeException(
-        "MySQL username not set and unable to get system user. Please set it"
-        +
-        " with '-Dsqoop.test.mysql.username=...' or USER environment variable!");
-  }
+private static String getCurrentUser() {
+	// First, check the $USER environment variable.
+	String envUser = System.getenv("USER");
+	if (null != envUser) {
+		return envUser;
+	}
+	// Fall back to user.name system property
+	envUser = System.getProperty("user.name");
+	if (null != envUser) {
+		return envUser;
+	}
+	throw new RuntimeException(
+		      "MySQL username not set and unable to get system user. Please set it"
+		      +
+		      " with '-Dsqoop.test.mysql.username=...' or USER environment variable!");
+}
 
-  public void addPasswordIfIsSet(ArrayList<String> args) {
-    if (isSet(userPass)) {
-      args.add("--password");
-      args.add(getUserPass());
-    }
-  }
+public void addPasswordIfIsSet(ArrayList<String> args) {
+	if (isSet(userPass)) {
+		args.add("--password");
+		args.add(getUserPass());
+	}
+}
 
-  private boolean isSet(String userPass) {
-    return !StringUtils.isBlank(userPass);
-  }
+private boolean isSet(String userPass) {
+	return !StringUtils.isBlank(userPass);
+}
 
-  public void addPasswordIfIsSet(SqoopOptions opts) {
-    if (isSet(userPass)) {
-      opts.setPassword(getUserPass());
-    }
-  }
+public void addPasswordIfIsSet(SqoopOptions opts) {
+	if (isSet(userPass)) {
+		opts.setPassword(getUserPass());
+	}
+}
 
-  public void dropTableIfExists(String table, ConnManager manager)
-      throws SQLException {
-    Connection conn = manager.getConnection();
-    PreparedStatement statement = conn.prepareStatement(
-        "DROP TABLE IF EXISTS " + table, ResultSet.TYPE_FORWARD_ONLY,
-        ResultSet.CONCUR_READ_ONLY);
-    try {
-      statement.executeUpdate();
-      conn.commit();
-    } finally {
-      statement.close();
-    }
-  }
+public void dropTableIfExists(String table, ConnManager manager)
+throws SQLException {
+	Connection conn = manager.getConnection();
+	PreparedStatement statement = conn.prepareStatement(
+		"DROP TABLE IF EXISTS " + table, ResultSet.TYPE_FORWARD_ONLY,
+		ResultSet.CONCUR_READ_ONLY);
+	try {
+		statement.executeUpdate();
+		conn.commit();
+	} finally {
+		statement.close();
+	}
+}
 }

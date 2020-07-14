@@ -38,81 +38,81 @@ import org.junit.Test;
 import org.junit.runners.Parameterized;
 
 public abstract class AbstractTestExternalHiveTableImport
-    extends CloudImportJobTestCase {
+	extends CloudImportJobTestCase {
 
-  private static CloudTestDataSet dataSet = new CloudTestDataSet();
+private static CloudTestDataSet dataSet = new CloudTestDataSet();
 
-  @Parameterized.Parameters(name = "fileFormatArg = {0}")
-  public static Iterable<? extends Object> parameters() {
-    return Arrays.asList(
-        new Object[] {FMT_TEXTFILE_ARG, dataSet.getExpectedTextOutputAsList()},
-        new Object[] {FMT_PARQUETFILE_ARG, dataSet.getExpectedParquetOutput()});
-  }
+@Parameterized.Parameters(name = "fileFormatArg = {0}")
+public static Iterable<? extends Object> parameters() {
+	return Arrays.asList(
+		new Object[] {FMT_TEXTFILE_ARG, dataSet.getExpectedTextOutputAsList()},
+		new Object[] {FMT_PARQUETFILE_ARG, dataSet.getExpectedParquetOutput()});
+}
 
-  public static final Log LOG =
-      LogFactory.getLog(AbstractTestExternalHiveTableImport.class.getName());
+public static final Log LOG =
+	LogFactory.getLog(AbstractTestExternalHiveTableImport.class.getName());
 
-  private String fileFormatArg;
+private String fileFormatArg;
 
-  private List<String> expectedResult;
+private List<String> expectedResult;
 
-  protected AbstractTestExternalHiveTableImport(
-      CloudCredentialsRule credentialsRule, String fileFormatArg,
-      List<String> expectedResult) {
-    super(credentialsRule);
-    this.fileFormatArg = fileFormatArg;
-    this.expectedResult = expectedResult;
-  }
+protected AbstractTestExternalHiveTableImport(
+	CloudCredentialsRule credentialsRule, String fileFormatArg,
+	List<String> expectedResult) {
+	super(credentialsRule);
+	this.fileFormatArg = fileFormatArg;
+	this.expectedResult = expectedResult;
+}
 
-  private HiveMiniCluster hiveMiniCluster;
+private HiveMiniCluster hiveMiniCluster;
 
-  private HiveServer2TestUtil hiveServer2TestUtil;
+private HiveServer2TestUtil hiveServer2TestUtil;
 
-  @Override
-  @Before
-  public void setUp() {
-    super.setUp();
-    hiveMiniCluster = createCloudBasedHiveMiniCluster();
-    hiveServer2TestUtil = new HiveServer2TestUtil(hiveMiniCluster.getUrl());
-  }
+@Override
+@Before
+public void setUp() {
+	super.setUp();
+	hiveMiniCluster = createCloudBasedHiveMiniCluster();
+	hiveServer2TestUtil = new HiveServer2TestUtil(hiveMiniCluster.getUrl());
+}
 
-  @After
-  public void stopMiniCluster() {
-    if (hiveMiniCluster != null) {
-      hiveMiniCluster.stop();
-    }
-  }
+@After
+public void stopMiniCluster() {
+	if (hiveMiniCluster != null) {
+		hiveMiniCluster.stop();
+	}
+}
 
-  @Test
-  public void testImportIntoExternalHiveTable() throws IOException {
-    String[] args = getExternalHiveTableImportArgs(false);
-    runImport(args);
+@Test
+public void testImportIntoExternalHiveTable() throws IOException {
+	String[] args = getExternalHiveTableImportArgs(false);
+	runImport(args);
 
-    List<String> rows =
-        hiveServer2TestUtil.loadCsvRowsFromTable(getTableName());
-    assertEquals(rows, expectedResult);
-  }
+	List<String> rows =
+		hiveServer2TestUtil.loadCsvRowsFromTable(getTableName());
+	assertEquals(rows, expectedResult);
+}
 
-  @Test
-  public void testCreateAndImportIntoExternalHiveTable() throws IOException {
-    String[] args = getExternalHiveTableImportArgs(true);
-    runImport(args);
+@Test
+public void testCreateAndImportIntoExternalHiveTable() throws IOException {
+	String[] args = getExternalHiveTableImportArgs(true);
+	runImport(args);
 
-    List<String> rows =
-        hiveServer2TestUtil.loadCsvRowsFromTable(getHiveExternalTableName());
-    assertEquals(rows, expectedResult);
-  }
+	List<String> rows =
+		hiveServer2TestUtil.loadCsvRowsFromTable(getHiveExternalTableName());
+	assertEquals(rows, expectedResult);
+}
 
-  private String[] getExternalHiveTableImportArgs(boolean createHiveTable) {
-    ArgumentArrayBuilder builder =
-        getArgumentArrayBuilderForUnitTestsWithFileFormatOption(
-            fileSystemRule.getTargetDirPath().toString(), fileFormatArg);
-    builder = addExternalHiveTableImportArgs(
-        builder, hiveMiniCluster.getUrl(),
-        fileSystemRule.getExternalTableDirPath().toString());
-    if (createHiveTable) {
-      builder = addCreateHiveTableArgs(builder, getHiveExternalTableName());
-    }
-    return builder.build();
-  }
+private String[] getExternalHiveTableImportArgs(boolean createHiveTable) {
+	ArgumentArrayBuilder builder =
+		getArgumentArrayBuilderForUnitTestsWithFileFormatOption(
+			fileSystemRule.getTargetDirPath().toString(), fileFormatArg);
+	builder = addExternalHiveTableImportArgs(
+		builder, hiveMiniCluster.getUrl(),
+		fileSystemRule.getExternalTableDirPath().toString());
+	if (createHiveTable) {
+		builder = addCreateHiveTableArgs(builder, getHiveExternalTableName());
+	}
+	return builder.build();
+}
 }

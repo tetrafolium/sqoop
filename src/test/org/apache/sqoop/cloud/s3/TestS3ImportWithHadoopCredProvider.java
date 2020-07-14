@@ -33,25 +33,25 @@ import org.junit.runners.Parameterized;
 @Parameterized.
 UseParametersRunnerFactory(BlockJUnit4ClassRunnerWithParametersFactory.class)
 public class TestS3ImportWithHadoopCredProvider
-    extends AbstractTestImportWithHadoopCredProvider {
+	extends AbstractTestImportWithHadoopCredProvider {
 
-  @Parameterized.Parameters(name = "credentialProviderPathProperty = {0}")
-  public static Iterable<? extends Object> parameters() {
-    return Arrays.asList(
-        CredentialProviderHelper.HADOOP_CREDENTIAL_PROVIDER_PATH,
-        CredentialProviderHelper.S3A_CREDENTIAL_PROVIDER_PATH);
-  }
+@Parameterized.Parameters(name = "credentialProviderPathProperty = {0}")
+public static Iterable<? extends Object> parameters() {
+	return Arrays.asList(
+		CredentialProviderHelper.HADOOP_CREDENTIAL_PROVIDER_PATH,
+		CredentialProviderHelper.S3A_CREDENTIAL_PROVIDER_PATH);
+}
 
-  @ClassRule
-  public static S3CredentialsRule s3CredentialsRule = new S3CredentialsRule();
+@ClassRule
+public static S3CredentialsRule s3CredentialsRule = new S3CredentialsRule();
 
-  static {
-    AbstractTestImportWithHadoopCredProvider.credentialsRule =
-        s3CredentialsRule;
-  }
+static {
+	AbstractTestImportWithHadoopCredProvider.credentialsRule =
+		s3CredentialsRule;
+}
 
-  public TestS3ImportWithHadoopCredProvider(
-      String credentialProviderPathProperty) {
-    super(credentialProviderPathProperty);
-  }
+public TestS3ImportWithHadoopCredProvider(
+	String credentialProviderPathProperty) {
+	super(credentialProviderPathProperty);
+}
 }

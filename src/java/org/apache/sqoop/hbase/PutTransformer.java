@@ -30,41 +30,45 @@ import org.apache.hadoop.hbase.client.Mutation;
  */
 public abstract class PutTransformer {
 
-  private String columnFamily;
-  private String rowKeyColumn;
+private String columnFamily;
+private String rowKeyColumn;
 
-  public abstract void init(Configuration conf);
+public abstract void init(Configuration conf);
 
-  /**
-   * @return the default column family to insert into.
-   */
-  public String getColumnFamily() { return this.columnFamily; }
+/**
+ * @return the default column family to insert into.
+ */
+public String getColumnFamily() {
+	return this.columnFamily;
+}
 
-  /**
-   * Set the default column family to insert into.
-   */
-  public void setColumnFamily(String colFamily) {
-    this.columnFamily = colFamily;
-  }
+/**
+ * Set the default column family to insert into.
+ */
+public void setColumnFamily(String colFamily) {
+	this.columnFamily = colFamily;
+}
 
-  /**
-   * @return the field name identifying the value to use as the row id.
-   */
-  public String getRowKeyColumn() { return this.rowKeyColumn; }
+/**
+ * @return the field name identifying the value to use as the row id.
+ */
+public String getRowKeyColumn() {
+	return this.rowKeyColumn;
+}
 
-  /**
-   * Set the column of the input fields which should be used to calculate
-   * the row id.
-   */
-  public void setRowKeyColumn(String rowKeyCol) {
-    this.rowKeyColumn = rowKeyCol;
-  }
+/**
+ * Set the column of the input fields which should be used to calculate
+ * the row id.
+ */
+public void setRowKeyColumn(String rowKeyCol) {
+	this.rowKeyColumn = rowKeyCol;
+}
 
-  /**
-   * Returns a list of Put commands that inserts the fields into a row in HBase.
-   * @param fields a map of field names to values to insert.
-   * @return A list of Put commands that inserts these into HBase.
-   */
-  public abstract List<Mutation> getMutationCommand(Map<String, Object> fields)
-      throws IOException;
+/**
+ * Returns a list of Put commands that inserts the fields into a row in HBase.
+ * @param fields a map of field names to values to insert.
+ * @return A list of Put commands that inserts these into HBase.
+ */
+public abstract List<Mutation> getMutationCommand(Map<String, Object> fields)
+throws IOException;
 }

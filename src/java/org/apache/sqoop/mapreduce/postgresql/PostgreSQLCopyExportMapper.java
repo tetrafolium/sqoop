@@ -46,112 +46,113 @@ import org.postgresql.copy.CopyManager;
  * and deliver these results to the CopyIn object of PostgreSQL JDBC.
  */
 public class PostgreSQLCopyExportMapper
-    extends AutoProgressMapper<LongWritable, Writable, NullWritable,
-                               NullWritable> {
-  public static final Log LOG =
-      LogFactory.getLog(PostgreSQLCopyExportMapper.class.getName());
+	extends AutoProgressMapper<LongWritable, Writable, NullWritable,
+	                           NullWritable> {
+public static final Log LOG =
+	LogFactory.getLog(PostgreSQLCopyExportMapper.class.getName());
 
-  private Configuration conf;
-  private DBConfiguration dbConf;
-  private Connection conn = null;
-  private CopyIn copyin = null;
-  private StringBuilder line = new StringBuilder();
-  private DelimiterSet delimiters = new DelimiterSet(
-      ',', '\n', DelimiterSet.NULL_CHAR, DelimiterSet.NULL_CHAR, false);
+private Configuration conf;
+private DBConfiguration dbConf;
+private Connection conn = null;
+private CopyIn copyin = null;
+private StringBuilder line = new StringBuilder();
+private DelimiterSet delimiters = new DelimiterSet(
+	',', '\n', DelimiterSet.NULL_CHAR, DelimiterSet.NULL_CHAR, false);
 
-  public PostgreSQLCopyExportMapper() {}
+public PostgreSQLCopyExportMapper() {
+}
 
-  @Override
-  protected void setup(Context context)
-      throws IOException, InterruptedException {
+@Override
+protected void setup(Context context)
+throws IOException, InterruptedException {
 
-    super.setup(context);
-    conf = context.getConfiguration();
-    dbConf = new DBConfiguration(conf);
-    CopyManager cm = null;
-    try {
-      conn = dbConf.getConnection();
-      cm = ((PGConnection)conn).getCopyAPI();
-    } catch (ClassNotFoundException ex) {
-      LOG.error("Unable to load JDBC driver class", ex);
-      throw new IOException(ex);
-    } catch (SQLException ex) {
-      LoggingUtils.logAll(LOG, "Unable to get CopyIn", ex);
-      throw new IOException(ex);
-    }
-    try {
-      StringBuilder sql = new StringBuilder();
-      sql.append("COPY ");
-      sql.append(dbConf.getOutputTableName());
-      sql.append(" FROM STDIN WITH (");
-      sql.append(" ENCODING 'UTF-8' ");
-      sql.append(", FORMAT csv ");
-      sql.append(", DELIMITER ");
-      sql.append("'");
-      sql.append(conf.get("postgresql.input.field.delim", ","));
-      sql.append("'");
-      sql.append(", QUOTE ");
-      sql.append("'");
-      sql.append(conf.get("postgresql.input.enclosedby", "\""));
-      sql.append("'");
-      sql.append(", ESCAPE ");
-      sql.append("'");
-      sql.append(conf.get("postgresql.input.escapedby", "\""));
-      sql.append("'");
-      if (conf.get("postgresql.null.string") != null) {
-        sql.append(", NULL ");
-        sql.append("'");
-        sql.append(conf.get("postgresql.null.string"));
-        sql.append("'");
-      }
-      sql.append(")");
-      LOG.debug("Starting export with copy: " + sql);
-      copyin = cm.copyIn(sql.toString());
-    } catch (SQLException ex) {
-      LoggingUtils.logAll(LOG, "Unable to get CopyIn", ex);
-      close();
-      throw new IOException(ex);
-    }
-  }
+	super.setup(context);
+	conf = context.getConfiguration();
+	dbConf = new DBConfiguration(conf);
+	CopyManager cm = null;
+	try {
+		conn = dbConf.getConnection();
+		cm = ((PGConnection)conn).getCopyAPI();
+	} catch (ClassNotFoundException ex) {
+		LOG.error("Unable to load JDBC driver class", ex);
+		throw new IOException(ex);
+	} catch (SQLException ex) {
+		LoggingUtils.logAll(LOG, "Unable to get CopyIn", ex);
+		throw new IOException(ex);
+	}
+	try {
+		StringBuilder sql = new StringBuilder();
+		sql.append("COPY ");
+		sql.append(dbConf.getOutputTableName());
+		sql.append(" FROM STDIN WITH (");
+		sql.append(" ENCODING 'UTF-8' ");
+		sql.append(", FORMAT csv ");
+		sql.append(", DELIMITER ");
+		sql.append("'");
+		sql.append(conf.get("postgresql.input.field.delim", ","));
+		sql.append("'");
+		sql.append(", QUOTE ");
+		sql.append("'");
+		sql.append(conf.get("postgresql.input.enclosedby", "\""));
+		sql.append("'");
+		sql.append(", ESCAPE ");
+		sql.append("'");
+		sql.append(conf.get("postgresql.input.escapedby", "\""));
+		sql.append("'");
+		if (conf.get("postgresql.null.string") != null) {
+			sql.append(", NULL ");
+			sql.append("'");
+			sql.append(conf.get("postgresql.null.string"));
+			sql.append("'");
+		}
+		sql.append(")");
+		LOG.debug("Starting export with copy: " + sql);
+		copyin = cm.copyIn(sql.toString());
+	} catch (SQLException ex) {
+		LoggingUtils.logAll(LOG, "Unable to get CopyIn", ex);
+		close();
+		throw new IOException(ex);
+	}
+}
 
-  @Override
-  public void map(LongWritable key, Writable value, Context context)
-      throws IOException, InterruptedException {
-    line.setLength(0);
-    line.append(value.toString());
-    if (value instanceof Text) {
-      line.append(System.getProperty("line.separator"));
-    }
-    try {
-      byte[] data = line.toString().getBytes("UTF-8");
-      copyin.writeToCopy(data, 0, data.length);
-    } catch (SQLException ex) {
-      LoggingUtils.logAll(LOG, "Unable to execute copy", ex);
-      close();
-      throw new IOException(ex);
-    }
-  }
+@Override
+public void map(LongWritable key, Writable value, Context context)
+throws IOException, InterruptedException {
+	line.setLength(0);
+	line.append(value.toString());
+	if (value instanceof Text) {
+		line.append(System.getProperty("line.separator"));
+	}
+	try {
+		byte[] data = line.toString().getBytes("UTF-8");
+		copyin.writeToCopy(data, 0, data.length);
+	} catch (SQLException ex) {
+		LoggingUtils.logAll(LOG, "Unable to execute copy", ex);
+		close();
+		throw new IOException(ex);
+	}
+}
 
-  @Override
-  protected void cleanup(Context context)
-      throws IOException, InterruptedException {
-    try {
-      copyin.endCopy();
-    } catch (SQLException ex) {
-      LoggingUtils.logAll(LOG, "Unable to finalize copy", ex);
-      throw new IOException(ex);
-    }
-    close();
-  }
+@Override
+protected void cleanup(Context context)
+throws IOException, InterruptedException {
+	try {
+		copyin.endCopy();
+	} catch (SQLException ex) {
+		LoggingUtils.logAll(LOG, "Unable to finalize copy", ex);
+		throw new IOException(ex);
+	}
+	close();
+}
 
-  void close() throws IOException {
-    if (conn != null) {
-      try {
-        conn.close();
-      } catch (SQLException ex) {
-        LoggingUtils.logAll(LOG, "Unable to close connection", ex);
-        throw new IOException(ex);
-      }
-    }
-  }
+void close() throws IOException {
+	if (conn != null) {
+		try {
+			conn.close();
+		} catch (SQLException ex) {
+			LoggingUtils.logAll(LOG, "Unable to close connection", ex);
+			throw new IOException(ex);
+		}
+	}
+}
 }

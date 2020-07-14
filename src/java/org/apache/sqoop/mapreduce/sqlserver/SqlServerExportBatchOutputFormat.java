@@ -31,86 +31,86 @@ import org.apache.sqoop.mapreduce.ExportBatchOutputFormat;
  * Output format specific for Microsoft SQL Connector.
  */
 public class SqlServerExportBatchOutputFormat<K extends SqoopRecord, V>
-    extends ExportBatchOutputFormat<K, V> {
+	extends ExportBatchOutputFormat<K, V> {
 
-  private static final Log LOG =
-      LogFactory.getLog(SqlServerExportBatchOutputFormat.class);
+private static final Log LOG =
+	LogFactory.getLog(SqlServerExportBatchOutputFormat.class);
 
-  /** {@inheritDoc} */
-  @Override
-  public RecordWriter<K, V> getRecordWriter(TaskAttemptContext context)
-      throws IOException {
-    try {
-      return new SqlServerExportBatchRecordWriter<K, V>(context);
-    } catch (Exception e) {
-      throw new IOException(e);
-    }
-  }
+/** {@inheritDoc} */
+@Override
+public RecordWriter<K, V> getRecordWriter(TaskAttemptContext context)
+throws IOException {
+	try {
+		return new SqlServerExportBatchRecordWriter<K, V>(context);
+	} catch (Exception e) {
+		throw new IOException(e);
+	}
+}
 
-  /** {@inheritDoc}. */
-  public class SqlServerExportBatchRecordWriter<K extends SqoopRecord, V>
-      extends ExportBatchRecordWriter<K, V> {
+/** {@inheritDoc}. */
+public class SqlServerExportBatchRecordWriter<K extends SqoopRecord, V>
+	extends ExportBatchRecordWriter<K, V> {
 
-    public SqlServerExportBatchRecordWriter(TaskAttemptContext context)
-        throws ClassNotFoundException, SQLException {
-      super(context);
-    }
+public SqlServerExportBatchRecordWriter(TaskAttemptContext context)
+throws ClassNotFoundException, SQLException {
+	super(context);
+}
 
-    /** {@inheritDoc} */
-    @Override
-    protected String getInsertStatement(int numRows) {
-      StringBuilder sb = new StringBuilder();
+/** {@inheritDoc} */
+@Override
+protected String getInsertStatement(int numRows) {
+	StringBuilder sb = new StringBuilder();
 
-      if (getConf().getBoolean(SQLServerManager.IDENTITY_INSERT_PROP, false)) {
-        LOG.info("Enabling identity inserts");
-        sb.append("SET IDENTITY_INSERT ").append(tableName).append(" ON ");
-      }
+	if (getConf().getBoolean(SQLServerManager.IDENTITY_INSERT_PROP, false)) {
+		LOG.info("Enabling identity inserts");
+		sb.append("SET IDENTITY_INSERT ").append(tableName).append(" ON ");
+	}
 
-      sb.append("INSERT INTO " + tableName + " ");
+	sb.append("INSERT INTO " + tableName + " ");
 
-      String tableHints = getConf().get(SQLServerManager.TABLE_HINTS_PROP);
-      if (tableHints != null) {
-        LOG.info("Using table hints: " + tableHints);
-        sb.append(" WITH (").append(tableHints).append(") ");
-      }
+	String tableHints = getConf().get(SQLServerManager.TABLE_HINTS_PROP);
+	if (tableHints != null) {
+		LOG.info("Using table hints: " + tableHints);
+		sb.append(" WITH (").append(tableHints).append(") ");
+	}
 
-      int numSlots;
-      if (this.columnNames != null) {
-        numSlots = this.columnNames.length;
+	int numSlots;
+	if (this.columnNames != null) {
+		numSlots = this.columnNames.length;
 
-        sb.append("(");
-        boolean first = true;
-        for (String col : columnNames) {
-          if (!first) {
-            sb.append(", ");
-          }
+		sb.append("(");
+		boolean first = true;
+		for (String col : columnNames) {
+			if (!first) {
+				sb.append(", ");
+			}
 
-          sb.append(col);
-          first = false;
-        }
+			sb.append(col);
+			first = false;
+		}
 
-        sb.append(") ");
-      } else {
-        numSlots = this.columnCount; // set if columnNames is null.
-      }
+		sb.append(") ");
+	} else {
+		numSlots = this.columnCount; // set if columnNames is null.
+	}
 
-      sb.append("VALUES ");
+	sb.append("VALUES ");
 
-      // generates the (?, ?, ?...).
-      sb.append("(");
-      for (int i = 0; i < numSlots; i++) {
-        if (i != 0) {
-          sb.append(", ");
-        }
+	// generates the (?, ?, ?...).
+	sb.append("(");
+	for (int i = 0; i < numSlots; i++) {
+		if (i != 0) {
+			sb.append(", ");
+		}
 
-        sb.append("?");
-      }
-      sb.append(")");
+		sb.append("?");
+	}
+	sb.append(")");
 
-      String query = sb.toString();
-      LOG.info("Using query " + query);
+	String query = sb.toString();
+	LOG.info("Using query " + query);
 
-      return query;
-    }
-  }
+	return query;
+}
+}
 }

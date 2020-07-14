@@ -27,10 +27,10 @@ import java.util.Date;
  */
 public class OracleDateSplitter extends DateSplitter {
 
-  @SuppressWarnings("unchecked")
-  @Override
-  protected String dateToString(Date d) {
-    // Oracle Data objects are always actually Timestamps
-    return "TO_TIMESTAMP('" + d.toString() + "', 'YYYY-MM-DD HH24:MI:SS.FF')";
-  }
+@SuppressWarnings("unchecked")
+@Override
+protected String dateToString(Date d) {
+	// Oracle Data objects are always actually Timestamps
+	return "TO_TIMESTAMP('" + d.toString() + "', 'YYYY-MM-DD HH24:MI:SS.FF')";
+}
 }

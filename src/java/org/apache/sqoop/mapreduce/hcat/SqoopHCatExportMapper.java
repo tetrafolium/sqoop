@@ -32,24 +32,24 @@ import org.apache.sqoop.mapreduce.AutoProgressMapper;
  * A mapper that works on combined hcat splits.
  */
 public class SqoopHCatExportMapper
-    extends AutoProgressMapper<WritableComparable, HCatRecord, SqoopRecord,
-                               WritableComparable> {
-  public static final Log LOG =
-      LogFactory.getLog(SqoopHCatExportMapper.class.getName());
-  private SqoopHCatExportHelper helper;
+	extends AutoProgressMapper<WritableComparable, HCatRecord, SqoopRecord,
+	                           WritableComparable> {
+public static final Log LOG =
+	LogFactory.getLog(SqoopHCatExportMapper.class.getName());
+private SqoopHCatExportHelper helper;
 
-  @Override
-  protected void setup(Context context)
-      throws IOException, InterruptedException {
-    super.setup(context);
+@Override
+protected void setup(Context context)
+throws IOException, InterruptedException {
+	super.setup(context);
 
-    Configuration conf = context.getConfiguration();
-    helper = new SqoopHCatExportHelper(conf);
-  }
+	Configuration conf = context.getConfiguration();
+	helper = new SqoopHCatExportHelper(conf);
+}
 
-  @Override
-  public void map(WritableComparable key, HCatRecord value, Context context)
-      throws IOException, InterruptedException {
-    context.write(helper.convertToSqoopRecord(value), NullWritable.get());
-  }
+@Override
+public void map(WritableComparable key, HCatRecord value, Context context)
+throws IOException, InterruptedException {
+	context.write(helper.convertToSqoopRecord(value), NullWritable.get());
+}
 }

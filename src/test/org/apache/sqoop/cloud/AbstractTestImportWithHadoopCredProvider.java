@@ -40,172 +40,172 @@ import org.junit.contrib.java.lang.system.EnvironmentVariables;
 import org.junit.rules.ExpectedException;
 
 public abstract class AbstractTestImportWithHadoopCredProvider
-    extends CloudImportJobTestCase {
+	extends CloudImportJobTestCase {
 
-  public static final Log LOG = LogFactory.getLog(
-      AbstractTestImportWithHadoopCredProvider.class.getName());
+public static final Log LOG = LogFactory.getLog(
+	AbstractTestImportWithHadoopCredProvider.class.getName());
 
-  private static String providerPathDefault;
-  private static String providerPathEnv;
-  private static String providerPathPwdFile;
+private static String providerPathDefault;
+private static String providerPathEnv;
+private static String providerPathPwdFile;
 
-  protected static CloudCredentialsRule credentialsRule;
+protected static CloudCredentialsRule credentialsRule;
 
-  @ClassRule
-  public static final EnvironmentVariables environmentVariables =
-      new EnvironmentVariables();
-  private static File providerFileDefault;
-  private static File providerFileEnvPwd;
-  private static File providerFilePwdFile;
+@ClassRule
+public static final EnvironmentVariables environmentVariables =
+	new EnvironmentVariables();
+private static File providerFileDefault;
+private static File providerFileEnvPwd;
+private static File providerFilePwdFile;
 
-  private static final String PASSWORD_FILE_NAME = "password-file.txt";
-  private static final String HADOOP_CREDSTORE_PASSWORD_ENV_NAME =
-      "HADOOP_CREDSTORE_PASSWORD";
+private static final String PASSWORD_FILE_NAME = "password-file.txt";
+private static final String HADOOP_CREDSTORE_PASSWORD_ENV_NAME =
+	"HADOOP_CREDSTORE_PASSWORD";
 
-  @Rule public ExpectedException thrown = ExpectedException.none();
+@Rule public ExpectedException thrown = ExpectedException.none();
 
-  private final String credentialProviderPathProperty;
+private final String credentialProviderPathProperty;
 
-  @BeforeClass
-  public static void fillCredentialProviderFiles() throws Exception {
-    generateTempProviderFileNames();
-    fillCredentialProviderDefault();
-    fillCredentialProviderPwdFile();
-    fillCredentialProviderEnv();
-  }
+@BeforeClass
+public static void fillCredentialProviderFiles() throws Exception {
+	generateTempProviderFileNames();
+	fillCredentialProviderDefault();
+	fillCredentialProviderPwdFile();
+	fillCredentialProviderEnv();
+}
 
-  public AbstractTestImportWithHadoopCredProvider() {
-    this(CredentialProviderHelper.HADOOP_CREDENTIAL_PROVIDER_PATH);
-  }
+public AbstractTestImportWithHadoopCredProvider() {
+	this(CredentialProviderHelper.HADOOP_CREDENTIAL_PROVIDER_PATH);
+}
 
-  public AbstractTestImportWithHadoopCredProvider(
-      String credentialProviderPathProperty) {
-    super(credentialsRule);
-    this.credentialProviderPathProperty = credentialProviderPathProperty;
-  }
+public AbstractTestImportWithHadoopCredProvider(
+	String credentialProviderPathProperty) {
+	super(credentialsRule);
+	this.credentialProviderPathProperty = credentialProviderPathProperty;
+}
 
-  @Before
-  public void setup() {
-    super.setUp();
-    environmentVariables.clear(HADOOP_CREDSTORE_PASSWORD_ENV_NAME);
-  }
+@Before
+public void setup() {
+	super.setUp();
+	environmentVariables.clear(HADOOP_CREDSTORE_PASSWORD_ENV_NAME);
+}
 
-  @AfterClass
-  public static void deleteTemporaryCredFiles() {
-    deleteFileOnExit(providerFileDefault);
-    deleteFileOnExit(providerFileEnvPwd);
-    deleteFileOnExit(providerFilePwdFile);
-  }
+@AfterClass
+public static void deleteTemporaryCredFiles() {
+	deleteFileOnExit(providerFileDefault);
+	deleteFileOnExit(providerFileEnvPwd);
+	deleteFileOnExit(providerFilePwdFile);
+}
 
-  @Test
-  public void testCredentialProviderDefaultSucceeds() throws Exception {
-    runImport(getArgs(providerPathDefault, false, null));
-    TextFileTestUtils.verify(getDataSet().getExpectedTextOutput(),
-                             fileSystemRule.getCloudFileSystem(),
-                             fileSystemRule.getTargetDirPath());
-  }
+@Test
+public void testCredentialProviderDefaultSucceeds() throws Exception {
+	runImport(getArgs(providerPathDefault, false, null));
+	TextFileTestUtils.verify(getDataSet().getExpectedTextOutput(),
+	                         fileSystemRule.getCloudFileSystem(),
+	                         fileSystemRule.getTargetDirPath());
+}
 
-  @Test
-  public void testCredentialProviderEnvSucceeds() throws Exception {
-    setHadoopCredStorePwdEnvVar();
-    runImport(getArgs(providerPathEnv, false, null));
-    TextFileTestUtils.verify(getDataSet().getExpectedTextOutput(),
-                             fileSystemRule.getCloudFileSystem(),
-                             fileSystemRule.getTargetDirPath());
-  }
+@Test
+public void testCredentialProviderEnvSucceeds() throws Exception {
+	setHadoopCredStorePwdEnvVar();
+	runImport(getArgs(providerPathEnv, false, null));
+	TextFileTestUtils.verify(getDataSet().getExpectedTextOutput(),
+	                         fileSystemRule.getCloudFileSystem(),
+	                         fileSystemRule.getTargetDirPath());
+}
 
-  @Test
-  public void testCredentialProviderPwdFileSucceeds() throws Exception {
-    runImport(getArgs(providerPathPwdFile, true, PASSWORD_FILE_NAME));
-    TextFileTestUtils.verify(getDataSet().getExpectedTextOutput(),
-                             fileSystemRule.getCloudFileSystem(),
-                             fileSystemRule.getTargetDirPath());
-  }
+@Test
+public void testCredentialProviderPwdFileSucceeds() throws Exception {
+	runImport(getArgs(providerPathPwdFile, true, PASSWORD_FILE_NAME));
+	TextFileTestUtils.verify(getDataSet().getExpectedTextOutput(),
+	                         fileSystemRule.getCloudFileSystem(),
+	                         fileSystemRule.getTargetDirPath());
+}
 
-  @Test
-  public void testCredentialProviderWithNoProviderPathFails() throws Exception {
-    thrown.expect(IOException.class);
-    runImport(getArgs(null, false, null));
-  }
+@Test
+public void testCredentialProviderWithNoProviderPathFails() throws Exception {
+	thrown.expect(IOException.class);
+	runImport(getArgs(null, false, null));
+}
 
-  @Test
-  public void testCredentialProviderWithNoEnvFails() throws Exception {
-    thrown.expect(IOException.class);
-    runImport(getArgs(providerPathEnv, false, null));
-  }
+@Test
+public void testCredentialProviderWithNoEnvFails() throws Exception {
+	thrown.expect(IOException.class);
+	runImport(getArgs(providerPathEnv, false, null));
+}
 
-  @Test
-  public void testCredentialProviderWithWrongPwdFileFails() throws Exception {
-    thrown.expect(IOException.class);
-    runImport(getArgs(providerPathPwdFile, true, "wrong-password-file.txt"));
-  }
+@Test
+public void testCredentialProviderWithWrongPwdFileFails() throws Exception {
+	thrown.expect(IOException.class);
+	runImport(getArgs(providerPathPwdFile, true, "wrong-password-file.txt"));
+}
 
-  @Test
-  public void testCredentialProviderWithNoPwdFileFails() throws Exception {
-    thrown.expect(IOException.class);
-    runImport(getArgs(providerPathPwdFile, true, null));
-  }
+@Test
+public void testCredentialProviderWithNoPwdFileFails() throws Exception {
+	thrown.expect(IOException.class);
+	runImport(getArgs(providerPathPwdFile, true, null));
+}
 
-  private String[] getArgs(String providerPath, boolean withPwdFile,
-                           String pwdFile) {
-    ArgumentArrayBuilder builder =
-        getArgumentArrayBuilderForHadoopCredProviderUnitTests(
-            fileSystemRule.getTargetDirPath().toString());
+private String[] getArgs(String providerPath, boolean withPwdFile,
+                         String pwdFile) {
+	ArgumentArrayBuilder builder =
+		getArgumentArrayBuilderForHadoopCredProviderUnitTests(
+			fileSystemRule.getTargetDirPath().toString());
 
-    builder.withProperty(credentialProviderPathProperty, providerPath);
-    if (withPwdFile) {
-      builder.withProperty(
-          CredentialProviderHelper.CREDENTIAL_PROVIDER_PASSWORD_FILE, pwdFile);
-    }
-    return builder.build();
-  }
+	builder.withProperty(credentialProviderPathProperty, providerPath);
+	if (withPwdFile) {
+		builder.withProperty(
+			CredentialProviderHelper.CREDENTIAL_PROVIDER_PASSWORD_FILE, pwdFile);
+	}
+	return builder.build();
+}
 
-  private static void fillCredentialProviderDefault() throws Exception {
-    credentialsRule.fillCredentialProvider(new Configuration(),
-                                           providerPathDefault);
-  }
+private static void fillCredentialProviderDefault() throws Exception {
+	credentialsRule.fillCredentialProvider(new Configuration(),
+	                                       providerPathDefault);
+}
 
-  private static void fillCredentialProviderEnv() throws Exception {
-    setHadoopCredStorePwdEnvVar();
-    credentialsRule.fillCredentialProvider(new Configuration(),
-                                           providerPathEnv);
-  }
+private static void fillCredentialProviderEnv() throws Exception {
+	setHadoopCredStorePwdEnvVar();
+	credentialsRule.fillCredentialProvider(new Configuration(),
+	                                       providerPathEnv);
+}
 
-  private static void fillCredentialProviderPwdFile() throws Exception {
-    Configuration conf = new Configuration();
-    conf.set(CredentialProviderHelper.CREDENTIAL_PROVIDER_PASSWORD_FILE,
-             PASSWORD_FILE_NAME);
-    credentialsRule.fillCredentialProvider(conf, providerPathPwdFile);
-  }
+private static void fillCredentialProviderPwdFile() throws Exception {
+	Configuration conf = new Configuration();
+	conf.set(CredentialProviderHelper.CREDENTIAL_PROVIDER_PASSWORD_FILE,
+	         PASSWORD_FILE_NAME);
+	credentialsRule.fillCredentialProvider(conf, providerPathPwdFile);
+}
 
-  private static void generateTempProviderFileNames() throws IOException {
-    providerFileDefault =
-        Files.createTempFile("test-default-pwd-", ".jceks").toFile();
-    boolean deleted = providerFileDefault.delete();
-    providerFileEnvPwd =
-        Files.createTempFile("test-env-pwd-", ".jceks").toFile();
-    deleted &= providerFileEnvPwd.delete();
-    providerFilePwdFile =
-        Files.createTempFile("test-file-pwd-", ".jceks").toFile();
-    deleted &= providerFilePwdFile.delete();
-    if (!deleted) {
-      fail("Could not delete temporary provider files");
-    }
-    providerPathDefault =
-        "jceks://file/" + providerFileDefault.getAbsolutePath();
-    providerPathEnv = "jceks://file/" + providerFileEnvPwd.getAbsolutePath();
-    providerPathPwdFile =
-        "jceks://file/" + providerFilePwdFile.getAbsolutePath();
-  }
+private static void generateTempProviderFileNames() throws IOException {
+	providerFileDefault =
+		Files.createTempFile("test-default-pwd-", ".jceks").toFile();
+	boolean deleted = providerFileDefault.delete();
+	providerFileEnvPwd =
+		Files.createTempFile("test-env-pwd-", ".jceks").toFile();
+	deleted &= providerFileEnvPwd.delete();
+	providerFilePwdFile =
+		Files.createTempFile("test-file-pwd-", ".jceks").toFile();
+	deleted &= providerFilePwdFile.delete();
+	if (!deleted) {
+		fail("Could not delete temporary provider files");
+	}
+	providerPathDefault =
+		"jceks://file/" + providerFileDefault.getAbsolutePath();
+	providerPathEnv = "jceks://file/" + providerFileEnvPwd.getAbsolutePath();
+	providerPathPwdFile =
+		"jceks://file/" + providerFilePwdFile.getAbsolutePath();
+}
 
-  private static void setHadoopCredStorePwdEnvVar() {
-    environmentVariables.set(HADOOP_CREDSTORE_PASSWORD_ENV_NAME,
-                             "credProviderPwd");
-  }
+private static void setHadoopCredStorePwdEnvVar() {
+	environmentVariables.set(HADOOP_CREDSTORE_PASSWORD_ENV_NAME,
+	                         "credProviderPwd");
+}
 
-  private static void deleteFileOnExit(File file) {
-    if (file != null) {
-      file.deleteOnExit();
-    }
-  }
+private static void deleteFileOnExit(File file) {
+	if (file != null) {
+		file.deleteOnExit();
+	}
+}
 }

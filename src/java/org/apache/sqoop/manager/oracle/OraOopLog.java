@@ -22,211 +22,211 @@ package org.apache.sqoop.manager.oracle;
  * Class to wrap commons logging to support caching entries.
  */
 public class OraOopLog
-    implements org.apache.commons.logging.Log, OraOopLogFactory.OraOopLog2 {
+	implements org.apache.commons.logging.Log, OraOopLogFactory.OraOopLog2 {
 
-  private org.apache.commons.logging.Log log;
-  private StringBuilder cache;
+private org.apache.commons.logging.Log log;
+private StringBuilder cache;
 
-  public OraOopLog(org.apache.commons.logging.Log otherLog) {
+public OraOopLog(org.apache.commons.logging.Log otherLog) {
 
-    this.log = otherLog;
-  }
+	this.log = otherLog;
+}
 
-  @Override
-  public void debug(Object message) {
+@Override
+public void debug(Object message) {
 
-    if (cacheLogEntry(message)) {
-      return;
-    }
+	if (cacheLogEntry(message)) {
+		return;
+	}
 
-    log.debug(message);
-  }
+	log.debug(message);
+}
 
-  @Override
-  public void debug(Object message, Throwable t) {
+@Override
+public void debug(Object message, Throwable t) {
 
-    if (cacheLogEntry(message)) {
-      return;
-    }
+	if (cacheLogEntry(message)) {
+		return;
+	}
 
-    log.debug(message, t);
-  }
+	log.debug(message, t);
+}
 
-  @Override
-  public void error(Object message) {
+@Override
+public void error(Object message) {
 
-    if (cacheLogEntry(message)) {
-      return;
-    }
+	if (cacheLogEntry(message)) {
+		return;
+	}
 
-    log.error(message);
-  }
+	log.error(message);
+}
 
-  @Override
-  public void error(Object message, Throwable t) {
+@Override
+public void error(Object message, Throwable t) {
 
-    if (cacheLogEntry(message)) {
-      return;
-    }
+	if (cacheLogEntry(message)) {
+		return;
+	}
 
-    log.error(message, t);
-  }
+	log.error(message, t);
+}
 
-  @Override
-  public void fatal(Object message) {
+@Override
+public void fatal(Object message) {
 
-    if (cacheLogEntry(message)) {
-      return;
-    }
+	if (cacheLogEntry(message)) {
+		return;
+	}
 
-    log.fatal(message);
-  }
+	log.fatal(message);
+}
 
-  @Override
-  public void fatal(Object message, Throwable t) {
+@Override
+public void fatal(Object message, Throwable t) {
 
-    if (cacheLogEntry(message)) {
-      return;
-    }
+	if (cacheLogEntry(message)) {
+		return;
+	}
 
-    log.fatal(message, t);
-  }
+	log.fatal(message, t);
+}
 
-  @Override
-  public void info(Object message) {
+@Override
+public void info(Object message) {
 
-    if (cacheLogEntry(message)) {
-      return;
-    }
+	if (cacheLogEntry(message)) {
+		return;
+	}
 
-    log.info(message);
-  }
+	log.info(message);
+}
 
-  @Override
-  public void info(Object message, Throwable t) {
+@Override
+public void info(Object message, Throwable t) {
 
-    if (cacheLogEntry(message)) {
-      return;
-    }
+	if (cacheLogEntry(message)) {
+		return;
+	}
 
-    log.info(message, t);
-  }
+	log.info(message, t);
+}
 
-  @Override
-  public boolean isDebugEnabled() {
+@Override
+public boolean isDebugEnabled() {
 
-    return log.isDebugEnabled();
-  }
+	return log.isDebugEnabled();
+}
 
-  @Override
-  public boolean isErrorEnabled() {
+@Override
+public boolean isErrorEnabled() {
 
-    return log.isErrorEnabled();
-  }
+	return log.isErrorEnabled();
+}
 
-  @Override
-  public boolean isFatalEnabled() {
+@Override
+public boolean isFatalEnabled() {
 
-    return log.isFatalEnabled();
-  }
+	return log.isFatalEnabled();
+}
 
-  @Override
-  public boolean isInfoEnabled() {
+@Override
+public boolean isInfoEnabled() {
 
-    return log.isInfoEnabled();
-  }
+	return log.isInfoEnabled();
+}
 
-  @Override
-  public boolean isTraceEnabled() {
+@Override
+public boolean isTraceEnabled() {
 
-    return log.isTraceEnabled();
-  }
+	return log.isTraceEnabled();
+}
 
-  @Override
-  public boolean isWarnEnabled() {
+@Override
+public boolean isWarnEnabled() {
 
-    return log.isWarnEnabled();
-  }
+	return log.isWarnEnabled();
+}
 
-  @Override
-  public void trace(Object message) {
+@Override
+public void trace(Object message) {
 
-    log.trace(message);
-    cacheLogEntry(message);
-  }
+	log.trace(message);
+	cacheLogEntry(message);
+}
 
-  @Override
-  public void trace(Object message, Throwable t) {
+@Override
+public void trace(Object message, Throwable t) {
 
-    if (cacheLogEntry(message)) {
-      return;
-    }
+	if (cacheLogEntry(message)) {
+		return;
+	}
 
-    log.trace(message, t);
-  }
+	log.trace(message, t);
+}
 
-  @Override
-  public void warn(Object message) {
+@Override
+public void warn(Object message) {
 
-    if (cacheLogEntry(message)) {
-      return;
-    }
+	if (cacheLogEntry(message)) {
+		return;
+	}
 
-    log.warn(message);
-  }
+	log.warn(message);
+}
 
-  @Override
-  public void warn(Object message, Throwable t) {
+@Override
+public void warn(Object message, Throwable t) {
 
-    if (cacheLogEntry(message)) {
-      return;
-    }
+	if (cacheLogEntry(message)) {
+		return;
+	}
 
-    log.warn(message, t);
-  }
+	log.warn(message, t);
+}
 
-  @Override
-  public boolean getCacheLogEntries() {
+@Override
+public boolean getCacheLogEntries() {
 
-    return (this.cache != null);
-  }
+	return (this.cache != null);
+}
 
-  @Override
-  public String getLogEntries() {
+@Override
+public String getLogEntries() {
 
-    if (this.cache != null) {
-      return this.cache.toString();
-    } else {
-      return "";
-    }
-  }
+	if (this.cache != null) {
+		return this.cache.toString();
+	} else {
+		return "";
+	}
+}
 
-  @Override
-  public void setCacheLogEntries(boolean value) {
+@Override
+public void setCacheLogEntries(boolean value) {
 
-    if (getCacheLogEntries() && !value) {
-      this.cache = null;
-    } else if (!getCacheLogEntries() && value) {
-      this.cache = new StringBuilder();
-    }
-  }
+	if (getCacheLogEntries() && !value) {
+		this.cache = null;
+	} else if (!getCacheLogEntries() && value) {
+		this.cache = new StringBuilder();
+	}
+}
 
-  @Override
-  public void clearCache() {
+@Override
+public void clearCache() {
 
-    if (getCacheLogEntries()) {
-      this.cache = new StringBuilder();
-    }
-  }
+	if (getCacheLogEntries()) {
+		this.cache = new StringBuilder();
+	}
+}
 
-  private boolean cacheLogEntry(Object message) {
+private boolean cacheLogEntry(Object message) {
 
-    boolean result = getCacheLogEntries();
+	boolean result = getCacheLogEntries();
 
-    if (result && message != null) {
-      this.cache.append(message.toString());
-    }
+	if (result && message != null) {
+		this.cache.append(message.toString());
+	}
 
-    return result;
-  }
+	return result;
+}
 }

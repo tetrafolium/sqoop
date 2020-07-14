@@ -32,72 +32,76 @@ import org.apache.sqoop.io.LobFile;
  */
 public class ClobRef extends LobRef<String, String, Reader> {
 
-  public ClobRef() { super(); }
+public ClobRef() {
+	super();
+}
 
-  public ClobRef(String chars) { super(chars); }
+public ClobRef(String chars) {
+	super(chars);
+}
 
-  /**
-   * Initialize a clobref to an external CLOB.
-   * @param file the filename to the CLOB. May be relative to the job dir.
-   * @param offset the offset (in bytes) into the LobFile for this record.
-   * @param length the length of the record in characters.
-   */
-  public ClobRef(String file, long offset, long length) {
-    super(file, offset, length);
-  }
+/**
+ * Initialize a clobref to an external CLOB.
+ * @param file the filename to the CLOB. May be relative to the job dir.
+ * @param offset the offset (in bytes) into the LobFile for this record.
+ * @param length the length of the record in characters.
+ */
+public ClobRef(String file, long offset, long length) {
+	super(file, offset, length);
+}
 
-  @Override
-  protected Reader getExternalSource(LobFile.Reader reader) throws IOException {
-    return reader.readClobRecord();
-  }
+@Override
+protected Reader getExternalSource(LobFile.Reader reader) throws IOException {
+	return reader.readClobRecord();
+}
 
-  @Override
-  protected Reader getInternalSource(String data) {
-    return new StringReader(data);
-  }
+@Override
+protected Reader getInternalSource(String data) {
+	return new StringReader(data);
+}
 
-  @Override
-  protected String deepCopyData(String data) {
-    return data;
-  }
+@Override
+protected String deepCopyData(String data) {
+	return data;
+}
 
-  @Override
-  protected String getInternalData(String data) {
-    return data;
-  }
+@Override
+protected String getInternalData(String data) {
+	return data;
+}
 
-  @Override
-  public void readFieldsInternal(DataInput in) throws IOException {
-    // For internally-stored clobs, the data is written as UTF8 Text.
-    setDataObj(Text.readString(in));
-  }
+@Override
+public void readFieldsInternal(DataInput in) throws IOException {
+	// For internally-stored clobs, the data is written as UTF8 Text.
+	setDataObj(Text.readString(in));
+}
 
-  @Override
-  public void writeInternal(DataOutput out) throws IOException {
-    Text.writeString(out, getDataObj());
-  }
+@Override
+public void writeInternal(DataOutput out) throws IOException {
+	Text.writeString(out, getDataObj());
+}
 
-  /**
-   * Create a ClobRef based on parsed data from a line of text.
-   * @param inputString the text-based input data to parse.
-   * @return a ClobRef to the given data.
-   */
-  public static org.apache.sqoop.lib.ClobRef parse(String inputString) {
-    // If inputString is of the form 'externalLob(lf,%s,%d,%d)', then this is
-    // an external CLOB stored at the LobFile indicated by '%s' with the next
-    // two arguments representing its offset and length in the file.
-    // Otherwise, it is an inline CLOB, which we read as-is.
+/**
+ * Create a ClobRef based on parsed data from a line of text.
+ * @param inputString the text-based input data to parse.
+ * @return a ClobRef to the given data.
+ */
+public static org.apache.sqoop.lib.ClobRef parse(String inputString) {
+	// If inputString is of the form 'externalLob(lf,%s,%d,%d)', then this is
+	// an external CLOB stored at the LobFile indicated by '%s' with the next
+	// two arguments representing its offset and length in the file.
+	// Otherwise, it is an inline CLOB, which we read as-is.
 
-    Matcher m = EXTERNAL_MATCHER.get();
-    m.reset(inputString);
-    if (m.matches()) {
-      // This is a LobFile. Extract the filename, offset and len from the
-      // matcher.
-      return new org.apache.sqoop.lib.ClobRef(
-          m.group(1), Long.valueOf(m.group(2)), Long.valueOf(m.group(3)));
-    } else {
-      // This is inline CLOB string data.
-      return new org.apache.sqoop.lib.ClobRef(inputString);
-    }
-  }
+	Matcher m = EXTERNAL_MATCHER.get();
+	m.reset(inputString);
+	if (m.matches()) {
+		// This is a LobFile. Extract the filename, offset and len from the
+		// matcher.
+		return new org.apache.sqoop.lib.ClobRef(
+			m.group(1), Long.valueOf(m.group(2)), Long.valueOf(m.group(3)));
+	} else {
+		// This is inline CLOB string data.
+		return new org.apache.sqoop.lib.ClobRef(inputString);
+	}
+}
 }

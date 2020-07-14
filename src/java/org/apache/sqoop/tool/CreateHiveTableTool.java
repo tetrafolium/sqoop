@@ -36,99 +36,101 @@ import org.apache.sqoop.hive.HiveClientFactory;
  */
 public class CreateHiveTableTool extends BaseSqoopTool {
 
-  public static final Log LOG =
-      LogFactory.getLog(CreateHiveTableTool.class.getName());
+public static final Log LOG =
+	LogFactory.getLog(CreateHiveTableTool.class.getName());
 
-  private final HiveClientFactory hiveClientFactory;
+private final HiveClientFactory hiveClientFactory;
 
-  public CreateHiveTableTool(HiveClientFactory hiveClientFactory) {
-    super("create-hive-table");
-    this.hiveClientFactory = hiveClientFactory;
-  }
+public CreateHiveTableTool(HiveClientFactory hiveClientFactory) {
+	super("create-hive-table");
+	this.hiveClientFactory = hiveClientFactory;
+}
 
-  public CreateHiveTableTool() { this(new HiveClientFactory()); }
+public CreateHiveTableTool() {
+	this(new HiveClientFactory());
+}
 
-  @Override
-  /** {@inheritDoc} */
-  public int run(SqoopOptions options) {
-    if (!init(options)) {
-      return 1;
-    }
+@Override
+/** {@inheritDoc} */
+public int run(SqoopOptions options) {
+	if (!init(options)) {
+		return 1;
+	}
 
-    try {
-      HiveClient hiveClient =
-          hiveClientFactory.createHiveClient(options, manager);
-      hiveClient.createTable();
-    } catch (IOException ioe) {
-      LOG.error("Encountered IOException running create table job: " +
-                StringUtils.stringifyException(ioe));
-      rethrowIfRequired(options, ioe);
-      return 1;
-    } finally {
-      destroy(options);
-    }
+	try {
+		HiveClient hiveClient =
+			hiveClientFactory.createHiveClient(options, manager);
+		hiveClient.createTable();
+	} catch (IOException ioe) {
+		LOG.error("Encountered IOException running create table job: " +
+		          StringUtils.stringifyException(ioe));
+		rethrowIfRequired(options, ioe);
+		return 1;
+	} finally {
+		destroy(options);
+	}
 
-    return 0;
-  }
+	return 0;
+}
 
-  @Override
-  /** Configure the command-line arguments we expect to receive */
-  public void configureOptions(ToolOptions toolOptions) {
+@Override
+/** Configure the command-line arguments we expect to receive */
+public void configureOptions(ToolOptions toolOptions) {
 
-    toolOptions.addUniqueOptions(getCommonOptions());
+	toolOptions.addUniqueOptions(getCommonOptions());
 
-    RelatedOptions hiveOpts = getHiveOptions(false);
-    hiveOpts.addOption(
-        OptionBuilder.withArgName("table-name")
-            .hasArg()
-            .withDescription("The db table to read the definition from")
-            .withLongOpt(TABLE_ARG)
-            .create());
-    toolOptions.addUniqueOptions(hiveOpts);
+	RelatedOptions hiveOpts = getHiveOptions(false);
+	hiveOpts.addOption(
+		OptionBuilder.withArgName("table-name")
+		.hasArg()
+		.withDescription("The db table to read the definition from")
+		.withLongOpt(TABLE_ARG)
+		.create());
+	toolOptions.addUniqueOptions(hiveOpts);
 
-    toolOptions.addUniqueOptions(getOutputFormatOptions());
-  }
+	toolOptions.addUniqueOptions(getOutputFormatOptions());
+}
 
-  @Override
-  /** {@inheritDoc} */
-  public void printHelp(ToolOptions toolOptions) {
-    super.printHelp(toolOptions);
-    System.out.println("");
-    System.out.println("At minimum, you must specify --connect and --table");
-  }
+@Override
+/** {@inheritDoc} */
+public void printHelp(ToolOptions toolOptions) {
+	super.printHelp(toolOptions);
+	System.out.println("");
+	System.out.println("At minimum, you must specify --connect and --table");
+}
 
-  @Override
-  /** {@inheritDoc} */
-  public void applyOptions(CommandLine in, SqoopOptions out)
-      throws InvalidOptionsException {
+@Override
+/** {@inheritDoc} */
+public void applyOptions(CommandLine in, SqoopOptions out)
+throws InvalidOptionsException {
 
-    if (in.hasOption(TABLE_ARG)) {
-      out.setTableName(in.getOptionValue(TABLE_ARG));
-    }
+	if (in.hasOption(TABLE_ARG)) {
+		out.setTableName(in.getOptionValue(TABLE_ARG));
+	}
 
-    out.setHiveImport(true);
+	out.setHiveImport(true);
 
-    applyCommonOptions(in, out);
-    applyHiveOptions(in, out);
-    applyOutputFormatOptions(in, out);
-  }
+	applyCommonOptions(in, out);
+	applyHiveOptions(in, out);
+	applyOutputFormatOptions(in, out);
+}
 
-  @Override
-  /** {@inheritDoc} */
-  public void validateOptions(SqoopOptions options)
-      throws InvalidOptionsException {
+@Override
+/** {@inheritDoc} */
+public void validateOptions(SqoopOptions options)
+throws InvalidOptionsException {
 
-    if (hasUnrecognizedArgs(extraArguments)) {
-      throw new InvalidOptionsException(HELP_STR);
-    }
+	if (hasUnrecognizedArgs(extraArguments)) {
+		throw new InvalidOptionsException(HELP_STR);
+	}
 
-    validateCommonOptions(options);
-    validateOutputFormatOptions(options);
-    validateHiveOptions(options);
+	validateCommonOptions(options);
+	validateOutputFormatOptions(options);
+	validateHiveOptions(options);
 
-    if (options.getTableName() == null) {
-      throw new InvalidOptionsException(
-          "--table is required for table definition importing." + HELP_STR);
-    }
-  }
+	if (options.getTableName() == null) {
+		throw new InvalidOptionsException(
+			      "--table is required for table definition importing." + HELP_STR);
+	}
+}
 }

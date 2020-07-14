@@ -78,180 +78,182 @@ import org.junit.experimental.categories.Category;
 @Category({ManualTest.class, Db2Test.class})
 public class DB2ImportAllTableWithSchemaManualTest extends ImportJobTestCase {
 
-  public static final Log LOG =
-      LogFactory.getLog(DB2ImportAllTableWithSchemaManualTest.class.getName());
+public static final Log LOG =
+	LogFactory.getLog(DB2ImportAllTableWithSchemaManualTest.class.getName());
 
-  static final String TABLE_NAME = "TEST.COMPANY";
-  static final String TABLE_SCHEMA = "TEST";
-  static String ExpectedResults = "1,doc1";
+static final String TABLE_NAME = "TEST.COMPANY";
+static final String TABLE_SCHEMA = "TEST";
+static String ExpectedResults = "1,doc1";
 
-  String[] extraArgs = {
-      "--",
-      "--schema",
-      TABLE_SCHEMA,
-  };
+String[] extraArgs = {
+	"--",
+	"--schema",
+	TABLE_SCHEMA,
+};
 
-  static {
-    LOG.info("Using DB2 CONNECT_STRING HOST_URL is : " + HOST_URL);
-    LOG.info("Using DB2 CONNECT_STRING: " + CONNECT_STRING);
-  }
+static {
+	LOG.info("Using DB2 CONNECT_STRING HOST_URL is : " + HOST_URL);
+	LOG.info("Using DB2 CONNECT_STRING: " + CONNECT_STRING);
+}
 
-  // instance variables populated during setUp, used during tests
-  private Db2Manager manager;
+// instance variables populated during setUp, used during tests
+private Db2Manager manager;
 
-  protected String getTableName() { return TABLE_NAME; }
+protected String getTableName() {
+	return TABLE_NAME;
+}
 
-  @Before
-  public void setUp() {
-    super.setUp();
+@Before
+public void setUp() {
+	super.setUp();
 
-    SqoopOptions options = new SqoopOptions(CONNECT_STRING, getTableName());
-    options.setUsername(DATABASE_USER);
-    options.setPassword(DATABASE_PASSWORD);
+	SqoopOptions options = new SqoopOptions(CONNECT_STRING, getTableName());
+	options.setUsername(DATABASE_USER);
+	options.setPassword(DATABASE_PASSWORD);
 
-    manager = new Db2Manager(options);
+	manager = new Db2Manager(options);
 
-    // Drop the existing table, if there is one.
-    Connection conn = null;
-    Statement stmt = null;
-    try {
-      conn = manager.getConnection();
-      stmt = conn.createStatement();
-      stmt.execute("DROP TABLE " + getTableName());
-    } catch (SQLException sqlE) {
-      LoggingUtils.logAll(LOG, "Table was not dropped: ", sqlE);
-    } finally {
-      try {
-        if (null != stmt) {
-          stmt.close();
-        }
-      } catch (Exception ex) {
-        LOG.warn("Exception while closing stmt", ex);
-      }
-    }
+	// Drop the existing table, if there is one.
+	Connection conn = null;
+	Statement stmt = null;
+	try {
+		conn = manager.getConnection();
+		stmt = conn.createStatement();
+		stmt.execute("DROP TABLE " + getTableName());
+	} catch (SQLException sqlE) {
+		LoggingUtils.logAll(LOG, "Table was not dropped: ", sqlE);
+	} finally {
+		try {
+			if (null != stmt) {
+				stmt.close();
+			}
+		} catch (Exception ex) {
+			LOG.warn("Exception while closing stmt", ex);
+		}
+	}
 
-    // Create and populate table
-    try {
-      conn = manager.getConnection();
-      conn.setAutoCommit(false);
-      stmt = conn.createStatement();
+	// Create and populate table
+	try {
+		conn = manager.getConnection();
+		conn.setAutoCommit(false);
+		stmt = conn.createStatement();
 
-      // create the database table and populate it with data.
-      stmt.executeUpdate("CREATE TABLE " + getTableName() + " ("
-                         + "ID int, "
-                         + "DOCNAME VARCHAR(20))");
+		// create the database table and populate it with data.
+		stmt.executeUpdate("CREATE TABLE " + getTableName() + " ("
+		                   + "ID int, "
+		                   + "DOCNAME VARCHAR(20))");
 
-      stmt.executeUpdate("INSERT INTO " + getTableName() + " VALUES("
-                         + "1,'doc1' "
-                         + " )");
-      conn.commit();
-    } catch (SQLException sqlE) {
-      LoggingUtils.logAll(LOG, "Encountered SQL Exception: ", sqlE);
-    } finally {
-      try {
-        if (null != stmt) {
-          stmt.close();
-        }
-      } catch (Exception ex) {
-        LOG.warn("Exception while closing connection/stmt", ex);
-      }
-    }
-  }
+		stmt.executeUpdate("INSERT INTO " + getTableName() + " VALUES("
+		                   + "1,'doc1' "
+		                   + " )");
+		conn.commit();
+	} catch (SQLException sqlE) {
+		LoggingUtils.logAll(LOG, "Encountered SQL Exception: ", sqlE);
+	} finally {
+		try {
+			if (null != stmt) {
+				stmt.close();
+			}
+		} catch (Exception ex) {
+			LOG.warn("Exception while closing connection/stmt", ex);
+		}
+	}
+}
 
-  @After
-  public void tearDown() {
-    super.tearDown();
-    try {
-      manager.close();
-    } catch (SQLException sqlE) {
-      LoggingUtils.logAll(LOG, "Got SQLException: ", sqlE);
-    }
-  }
+@After
+public void tearDown() {
+	super.tearDown();
+	try {
+		manager.close();
+	} catch (SQLException sqlE) {
+		LoggingUtils.logAll(LOG, "Got SQLException: ", sqlE);
+	}
+}
 
-  @Test
-  public void testDb2Import() throws IOException {
+@Test
+public void testDb2Import() throws IOException {
 
-    runDb2Test(ExpectedResults);
-  }
+	runDb2Test(ExpectedResults);
+}
 
-  private String[] getArgv() {
-    ArrayList<String> args = new ArrayList<String>();
+private String[] getArgv() {
+	ArrayList<String> args = new ArrayList<String>();
 
-    CommonArgs.addHadoopFlags(args);
-    args.add("--connect");
-    args.add(CONNECT_STRING);
-    args.add("--username");
-    args.add(DATABASE_USER);
-    args.add("--password");
-    args.add(DATABASE_PASSWORD);
-    args.add("--warehouse-dir");
-    args.add(getWarehouseDir());
+	CommonArgs.addHadoopFlags(args);
+	args.add("--connect");
+	args.add(CONNECT_STRING);
+	args.add("--username");
+	args.add(DATABASE_USER);
+	args.add("--password");
+	args.add(DATABASE_PASSWORD);
+	args.add("--warehouse-dir");
+	args.add(getWarehouseDir());
 
-    args.add("--m");
-    args.add("1");
+	args.add("--m");
+	args.add("1");
 
-    for (String arg : extraArgs) {
-      args.add(arg);
-    }
+	for (String arg : extraArgs) {
+		args.add(arg);
+	}
 
-    return args.toArray(new String[0]);
-  }
+	return args.toArray(new String[0]);
+}
 
-  private void runDb2Test(String expectedResults) throws IOException {
+private void runDb2Test(String expectedResults) throws IOException {
 
-    Path warehousePath = new Path(this.getWarehouseDir());
-    Path tablePath = new Path(warehousePath, getTableName());
-    Path filePath = new Path(tablePath, "part-m-00000");
+	Path warehousePath = new Path(this.getWarehouseDir());
+	Path tablePath = new Path(warehousePath, getTableName());
+	Path filePath = new Path(tablePath, "part-m-00000");
 
-    File tableFile = new File(getTableName().toString());
-    if (tableFile.exists() && tableFile.isDirectory()) {
-      // remove the directory before running the import.
-      FileListing.recursiveDeleteDir(tableFile);
-    }
+	File tableFile = new File(getTableName().toString());
+	if (tableFile.exists() && tableFile.isDirectory()) {
+		// remove the directory before running the import.
+		FileListing.recursiveDeleteDir(tableFile);
+	}
 
-    String[] argv = getArgv();
-    try {
-      runImportAll(argv);
-    } catch (IOException ioe) {
-      LOG.error("Got IOException during import: " + ioe.getMessage());
-    }
+	String[] argv = getArgv();
+	try {
+		runImportAll(argv);
+	} catch (IOException ioe) {
+		LOG.error("Got IOException during import: " + ioe.getMessage());
+	}
 
-    File f = new File(filePath.toString());
-    assertTrue("Could not find imported data file", f.exists());
-    BufferedReader r = null;
-    try {
-      // Read through the file and make sure it's all there.
-      r = new BufferedReader(new InputStreamReader(new FileInputStream(f)));
-      assertEquals(expectedResults, r.readLine());
-    } catch (IOException ioe) {
-      LOG.error("Got IOException verifying results: " + ioe.getMessage());
-    } finally {
-      IOUtils.closeStream(r);
-    }
-  }
+	File f = new File(filePath.toString());
+	assertTrue("Could not find imported data file", f.exists());
+	BufferedReader r = null;
+	try {
+		// Read through the file and make sure it's all there.
+		r = new BufferedReader(new InputStreamReader(new FileInputStream(f)));
+		assertEquals(expectedResults, r.readLine());
+	} catch (IOException ioe) {
+		LOG.error("Got IOException verifying results: " + ioe.getMessage());
+	} finally {
+		IOUtils.closeStream(r);
+	}
+}
 
-  private void runImportAll(SqoopTool tool, String[] argv) throws IOException {
-    // run the tool through the normal entry-point.
-    int ret;
-    try {
-      Configuration conf = getConf();
-      SqoopOptions opts = getSqoopOptions(conf);
-      Sqoop sqoop = new Sqoop(tool, conf, opts);
-      ret = Sqoop.runSqoop(sqoop, argv);
-      // ret = tool.run(opts);
-    } catch (Exception e) {
-      LOG.error("Got exception running Sqoop: " + e.toString());
-      ret = 1;
-    }
+private void runImportAll(SqoopTool tool, String[] argv) throws IOException {
+	// run the tool through the normal entry-point.
+	int ret;
+	try {
+		Configuration conf = getConf();
+		SqoopOptions opts = getSqoopOptions(conf);
+		Sqoop sqoop = new Sqoop(tool, conf, opts);
+		ret = Sqoop.runSqoop(sqoop, argv);
+		// ret = tool.run(opts);
+	} catch (Exception e) {
+		LOG.error("Got exception running Sqoop: " + e.toString());
+		ret = 1;
+	}
 
-    // expect a successful return.
-    if (0 != ret) {
-      throw new IOException("Failure during job; return status " + ret);
-    }
-  }
+	// expect a successful return.
+	if (0 != ret) {
+		throw new IOException("Failure during job; return status " + ret);
+	}
+}
 
-  /** run an import using the default ImportTool. */
-  protected void runImportAll(String[] argv) throws IOException {
-    runImportAll(new ImportAllTablesTool(), argv);
-  }
+/** run an import using the default ImportTool. */
+protected void runImportAll(String[] argv) throws IOException {
+	runImportAll(new ImportAllTablesTool(), argv);
+}
 }

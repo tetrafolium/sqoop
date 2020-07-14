@@ -38,65 +38,65 @@ import org.apache.commons.logging.LogFactory;
  */
 public class SubprocessSecurityManager extends SecurityManager {
 
-  public static final Log LOG =
-      LogFactory.getLog(SubprocessSecurityManager.class.getName());
+public static final Log LOG =
+	LogFactory.getLog(SubprocessSecurityManager.class.getName());
 
-  private SecurityManager parentSecurityManager;
-  private boolean installed;
-  private boolean allowReplacement;
+private SecurityManager parentSecurityManager;
+private boolean installed;
+private boolean allowReplacement;
 
-  public SubprocessSecurityManager() {
-    this.installed = false;
-    this.allowReplacement = false;
-  }
+public SubprocessSecurityManager() {
+	this.installed = false;
+	this.allowReplacement = false;
+}
 
-  /**
-   * Install this SecurityManager and retain a reference to any
-   * previously-installed SecurityManager.
-   */
-  public void install() {
-    LOG.debug("Installing subprocess security manager");
-    this.parentSecurityManager = System.getSecurityManager();
-    System.setSecurityManager(this);
-    this.installed = true;
-  }
+/**
+ * Install this SecurityManager and retain a reference to any
+ * previously-installed SecurityManager.
+ */
+public void install() {
+	LOG.debug("Installing subprocess security manager");
+	this.parentSecurityManager = System.getSecurityManager();
+	System.setSecurityManager(this);
+	this.installed = true;
+}
 
-  /**
-   * Restore an existing SecurityManager, uninstalling this one.
-   */
-  public void uninstall() {
-    if (this.installed) {
-      LOG.debug("Uninstalling subprocess security manager");
-      this.allowReplacement = true;
-      System.setSecurityManager(this.parentSecurityManager);
-    }
-  }
+/**
+ * Restore an existing SecurityManager, uninstalling this one.
+ */
+public void uninstall() {
+	if (this.installed) {
+		LOG.debug("Uninstalling subprocess security manager");
+		this.allowReplacement = true;
+		System.setSecurityManager(this.parentSecurityManager);
+	}
+}
 
-  @Override
-  /**
-   * Disallow the capability to call System.exit() or otherwise
-   * terminate the JVM.
-   */
-  public void checkExit(int status) {
-    LOG.debug("Rejecting System.exit call with status=" + status);
-    throw new org.apache.sqoop.util.ExitSecurityException(status);
-  }
+@Override
+/**
+ * Disallow the capability to call System.exit() or otherwise
+ * terminate the JVM.
+ */
+public void checkExit(int status) {
+	LOG.debug("Rejecting System.exit call with status=" + status);
+	throw new org.apache.sqoop.util.ExitSecurityException(status);
+}
 
-  @Override
-  /**
-   * Check a particular permission. Checks with this SecurityManager
-   * as well as any previously-installed manager.
-   *
-   * @param perm the Permission to check; must not be null.
-   */
-  public void checkPermission(Permission perm) {
-    if (null != this.parentSecurityManager) {
-      // Check if the prior SecurityManager would have rejected this.
-      parentSecurityManager.checkPermission(perm);
-    }
+@Override
+/**
+ * Check a particular permission. Checks with this SecurityManager
+ * as well as any previously-installed manager.
+ *
+ * @param perm the Permission to check; must not be null.
+ */
+public void checkPermission(Permission perm) {
+	if (null != this.parentSecurityManager) {
+		// Check if the prior SecurityManager would have rejected this.
+		parentSecurityManager.checkPermission(perm);
+	}
 
-    if (!allowReplacement && perm.getName().equals("setSecurityManager")) {
-      throw new SecurityException("Cannot replace security manager");
-    }
-  }
+	if (!allowReplacement && perm.getName().equals("setSecurityManager")) {
+		throw new SecurityException("Cannot replace security manager");
+	}
+}
 }
