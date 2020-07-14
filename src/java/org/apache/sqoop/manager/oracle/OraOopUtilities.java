@@ -283,11 +283,9 @@ public final class OraOopUtilities {
             duplicates.add(list[idx2]);
           }
 
-        } else if (ignoreCase && list[idx1].equalsIgnoreCase((list[idx2]))) {
-          // If c is a duplicate of both a & b, don't add c to the list twice...
-          if (stringListIndexOf(duplicates, list[idx2], ignoreCase) == -1) {
-            duplicates.add(list[idx2]);
-          }
+        } else // If c is a duplicate of both a & b, don't add c to the list twice...
+        if ((ignoreCase && list[idx1].equalsIgnoreCase((list[idx2]))) && (stringListIndexOf(duplicates, list[idx2], ignoreCase) == -1)) {
+          duplicates.add(list[idx2]);
         }
       }
     }

@@ -401,12 +401,10 @@ public class JobTool extends BaseSqoopTool {
                                         HELP_STR);
     }
 
-    if (operation == JobOp.JobCreate) {
-      // Check that we have a '--' followed by at least a tool name.
-      if (extraArguments == null || extraArguments.length == 0) {
-        throw new InvalidOptionsException(
-            "Expected: -- <tool-name> [tool-args] " + HELP_STR);
-      }
+    // Check that we have a '--' followed by at least a tool name.
+    if ((operation == JobOp.JobCreate) && (extraArguments == null || extraArguments.length == 0)) {
+      throw new InvalidOptionsException(
+          "Expected: -- <tool-name> [tool-args] " + HELP_STR);
     }
 
     int dashPos = getDashPosition(extraArguments);

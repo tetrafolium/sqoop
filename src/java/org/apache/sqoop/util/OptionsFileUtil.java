@@ -169,19 +169,17 @@ public final class OptionsFileUtil {
       return option.substring(1, option.length() - 1);
     }
 
-    if (startingQuote || endingQuote) {
-      // Regular expression looks like below:
-      // .*=\s*".*"$ OR .*=\s*'.*'$
-      // it tries to match the following:
-      // .... column_name = "values" OR .... column_name = 'values'
-      // so that the query like:
-      // SELECT * FROM table WHERE column = "values"
-      // is valid even though it ends with double quote but no starting double
-      // quote
-      if (!Pattern.matches(".*=\\s*" + quote + ".*" + quote + "$", option)) {
-        throw new Exception("Malformed option in options file(" + fileName +
-                            "): " + option);
-      }
+    // Regular expression looks like below:
+    // .*=\s*".*"$ OR .*=\s*'.*'$
+    // it tries to match the following:
+    // .... column_name = "values" OR .... column_name = 'values'
+    // so that the query like:
+    // SELECT * FROM table WHERE column = "values"
+    // is valid even though it ends with double quote but no starting double
+    // quote
+    if ((startingQuote || endingQuote) && (!Pattern.matches(".*=\\s*" + quote + ".*" + quote + "$", option))) {
+      throw new Exception("Malformed option in options file(" + fileName +
+                          "): " + option);
     }
 
     return option;

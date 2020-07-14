@@ -146,14 +146,12 @@ public class ImportJobBase extends JobBase {
         }
       }
 
-      if (options.getFileLayout() == SqoopOptions.FileLayout.ParquetFile) {
-        if (codecName != null) {
-          Configuration conf = job.getConfiguration();
-          String shortName = CodecMap.getCodecShortNameByName(codecName, conf);
-          if (!shortName.equalsIgnoreCase("default")) {
-            conf.set(SQOOP_PARQUET_OUTPUT_CODEC_KEY, shortName);
-            options.getConf().set(SQOOP_PARQUET_OUTPUT_CODEC_KEY, shortName);
-          }
+      if ((options.getFileLayout() == SqoopOptions.FileLayout.ParquetFile) && (codecName != null)) {
+        Configuration conf = job.getConfiguration();
+        String shortName = CodecMap.getCodecShortNameByName(codecName, conf);
+        if (!shortName.equalsIgnoreCase("default")) {
+          conf.set(SQOOP_PARQUET_OUTPUT_CODEC_KEY, shortName);
+          options.getConf().set(SQOOP_PARQUET_OUTPUT_CODEC_KEY, shortName);
         }
       }
     }

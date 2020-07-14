@@ -75,7 +75,7 @@ public class OracleImportJobTestConfigurationForNumber
 
   @Override
   public Object[] getExpectedResultsForHive() {
-    return new Object[] {new BigDecimal("1"), new BigDecimal("100.010"),
+    return new Object[] {BigDecimal.ONE, new BigDecimal("100.010"),
                          new BigDecimal("100"), new BigDecimal("100.03000")};
   }
 }

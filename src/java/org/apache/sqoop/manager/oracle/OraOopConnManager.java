@@ -455,22 +455,20 @@ public class OraOopConnManager extends GenericJdbcManager {
       javaType = "String";
     }
 
-    if (javaType == null) {
-
-      // For constant values, refer to:
-      // http://oracleadvisor.com/documentation/oracle/database/11.2/
-      //   appdev.112/e13995/constant-values.html#oracle_jdbc
-
-      if (sqlType == OraOopOracleQueries.getOracleType("BFILE") ||
+    
+    // For constant values, refer to:
+    // http://oracleadvisor.com/documentation/oracle/database/11.2/
+    //   appdev.112/e13995/constant-values.html#oracle_jdbc
+    
+    if ((javaType == null) && (sqlType == OraOopOracleQueries.getOracleType("BFILE") ||
           sqlType == OraOopOracleQueries.getOracleType("NCLOB") ||
           sqlType == OraOopOracleQueries.getOracleType("NCHAR") ||
           sqlType == OraOopOracleQueries.getOracleType("NVARCHAR") ||
           sqlType == OraOopOracleQueries.getOracleType("ROWID") ||
           sqlType == OraOopOracleQueries.getOracleType("INTERVALYM") ||
           sqlType == OraOopOracleQueries.getOracleType("INTERVALDS") ||
-          sqlType == OraOopOracleQueries.getOracleType("OTHER")) {
-        javaType = "String";
-      }
+          sqlType == OraOopOracleQueries.getOracleType("OTHER"))) {
+      javaType = "String";
     }
 
     if (javaType == null) {

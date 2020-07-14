@@ -477,19 +477,15 @@ public class DirectPostgresqlManager extends PostgresqlManager {
       }
 
       // Remove any password file we wrote
-      if (null != passwordFilename) {
-        if (!new File(passwordFilename).delete()) {
-          LOG.error("Could not remove postgresql password file " +
-                    passwordFilename);
-          LOG.error("You should remove this file to protect your credentials.");
-        }
+      if ((null != passwordFilename) && (!new File(passwordFilename).delete())) {
+        LOG.error("Could not remove postgresql password file " +
+                  passwordFilename);
+        LOG.error("You should remove this file to protect your credentials.");
       }
 
-      if (null != commandFilename) {
-        // We wrote the COPY comand to a tmpfile. Remove it.
-        if (!new File(commandFilename).delete()) {
-          LOG.info("Could not remove temp file: " + commandFilename);
-        }
+      // We wrote the COPY comand to a tmpfile. Remove it.
+      if ((null != commandFilename) && (!new File(commandFilename).delete())) {
+        LOG.info("Could not remove temp file: " + commandFilename);
       }
 
       // block until the stream sink is done too.

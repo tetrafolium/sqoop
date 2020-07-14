@@ -125,15 +125,13 @@ public class CodeGenTool extends BaseSqoopTool {
       // use a HiveImport to generate the DDL statements and write
       // them to files (but don't actually perform the import -- thus
       // the generateOnly=true in the constructor).
-      if (options.doHiveImport()) {
-        // For Parquet file, the import action will create hive table directly
-        // via kite. So there is no need to create hive table again.
-        if (options.getFileLayout() != SqoopOptions.FileLayout.ParquetFile) {
-          HiveImport hiveImport =
-              new HiveImport(options, manager, options.getConf(), true);
-          hiveImport.importTable(options.getTableName(),
-                                 options.getHiveTableName(), true);
-        }
+      // For Parquet file, the import action will create hive table directly
+      // via kite. So there is no need to create hive table again.
+      if ((options.doHiveImport()) && (options.getFileLayout() != SqoopOptions.FileLayout.ParquetFile)) {
+        HiveImport hiveImport =
+            new HiveImport(options, manager, options.getConf(), true);
+        hiveImport.importTable(options.getTableName(),
+                               options.getHiveTableName(), true);
       }
     } catch (IOException ioe) {
       LOG.error("Encountered IOException running codegen job: " +

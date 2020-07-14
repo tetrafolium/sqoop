@@ -140,15 +140,13 @@ public final class MainframeFTPClientUtils {
           for (FTPFile f : ftpFiles) {
             LOG.info(
                 String.format("Name: %s Type: %s", f.getName(), f.getType()));
-            if (f.getType() == FTPFile.FILE_TYPE) {
-              // only add datasets if default behaviour of partitioned data sets
-              // or if it is a sequential data set, only add if the file name
-              // matches exactly
-              if (!isSequentialDs || isSequentialDs &&
+            // only add datasets if default behaviour of partitioned data sets
+            // or if it is a sequential data set, only add if the file name
+            // matches exactly
+            if ((f.getType() == FTPFile.FILE_TYPE) && (!isSequentialDs || isSequentialDs &&
                                          f.getName().equals(fileName) &&
-                                         !fileName.equals("")) {
-                datasets.add(f.getName());
-              }
+                                         !fileName.equals(""))) {
+              datasets.add(f.getName());
             }
           }
         } else {

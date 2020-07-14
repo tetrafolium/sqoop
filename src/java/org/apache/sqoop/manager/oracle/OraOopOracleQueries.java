@@ -672,10 +672,8 @@ public final class OraOopOracleQueries {
 
       String columnName = resultSet.getString("column_name");
 
-      if (columnNamesToOmit != null) {
-        if (columnNamesToOmit.contains(columnName)) {
-          continue;
-        }
+      if ((columnNamesToOmit != null) && (columnNamesToOmit.contains(columnName))) {
+        continue;
       }
 
       result.add(
@@ -1216,25 +1214,23 @@ public final class OraOopOracleQueries {
       }
       valuesClause.append(String.format("source.\"%s\"", columnName));
 
-      if (!OraOopUtilities.stringArrayContains(mergeColumnNames, columnName,
-                                               true)) {
-
-        // If we're performing a merge, then the table is not partitioned. (If
-        // the table
-        // was partitioned, we'd be deleting and then inserting rows.)
-        if (!columnName.equalsIgnoreCase(
+      
+      // If we're performing a merge, then the table is not partitioned. (If
+      // the table
+      // was partitioned, we'd be deleting and then inserting rows.)
+      if ((!OraOopUtilities.stringArrayContains(mergeColumnNames, columnName,
+                                               true)) && (!columnName.equalsIgnoreCase(
                 OraOopConstants.COLUMN_NAME_EXPORT_PARTITION) &&
             !columnName.equalsIgnoreCase(
                 OraOopConstants.COLUMN_NAME_EXPORT_SUBPARTITION) &&
             !columnName.equalsIgnoreCase(
-                OraOopConstants.COLUMN_NAME_EXPORT_MAPPER_ROW)) {
+                OraOopConstants.COLUMN_NAME_EXPORT_MAPPER_ROW))) {
 
-          if (updateClause.length() > 0) {
-            updateClause.append(",");
-          }
-          updateClause.append(
-              String.format("target.\"%1$s\" = source.\"%1$s\"", columnName));
+        if (updateClause.length() > 0) {
+          updateClause.append(",");
         }
+        updateClause.append(
+            String.format("target.\"%1$s\" = source.\"%1$s\"", columnName));
       }
     }
 

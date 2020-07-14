@@ -106,12 +106,10 @@ public class SqlServerManagerContextConfigurator {
 
   public void configureContextForImport(ImportJobContext context,
                                         String splitCol) {
-    if (isResilientOperation(context.getOptions())) {
-      // Enable connection recovery only if split column is provided
-      if (splitCol != null) {
-        // Configure SQLServer table import jobs for connection recovery
-        configureConnectionRecoveryForImport(context);
-      }
+    // Enable connection recovery only if split column is provided
+    if ((isResilientOperation(context.getOptions())) && (splitCol != null)) {
+      // Configure SQLServer table import jobs for connection recovery
+      configureConnectionRecoveryForImport(context);
     }
   }
 
