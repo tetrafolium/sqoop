@@ -39,7 +39,7 @@ public class SequenceFileTestUtils {
     private static final String OUTPUT_FILE_NAME = "/part-m-00000";
 
     public static final Log LOG = LogFactory.getLog(
-            SequenceFileTestUtils.class.getName());
+                                      SequenceFileTestUtils.class.getName());
 
     /**
      * Verify results at the given tablePath.
@@ -48,7 +48,7 @@ public class SequenceFileTestUtils {
      * @param fileSystem current fileSystem
      * @param tablePath path of the output table
      */
-    public static void verify(BaseSqoopTestCase testCase, String[] expectedResults, FileSystem fileSystem, Path tablePath) throws Exception{
+    public static void verify(BaseSqoopTestCase testCase, String[] expectedResults, FileSystem fileSystem, Path tablePath) throws Exception {
         String outputFilePathString = tablePath.toString() + OUTPUT_FILE_NAME;
         readAndVerify(testCase, expectedResults, fileSystem, outputFilePathString);
     }
@@ -61,7 +61,7 @@ public class SequenceFileTestUtils {
      * @param tablePath path of the output table
      * @param outputFileName MapReduce output filename
      */
-    public static void verify(BaseSqoopTestCase testCase, String[] expectedResults, FileSystem fileSystem, Path tablePath,  String outputFileName) throws Exception{
+    public static void verify(BaseSqoopTestCase testCase, String[] expectedResults, FileSystem fileSystem, Path tablePath,  String outputFileName) throws Exception {
         String outputFilePathString = tablePath.toString() + "/" + outputFileName;
         readAndVerify(testCase, expectedResults, fileSystem, outputFilePathString);
     }
@@ -72,8 +72,8 @@ public class SequenceFileTestUtils {
         Configuration conf = fileSystem.getConf();
 
         ClassLoader prevClassLoader = ClassLoaderStack.addJarFile(
-                new Path(new Path(new SqoopOptions().getJarOutputDir()), testCase.getTableName() + ".jar").toString(),
-                testCase.getTableName());
+                                          new Path(new Path(new SqoopOptions().getJarOutputDir()), testCase.getTableName() + ".jar").toString(),
+                                          testCase.getTableName());
 
         // Needs to set the classLoader for the Configuration object otherwise SequenceFile cannot load custom classes
         conf.setClassLoader(Thread.currentThread().getContextClassLoader());

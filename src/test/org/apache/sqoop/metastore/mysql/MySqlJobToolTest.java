@@ -49,6 +49,6 @@ public class MySqlJobToolTest extends JobToolTestBase {
 
     public MySqlJobToolTest() {
         super(mySQLTestUtils.getMySqlConnectString(), mySQLTestUtils.getUserName(),
-                mySQLTestUtils.getUserPass());
+              mySQLTestUtils.getUserPass());
     }
 }

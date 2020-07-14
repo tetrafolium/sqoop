@@ -56,40 +56,40 @@ import java.io.BufferedWriter;
 public class SQLServerDatatypeExportDelimitedFileTest
     extends ManagerCompatExport {
 
-  @Override
-  public void createFile(DATATYPES dt, String[] data) throws IOException {
-    Path tablePath = getTablePath(dt);
-    Path filePath = new Path(tablePath, "part0000");
+    @Override
+    public void createFile(DATATYPES dt, String[] data) throws IOException {
+        Path tablePath = getTablePath(dt);
+        Path filePath = new Path(tablePath, "part0000");
 
-    Configuration conf = new Configuration();
-    String hdfsroot;
-    hdfsroot = System.getProperty("ms.datatype.test.hdfsprefix");
-    if (hdfsroot == null) {
-      hdfsroot = "hdfs://localhost/";
+        Configuration conf = new Configuration();
+        String hdfsroot;
+        hdfsroot = System.getProperty("ms.datatype.test.hdfsprefix");
+        if (hdfsroot == null) {
+            hdfsroot = "hdfs://localhost/";
+        }
+        conf.set("fs.default.name", hdfsroot);
+        FileSystem fs = FileSystem.get(conf);
+        fs.mkdirs(tablePath);
+        System.out.println("-----------------------------------Path : "
+                           + filePath);
+        OutputStream os = fs.create(filePath);
+
+        BufferedWriter w = new BufferedWriter(new OutputStreamWriter(os));
+        for (int i = 0; i < data.length; i++) {
+            w.write(data[i] + "\n");
+        }
+        w.close();
+        os.close();
     }
-    conf.set("fs.default.name", hdfsroot);
-    FileSystem fs = FileSystem.get(conf);
-    fs.mkdirs(tablePath);
-    System.out.println("-----------------------------------Path : "
-        + filePath);
-    OutputStream os = fs.create(filePath);
 
-    BufferedWriter w = new BufferedWriter(new OutputStreamWriter(os));
-    for (int i = 0; i < data.length; i++) {
-      w.write(data[i] + "\n");
+    @Override
+    public void createFile(DATATYPES dt, String data) throws IOException {
+        createFile(dt, new String[] { data });
     }
-    w.close();
-    os.close();
-  }
 
-  @Override
-  public void createFile(DATATYPES dt, String data) throws IOException {
-    createFile(dt, new String[] { data });
-  }
-
-  @Override
-  public String getOutputFileName() {
-    return "ManagerCompatExportDelim.txt";
-  }
+    @Override
+    public String getOutputFileName() {
+        return "ManagerCompatExportDelim.txt";
+    }
 
 }

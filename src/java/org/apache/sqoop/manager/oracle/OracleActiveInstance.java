@@ -23,22 +23,22 @@ package org.apache.sqoop.manager.oracle;
  */
 public class OracleActiveInstance {
 
-  private String instanceName;
-  private String hostName;
+    private String instanceName;
+    private String hostName;
 
-  public String getInstanceName() {
-    return instanceName;
-  }
+    public String getInstanceName() {
+        return instanceName;
+    }
 
-  public void setInstanceName(String newInstanceName) {
-    this.instanceName = newInstanceName;
-  }
+    public void setInstanceName(String newInstanceName) {
+        this.instanceName = newInstanceName;
+    }
 
-  public String getHostName() {
-    return hostName;
-  }
+    public String getHostName() {
+        return hostName;
+    }
 
-  public void setHostName(String newHostName) {
-    this.hostName = newHostName;
-  }
+    public void setHostName(String newHostName) {
+        this.hostName = newHostName;
+    }
 }

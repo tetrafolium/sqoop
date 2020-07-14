@@ -28,35 +28,35 @@ import java.util.regex.Pattern;
 public class OracleTablePartitions extends
     OraOopGenerics.ObjectList<OracleTablePartition> {
 
-  public OracleTablePartition findPartitionByName(String partitionName) {
+    public OracleTablePartition findPartitionByName(String partitionName) {
 
-    OracleTablePartition result;
+        OracleTablePartition result;
 
-    Iterator<OracleTablePartition> iterator = this.iterator();
-    while (iterator.hasNext()) {
-      result = iterator.next();
-      if (result.getName().equals(partitionName)) {
-        return result;
-      }
+        Iterator<OracleTablePartition> iterator = this.iterator();
+        while (iterator.hasNext()) {
+            result = iterator.next();
+            if (result.getName().equals(partitionName)) {
+                return result;
+            }
+        }
+        return null;
     }
-    return null;
-  }
 
-  public OracleTablePartition findPartitionByRegEx(String regEx) {
+    public OracleTablePartition findPartitionByRegEx(String regEx) {
 
-    OracleTablePartition result;
+        OracleTablePartition result;
 
-    Pattern pattern = Pattern.compile(regEx);
+        Pattern pattern = Pattern.compile(regEx);
 
-    Iterator<OracleTablePartition> iterator = this.iterator();
-    while (iterator.hasNext()) {
-      result = iterator.next();
-      Matcher matcher = pattern.matcher(result.getName());
-      if (matcher.find()) {
-        return result;
-      }
+        Iterator<OracleTablePartition> iterator = this.iterator();
+        while (iterator.hasNext()) {
+            result = iterator.next();
+            Matcher matcher = pattern.matcher(result.getName());
+            if (matcher.find()) {
+                return result;
+            }
+        }
+        return null;
     }
-    return null;
-  }
 
 }

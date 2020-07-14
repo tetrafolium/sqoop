@@ -27,10 +27,10 @@ import org.apache.sqoop.lib.SqoopRecord;
  */
 public class MainframeDatasetImportMapper extends AbstractMainframeDatasetImportMapper<Text> {
 
-  @Override
-  protected Text createOutKey(SqoopRecord sqoopRecord) {
-    Text result = new Text();
-    result.set(sqoopRecord.toString());
-    return result;
-  }
+    @Override
+    protected Text createOutKey(SqoopRecord sqoopRecord) {
+        Text result = new Text();
+        result.set(sqoopRecord.toString());
+        return result;
+    }
 }

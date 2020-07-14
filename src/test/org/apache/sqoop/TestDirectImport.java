@@ -30,52 +30,52 @@ import java.util.ArrayList;
 
 public class TestDirectImport extends ImportJobTestCase {
 
-  @Rule
-  public ExpectedException exception = ExpectedException.none();
+    @Rule
+    public ExpectedException exception = ExpectedException.none();
 
-  protected String[] getArgv(boolean includeHadoopFlags, String[] colNames, boolean isDirect) {
-    String columnsString = "";
-    for (String col : colNames) {
-      columnsString += col + ",";
+    protected String[] getArgv(boolean includeHadoopFlags, String[] colNames, boolean isDirect) {
+        String columnsString = "";
+        for (String col : colNames) {
+            columnsString += col + ",";
+        }
+
+        ArrayList<String> args = new ArrayList<String>();
+
+        if (includeHadoopFlags) {
+            CommonArgs.addHadoopFlags(args);
+        }
+
+        args.add("--table");
+        args.add(HsqldbTestServer.getTableName());
+        args.add("--columns");
+        args.add(columnsString);
+        if (isDirect) args.add("--direct");
+        args.add("--split-by");
+        args.add("INTFIELD1");
+        args.add("--connect");
+        args.add(HsqldbTestServer.getUrl());
+
+        args.add("--delete-target-dir");
+
+        return args.toArray(new String[0]);
     }
 
-    ArrayList<String> args = new ArrayList<String>();
+    @Test
+    public void testDirectFlagWithHSQL() throws IOException {
+        String[] columns = HsqldbTestServer.getFieldNames();
 
-    if (includeHadoopFlags) {
-      CommonArgs.addHadoopFlags(args);
+        String[] argv = getArgv(true, columns, true);
+        exception.expect(IOException.class);
+        runImport(argv);
     }
 
-    args.add("--table");
-    args.add(HsqldbTestServer.getTableName());
-    args.add("--columns");
-    args.add(columnsString);
-    if (isDirect) args.add("--direct");
-    args.add("--split-by");
-    args.add("INTFIELD1");
-    args.add("--connect");
-    args.add(HsqldbTestServer.getUrl());
+    @Test
+    public void testNonDirectFlagWithHSQL() throws IOException {
+        String[] columns = HsqldbTestServer.getFieldNames();
 
-    args.add("--delete-target-dir");
+        String[] argv = getArgv(true, columns, false);
+        runImport(argv);
 
-    return args.toArray(new String[0]);
-  }
-
-  @Test
-  public void testDirectFlagWithHSQL() throws IOException {
-    String[] columns = HsqldbTestServer.getFieldNames();
-
-    String[] argv = getArgv(true, columns, true);
-    exception.expect(IOException.class);
-    runImport(argv);
-  }
-
-  @Test
-  public void testNonDirectFlagWithHSQL() throws IOException {
-    String[] columns = HsqldbTestServer.getFieldNames();
-
-    String[] argv = getArgv(true, columns, false);
-    runImport(argv);
-
-  }
+    }
 
 }

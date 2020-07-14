@@ -48,8 +48,8 @@ public class OracleSavedJobsTest extends SavedJobsTestBase {
 
     public OracleSavedJobsTest() {
         super(OracleUtils.CONNECT_STRING,
-                OracleUtils.ORACLE_USER_NAME,
-                OracleUtils.ORACLE_USER_PASS,
-                JdbcDrivers.ORACLE.getDriverClass());
+              OracleUtils.ORACLE_USER_NAME,
+              OracleUtils.ORACLE_USER_PASS,
+              JdbcDrivers.ORACLE.getDriverClass());
     }
 }

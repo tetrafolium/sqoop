@@ -30,8 +30,8 @@ import org.junit.runners.parameterized.TestWithParameters;
  * on parameterized test classes until JUnit 4.13 is released and we migrate to it.
  */
 public class BlockJUnit4ClassRunnerWithParametersFactory implements ParametersRunnerFactory {
-  @Override
-  public Runner createRunnerForTestWithParameters(TestWithParameters test) throws InitializationError {
-    return new BlockJUnit4ClassRunnerWithParameters(test);
-  }
+    @Override
+    public Runner createRunnerForTestWithParameters(TestWithParameters test) throws InitializationError {
+        return new BlockJUnit4ClassRunnerWithParameters(test);
+    }
 }

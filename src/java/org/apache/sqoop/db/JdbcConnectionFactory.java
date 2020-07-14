@@ -22,6 +22,6 @@ import java.sql.Connection;
 
 public interface JdbcConnectionFactory {
 
-  Connection createConnection();
+    Connection createConnection();
 
 }

@@ -25,24 +25,24 @@ import org.apache.hadoop.io.Writable;
  */
 public abstract class OraOopOracleDataChunk implements Writable {
 
-  private String id;
+    private String id;
 
-  public abstract long getNumberOfBlocks();
+    public abstract long getNumberOfBlocks();
 
-  public String getWhereClause() {
-    return "1=1";
-  }
+    public String getWhereClause() {
+        return "1=1";
+    }
 
-  public String getPartitionClause() {
-    return "";
-  }
+    public String getPartitionClause() {
+        return "";
+    }
 
-  public String getId() {
-    return id;
-  }
+    public String getId() {
+        return id;
+    }
 
-  public void setId(String newId) {
-    this.id = newId;
-  }
+    public void setId(String newId) {
+        this.id = newId;
+    }
 
 }

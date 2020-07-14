@@ -47,7 +47,7 @@ public class OracleMetaConnectIncrementalImportTest extends MetaConnectIncrement
 
     public OracleMetaConnectIncrementalImportTest() {
         super(OracleUtils.CONNECT_STRING,
-                OracleUtils.ORACLE_USER_NAME,
-                OracleUtils.ORACLE_USER_PASS);
+              OracleUtils.ORACLE_USER_NAME,
+              OracleUtils.ORACLE_USER_PASS);
     }
 }

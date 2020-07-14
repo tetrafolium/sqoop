@@ -37,41 +37,41 @@ import org.apache.hadoop.util.*;
  */
 public class RawKeyTextOutputFormat<K, V> extends FileOutputFormat<K, V> {
 
-  protected FSDataOutputStream getFSDataOutputStream(TaskAttemptContext context, String ext) throws IOException {
-    Configuration conf = context.getConfiguration();
-    Path file = getDefaultWorkFile(context, ext);
-    FileSystem fs = file.getFileSystem(conf);
-    FSDataOutputStream fileOut = fs.create(file, false);
-    return fileOut;
-  }
-
-  protected DataOutputStream getOutputStream(TaskAttemptContext context) throws IOException {
-    boolean isCompressed = getCompressOutput(context);
-    Configuration conf = context.getConfiguration();
-    String ext = "";
-    CompressionCodec codec = null;
-
-    if (isCompressed) {
-      // create the named codec
-      Class<? extends CompressionCodec> codecClass =
-        getOutputCompressorClass(context, GzipCodec.class);
-      codec = ReflectionUtils.newInstance(codecClass, conf);
-
-      ext = codec.getDefaultExtension();
+    protected FSDataOutputStream getFSDataOutputStream(TaskAttemptContext context, String ext) throws IOException {
+        Configuration conf = context.getConfiguration();
+        Path file = getDefaultWorkFile(context, ext);
+        FileSystem fs = file.getFileSystem(conf);
+        FSDataOutputStream fileOut = fs.create(file, false);
+        return fileOut;
     }
 
-    FSDataOutputStream fileOut = getFSDataOutputStream(context,ext);
-    DataOutputStream ostream = fileOut;
+    protected DataOutputStream getOutputStream(TaskAttemptContext context) throws IOException {
+        boolean isCompressed = getCompressOutput(context);
+        Configuration conf = context.getConfiguration();
+        String ext = "";
+        CompressionCodec codec = null;
 
-    if (isCompressed) {
-      ostream = new DataOutputStream(codec.createOutputStream(fileOut));
+        if (isCompressed) {
+            // create the named codec
+            Class<? extends CompressionCodec> codecClass =
+                getOutputCompressorClass(context, GzipCodec.class);
+            codec = ReflectionUtils.newInstance(codecClass, conf);
+
+            ext = codec.getDefaultExtension();
+        }
+
+        FSDataOutputStream fileOut = getFSDataOutputStream(context,ext);
+        DataOutputStream ostream = fileOut;
+
+        if (isCompressed) {
+            ostream = new DataOutputStream(codec.createOutputStream(fileOut));
+        }
+        return ostream;
     }
-    return ostream;
-  }
 
-  public RecordWriter<K, V> getRecordWriter(TaskAttemptContext context)
-      throws IOException {
-    DataOutputStream ostream = getOutputStream(context);
-    return new KeyRecordWriters.RawKeyRecordWriter<K, V>(ostream);
-  }
+    public RecordWriter<K, V> getRecordWriter(TaskAttemptContext context)
+    throws IOException {
+        DataOutputStream ostream = getOutputStream(context);
+        return new KeyRecordWriters.RawKeyRecordWriter<K, V>(ostream);
+    }
 }

@@ -51,345 +51,346 @@ import static org.junit.Assert.assertTrue;
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public abstract class LobAvroImportTestCase extends ImportJobTestCase {
 
-  private Log log;
+    private Log log;
 
-  public LobAvroImportTestCase() {
-    this.log = LogFactory.getLog(LobAvroImportTestCase.class.getName());
-  }
-
-  /**
-   * @return the Log object to use for reporting during this test
-   */
-  protected abstract Log getLogger();
-
-  /**
-   * @return a "friendly" name for the database. e.g "mysql" or "oracle".
-   */
-  protected abstract String getDbFriendlyName();
-
-  @Override
-  protected String getTablePrefix() {
-    return "LOB_" + getDbFriendlyName().toUpperCase() + "_";
-  }
-
-  @Override
-  protected boolean useHsqldbTestServer() {
-    // Hsqldb does not support BLOB/CLOB
-    return false;
-  }
-
-  @After
-  public void tearDown() {
-    try {
-      // Clean up the database on our way out.
-      dropTableIfExists(getTableName());
-    } catch (SQLException e) {
-      log.warn("Error trying to drop table '" + getTableName()
-          + "' on tearDown: " + e);
-    }
-    super.tearDown();
-  }
-
-  protected String [] getArgv(String ... additionalArgs) {
-    // Import every column of the table
-    String [] colNames = getColNames();
-    String splitByCol = colNames[0];
-    String columnsString = "";
-    for (String col : colNames) {
-      columnsString += col + ",";
+    public LobAvroImportTestCase() {
+        this.log = LogFactory.getLog(LobAvroImportTestCase.class.getName());
     }
 
-    ArrayList<String> args = new ArrayList<String>();
+    /**
+     * @return the Log object to use for reporting during this test
+     */
+    protected abstract Log getLogger();
 
-    CommonArgs.addHadoopFlags(args);
+    /**
+     * @return a "friendly" name for the database. e.g "mysql" or "oracle".
+     */
+    protected abstract String getDbFriendlyName();
 
-    args.add("--table");
-    args.add(getTableName());
-    args.add("--columns");
-    args.add(columnsString);
-    args.add("--split-by");
-    args.add(splitByCol);
-    args.add("--warehouse-dir");
-    args.add(getWarehouseDir());
-    args.add("--connect");
-    args.add(getConnectString());
-    args.add("--as-avrodatafile");
-    args.add("--num-mappers");
-    args.add("1");
-
-    for (String arg : additionalArgs) {
-      args.add(arg);
+    @Override
+    protected String getTablePrefix() {
+        return "LOB_" + getDbFriendlyName().toUpperCase() + "_";
     }
 
-    return args.toArray(new String[0]);
-  }
-
-  protected String getBlobType() {
-    return "BLOB";
-  }
-
-  protected String getBlobInsertStr(String blobData) {
-    return "'" + blobData + "'";
-  }
-
-  /**
-   * Return the current table number as a string. In test, table number is used
-   * to name .lob files.
-   * @return current table number.
-   */
-  private String getTableNum() {
-    return getTableName().substring(getTablePrefix().length());
-  }
-
-  /**
-   * Return an instance of DataFileReader for the given filename.
-   * @param filename path that we're opening a reader for.
-   * @return instance of DataFileReader.
-   * @throws IOException
-   */
-  private DataFileReader<GenericRecord> read(Path filename)
-      throws IOException {
-    Configuration conf = getConf();
-    if (!BaseSqoopTestCase.isOnPhysicalCluster()) {
-      conf.set(CommonArgs.FS_DEFAULT_NAME, CommonArgs.LOCAL_FS);
+    @Override
+    protected boolean useHsqldbTestServer() {
+        // Hsqldb does not support BLOB/CLOB
+        return false;
     }
-    FsInput fsInput = new FsInput(filename, conf);
-    DatumReader<GenericRecord> datumReader =
-      new GenericDatumReader<GenericRecord>();
-    return new DataFileReader<GenericRecord>(fsInput, datumReader);
-  }
 
-  /** Import blob data that is smaller than inline lob limit. Blob data
-   * should be saved as Avro bytes.
-   * @throws IOException
-   * @throws SQLException
-   */
-  @Test
-  public void testBlobAvroImportInline() throws IOException, SQLException {
-    String [] types = { getBlobType() };
-    String expectedVal = "This is short BLOB data";
-    String [] vals = { getBlobInsertStr(expectedVal) };
+    @After
+    public void tearDown() {
+        try {
+            // Clean up the database on our way out.
+            dropTableIfExists(getTableName());
+        } catch (SQLException e) {
+            log.warn("Error trying to drop table '" + getTableName()
+                     + "' on tearDown: " + e);
+        }
+        super.tearDown();
+    }
 
-    createTableWithColTypes(types, vals);
+    protected String [] getArgv(String ... additionalArgs) {
+        // Import every column of the table
+        String [] colNames = getColNames();
+        String splitByCol = colNames[0];
+        String columnsString = "";
+        for (String col : colNames) {
+            columnsString += col + ",";
+        }
 
-    runImport(getArgv());
+        ArrayList<String> args = new ArrayList<String>();
 
-    Path outputFile = new Path(getTablePath(), "part-m-00000.avro");
-    DataFileReader<GenericRecord> reader = read(outputFile);
-    GenericRecord record = reader.next();
+        CommonArgs.addHadoopFlags(args);
 
-    // Verify that blob data is imported as Avro bytes.
-    ByteBuffer buf = (ByteBuffer) record.get(getColName(0));
-    String returnVal = new String(buf.array());
+        args.add("--table");
+        args.add(getTableName());
+        args.add("--columns");
+        args.add(columnsString);
+        args.add("--split-by");
+        args.add(splitByCol);
+        args.add("--warehouse-dir");
+        args.add(getWarehouseDir());
+        args.add("--connect");
+        args.add(getConnectString());
+        args.add("--as-avrodatafile");
+        args.add("--num-mappers");
+        args.add("1");
 
-    assertEquals(getColName(0), expectedVal, returnVal);
-  }
+        for (String arg : additionalArgs) {
+            args.add(arg);
+        }
 
-  /**
-   * Import blob data that is larger than inline lob limit. The reference file
-   * should be saved as Avro bytes. Blob data should be saved in LOB file
-   * format.
-   * @throws IOException
-   * @throws SQLException
-   */
-  @Test
-  public void testBlobAvroImportExternal() throws IOException, SQLException {
-    String [] types = { getBlobType() };
-    String data = "This is short BLOB data";
-    String [] vals = { getBlobInsertStr(data) };
+        return args.toArray(new String[0]);
+    }
 
-    createTableWithColTypes(types, vals);
+    protected String getBlobType() {
+        return "BLOB";
+    }
 
-    // Set inline lob limit to a small value so that blob data will be
-    // written to an external file.
-    runImport(getArgv("--inline-lob-limit", "1"));
+    protected String getBlobInsertStr(String blobData) {
+        return "'" + blobData + "'";
+    }
 
-    Path outputFile = new Path(getTablePath(), "part-m-00000.avro");
-    DataFileReader<GenericRecord> reader = read(outputFile);
-    GenericRecord record = reader.next();
+    /**
+     * Return the current table number as a string. In test, table number is used
+     * to name .lob files.
+     * @return current table number.
+     */
+    private String getTableNum() {
+        return getTableName().substring(getTablePrefix().length());
+    }
 
-    // Verify that the reference file is written in Avro bytes.
-    ByteBuffer buf = (ByteBuffer) record.get(getColName(0));
-    String returnVal = new String(buf.array());
-    String expectedStart = "externalLob(lf,_lob/large_obj";
-    String expectedEnd = "_m_0000000.lob,68," + data.length() + ")";
+    /**
+     * Return an instance of DataFileReader for the given filename.
+     * @param filename path that we're opening a reader for.
+     * @return instance of DataFileReader.
+     * @throws IOException
+     */
+    private DataFileReader<GenericRecord> read(Path filename)
+    throws IOException {
+        Configuration conf = getConf();
+        if (!BaseSqoopTestCase.isOnPhysicalCluster()) {
+            conf.set(CommonArgs.FS_DEFAULT_NAME, CommonArgs.LOCAL_FS);
+        }
+        FsInput fsInput = new FsInput(filename, conf);
+        DatumReader<GenericRecord> datumReader =
+            new GenericDatumReader<GenericRecord>();
+        return new DataFileReader<GenericRecord>(fsInput, datumReader);
+    }
 
-    assertNotNull(returnVal);
-    assertTrue("ExpectedStart: " + expectedStart + ", value: " + returnVal, returnVal.startsWith(expectedStart));
-    assertTrue("ExpectedEnd: " + expectedEnd + ", value: " + returnVal, returnVal.endsWith(expectedEnd));
+    /** Import blob data that is smaller than inline lob limit. Blob data
+     * should be saved as Avro bytes.
+     * @throws IOException
+     * @throws SQLException
+     */
+    @Test
+    public void testBlobAvroImportInline() throws IOException, SQLException {
+        String [] types = { getBlobType() };
+        String expectedVal = "This is short BLOB data";
+        String [] vals = { getBlobInsertStr(expectedVal) };
 
-    // Verify that blob data stored in the external lob file is correct.
-    BlobRef br = BlobRef.parse(returnVal);
-    Path lobFileDir = new Path(getWarehouseDir(), getTableName());
-    InputStream in = br.getDataStream(getConf(), lobFileDir);
+        createTableWithColTypes(types, vals);
 
-    byte [] bufArray = new byte[data.length()];
-    int chars = in.read(bufArray);
-    in.close();
+        runImport(getArgv());
 
-    assertEquals(chars, data.length());
+        Path outputFile = new Path(getTablePath(), "part-m-00000.avro");
+        DataFileReader<GenericRecord> reader = read(outputFile);
+        GenericRecord record = reader.next();
 
-    returnVal = new String(bufArray);
-    String expectedVal = data;
+        // Verify that blob data is imported as Avro bytes.
+        ByteBuffer buf = (ByteBuffer) record.get(getColName(0));
+        String returnVal = new String(buf.array());
 
-    assertEquals(getColName(0), returnVal, expectedVal);
-  }
+        assertEquals(getColName(0), expectedVal, returnVal);
+    }
 
-  /**
-   * Import blob data that is smaller than inline lob limit and compress with
-   * deflate codec. Blob data should be encoded and saved as Avro bytes.
-   * @throws IOException
-   * @throws SQLException
-   */
-  @Test
-  public void testBlobCompressedAvroImportInline()
-      throws IOException, SQLException {
-    String [] types = { getBlobType() };
-    String expectedVal = "This is short BLOB data";
-    String [] vals = { getBlobInsertStr(expectedVal) };
+    /**
+     * Import blob data that is larger than inline lob limit. The reference file
+     * should be saved as Avro bytes. Blob data should be saved in LOB file
+     * format.
+     * @throws IOException
+     * @throws SQLException
+     */
+    @Test
+    public void testBlobAvroImportExternal() throws IOException, SQLException {
+        String [] types = { getBlobType() };
+        String data = "This is short BLOB data";
+        String [] vals = { getBlobInsertStr(data) };
 
-    createTableWithColTypes(types, vals);
+        createTableWithColTypes(types, vals);
 
-    runImport(getArgv("--compression-codec", CodecMap.DEFLATE));
+        // Set inline lob limit to a small value so that blob data will be
+        // written to an external file.
+        runImport(getArgv("--inline-lob-limit", "1"));
 
-    Path outputFile = new Path(getTablePath(), "part-m-00000.avro");
-    DataFileReader<GenericRecord> reader = read(outputFile);
-    GenericRecord record = reader.next();
+        Path outputFile = new Path(getTablePath(), "part-m-00000.avro");
+        DataFileReader<GenericRecord> reader = read(outputFile);
+        GenericRecord record = reader.next();
 
-    // Verify that the data block of the Avro file is compressed with deflate
-    // codec.
-    assertEquals(CodecMap.DEFLATE,
-        reader.getMetaString(DataFileConstants.CODEC));
+        // Verify that the reference file is written in Avro bytes.
+        ByteBuffer buf = (ByteBuffer) record.get(getColName(0));
+        String returnVal = new String(buf.array());
+        String expectedStart = "externalLob(lf,_lob/large_obj";
+        String expectedEnd = "_m_0000000.lob,68," + data.length() + ")";
 
-    // Verify that all columns are imported correctly.
-    ByteBuffer buf = (ByteBuffer) record.get(getColName(0));
-    String returnVal = new String(buf.array());
+        assertNotNull(returnVal);
+        assertTrue("ExpectedStart: " + expectedStart + ", value: " + returnVal, returnVal.startsWith(expectedStart));
+        assertTrue("ExpectedEnd: " + expectedEnd + ", value: " + returnVal, returnVal.endsWith(expectedEnd));
 
-    assertEquals(getColName(0), expectedVal, returnVal);
-  }
+        // Verify that blob data stored in the external lob file is correct.
+        BlobRef br = BlobRef.parse(returnVal);
+        Path lobFileDir = new Path(getWarehouseDir(), getTableName());
+        InputStream in = br.getDataStream(getConf(), lobFileDir);
 
-  /**
-   * Import blob data that is larger than inline lob limit and compress with
-   * deflate codec. The reference file should be encoded and saved as Avro
-   * bytes. Blob data should be saved in LOB file format without compression.
-   * @throws IOException
-   * @throws SQLException
-   */
-  @Test
-  public void testBlobCompressedAvroImportExternal()
-      throws IOException, SQLException {
-    String [] types = { getBlobType() };
-    String data = "This is short BLOB data";
-    String [] vals = { getBlobInsertStr(data) };
+        byte [] bufArray = new byte[data.length()];
+        int chars = in.read(bufArray);
+        in.close();
 
-    createTableWithColTypes(types, vals);
+        assertEquals(chars, data.length());
 
-    // Set inline lob limit to a small value so that blob data will be
-    // written to an external file.
-    runImport(getArgv(
-        "--inline-lob-limit", "1", "--compression-codec", CodecMap.DEFLATE));
+        returnVal = new String(bufArray);
+        String expectedVal = data;
 
-    Path outputFile = new Path(getTablePath(), "part-m-00000.avro");
-    DataFileReader<GenericRecord> reader = read(outputFile);
-    GenericRecord record = reader.next();
+        assertEquals(getColName(0), returnVal, expectedVal);
+    }
 
-    // Verify that the data block of the Avro file is compressed with deflate
-    // codec.
-    assertEquals(CodecMap.DEFLATE,
-        reader.getMetaString(DataFileConstants.CODEC));
+    /**
+     * Import blob data that is smaller than inline lob limit and compress with
+     * deflate codec. Blob data should be encoded and saved as Avro bytes.
+     * @throws IOException
+     * @throws SQLException
+     */
+    @Test
+    public void testBlobCompressedAvroImportInline()
+    throws IOException, SQLException {
+        String [] types = { getBlobType() };
+        String expectedVal = "This is short BLOB data";
+        String [] vals = { getBlobInsertStr(expectedVal) };
 
-    // Verify that the reference file is written in Avro bytes.
-    ByteBuffer buf = (ByteBuffer) record.get(getColName(0));
-    String returnVal = new String(buf.array());
-    String expectedStart = "externalLob(lf,_lob/large_obj";
-    String expectedEnd = "_m_0000000.lob,68," + data.length() + ")";
+        createTableWithColTypes(types, vals);
 
-    assertNotNull(returnVal);
-    assertTrue("ExpectedStart: " + expectedStart + ", value: " + returnVal, returnVal.startsWith(expectedStart));
-    assertTrue("ExpectedEnd: " + expectedEnd + ", value: " + returnVal, returnVal.endsWith(expectedEnd));
+        runImport(getArgv("--compression-codec", CodecMap.DEFLATE));
 
-    // Verify that blob data stored in the external lob file is correct.
-    BlobRef br = BlobRef.parse(returnVal);
-    Path lobFileDir = new Path(getWarehouseDir(), getTableName());
-    InputStream in = br.getDataStream(getConf(), lobFileDir);
+        Path outputFile = new Path(getTablePath(), "part-m-00000.avro");
+        DataFileReader<GenericRecord> reader = read(outputFile);
+        GenericRecord record = reader.next();
 
-    byte [] bufArray = new byte[data.length()];
-    int chars = in.read(bufArray);
-    in.close();
+        // Verify that the data block of the Avro file is compressed with deflate
+        // codec.
+        assertEquals(CodecMap.DEFLATE,
+                     reader.getMetaString(DataFileConstants.CODEC));
 
-    assertEquals(chars, data.length());
+        // Verify that all columns are imported correctly.
+        ByteBuffer buf = (ByteBuffer) record.get(getColName(0));
+        String returnVal = new String(buf.array());
 
-    returnVal = new String(bufArray);
-    String expectedVal = data;
+        assertEquals(getColName(0), expectedVal, returnVal);
+    }
 
-    assertEquals(getColName(0), returnVal, expectedVal);
-  }
+    /**
+     * Import blob data that is larger than inline lob limit and compress with
+     * deflate codec. The reference file should be encoded and saved as Avro
+     * bytes. Blob data should be saved in LOB file format without compression.
+     * @throws IOException
+     * @throws SQLException
+     */
+    @Test
+    public void testBlobCompressedAvroImportExternal()
+    throws IOException, SQLException {
+        String [] types = { getBlobType() };
+        String data = "This is short BLOB data";
+        String [] vals = { getBlobInsertStr(data) };
 
-  /**
-   * Import multiple columns of blob data. Blob data should be saved as Avro
-   * bytes.
-   * @throws IOException
-   * @throws SQLException
-   */
-  @Test
-  public void testBlobAvroImportMultiCols() throws IOException, SQLException {
-    String [] types = { getBlobType(), getBlobType(), getBlobType(), };
-    String expectedVal1 = "This is short BLOB data1";
-    String expectedVal2 = "This is short BLOB data2";
-    String expectedVal3 = "This is short BLOB data3";
-    String [] vals = { getBlobInsertStr(expectedVal1),
-                       getBlobInsertStr(expectedVal2),
-                       getBlobInsertStr(expectedVal3), };
+        createTableWithColTypes(types, vals);
 
-    createTableWithColTypes(types, vals);
+        // Set inline lob limit to a small value so that blob data will be
+        // written to an external file.
+        runImport(getArgv(
+                      "--inline-lob-limit", "1", "--compression-codec", CodecMap.DEFLATE));
 
-    runImport(getArgv());
+        Path outputFile = new Path(getTablePath(), "part-m-00000.avro");
+        DataFileReader<GenericRecord> reader = read(outputFile);
+        GenericRecord record = reader.next();
 
-    Path outputFile = new Path(getTablePath(), "part-m-00000.avro");
-    DataFileReader<GenericRecord> reader = read(outputFile);
-    GenericRecord record = reader.next();
+        // Verify that the data block of the Avro file is compressed with deflate
+        // codec.
+        assertEquals(CodecMap.DEFLATE,
+                     reader.getMetaString(DataFileConstants.CODEC));
 
-    // Verify that all columns are imported correctly.
-    ByteBuffer buf = (ByteBuffer) record.get(getColName(0));
-    String returnVal = new String(buf.array());
+        // Verify that the reference file is written in Avro bytes.
+        ByteBuffer buf = (ByteBuffer) record.get(getColName(0));
+        String returnVal = new String(buf.array());
+        String expectedStart = "externalLob(lf,_lob/large_obj";
+        String expectedEnd = "_m_0000000.lob,68," + data.length() + ")";
 
-    assertEquals(getColName(0), expectedVal1, returnVal);
+        assertNotNull(returnVal);
+        assertTrue("ExpectedStart: " + expectedStart + ", value: " + returnVal, returnVal.startsWith(expectedStart));
+        assertTrue("ExpectedEnd: " + expectedEnd + ", value: " + returnVal, returnVal.endsWith(expectedEnd));
 
-    buf = (ByteBuffer) record.get(getColName(1));
-    returnVal = new String(buf.array());
+        // Verify that blob data stored in the external lob file is correct.
+        BlobRef br = BlobRef.parse(returnVal);
+        Path lobFileDir = new Path(getWarehouseDir(), getTableName());
+        InputStream in = br.getDataStream(getConf(), lobFileDir);
 
-    assertEquals(getColName(1), expectedVal2, returnVal);
+        byte [] bufArray = new byte[data.length()];
+        int chars = in.read(bufArray);
+        in.close();
 
-    buf = (ByteBuffer) record.get(getColName(2));
-    returnVal = new String(buf.array());
+        assertEquals(chars, data.length());
 
-    assertEquals(getColName(2), expectedVal3, returnVal);
-  }
+        returnVal = new String(bufArray);
+        String expectedVal = data;
 
-  @Test
-  public void testClobAvroImportInline() throws IOException, SQLException {
-    // TODO: add tests for CLOB support for Avro import
-  }
+        assertEquals(getColName(0), returnVal, expectedVal);
+    }
 
-  @Test
-  public void testClobAvroImportExternal() throws IOException, SQLException {
-    // TODO: add tests for CLOB support for Avro import
-  }
+    /**
+     * Import multiple columns of blob data. Blob data should be saved as Avro
+     * bytes.
+     * @throws IOException
+     * @throws SQLException
+     */
+    @Test
+    public void testBlobAvroImportMultiCols() throws IOException, SQLException {
+        String [] types = { getBlobType(), getBlobType(), getBlobType(), };
+        String expectedVal1 = "This is short BLOB data1";
+        String expectedVal2 = "This is short BLOB data2";
+        String expectedVal3 = "This is short BLOB data3";
+        String [] vals = { getBlobInsertStr(expectedVal1),
+                           getBlobInsertStr(expectedVal2),
+                           getBlobInsertStr(expectedVal3),
+                         };
 
-  @Test
-  public void testClobCompressedAvroImportInline()
-      throws IOException, SQLException {
-    // TODO: add tests for CLOB support for Avro import
-  }
+        createTableWithColTypes(types, vals);
 
-  @Test
-  public void testClobCompressedAvroImportExternal()
-      throws IOException, SQLException {
-    // TODO: add tests for CLOB support for Avro import
-  }
+        runImport(getArgv());
 
-  @Test
-  public void testClobAvroImportMultiCols() throws IOException, SQLException {
-    // TODO: add tests for CLOB support for Avro import
-  }
+        Path outputFile = new Path(getTablePath(), "part-m-00000.avro");
+        DataFileReader<GenericRecord> reader = read(outputFile);
+        GenericRecord record = reader.next();
+
+        // Verify that all columns are imported correctly.
+        ByteBuffer buf = (ByteBuffer) record.get(getColName(0));
+        String returnVal = new String(buf.array());
+
+        assertEquals(getColName(0), expectedVal1, returnVal);
+
+        buf = (ByteBuffer) record.get(getColName(1));
+        returnVal = new String(buf.array());
+
+        assertEquals(getColName(1), expectedVal2, returnVal);
+
+        buf = (ByteBuffer) record.get(getColName(2));
+        returnVal = new String(buf.array());
+
+        assertEquals(getColName(2), expectedVal3, returnVal);
+    }
+
+    @Test
+    public void testClobAvroImportInline() throws IOException, SQLException {
+        // TODO: add tests for CLOB support for Avro import
+    }
+
+    @Test
+    public void testClobAvroImportExternal() throws IOException, SQLException {
+        // TODO: add tests for CLOB support for Avro import
+    }
+
+    @Test
+    public void testClobCompressedAvroImportInline()
+    throws IOException, SQLException {
+        // TODO: add tests for CLOB support for Avro import
+    }
+
+    @Test
+    public void testClobCompressedAvroImportExternal()
+    throws IOException, SQLException {
+        // TODO: add tests for CLOB support for Avro import
+    }
+
+    @Test
+    public void testClobAvroImportMultiCols() throws IOException, SQLException {
+        // TODO: add tests for CLOB support for Avro import
+    }
 }

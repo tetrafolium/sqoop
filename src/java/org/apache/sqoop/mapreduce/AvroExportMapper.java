@@ -32,18 +32,18 @@ import java.io.IOException;
 public class AvroExportMapper
     extends GenericRecordExportMapper<AvroWrapper<GenericRecord>, NullWritable> {
 
-  @Override
-  protected void setup(Context context) throws IOException, InterruptedException {
-    super.setup(context);
+    @Override
+    protected void setup(Context context) throws IOException, InterruptedException {
+        super.setup(context);
 
-    // Add decimal support
-    ReflectData.get().addLogicalTypeConversion(new Conversions.DecimalConversion());
-  }
+        // Add decimal support
+        ReflectData.get().addLogicalTypeConversion(new Conversions.DecimalConversion());
+    }
 
-  @Override
-  protected void map(AvroWrapper<GenericRecord> key, NullWritable value,
-      Context context) throws IOException, InterruptedException {
-    context.write(toSqoopRecord(key.datum()), NullWritable.get());
-  }
+    @Override
+    protected void map(AvroWrapper<GenericRecord> key, NullWritable value,
+                       Context context) throws IOException, InterruptedException {
+        context.write(toSqoopRecord(key.datum()), NullWritable.get());
+    }
 
 }

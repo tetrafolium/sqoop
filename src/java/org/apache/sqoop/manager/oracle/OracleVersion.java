@@ -22,63 +22,63 @@ package org.apache.sqoop.manager.oracle;
  * Represents an Oracle version and allows comparing of versions.
  */
 public class OracleVersion {
-  private int major;
-  private int minor;
-  private int version;
-  private int patch;
-  private String banner;
+    private int major;
+    private int minor;
+    private int version;
+    private int patch;
+    private String banner;
 
-  public OracleVersion(int major, int minor, int version, int patch,
-      String banner) {
+    public OracleVersion(int major, int minor, int version, int patch,
+                         String banner) {
 
-    this.major = major;
-    this.minor = minor;
-    this.version = version;
-    this.patch = patch;
-    this.banner = banner;
-  }
-
-  public boolean isGreaterThanOrEqualTo(int otherMajor, int otherMinor,
-      int otherVersion, int otherPatch) {
-
-    if (this.major > otherMajor) {
-      return true;
+        this.major = major;
+        this.minor = minor;
+        this.version = version;
+        this.patch = patch;
+        this.banner = banner;
     }
 
-    if (this.major == otherMajor && this.minor > otherMinor) {
-      return true;
+    public boolean isGreaterThanOrEqualTo(int otherMajor, int otherMinor,
+                                          int otherVersion, int otherPatch) {
+
+        if (this.major > otherMajor) {
+            return true;
+        }
+
+        if (this.major == otherMajor && this.minor > otherMinor) {
+            return true;
+        }
+
+        if (this.major == otherMajor && this.minor == otherMinor
+                && this.version > otherVersion) {
+            return true;
+        }
+
+        if (this.major == otherMajor && this.minor == otherMinor
+                && this.version == otherVersion && this.patch >= otherPatch) {
+            return true;
+        }
+
+        return false;
     }
 
-    if (this.major == otherMajor && this.minor == otherMinor
-        && this.version > otherVersion) {
-      return true;
+    public int getMajor() {
+        return major;
     }
 
-    if (this.major == otherMajor && this.minor == otherMinor
-        && this.version == otherVersion && this.patch >= otherPatch) {
-      return true;
+    public int getMinor() {
+        return minor;
     }
 
-    return false;
-  }
+    public int getVersion() {
+        return version;
+    }
 
-  public int getMajor() {
-    return major;
-  }
+    public int getPatch() {
+        return patch;
+    }
 
-  public int getMinor() {
-    return minor;
-  }
-
-  public int getVersion() {
-    return version;
-  }
-
-  public int getPatch() {
-    return patch;
-  }
-
-  public String getBanner() {
-    return banner;
-  }
+    public String getBanner() {
+        return banner;
+    }
 }

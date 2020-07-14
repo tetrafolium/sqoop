@@ -29,48 +29,48 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.RemoteIterator;
 
 public final class FileSystemUtil {
-  private FileSystemUtil() {
-  }
-
-
-  /**
-   * Creates a fully-qualified path object.
-   * @param path the path to fully-qualify with its file system URI.
-   * @param conf the current Hadoop configuration.
-   * @return a new path representing the same location as the input path,
-   * but with a fully-qualified URI. Returns {@code null} if provided path is {@code null};
-   */
-  public static Path makeQualified(Path path, Configuration conf)
-      throws IOException {
-    if (null == path) {
-      return null;
+    private FileSystemUtil() {
     }
 
-    return path.getFileSystem(conf).makeQualified(path);
-  }
 
-  public static boolean isFile(Path path, Configuration conf) throws IOException {
-    return path.getFileSystem(conf).isFile(path);
-  }
+    /**
+     * Creates a fully-qualified path object.
+     * @param path the path to fully-qualify with its file system URI.
+     * @param conf the current Hadoop configuration.
+     * @return a new path representing the same location as the input path,
+     * but with a fully-qualified URI. Returns {@code null} if provided path is {@code null};
+     */
+    public static Path makeQualified(Path path, Configuration conf)
+    throws IOException {
+        if (null == path) {
+            return null;
+        }
 
-  public static List<Path> listFiles(Path path, Configuration conf) throws IOException {
-    List<Path> result = new ArrayList<>();
-    FileSystem fileSystem = path.getFileSystem(conf);
-    RemoteIterator<LocatedFileStatus> files = fileSystem.listFiles(path, false);
-    while (files.hasNext()) {
-      result.add(files.next().getPath());
+        return path.getFileSystem(conf).makeQualified(path);
     }
-    return result;
-  }
 
-  public static List<Path> findFilesWithPathContainingPattern(Path path, Configuration conf, String pattern) throws IOException {
-    List<Path> result = new ArrayList<>();
-    List<Path> filePaths = listFiles(path, conf);
-    for (Path filePath : filePaths) {
-      if (filePath.toString().contains(pattern)) {
-        result.add(filePath);
-      }
+    public static boolean isFile(Path path, Configuration conf) throws IOException {
+        return path.getFileSystem(conf).isFile(path);
     }
-    return result;
-  }
+
+    public static List<Path> listFiles(Path path, Configuration conf) throws IOException {
+        List<Path> result = new ArrayList<>();
+        FileSystem fileSystem = path.getFileSystem(conf);
+        RemoteIterator<LocatedFileStatus> files = fileSystem.listFiles(path, false);
+        while (files.hasNext()) {
+            result.add(files.next().getPath());
+        }
+        return result;
+    }
+
+    public static List<Path> findFilesWithPathContainingPattern(Path path, Configuration conf, String pattern) throws IOException {
+        List<Path> result = new ArrayList<>();
+        List<Path> filePaths = listFiles(path, conf);
+        for (Path filePath : filePaths) {
+            if (filePath.toString().contains(pattern)) {
+                result.add(filePath);
+            }
+        }
+        return result;
+    }
 }

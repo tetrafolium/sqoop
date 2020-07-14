@@ -41,119 +41,119 @@ import static org.mockito.Mockito.when;
 @Category(UnitTest.class)
 public class TestBaseSqoopTool {
 
-  private static final String PARQUET_CONFIGURATOR_IMPLEMENTATION = "parquet-configurator-implementation";
+    private static final String PARQUET_CONFIGURATOR_IMPLEMENTATION = "parquet-configurator-implementation";
 
-  @Rule
-  public ExpectedException exception = ExpectedException.none();
+    @Rule
+    public ExpectedException exception = ExpectedException.none();
 
-  private BaseSqoopTool testBaseSqoopTool;
-  private SqoopOptions testSqoopOptions;
-  private CommandLine mockCommandLine;
+    private BaseSqoopTool testBaseSqoopTool;
+    private SqoopOptions testSqoopOptions;
+    private CommandLine mockCommandLine;
 
-  @Before
-  public void setup() {
-    testBaseSqoopTool = mock(BaseSqoopTool.class, Mockito.CALLS_REAL_METHODS);
-    testSqoopOptions = new SqoopOptions();
-    mockCommandLine = mock(CommandLine.class);
-  }
+    @Before
+    public void setup() {
+        testBaseSqoopTool = mock(BaseSqoopTool.class, Mockito.CALLS_REAL_METHODS);
+        testSqoopOptions = new SqoopOptions();
+        mockCommandLine = mock(CommandLine.class);
+    }
 
-  @Test
-  public void testRethrowIfRequiredWithoutRethrowPropertySetOrThrowOnErrorOption() {
-    testSqoopOptions.setThrowOnError(false);
+    @Test
+    public void testRethrowIfRequiredWithoutRethrowPropertySetOrThrowOnErrorOption() {
+        testSqoopOptions.setThrowOnError(false);
 
-    testBaseSqoopTool.rethrowIfRequired(testSqoopOptions, new Exception());
-  }
+        testBaseSqoopTool.rethrowIfRequired(testSqoopOptions, new Exception());
+    }
 
-  @Test
-  public void testRethrowIfRequiredWithRethrowPropertySetAndRuntimeException() {
-    RuntimeException expectedException = new RuntimeException();
-    testSqoopOptions.setThrowOnError(true);
+    @Test
+    public void testRethrowIfRequiredWithRethrowPropertySetAndRuntimeException() {
+        RuntimeException expectedException = new RuntimeException();
+        testSqoopOptions.setThrowOnError(true);
 
 
-    exception.expect(sameInstance(expectedException));
-    testBaseSqoopTool.rethrowIfRequired(testSqoopOptions, expectedException);
-  }
+        exception.expect(sameInstance(expectedException));
+        testBaseSqoopTool.rethrowIfRequired(testSqoopOptions, expectedException);
+    }
 
-  @Test
-  public void testRethrowIfRequiredWithRethrowPropertySetAndException() {
-    Exception expectedCauseException = new Exception();
-    testSqoopOptions.setThrowOnError(true);
+    @Test
+    public void testRethrowIfRequiredWithRethrowPropertySetAndException() {
+        Exception expectedCauseException = new Exception();
+        testSqoopOptions.setThrowOnError(true);
 
-    exception.expect(RuntimeException.class);
-    exception.expectCause(sameInstance(expectedCauseException));
-    testBaseSqoopTool.rethrowIfRequired(testSqoopOptions, expectedCauseException);
-  }
+        exception.expect(RuntimeException.class);
+        exception.expectCause(sameInstance(expectedCauseException));
+        testBaseSqoopTool.rethrowIfRequired(testSqoopOptions, expectedCauseException);
+    }
 
-  @Test
-  public void testApplyCommonOptionsSetsParquetJobConfigurationImplementationFromCommandLine() throws Exception {
-    ParquetJobConfiguratorImplementation expectedValue = HADOOP;
+    @Test
+    public void testApplyCommonOptionsSetsParquetJobConfigurationImplementationFromCommandLine() throws Exception {
+        ParquetJobConfiguratorImplementation expectedValue = HADOOP;
 
-    when(mockCommandLine.getOptionValue(PARQUET_CONFIGURATOR_IMPLEMENTATION)).thenReturn(expectedValue.toString());
+        when(mockCommandLine.getOptionValue(PARQUET_CONFIGURATOR_IMPLEMENTATION)).thenReturn(expectedValue.toString());
 
-    testBaseSqoopTool.applyCommonOptions(mockCommandLine, testSqoopOptions);
+        testBaseSqoopTool.applyCommonOptions(mockCommandLine, testSqoopOptions);
 
-    assertEquals(expectedValue, testSqoopOptions.getParquetConfiguratorImplementation());
-  }
+        assertEquals(expectedValue, testSqoopOptions.getParquetConfiguratorImplementation());
+    }
 
-  @Test
-  public void testApplyCommonOptionsSetsParquetJobConfigurationImplementationFromCommandLineCaseInsensitively() throws Exception {
-    String hadoopImplementationLowercase = "haDooP";
+    @Test
+    public void testApplyCommonOptionsSetsParquetJobConfigurationImplementationFromCommandLineCaseInsensitively() throws Exception {
+        String hadoopImplementationLowercase = "haDooP";
 
-    when(mockCommandLine.getOptionValue(PARQUET_CONFIGURATOR_IMPLEMENTATION)).thenReturn(hadoopImplementationLowercase);
+        when(mockCommandLine.getOptionValue(PARQUET_CONFIGURATOR_IMPLEMENTATION)).thenReturn(hadoopImplementationLowercase);
 
-    testBaseSqoopTool.applyCommonOptions(mockCommandLine, testSqoopOptions);
+        testBaseSqoopTool.applyCommonOptions(mockCommandLine, testSqoopOptions);
 
-    assertEquals(HADOOP, testSqoopOptions.getParquetConfiguratorImplementation());
-  }
+        assertEquals(HADOOP, testSqoopOptions.getParquetConfiguratorImplementation());
+    }
 
-  @Test
-  public void testApplyCommonOptionsSetsParquetJobConfigurationImplementationFromConfiguration() throws Exception {
-    ParquetJobConfiguratorImplementation expectedValue = HADOOP;
-    testSqoopOptions.getConf().set("parquetjob.configurator.implementation", expectedValue.toString());
+    @Test
+    public void testApplyCommonOptionsSetsParquetJobConfigurationImplementationFromConfiguration() throws Exception {
+        ParquetJobConfiguratorImplementation expectedValue = HADOOP;
+        testSqoopOptions.getConf().set("parquetjob.configurator.implementation", expectedValue.toString());
 
-    testBaseSqoopTool.applyCommonOptions(mockCommandLine, testSqoopOptions);
+        testBaseSqoopTool.applyCommonOptions(mockCommandLine, testSqoopOptions);
 
-    assertEquals(expectedValue, testSqoopOptions.getParquetConfiguratorImplementation());
-  }
+        assertEquals(expectedValue, testSqoopOptions.getParquetConfiguratorImplementation());
+    }
 
-  @Test
-  public void testApplyCommonOptionsPrefersParquetJobConfigurationImplementationFromCommandLine() throws Exception {
-    ParquetJobConfiguratorImplementation expectedValue = HADOOP;
-    testSqoopOptions.getConf().set("parquetjob.configurator.implementation", "kite");
-    when(mockCommandLine.getOptionValue(PARQUET_CONFIGURATOR_IMPLEMENTATION)).thenReturn(expectedValue.toString());
+    @Test
+    public void testApplyCommonOptionsPrefersParquetJobConfigurationImplementationFromCommandLine() throws Exception {
+        ParquetJobConfiguratorImplementation expectedValue = HADOOP;
+        testSqoopOptions.getConf().set("parquetjob.configurator.implementation", "kite");
+        when(mockCommandLine.getOptionValue(PARQUET_CONFIGURATOR_IMPLEMENTATION)).thenReturn(expectedValue.toString());
 
-    testBaseSqoopTool.applyCommonOptions(mockCommandLine, testSqoopOptions);
+        testBaseSqoopTool.applyCommonOptions(mockCommandLine, testSqoopOptions);
 
-    assertEquals(expectedValue, testSqoopOptions.getParquetConfiguratorImplementation());
-  }
+        assertEquals(expectedValue, testSqoopOptions.getParquetConfiguratorImplementation());
+    }
 
-  @Test
-  public void testApplyCommonOptionsThrowsWhenInvalidParquetJobConfigurationImplementationIsSet() throws Exception {
-    when(mockCommandLine.getOptionValue(PARQUET_CONFIGURATOR_IMPLEMENTATION)).thenReturn("this_is_definitely_not_valid");
+    @Test
+    public void testApplyCommonOptionsThrowsWhenInvalidParquetJobConfigurationImplementationIsSet() throws Exception {
+        when(mockCommandLine.getOptionValue(PARQUET_CONFIGURATOR_IMPLEMENTATION)).thenReturn("this_is_definitely_not_valid");
 
-    exception.expectMessage("Invalid Parquet job configurator implementation is set: this_is_definitely_not_valid. Supported values are: [HADOOP]");
-    testBaseSqoopTool.applyCommonOptions(mockCommandLine, testSqoopOptions);
-  }
+        exception.expectMessage("Invalid Parquet job configurator implementation is set: this_is_definitely_not_valid. Supported values are: [HADOOP]");
+        testBaseSqoopTool.applyCommonOptions(mockCommandLine, testSqoopOptions);
+    }
 
-  @Test
-  public void testApplyCommonOptionsDoesNotChangeDefaultParquetJobConfigurationImplementationWhenNothingIsSet() throws Exception {
-    testBaseSqoopTool.applyCommonOptions(mockCommandLine, testSqoopOptions);
+    @Test
+    public void testApplyCommonOptionsDoesNotChangeDefaultParquetJobConfigurationImplementationWhenNothingIsSet() throws Exception {
+        testBaseSqoopTool.applyCommonOptions(mockCommandLine, testSqoopOptions);
 
-    assertEquals(HADOOP, testSqoopOptions.getParquetConfiguratorImplementation());
-  }
+        assertEquals(HADOOP, testSqoopOptions.getParquetConfiguratorImplementation());
+    }
 
-  @Test
-  public void testGetCommonOptionsAddsParquetJobConfigurationImplementation() {
-    RelatedOptions commonOptions = testBaseSqoopTool.getCommonOptions();
+    @Test
+    public void testGetCommonOptionsAddsParquetJobConfigurationImplementation() {
+        RelatedOptions commonOptions = testBaseSqoopTool.getCommonOptions();
 
-    assertTrue(commonOptions.hasOption(PARQUET_CONFIGURATOR_IMPLEMENTATION));
-  }
+        assertTrue(commonOptions.hasOption(PARQUET_CONFIGURATOR_IMPLEMENTATION));
+    }
 
-  @Test
-  public void testParquetJobConfigurationImplementationOptionHasAnArg() {
-    RelatedOptions commonOptions = testBaseSqoopTool.getCommonOptions();
+    @Test
+    public void testParquetJobConfigurationImplementationOptionHasAnArg() {
+        RelatedOptions commonOptions = testBaseSqoopTool.getCommonOptions();
 
-    Option implementationOption = commonOptions.getOption(PARQUET_CONFIGURATOR_IMPLEMENTATION);
-    assertTrue(implementationOption.hasArg());
-  }
+        Option implementationOption = commonOptions.getOption(PARQUET_CONFIGURATOR_IMPLEMENTATION);
+        assertTrue(implementationOption.hasArg());
+    }
 }

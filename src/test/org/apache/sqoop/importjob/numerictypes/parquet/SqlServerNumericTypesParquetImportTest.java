@@ -31,12 +31,12 @@ import static org.apache.sqoop.testutil.NumericTypesTestUtils.SUCCEED_WITH_PADDI
 @Category(SqlServerTest.class)
 public class SqlServerNumericTypesParquetImportTest extends NumericTypesParquetImportTestBase {
 
-  @Override
-  public DatabaseAdapter createAdapter() {
-    return new SqlServerDatabaseAdapter();
-  }
+    @Override
+    public DatabaseAdapter createAdapter() {
+        return new SqlServerDatabaseAdapter();
+    }
 
-  public SqlServerNumericTypesParquetImportTest() {
-    super(new SqlServerImportJobTestConfiguration(), SUCCEED_WITHOUT_EXTRA_ARGS, SUCCEED_WITH_PADDING_ONLY);
-  }
+    public SqlServerNumericTypesParquetImportTest() {
+        super(new SqlServerImportJobTestConfiguration(), SUCCEED_WITHOUT_EXTRA_ARGS, SUCCEED_WITH_PADDING_ONLY);
+    }
 }

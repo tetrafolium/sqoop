@@ -32,27 +32,27 @@ import org.apache.sqoop.mapreduce.hcat.SqoopHCatExportHelper;
  * Netezza export mapper using external tables for HCat integration.
  */
 public class NetezzaExternalTableHCatExportMapper extends
-  NetezzaExternalTableExportMapper<LongWritable, HCatRecord> {
-  private SqoopHCatExportHelper helper;
-  public static final Log LOG = LogFactory
-    .getLog(NetezzaExternalTableHCatExportMapper.class.getName());
+    NetezzaExternalTableExportMapper<LongWritable, HCatRecord> {
+    private SqoopHCatExportHelper helper;
+    public static final Log LOG = LogFactory
+                                  .getLog(NetezzaExternalTableHCatExportMapper.class.getName());
 
-  @Override
-  protected void setup(Context context)
+    @Override
+    protected void setup(Context context)
     throws IOException, InterruptedException {
-    super.setup(context);
-    Configuration conf = context.getConfiguration();
-    helper = new SqoopHCatExportHelper(conf);
-    // Force escaped by
-    conf.setInt(DelimiterSet.OUTPUT_ESCAPED_BY_KEY, '\'');
+        super.setup(context);
+        Configuration conf = context.getConfiguration();
+        helper = new SqoopHCatExportHelper(conf);
+        // Force escaped by
+        conf.setInt(DelimiterSet.OUTPUT_ESCAPED_BY_KEY, '\'');
 
-  }
+    }
 
-  @Override
-  public void map(LongWritable key, HCatRecord hcr, Context context)
+    @Override
+    public void map(LongWritable key, HCatRecord hcr, Context context)
     throws IOException, InterruptedException {
-    SqoopRecord sqr = helper.convertToSqoopRecord(hcr);
-    writeSqoopRecord(sqr);
-    context.progress();
-  }
+        SqoopRecord sqr = helper.convertToSqoopRecord(hcr);
+        writeSqoopRecord(sqr);
+        context.progress();
+    }
 }

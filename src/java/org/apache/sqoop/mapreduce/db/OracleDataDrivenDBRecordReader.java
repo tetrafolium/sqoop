@@ -31,18 +31,18 @@ public class OracleDataDrivenDBRecordReader<T extends DBWritable>
     extends DataDrivenDBRecordReader<T>  {
 
 
-  // CHECKSTYLE:OFF
-  // TODO(aaron): Enable checkstyle after refactoring DBRecordReader c'tor.
-  public OracleDataDrivenDBRecordReader(DBInputFormat.DBInputSplit split,
-      Class<T> inputClass, Configuration conf, Connection conn,
-      DBConfiguration dbConfig, String cond, String [] fields,
-      String table) throws SQLException {
+    // CHECKSTYLE:OFF
+    // TODO(aaron): Enable checkstyle after refactoring DBRecordReader c'tor.
+    public OracleDataDrivenDBRecordReader(DBInputFormat.DBInputSplit split,
+                                          Class<T> inputClass, Configuration conf, Connection conn,
+                                          DBConfiguration dbConfig, String cond, String [] fields,
+                                          String table) throws SQLException {
 
-    super(split, inputClass, conf, conn, dbConfig, cond, fields, table,
-        "ORACLE");
+        super(split, inputClass, conf, conn, dbConfig, cond, fields, table,
+              "ORACLE");
 
-    // Must initialize the tz used by the connection for Oracle.
-    OracleDBRecordReader.setSessionTimeZone(conf, conn);
-  }
-  // CHECKSTYLE:ON
+        // Must initialize the tz used by the connection for Oracle.
+        OracleDBRecordReader.setSessionTimeZone(conf, conn);
+    }
+    // CHECKSTYLE:ON
 }

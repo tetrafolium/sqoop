@@ -24,38 +24,38 @@ package org.apache.sqoop.validation;
  * the message and failure reason are captured.
  */
 public class ValidationContext {
-  private final long sourceRowCount;
-  private final long targetRowCount;
+    private final long sourceRowCount;
+    private final long targetRowCount;
 
-  private String message;
-  private String reason;
+    private String message;
+    private String reason;
 
-  public ValidationContext(long sourceRowCount, long targetRowCount) {
-    this.sourceRowCount = sourceRowCount;
-    this.targetRowCount = targetRowCount;
-  }
+    public ValidationContext(long sourceRowCount, long targetRowCount) {
+        this.sourceRowCount = sourceRowCount;
+        this.targetRowCount = targetRowCount;
+    }
 
-  public String getMessage() {
-    return message;
-  }
+    public String getMessage() {
+        return message;
+    }
 
-  public void setMessage(String aMessage) {
-    this.message = aMessage;
-  }
+    public void setMessage(String aMessage) {
+        this.message = aMessage;
+    }
 
-  public String getReason() {
-    return reason;
-  }
+    public String getReason() {
+        return reason;
+    }
 
-  public void setReason(String aReason) {
-    this.reason = aReason;
-  }
+    public void setReason(String aReason) {
+        this.reason = aReason;
+    }
 
-  public long getSourceRowCount() {
-    return sourceRowCount;
-  }
+    public long getSourceRowCount() {
+        return sourceRowCount;
+    }
 
-  public long getTargetRowCount() {
-    return targetRowCount;
-  }
+    public long getTargetRowCount() {
+        return targetRowCount;
+    }
 }

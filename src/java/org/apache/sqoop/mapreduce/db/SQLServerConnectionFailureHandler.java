@@ -33,66 +33,66 @@ import org.apache.commons.logging.LogFactory;
 public class SQLServerConnectionFailureHandler
     extends BasicRetrySQLFailureHandler {
 
-  private static final Log LOG =
-      LogFactory.getLog(SQLServerConnectionFailureHandler.class);
+    private static final Log LOG =
+        LogFactory.getLog(SQLServerConnectionFailureHandler.class);
 
-  protected static final String CONNECTION_RESET_ERR_REGEX =
-      "(^Connection reset)(.*?)";
-  protected static final String SQLSTATE_CODE_CONNECTION_RESET = "08S01";
+    protected static final String CONNECTION_RESET_ERR_REGEX =
+        "(^Connection reset)(.*?)";
+    protected static final String SQLSTATE_CODE_CONNECTION_RESET = "08S01";
 
-  protected static final String VALIDATION_QUERY =
-      "SELECT CONVERT(NVARCHAR, CONTEXT_INFO()) AS contextInfo";
+    protected static final String VALIDATION_QUERY =
+        "SELECT CONVERT(NVARCHAR, CONTEXT_INFO()) AS contextInfo";
 
-  public SQLServerConnectionFailureHandler() {
-  }
-
-  /**
-   * Handle only connection reset or TCP exceptions.
-   */
-  public boolean canHandleFailure(Throwable failureCause) {
-    if (!super.canHandleFailure(failureCause)) {
-      return false;
-    }
-    SQLException sqlEx = (SQLException) failureCause;
-    String errStateCode = sqlEx.getSQLState();
-    boolean canHandle = false;
-    // By default check SQLState code if available
-    if (errStateCode != null) {
-      canHandle = errStateCode == SQLSTATE_CODE_CONNECTION_RESET;
-    } else {
-      errStateCode = "NULL";
-      // In case SQLState code is not available, check the exception message
-      String errMsg = sqlEx.getMessage();
-      canHandle = errMsg.matches(CONNECTION_RESET_ERR_REGEX);
+    public SQLServerConnectionFailureHandler() {
     }
 
-    if (!canHandle) {
-      LOG.warn("Cannot handle error with SQL State: " + errStateCode);
-    }
-    return canHandle;
-  }
+    /**
+     * Handle only connection reset or TCP exceptions.
+     */
+    public boolean canHandleFailure(Throwable failureCause) {
+        if (!super.canHandleFailure(failureCause)) {
+            return false;
+        }
+        SQLException sqlEx = (SQLException) failureCause;
+        String errStateCode = sqlEx.getSQLState();
+        boolean canHandle = false;
+        // By default check SQLState code if available
+        if (errStateCode != null) {
+            canHandle = errStateCode == SQLSTATE_CODE_CONNECTION_RESET;
+        } else {
+            errStateCode = "NULL";
+            // In case SQLState code is not available, check the exception message
+            String errMsg = sqlEx.getMessage();
+            canHandle = errMsg.matches(CONNECTION_RESET_ERR_REGEX);
+        }
 
-  /**
-   * Verify the provided connection is valid. For SQL Server we test the
-   * connection by querying the session context.
-   */
-  protected boolean validateConnection(Connection connection)
-      throws SQLException {
-    boolean isValid = false;
-    String contextInfo = null;
-    if (super.validateConnection(connection)) {
-      // Execute the validation query
-      PreparedStatement stmt = connection.prepareStatement(VALIDATION_QUERY);
-      ResultSet results = stmt.executeQuery();
-
-      // Read the context from the result set
-      if (results.next()) {
-        contextInfo = results.getString("contextInfo");
-        LOG.info("Session context is: "
-          + ((contextInfo == null) ? "NULL" : contextInfo));
-        isValid = true;
-      }
+        if (!canHandle) {
+            LOG.warn("Cannot handle error with SQL State: " + errStateCode);
+        }
+        return canHandle;
     }
-    return isValid;
-  }
+
+    /**
+     * Verify the provided connection is valid. For SQL Server we test the
+     * connection by querying the session context.
+     */
+    protected boolean validateConnection(Connection connection)
+    throws SQLException {
+        boolean isValid = false;
+        String contextInfo = null;
+        if (super.validateConnection(connection)) {
+            // Execute the validation query
+            PreparedStatement stmt = connection.prepareStatement(VALIDATION_QUERY);
+            ResultSet results = stmt.executeQuery();
+
+            // Read the context from the result set
+            if (results.next()) {
+                contextInfo = results.getString("contextInfo");
+                LOG.info("Session context is: "
+                         + ((contextInfo == null) ? "NULL" : contextInfo));
+                isValid = true;
+            }
+        }
+        return isValid;
+    }
 }

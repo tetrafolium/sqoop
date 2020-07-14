@@ -34,80 +34,80 @@ import static java.util.Arrays.asList;
 
 public class HiveServer2Client implements HiveClient {
 
-  private static final Log LOG = LogFactory.getLog(HiveServer2Client.class.getName());
+    private static final Log LOG = LogFactory.getLog(HiveServer2Client.class.getName());
 
-  private final SqoopOptions sqoopOptions;
+    private final SqoopOptions sqoopOptions;
 
-  private final TableDefWriter tableDefWriter;
+    private final TableDefWriter tableDefWriter;
 
-  private final JdbcConnectionFactory hs2ConnectionFactory;
+    private final JdbcConnectionFactory hs2ConnectionFactory;
 
-  private final HiveClientCommon hiveClientCommon;
+    private final HiveClientCommon hiveClientCommon;
 
-  public HiveServer2Client(SqoopOptions sqoopOptions, TableDefWriter tableDefWriter, JdbcConnectionFactory hs2ConnectionFactory, HiveClientCommon hiveClientCommon) {
-    this.sqoopOptions = sqoopOptions;
-    this.tableDefWriter = tableDefWriter;
-    this.hs2ConnectionFactory = hs2ConnectionFactory;
-    this.hiveClientCommon = hiveClientCommon;
-  }
-
-  public HiveServer2Client(SqoopOptions sqoopOptions, TableDefWriter tableDefWriter, JdbcConnectionFactory hs2ConnectionFactory) {
-    this(sqoopOptions, tableDefWriter, hs2ConnectionFactory, new HiveClientCommon());
-  }
-
-  @Override
-  public void importTable() throws IOException {
-    LOG.info("Loading uploaded data into Hive.");
-    String createTableStmt = tableDefWriter.getCreateTableStmt();
-    String loadDataStmt = tableDefWriter.getLoadDataStmt();
-    executeHiveImport(asList(createTableStmt, loadDataStmt));
-    LOG.info("Hive import complete.");
-  }
-
-  @Override
-  public void createTable() throws IOException {
-    LOG.info("Creating Hive table: " + tableDefWriter.getOutputTableName());
-    String createTableStmt = tableDefWriter.getCreateTableStmt();
-    executeHiveImport(asList(createTableStmt));
-    LOG.info("Hive table is successfully created.");
-  }
-
-  void executeHiveImport(List<String> commands) throws IOException {
-    Path finalPath = tableDefWriter.getFinalPath();
-
-    hiveClientCommon.removeTempLogs(sqoopOptions.getConf(), finalPath);
-
-    hiveClientCommon.indexLzoFiles(sqoopOptions, finalPath);
-
-    try {
-      executeCommands(commands);
-    } catch (SQLException e) {
-      throw new RuntimeException("Error executing Hive import.", e);
+    public HiveServer2Client(SqoopOptions sqoopOptions, TableDefWriter tableDefWriter, JdbcConnectionFactory hs2ConnectionFactory, HiveClientCommon hiveClientCommon) {
+        this.sqoopOptions = sqoopOptions;
+        this.tableDefWriter = tableDefWriter;
+        this.hs2ConnectionFactory = hs2ConnectionFactory;
+        this.hiveClientCommon = hiveClientCommon;
     }
 
-    hiveClientCommon.cleanUp(sqoopOptions.getConf(), finalPath);
-  }
+    public HiveServer2Client(SqoopOptions sqoopOptions, TableDefWriter tableDefWriter, JdbcConnectionFactory hs2ConnectionFactory) {
+        this(sqoopOptions, tableDefWriter, hs2ConnectionFactory, new HiveClientCommon());
+    }
 
-  void executeCommands(List<String> commands) throws SQLException {
-    try (Connection hs2Connection = hs2ConnectionFactory.createConnection()) {
-      for (String command : commands) {
-        LOG.debug("Executing command: " + command);
-        try (PreparedStatement statement = hs2Connection.prepareStatement(command)) {
-          statement.execute();
+    @Override
+    public void importTable() throws IOException {
+        LOG.info("Loading uploaded data into Hive.");
+        String createTableStmt = tableDefWriter.getCreateTableStmt();
+        String loadDataStmt = tableDefWriter.getLoadDataStmt();
+        executeHiveImport(asList(createTableStmt, loadDataStmt));
+        LOG.info("Hive import complete.");
+    }
+
+    @Override
+    public void createTable() throws IOException {
+        LOG.info("Creating Hive table: " + tableDefWriter.getOutputTableName());
+        String createTableStmt = tableDefWriter.getCreateTableStmt();
+        executeHiveImport(asList(createTableStmt));
+        LOG.info("Hive table is successfully created.");
+    }
+
+    void executeHiveImport(List<String> commands) throws IOException {
+        Path finalPath = tableDefWriter.getFinalPath();
+
+        hiveClientCommon.removeTempLogs(sqoopOptions.getConf(), finalPath);
+
+        hiveClientCommon.indexLzoFiles(sqoopOptions, finalPath);
+
+        try {
+            executeCommands(commands);
+        } catch (SQLException e) {
+            throw new RuntimeException("Error executing Hive import.", e);
         }
-      }
+
+        hiveClientCommon.cleanUp(sqoopOptions.getConf(), finalPath);
     }
-  }
 
-  SqoopOptions getSqoopOptions() {
-    return sqoopOptions;
-  }
+    void executeCommands(List<String> commands) throws SQLException {
+        try (Connection hs2Connection = hs2ConnectionFactory.createConnection()) {
+            for (String command : commands) {
+                LOG.debug("Executing command: " + command);
+                try (PreparedStatement statement = hs2Connection.prepareStatement(command)) {
+                    statement.execute();
+                }
+            }
+        }
+    }
 
-  TableDefWriter getTableDefWriter() {
-    return tableDefWriter;
-  }
+    SqoopOptions getSqoopOptions() {
+        return sqoopOptions;
+    }
 
-  JdbcConnectionFactory getHs2ConnectionFactory() {
-    return hs2ConnectionFactory;
-  }
+    TableDefWriter getTableDefWriter() {
+        return tableDefWriter;
+    }
+
+    JdbcConnectionFactory getHs2ConnectionFactory() {
+        return hs2ConnectionFactory;
+    }
 }

@@ -49,7 +49,7 @@ public class SqlServerMetaConnectIncrementalImportTest extends MetaConnectIncrem
 
     public SqlServerMetaConnectIncrementalImportTest() {
         super(msSQLTestUtils.getDBConnectString(),
-                msSQLTestUtils.getDBUserName(),
-                msSQLTestUtils.getDBPassWord());
+              msSQLTestUtils.getDBUserName(),
+              msSQLTestUtils.getDBPassWord());
     }
 }

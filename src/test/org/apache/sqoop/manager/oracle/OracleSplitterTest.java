@@ -44,101 +44,101 @@ import static org.junit.Assert.assertEquals;
 @Category(OracleTest.class)
 public class OracleSplitterTest extends ImportJobTestCase {
 
-  public static final Log LOG = LogFactory.getLog(
-      OracleSplitterTest.class.getName());
+    public static final Log LOG = LogFactory.getLog(
+                                      OracleSplitterTest.class.getName());
 
-  @Override
-  protected boolean useHsqldbTestServer() {
-    return false;
-  }
-
-  @Override
-  protected String getConnectString() {
-    return OracleUtils.CONNECT_STRING;
-  }
-
-  @Override
-  protected SqoopOptions getSqoopOptions(Configuration conf) {
-    SqoopOptions opts = new SqoopOptions(conf);
-    OracleUtils.setOracleAuth(opts);
-    return opts;
-  }
-
-  @Override
-  protected void dropTableIfExists(String table) throws SQLException {
-    OracleUtils.dropTable(table, getManager());
-  }
-
-  /** the names of the tables we're creating. */
-  private List<String> tableNames;
-
-  @Override
-  public void tearDown() {
-    // Clean up the database on our way out.
-    for (String tableName : tableNames) {
-      try {
-        dropTableIfExists(tableName);
-      } catch (SQLException e) {
-        LOG.warn("Error trying to drop table '" + tableName
-                 + "' on tearDown: " + e);
-      }
+    @Override
+    protected boolean useHsqldbTestServer() {
+        return false;
     }
-    super.tearDown();
-  }
 
-  protected String [] getArgv(String tableName, String connPropsFileName, String splitByColumn) {
-    ArrayList<String> args = new ArrayList<String>();
+    @Override
+    protected String getConnectString() {
+        return OracleUtils.CONNECT_STRING;
+    }
 
-    CommonArgs.addHadoopFlags(args);
+    @Override
+    protected SqoopOptions getSqoopOptions(Configuration conf) {
+        SqoopOptions opts = new SqoopOptions(conf);
+        OracleUtils.setOracleAuth(opts);
+        return opts;
+    }
 
-    args.add("--connect");
-    args.add(getConnectString());
-    args.add("--target-dir");
-    args.add(getTablePath().toString());
-    args.add("--num-mappers");
-    args.add("2");
-    args.add("--split-by");
-    args.add(splitByColumn);
-    args.add("--table");
-    args.add(tableName);
-    args.add("--connection-param-file");
-    args.add(connPropsFileName);
+    @Override
+    protected void dropTableIfExists(String table) throws SQLException {
+        OracleUtils.dropTable(table, getManager());
+    }
 
-    return args.toArray(new String[0]);
-  }
+    /** the names of the tables we're creating. */
+    private List<String> tableNames;
 
-  @Test
-  public void testTimestampSplitter() throws IOException {
-    tableNames = new ArrayList<String>();
-    String [] types = { "INT", "VARCHAR(10)", "TIMESTAMP", };
-    String [] vals = {
-      "1", "'old_data'", "TO_TIMESTAMP('1999-01-01 11:11:11', 'YYYY-MM-DD HH24:MI:SS')",
-      "2", "'new_data'", "TO_TIMESTAMP('2000-11-11 23:23:23', 'YYYY-MM-DD HH24:MI:SS')",
-    };
-    String tableName = getTableName();
-    tableNames.add(tableName);
-    createTableWithColTypes(types, vals);
-    // Some version of Oracle's jdbc drivers automatically convert date to
-    // timestamp. Since we don't want this to happen for this test,
-    // we must explicitly use a property file to control this behavior.
-    String connPropsFileName = "connection.properties";
-    FileUtils.writeStringToFile(new File(connPropsFileName), "oracle.jdbc.mapDateToTimestamp=false");
-    String[] args = getArgv(tableName, connPropsFileName, getColName(2));
-    runImport(args);
+    @Override
+    public void tearDown() {
+        // Clean up the database on our way out.
+        for (String tableName : tableNames) {
+            try {
+                dropTableIfExists(tableName);
+            } catch (SQLException e) {
+                LOG.warn("Error trying to drop table '" + tableName
+                         + "' on tearDown: " + e);
+            }
+        }
+        super.tearDown();
+    }
 
-    File file;
-    List<String> lines;
+    protected String [] getArgv(String tableName, String connPropsFileName, String splitByColumn) {
+        ArrayList<String> args = new ArrayList<String>();
 
-    // First row should be in the first file
-    file = new File(getTablePath().toString(), "part-m-00000");
-    lines = FileUtils.readLines(file, "UTF-8");
-    assertEquals(1, lines.size());
-    assertEquals("1,old_data,1999-01-01 11:11:11.0", lines.get(0));
+        CommonArgs.addHadoopFlags(args);
 
-    // With second line in the second file
-    file = new File(getTablePath().toString(), "part-m-00001");
-    lines = FileUtils.readLines(file, "UTF-8");
-    assertEquals(1, lines.size());
-    assertEquals("2,new_data,2000-11-11 23:23:23.0", lines.get(0));
-  }
+        args.add("--connect");
+        args.add(getConnectString());
+        args.add("--target-dir");
+        args.add(getTablePath().toString());
+        args.add("--num-mappers");
+        args.add("2");
+        args.add("--split-by");
+        args.add(splitByColumn);
+        args.add("--table");
+        args.add(tableName);
+        args.add("--connection-param-file");
+        args.add(connPropsFileName);
+
+        return args.toArray(new String[0]);
+    }
+
+    @Test
+    public void testTimestampSplitter() throws IOException {
+        tableNames = new ArrayList<String>();
+        String [] types = { "INT", "VARCHAR(10)", "TIMESTAMP", };
+        String [] vals = {
+            "1", "'old_data'", "TO_TIMESTAMP('1999-01-01 11:11:11', 'YYYY-MM-DD HH24:MI:SS')",
+            "2", "'new_data'", "TO_TIMESTAMP('2000-11-11 23:23:23', 'YYYY-MM-DD HH24:MI:SS')",
+        };
+        String tableName = getTableName();
+        tableNames.add(tableName);
+        createTableWithColTypes(types, vals);
+        // Some version of Oracle's jdbc drivers automatically convert date to
+        // timestamp. Since we don't want this to happen for this test,
+        // we must explicitly use a property file to control this behavior.
+        String connPropsFileName = "connection.properties";
+        FileUtils.writeStringToFile(new File(connPropsFileName), "oracle.jdbc.mapDateToTimestamp=false");
+        String[] args = getArgv(tableName, connPropsFileName, getColName(2));
+        runImport(args);
+
+        File file;
+        List<String> lines;
+
+        // First row should be in the first file
+        file = new File(getTablePath().toString(), "part-m-00000");
+        lines = FileUtils.readLines(file, "UTF-8");
+        assertEquals(1, lines.size());
+        assertEquals("1,old_data,1999-01-01 11:11:11.0", lines.get(0));
+
+        // With second line in the second file
+        file = new File(getTablePath().toString(), "part-m-00001");
+        lines = FileUtils.readLines(file, "UTF-8");
+        assertEquals(1, lines.size());
+        assertEquals("2,new_data,2000-11-11 23:23:23.0", lines.get(0));
+    }
 }

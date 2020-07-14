@@ -62,134 +62,134 @@ import static org.junit.Assert.fail;
 @Category(SqlServerTest.class)
 public class SQLServerHiveImportTest extends TestHiveImport {
 
-  @Before
-  public void setUp() {
-    super.setUp();
-  }
-
-  @After
-  public void tearDown() {
-    try {
-      dropTableIfExists(getTableName());
-    } catch (SQLException sqle) {
-      LOG.info("Table clean-up failed: " + sqle);
-    } finally {
-      super.tearDown();
-    }
-  }
-
-  protected boolean useHsqldbTestServer() {
-    return false;
-  }
-
-  protected String getConnectString() {
-    return MSSQLTestUtils.getDBConnectString();
-  }
-
-  //SQL Server pads out
-  @Override
-  protected String[] getTypes() {
-    String[] types = { "VARCHAR(32)", "INTEGER", "VARCHAR(64)" };
-    return types;
-  }
-
-  /**
-   * Drop a table if it already exists in the database.
-   * @param table
-   *            the name of the table to drop.
-   * @throws SQLException
-   *             if something goes wrong.
-   */
-  protected void dropTableIfExists(String table) throws SQLException {
-    Connection conn = getManager().getConnection();
-    String sqlStmt = "IF OBJECT_ID('" + table
-        + "') IS NOT NULL  DROP TABLE " + table;
-    PreparedStatement statement = conn.prepareStatement(sqlStmt,
-        ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-    try {
-      statement.executeUpdate();
-      conn.commit();
-    } finally {
-      statement.close();
-    }
-  }
-
-  protected SqoopOptions getSqoopOptions(Configuration conf) {
-
-    String username = MSSQLTestUtils.getDBUserName();
-    String password = MSSQLTestUtils.getDBPassWord();
-    SqoopOptions opts = new SqoopOptions(conf);
-    opts.setUsername(username);
-    opts.setPassword(password);
-
-    return opts;
-
-  }
-
-  SqoopOptions getSqoopOptions(String[] args, SqoopTool tool) {
-    SqoopOptions opts = null;
-    try {
-      opts = tool.parseArguments(args, null, null, true);
-      String username = MSSQLTestUtils.getDBUserName();
-      String password = MSSQLTestUtils.getDBPassWord();
-      opts.setUsername(username);
-      opts.setPassword(password);
-
-    } catch (Exception e) {
-      LOG.error(StringUtils.stringifyException(e));
-      fail("Invalid options: " + e.toString());
+    @Before
+    public void setUp() {
+        super.setUp();
     }
 
-    return opts;
-  }
-
-  protected String[] getArgv(boolean includeHadoopFlags, String[] moreArgs) {
-    ArrayList<String> args = new ArrayList<String>();
-    System.out.println("Overridden getArgv is called..");
-    if (includeHadoopFlags) {
-      CommonArgs.addHadoopFlags(args);
+    @After
+    public void tearDown() {
+        try {
+            dropTableIfExists(getTableName());
+        } catch (SQLException sqle) {
+            LOG.info("Table clean-up failed: " + sqle);
+        } finally {
+            super.tearDown();
+        }
     }
 
-    if (null != moreArgs) {
-      for (String arg : moreArgs) {
-        args.add(arg);
-      }
+    protected boolean useHsqldbTestServer() {
+        return false;
     }
 
-    args.add("--table");
-    args.add(getTableName());
-    args.add("--warehouse-dir");
-    args.add(getWarehouseDir());
-    args.add("--connect");
-    args.add(getConnectString());
-    args.add("--hive-import");
-    String[] colNames = getColNames();
-    if (null != colNames) {
-      args.add("--split-by");
-      args.add(colNames[0]);
-    } else {
-      fail("Could not determine column names.");
+    protected String getConnectString() {
+        return MSSQLTestUtils.getDBConnectString();
     }
 
-    args.add("--num-mappers");
-    args.add("1");
-
-    for (String a : args) {
-      LOG.debug("ARG : " + a);
+    //SQL Server pads out
+    @Override
+    protected String[] getTypes() {
+        String[] types = { "VARCHAR(32)", "INTEGER", "VARCHAR(64)" };
+        return types;
     }
 
-    return args.toArray(new String[0]);
-  }
+    /**
+     * Drop a table if it already exists in the database.
+     * @param table
+     *            the name of the table to drop.
+     * @throws SQLException
+     *             if something goes wrong.
+     */
+    protected void dropTableIfExists(String table) throws SQLException {
+        Connection conn = getManager().getConnection();
+        String sqlStmt = "IF OBJECT_ID('" + table
+                         + "') IS NOT NULL  DROP TABLE " + table;
+        PreparedStatement statement = conn.prepareStatement(sqlStmt,
+                                      ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+        try {
+            statement.executeUpdate();
+            conn.commit();
+        } finally {
+            statement.close();
+        }
+    }
 
-  protected String[] getCodeGenArgs() {
-    ArrayList<String> args = new ArrayList<String>();
+    protected SqoopOptions getSqoopOptions(Configuration conf) {
 
-    args.add("--table");
-    args.add(getTableName());
-    args.add("--connect");
-    args.add(getConnectString());
-    args.add("--hive-import");
+        String username = MSSQLTestUtils.getDBUserName();
+        String password = MSSQLTestUtils.getDBPassWord();
+        SqoopOptions opts = new SqoopOptions(conf);
+        opts.setUsername(username);
+        opts.setPassword(password);
 
-    return args.toArray(new String[0]);
-  }
+        return opts;
+
+    }
+
+    SqoopOptions getSqoopOptions(String[] args, SqoopTool tool) {
+        SqoopOptions opts = null;
+        try {
+            opts = tool.parseArguments(args, null, null, true);
+            String username = MSSQLTestUtils.getDBUserName();
+            String password = MSSQLTestUtils.getDBPassWord();
+            opts.setUsername(username);
+            opts.setPassword(password);
+
+        } catch (Exception e) {
+            LOG.error(StringUtils.stringifyException(e));
+            fail("Invalid options: " + e.toString());
+        }
+
+        return opts;
+    }
+
+    protected String[] getArgv(boolean includeHadoopFlags, String[] moreArgs) {
+        ArrayList<String> args = new ArrayList<String>();
+        System.out.println("Overridden getArgv is called..");
+        if (includeHadoopFlags) {
+            CommonArgs.addHadoopFlags(args);
+        }
+
+        if (null != moreArgs) {
+            for (String arg : moreArgs) {
+                args.add(arg);
+            }
+        }
+
+        args.add("--table");
+        args.add(getTableName());
+        args.add("--warehouse-dir");
+        args.add(getWarehouseDir());
+        args.add("--connect");
+        args.add(getConnectString());
+        args.add("--hive-import");
+        String[] colNames = getColNames();
+        if (null != colNames) {
+            args.add("--split-by");
+            args.add(colNames[0]);
+        } else {
+            fail("Could not determine column names.");
+        }
+
+        args.add("--num-mappers");
+        args.add("1");
+
+        for (String a : args) {
+            LOG.debug("ARG : " + a);
+        }
+
+        return args.toArray(new String[0]);
+    }
+
+    protected String[] getCodeGenArgs() {
+        ArrayList<String> args = new ArrayList<String>();
+
+        args.add("--table");
+        args.add(getTableName());
+        args.add("--connect");
+        args.add(getConnectString());
+        args.add("--hive-import");
+
+        return args.toArray(new String[0]);
+    }
 }

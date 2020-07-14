@@ -50,7 +50,7 @@ import java.util.List;
 public abstract class MetaConnectIncrementalImportTestBase extends BaseSqoopTestCase {
 
     public static final Log LOG = LogFactory
-            .getLog(MetaConnectIncrementalImportTestBase.class.getName());
+                                  .getLog(MetaConnectIncrementalImportTestBase.class.getName());
 
     private String metaConnectString;
     private String metaUser;
@@ -160,10 +160,10 @@ public abstract class MetaConnectIncrementalImportTestBase extends BaseSqoopTest
     private void checkIncrementalState(int expected) throws SQLException {
         Statement getSaveIncrementalState = connMeta.createStatement();
         ResultSet lastCol = getSaveIncrementalState.executeQuery(
-                "SELECT propVal FROM " + cm.escapeTableName("SQOOP_SESSIONS") + " WHERE propname = 'incremental.last.value'");
+                                "SELECT propVal FROM " + cm.escapeTableName("SQOOP_SESSIONS") + " WHERE propname = 'incremental.last.value'");
         lastCol.next();
         assertEquals("Last row value differs from expected",
-                expected, lastCol.getInt("propVal"));
+                     expected, lastCol.getInt("propVal"));
     }
 
     private void execJob() {
@@ -171,7 +171,7 @@ public abstract class MetaConnectIncrementalImportTestBase extends BaseSqoopTest
         org.apache.sqoop.Sqoop sqoopExec = new org.apache.sqoop.Sqoop(jobToolExec);
         String[] argsExec = getExecJob(metaConnectString, metaUser, metaPass);
         assertEquals("Sqoop Job did not execute properly",
-                0, org.apache.sqoop.Sqoop.runSqoop(sqoopExec, argsExec));
+                     0, org.apache.sqoop.Sqoop.runSqoop(sqoopExec, argsExec));
     }
 
     private void createJob() {
@@ -188,9 +188,9 @@ public abstract class MetaConnectIncrementalImportTestBase extends BaseSqoopTest
         dropTableIfExists("CARLOCATIONS");
         setCurTableName("CARLOCATIONS");
         createTableWithColTypesAndNames(
-                new String [] {"CARID", "LOCATIONS"},
-                new String [] {"INTEGER", "VARCHAR"},
-                new String [] {"1", "'Lexus'"});
+            new String [] {"CARID", "LOCATIONS"},
+            new String [] {"INTEGER", "VARCHAR"},
+            new String [] {"1", "'Lexus'"});
     }
 
     private void resetMetastoreSchema() {
@@ -210,13 +210,13 @@ public abstract class MetaConnectIncrementalImportTestBase extends BaseSqoopTest
         }
     }
 
-    private void initMetastoreConnection() throws SQLException{
+    private void initMetastoreConnection() throws SQLException {
         SqoopOptions options = new SqoopOptions();
         options.setConnectString(metaConnectString);
         options.setUsername(metaUser);
         options.setPassword(metaPass);
         org.apache.sqoop.metastore.JobData jd =
-                new org.apache.sqoop.metastore.JobData(options, new JobTool());
+            new org.apache.sqoop.metastore.JobData(options, new JobTool());
         DefaultManagerFactory dmf = new DefaultManagerFactory();
         cm = dmf.accept(jd);
         connMeta= cm.getConnection();

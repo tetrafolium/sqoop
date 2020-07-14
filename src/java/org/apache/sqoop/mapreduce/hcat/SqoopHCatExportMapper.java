@@ -34,26 +34,26 @@ import org.apache.sqoop.mapreduce.AutoProgressMapper;
  */
 public class SqoopHCatExportMapper
     extends
-  AutoProgressMapper<WritableComparable, HCatRecord,
-  SqoopRecord, WritableComparable> {
-  public static final Log LOG = LogFactory
-    .getLog(SqoopHCatExportMapper.class.getName());
-  private SqoopHCatExportHelper helper;
+    AutoProgressMapper<WritableComparable, HCatRecord,
+    SqoopRecord, WritableComparable> {
+    public static final Log LOG = LogFactory
+                                  .getLog(SqoopHCatExportMapper.class.getName());
+    private SqoopHCatExportHelper helper;
 
-  @Override
-  protected void setup(Context context)
+    @Override
+    protected void setup(Context context)
     throws IOException, InterruptedException {
-    super.setup(context);
+        super.setup(context);
 
-    Configuration conf = context.getConfiguration();
-    helper = new SqoopHCatExportHelper(conf);
-  }
+        Configuration conf = context.getConfiguration();
+        helper = new SqoopHCatExportHelper(conf);
+    }
 
-  @Override
-  public void map(WritableComparable key, HCatRecord value,
-    Context context)
+    @Override
+    public void map(WritableComparable key, HCatRecord value,
+                    Context context)
     throws IOException, InterruptedException {
-    context.write(helper.convertToSqoopRecord(value), NullWritable.get());
-  }
+        context.write(helper.convertToSqoopRecord(value), NullWritable.get());
+    }
 
 }

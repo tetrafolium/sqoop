@@ -31,28 +31,28 @@ import org.apache.commons.logging.LogFactory;
  */
 public final class PostgreSQLUtils {
 
-  public static final Log LOG =
-    LogFactory.getLog(PostgreSQLUtils.class.getName());
+    public static final Log LOG =
+        LogFactory.getLog(PostgreSQLUtils.class.getName());
 
-  private PostgreSQLUtils() {
-  }
+    private PostgreSQLUtils() {
+    }
 
-  /** Write the user's password to a file that is chmod 0600.
-      @return the filename.
-  */
-  public static String writePasswordFile(String tmpDir, String password)
+    /** Write the user's password to a file that is chmod 0600.
+        @return the filename.
+    */
+    public static String writePasswordFile(String tmpDir, String password)
     throws IOException {
-    File tempFile = File.createTempFile("pgpass", ".pgpass", new File(tmpDir));
-    LOG.debug("Writing password to tempfile: " + tempFile);
+        File tempFile = File.createTempFile("pgpass", ".pgpass", new File(tmpDir));
+        LOG.debug("Writing password to tempfile: " + tempFile);
 
-    // Make sure it's only readable by the current user.
-    DirectImportUtils.setFilePermissions(tempFile, "0600");
+        // Make sure it's only readable by the current user.
+        DirectImportUtils.setFilePermissions(tempFile, "0600");
 
-    // Actually write the password data into the file.
-    BufferedWriter w = new BufferedWriter(
-        new OutputStreamWriter(new FileOutputStream(tempFile)));
-    w.write("*:*:*:*:" + password);
-    w.close();
-    return tempFile.toString();
-  }
+        // Actually write the password data into the file.
+        BufferedWriter w = new BufferedWriter(
+            new OutputStreamWriter(new FileOutputStream(tempFile)));
+        w.write("*:*:*:*:" + password);
+        w.close();
+        return tempFile.toString();
+    }
 }

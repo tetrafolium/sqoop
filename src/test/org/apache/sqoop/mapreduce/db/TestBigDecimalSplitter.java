@@ -29,37 +29,37 @@ import static org.junit.Assert.assertEquals;
 @Category(UnitTest.class)
 public class TestBigDecimalSplitter {
 
-  /* Test if the decimal split sizes are generated as expected */
-  @Test
-  public void testDecimalTryDivide() {
-    BigDecimal numerator = new BigDecimal("2");
-    BigDecimal denominator = new BigDecimal("4");
-	BigDecimal expected = new BigDecimal("0.5");
-	BigDecimalSplitter splitter = new BigDecimalSplitter();
-	BigDecimal out = splitter.tryDivide(numerator, denominator);
-	assertEquals(expected, out);
-  }
+    /* Test if the decimal split sizes are generated as expected */
+    @Test
+    public void testDecimalTryDivide() {
+        BigDecimal numerator = new BigDecimal("2");
+        BigDecimal denominator = new BigDecimal("4");
+        BigDecimal expected = new BigDecimal("0.5");
+        BigDecimalSplitter splitter = new BigDecimalSplitter();
+        BigDecimal out = splitter.tryDivide(numerator, denominator);
+        assertEquals(expected, out);
+    }
 
-  /* Test if the integer split sizes are generated as expected */
-  @Test
-  public void testIntegerTryDivide() {
-	BigDecimal numerator = new BigDecimal("99");
-	BigDecimal denominator = new BigDecimal("3");
-	BigDecimal expected = new BigDecimal("33");
-	BigDecimalSplitter splitter = new BigDecimalSplitter();
-	BigDecimal out = splitter.tryDivide(numerator, denominator);
-	assertEquals(expected, out);
-  }
+    /* Test if the integer split sizes are generated as expected */
+    @Test
+    public void testIntegerTryDivide() {
+        BigDecimal numerator = new BigDecimal("99");
+        BigDecimal denominator = new BigDecimal("3");
+        BigDecimal expected = new BigDecimal("33");
+        BigDecimalSplitter splitter = new BigDecimalSplitter();
+        BigDecimal out = splitter.tryDivide(numerator, denominator);
+        assertEquals(expected, out);
+    }
 
-  /* Test if the recurring decimal split sizes are generated as expected */
-  @Test
-  public void testRecurringTryDivide() {
-	BigDecimal numerator = new BigDecimal("1");
-	BigDecimal denominator = new BigDecimal("3");
-	BigDecimal expected = new BigDecimal("1");
-	BigDecimalSplitter splitter = new BigDecimalSplitter();
-	BigDecimal out = splitter.tryDivide(numerator, denominator);
-	assertEquals(expected, out);
-  }
+    /* Test if the recurring decimal split sizes are generated as expected */
+    @Test
+    public void testRecurringTryDivide() {
+        BigDecimal numerator = new BigDecimal("1");
+        BigDecimal denominator = new BigDecimal("3");
+        BigDecimal expected = new BigDecimal("1");
+        BigDecimalSplitter splitter = new BigDecimalSplitter();
+        BigDecimal out = splitter.tryDivide(numerator, denominator);
+        assertEquals(expected, out);
+    }
 
 }

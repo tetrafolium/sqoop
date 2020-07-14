@@ -39,50 +39,50 @@ import org.apache.sqoop.lib.SqoopRecord;
 public class MergeParquetMapper
     extends  MergeGenericRecordExportMapper<GenericRecord, GenericRecord> {
 
-  private Map<String, Pair<String, String>> sqoopRecordFields = new HashMap<String, Pair<String, String>>();
-  private SqoopRecord sqoopRecordImpl;
+    private Map<String, Pair<String, String>> sqoopRecordFields = new HashMap<String, Pair<String, String>>();
+    private SqoopRecord sqoopRecordImpl;
 
-  @Override
-  protected void setup(Context context) throws IOException, InterruptedException {
-    super.setup(context);
-    Configuration conf = context.getConfiguration();
-    final String userClassName = conf.get(MergeJob.MERGE_SQOOP_RECORD_KEY);
-    try {
-      final Class<? extends Object> clazz = Class.forName(userClassName, true,
-          Thread.currentThread().getContextClassLoader());
-      sqoopRecordImpl = (SqoopRecord) ReflectionUtils.newInstance(clazz, conf);
-      for (final Field field : clazz.getDeclaredFields()) {
-        final String fieldName = field.getName();
-        final String fieldTypeName = field.getType().getName();
-        sqoopRecordFields.put(fieldName.toLowerCase(), new Pair<String, String>(fieldName,
-            fieldTypeName));
-      }
-    } catch (ClassNotFoundException e) {
-      throw new IOException("Cannot find the user record class with class name"
-          + userClassName, e);
+    @Override
+    protected void setup(Context context) throws IOException, InterruptedException {
+        super.setup(context);
+        Configuration conf = context.getConfiguration();
+        final String userClassName = conf.get(MergeJob.MERGE_SQOOP_RECORD_KEY);
+        try {
+            final Class<? extends Object> clazz = Class.forName(userClassName, true,
+                                                  Thread.currentThread().getContextClassLoader());
+            sqoopRecordImpl = (SqoopRecord) ReflectionUtils.newInstance(clazz, conf);
+            for (final Field field : clazz.getDeclaredFields()) {
+                final String fieldName = field.getName();
+                final String fieldTypeName = field.getType().getName();
+                sqoopRecordFields.put(fieldName.toLowerCase(), new Pair<String, String>(fieldName,
+                                      fieldTypeName));
+            }
+        } catch (ClassNotFoundException e) {
+            throw new IOException("Cannot find the user record class with class name"
+                                  + userClassName, e);
+        }
     }
-  }
 
-  @Override
-  protected void map(GenericRecord key, GenericRecord val, Context context)
-      throws IOException, InterruptedException {
-    processRecord(toSqoopRecord(val), context);
-  }
-
-  private SqoopRecord toSqoopRecord(GenericRecord genericRecord) throws IOException {
-    Schema avroSchema = genericRecord.getSchema();
-    for (Schema.Field field : avroSchema.getFields()) {
-      Pair<String, String> sqoopRecordField = sqoopRecordFields.get(field.name().toLowerCase());
-      if (null == sqoopRecordField) {
-        throw new IOException("Cannot find field '" + field.name() + "' in fields of user class"
-            + sqoopRecordImpl.getClass().getName() + ". Fields are: "
-            + Arrays.deepToString(sqoopRecordFields.values().toArray()));
-      }
-      Object avroObject = genericRecord.get(field.name());
-      Object fieldVal = AvroUtil.fromAvro(avroObject, field.schema(), sqoopRecordField.value());
-      sqoopRecordImpl.setField(sqoopRecordField.key(), fieldVal);
+    @Override
+    protected void map(GenericRecord key, GenericRecord val, Context context)
+    throws IOException, InterruptedException {
+        processRecord(toSqoopRecord(val), context);
     }
-    return sqoopRecordImpl;
-  }
+
+    private SqoopRecord toSqoopRecord(GenericRecord genericRecord) throws IOException {
+        Schema avroSchema = genericRecord.getSchema();
+        for (Schema.Field field : avroSchema.getFields()) {
+            Pair<String, String> sqoopRecordField = sqoopRecordFields.get(field.name().toLowerCase());
+            if (null == sqoopRecordField) {
+                throw new IOException("Cannot find field '" + field.name() + "' in fields of user class"
+                                      + sqoopRecordImpl.getClass().getName() + ". Fields are: "
+                                      + Arrays.deepToString(sqoopRecordFields.values().toArray()));
+            }
+            Object avroObject = genericRecord.get(field.name());
+            Object fieldVal = AvroUtil.fromAvro(avroObject, field.schema(), sqoopRecordField.value());
+            sqoopRecordImpl.setField(sqoopRecordField.key(), fieldVal);
+        }
+        return sqoopRecordImpl;
+    }
 
 }

@@ -43,95 +43,95 @@ import org.apache.sqoop.mapreduce.parquet.ParquetImportJobConfigurator;
  */
 public class MainframeImportJob extends DataDrivenImportJob {
 
-  private static final Log LOG = LogFactory.getLog(
-      MainframeImportJob.class.getName());
+    private static final Log LOG = LogFactory.getLog(
+                                       MainframeImportJob.class.getName());
 
-  public MainframeImportJob(final SqoopOptions opts, ImportJobContext context, ParquetImportJobConfigurator parquetImportJobConfigurator) {
-    super(opts, MainframeDatasetInputFormat.class, context, parquetImportJobConfigurator);
-  }
-
-  @Override
-  protected Class<? extends Mapper> getMapperClass() {
-    if (SqoopOptions.FileLayout.BinaryFile.equals(options.getFileLayout())) {
-      LOG.debug("Using MainframeDatasetBinaryImportMapper");
-      return MainframeDatasetBinaryImportMapper.class;
-    } else if (options.getFileLayout() == SqoopOptions.FileLayout.TextFile) {
-      return MainframeDatasetImportMapper.class;
-    } else {
-      return super.getMapperClass();
+    public MainframeImportJob(final SqoopOptions opts, ImportJobContext context, ParquetImportJobConfigurator parquetImportJobConfigurator) {
+        super(opts, MainframeDatasetInputFormat.class, context, parquetImportJobConfigurator);
     }
-  }
 
-  @Override
-  protected void configureInputFormat(Job job, String tableName,
-      String tableClassName, String splitByCol) throws IOException {
-    super.configureInputFormat(job, tableName, tableClassName, splitByCol);
-    job.getConfiguration().set(
-        MainframeConfiguration.MAINFRAME_INPUT_DATASET_NAME,
-        options.getMainframeInputDatasetName());
-    job.getConfiguration().set(
+    @Override
+    protected Class<? extends Mapper> getMapperClass() {
+        if (SqoopOptions.FileLayout.BinaryFile.equals(options.getFileLayout())) {
+            LOG.debug("Using MainframeDatasetBinaryImportMapper");
+            return MainframeDatasetBinaryImportMapper.class;
+        } else if (options.getFileLayout() == SqoopOptions.FileLayout.TextFile) {
+            return MainframeDatasetImportMapper.class;
+        } else {
+            return super.getMapperClass();
+        }
+    }
+
+    @Override
+    protected void configureInputFormat(Job job, String tableName,
+                                        String tableClassName, String splitByCol) throws IOException {
+        super.configureInputFormat(job, tableName, tableClassName, splitByCol);
+        job.getConfiguration().set(
+            MainframeConfiguration.MAINFRAME_INPUT_DATASET_NAME,
+            options.getMainframeInputDatasetName());
+        job.getConfiguration().set(
             MainframeConfiguration.MAINFRAME_INPUT_DATASET_TYPE,
             options.getMainframeInputDatasetType());
-    job.getConfiguration().set(
+        job.getConfiguration().set(
             MainframeConfiguration.MAINFRAME_INPUT_DATASET_TAPE,
             options.getMainframeInputDatasetTape().toString());
-    if (!StringUtils.isBlank(options.getFtpCommands())) {
-      job.getConfiguration().set(
-      MainframeConfiguration.MAINFRAME_FTP_CUSTOM_COMMANDS,
-      options.getFtpCommands());
+        if (!StringUtils.isBlank(options.getFtpCommands())) {
+            job.getConfiguration().set(
+                MainframeConfiguration.MAINFRAME_FTP_CUSTOM_COMMANDS,
+                options.getFtpCommands());
+        }
+        if (SqoopOptions.FileLayout.BinaryFile == options.getFileLayout()) {
+            job.getConfiguration().set(
+                MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE,
+                MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE_BINARY);
+            job.getConfiguration().setInt(
+                MainframeConfiguration.MAINFRAME_FTP_TRANSFER_BINARY_BUFFER_SIZE,
+                options.getBufferSize()
+            );
+        } else {
+            job.getConfiguration().set(
+                MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE,
+                MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE_ASCII);
+        }
+
     }
-    if (SqoopOptions.FileLayout.BinaryFile == options.getFileLayout()) {
-      job.getConfiguration().set(
-        MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE,
-        MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE_BINARY);
-      job.getConfiguration().setInt(
-        MainframeConfiguration.MAINFRAME_FTP_TRANSFER_BINARY_BUFFER_SIZE,
-        options.getBufferSize()
-      );
-    } else {
-      job.getConfiguration().set(
-        MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE,
-        MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE_ASCII);
+
+    @Override
+    protected void configureOutputFormat(Job job, String tableName,
+                                         String tableClassName) throws ClassNotFoundException, IOException {
+        super.configureOutputFormat(job, tableName, tableClassName);
+        job.getConfiguration().set(
+            MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE,
+            options.getMainframeFtpTransferMode());
+        // use the default outputformat
+        LazyOutputFormat.setOutputFormatClass(job, getOutputFormatClass());
     }
 
-  }
+    @Override
+    protected void configureMapper(Job job, String tableName,
+                                   String tableClassName) throws IOException {
+        super.configureMapper(job, tableName, tableClassName);
+        if (SqoopOptions.FileLayout.BinaryFile == options.getFileLayout()) {
+            job.setOutputKeyClass(BytesWritable.class);
+            job.setOutputValueClass(NullWritable.class);
 
-  @Override
-  protected void configureOutputFormat(Job job, String tableName,
-      String tableClassName) throws ClassNotFoundException, IOException {
-    super.configureOutputFormat(job, tableName, tableClassName);
-    job.getConfiguration().set(
-      MainframeConfiguration.MAINFRAME_FTP_TRANSFER_MODE,
-      options.getMainframeFtpTransferMode());
-    // use the default outputformat
-    LazyOutputFormat.setOutputFormatClass(job, getOutputFormatClass());
-  }
-
-  @Override
-  protected void configureMapper(Job job, String tableName,
-      String tableClassName) throws IOException {
-    super.configureMapper(job, tableName, tableClassName);
-    if (SqoopOptions.FileLayout.BinaryFile == options.getFileLayout()) {
-      job.setOutputKeyClass(BytesWritable.class);
-      job.setOutputValueClass(NullWritable.class);
-
-      // this is required as code generated class assumes setField method takes String
-      // and will fail with ClassCastException when a byte array is passed instead
-      // java.lang.ClassCastException: [B cannot be cast to java.lang.String
-      Configuration conf = job.getConfiguration();
-      conf.setClass(org.apache.sqoop.mapreduce.db.DBConfiguration.INPUT_CLASS_PROPERTY, MainframeDatasetBinaryRecord.class,
-        DBWritable.class);
+            // this is required as code generated class assumes setField method takes String
+            // and will fail with ClassCastException when a byte array is passed instead
+            // java.lang.ClassCastException: [B cannot be cast to java.lang.String
+            Configuration conf = job.getConfiguration();
+            conf.setClass(org.apache.sqoop.mapreduce.db.DBConfiguration.INPUT_CLASS_PROPERTY, MainframeDatasetBinaryRecord.class,
+                          DBWritable.class);
+        }
     }
-  }
 
-  @Override
-  protected Class<? extends OutputFormat> getOutputFormatClass() {
-    if (options.getFileLayout() == SqoopOptions.FileLayout.TextFile) {
-      return RawKeyTextOutputFormat.class;
-    } else if (options.getFileLayout()
-        == SqoopOptions.FileLayout.BinaryFile) {
-      return ByteKeyOutputFormat.class;
+    @Override
+    protected Class<? extends OutputFormat> getOutputFormatClass() {
+        if (options.getFileLayout() == SqoopOptions.FileLayout.TextFile) {
+            return RawKeyTextOutputFormat.class;
+        } else if (options.getFileLayout()
+                   == SqoopOptions.FileLayout.BinaryFile) {
+            return ByteKeyOutputFormat.class;
+        }
+        return null;
     }
-    return null;
-  }
 }

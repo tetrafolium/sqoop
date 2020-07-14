@@ -23,37 +23,37 @@ package org.apache.sqoop.manager.oracle;
  */
 public class OracleTableColumn {
 
-  private String name;
-  private String dataType; // <- i.e. The data_type from dba_tab_columns
-  private int oracleType;
+    private String name;
+    private String dataType; // <- i.e. The data_type from dba_tab_columns
+    private int oracleType;
 
-  public OracleTableColumn(String name, String dataType) {
+    public OracleTableColumn(String name, String dataType) {
 
-    this.setName(name);
-    this.setDataType(dataType);
-  }
+        this.setName(name);
+        this.setDataType(dataType);
+    }
 
-  public String getName() {
-    return name;
-  }
+    public String getName() {
+        return name;
+    }
 
-  public void setName(String newName) {
-    this.name = newName;
-  }
+    public void setName(String newName) {
+        this.name = newName;
+    }
 
-  public String getDataType() {
-    return dataType;
-  }
+    public String getDataType() {
+        return dataType;
+    }
 
-  public void setDataType(String newDataType) {
-    this.dataType = newDataType;
-  }
+    public void setDataType(String newDataType) {
+        this.dataType = newDataType;
+    }
 
-  public int getOracleType() {
-    return oracleType;
-  }
+    public int getOracleType() {
+        return oracleType;
+    }
 
-  public void setOracleType(int newOracleType) {
-    this.oracleType = newOracleType;
-  }
+    public void setOracleType(int newOracleType) {
+        this.oracleType = newOracleType;
+    }
 }

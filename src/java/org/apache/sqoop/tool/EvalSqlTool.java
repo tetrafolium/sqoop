@@ -44,130 +44,130 @@ import org.apache.sqoop.util.ResultSetPrinter;
  */
 public class EvalSqlTool extends BaseSqoopTool {
 
-  public static final Log LOG = LogFactory.getLog(EvalSqlTool.class.getName());
+    public static final Log LOG = LogFactory.getLog(EvalSqlTool.class.getName());
 
-  public EvalSqlTool() {
-    super("eval");
-  }
-
-  @Override
-  /** {@inheritDoc} */
-  public int run(SqoopOptions options) {
-    if (!init(options)) {
-      return 1;
+    public EvalSqlTool() {
+        super("eval");
     }
 
-    PreparedStatement stmt = null;
-    ResultSet rs = null;
-    PrintWriter pw = null;
-    try {
-      Connection c = manager.getConnection();
-      String query = options.getSqlQuery();
-      LOG.debug("SQL query: " + query);
-      stmt = c.prepareStatement(query);
-      boolean resultType = stmt.execute();
-      // Iterate over all the results from this statement.
-      while (true) {
-        LOG.debug("resultType=" + resultType);
-        if (!resultType) {
-          // This result was an update count.
-          int updateCount = stmt.getUpdateCount();
-          LOG.debug("updateCount=" + updateCount);
-          if (updateCount == -1) {
-            // We are done iterating over results from this statement.
-            c.commit();
-            break;
-          } else {
-            LOG.info(updateCount + " row(s) updated.");
-          }
-        } else {
-          // This yields a ResultSet.
-          rs = stmt.getResultSet();
-          pw = new PrintWriter(System.out, true);
-          new ResultSetPrinter().printResultSet(pw, rs);
-          pw.close();
-          pw = null;
+    @Override
+    /** {@inheritDoc} */
+    public int run(SqoopOptions options) {
+        if (!init(options)) {
+            return 1;
         }
 
-        resultType = stmt.getMoreResults();
-      }
-    } catch (IOException ioe) {
-      LOG.warn("IOException formatting results: "
-          + StringUtils.stringifyException(ioe));
-      return 1;
-    } catch (SQLException sqlE) {
-      LOG.warn("SQL exception executing statement: "
-          + StringUtils.stringifyException(sqlE));
-      return 1;
-    } finally {
-      if (null != pw) {
-        pw.close();
-      }
-      if (null != rs) {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        PrintWriter pw = null;
         try {
-          rs.close();
+            Connection c = manager.getConnection();
+            String query = options.getSqlQuery();
+            LOG.debug("SQL query: " + query);
+            stmt = c.prepareStatement(query);
+            boolean resultType = stmt.execute();
+            // Iterate over all the results from this statement.
+            while (true) {
+                LOG.debug("resultType=" + resultType);
+                if (!resultType) {
+                    // This result was an update count.
+                    int updateCount = stmt.getUpdateCount();
+                    LOG.debug("updateCount=" + updateCount);
+                    if (updateCount == -1) {
+                        // We are done iterating over results from this statement.
+                        c.commit();
+                        break;
+                    } else {
+                        LOG.info(updateCount + " row(s) updated.");
+                    }
+                } else {
+                    // This yields a ResultSet.
+                    rs = stmt.getResultSet();
+                    pw = new PrintWriter(System.out, true);
+                    new ResultSetPrinter().printResultSet(pw, rs);
+                    pw.close();
+                    pw = null;
+                }
+
+                resultType = stmt.getMoreResults();
+            }
+        } catch (IOException ioe) {
+            LOG.warn("IOException formatting results: "
+                     + StringUtils.stringifyException(ioe));
+            return 1;
         } catch (SQLException sqlE) {
-          LOG.warn("SQL exception closing ResultSet: "
-              + StringUtils.stringifyException(sqlE));
+            LOG.warn("SQL exception executing statement: "
+                     + StringUtils.stringifyException(sqlE));
+            return 1;
+        } finally {
+            if (null != pw) {
+                pw.close();
+            }
+            if (null != rs) {
+                try {
+                    rs.close();
+                } catch (SQLException sqlE) {
+                    LOG.warn("SQL exception closing ResultSet: "
+                             + StringUtils.stringifyException(sqlE));
+                }
+            }
+            if (null != stmt) {
+                try {
+                    stmt.close();
+                } catch (SQLException sqlE) {
+                    LOG.warn("SQL exception closing statement: "
+                             + StringUtils.stringifyException(sqlE));
+                }
+            }
+            destroy(options);
         }
-      }
-      if (null != stmt) {
-        try {
-          stmt.close();
-        } catch (SQLException sqlE) {
-          LOG.warn("SQL exception closing statement: "
-              + StringUtils.stringifyException(sqlE));
+
+        return 0;
+    }
+
+    @Override
+    /** Configure the command-line arguments we expect to receive */
+    public void configureOptions(ToolOptions toolOptions) {
+        toolOptions.addUniqueOptions(getCommonOptions());
+
+        RelatedOptions evalOpts = new RelatedOptions("SQL evaluation arguments");
+        evalOpts.addOption(OptionBuilder.withArgName("statement")
+                           .hasArg()
+                           .withDescription("Execute 'statement' in SQL and exit")
+                           .withLongOpt(SQL_QUERY_ARG)
+                           .create(SQL_QUERY_SHORT_ARG));
+
+        toolOptions.addUniqueOptions(evalOpts);
+    }
+
+    @Override
+    /** {@inheritDoc} */
+    public void applyOptions(CommandLine in, SqoopOptions out)
+    throws InvalidOptionsException {
+
+        applyCommonOptions(in, out);
+        if (in.hasOption(SQL_QUERY_ARG)) {
+            out.setSqlQuery(in.getOptionValue(SQL_QUERY_ARG));
         }
-      }
-      destroy(options);
     }
 
-    return 0;
-  }
+    @Override
+    /** {@inheritDoc} */
+    public void validateOptions(SqoopOptions options)
+    throws InvalidOptionsException {
 
-  @Override
-  /** Configure the command-line arguments we expect to receive */
-  public void configureOptions(ToolOptions toolOptions) {
-    toolOptions.addUniqueOptions(getCommonOptions());
+        if (hasUnrecognizedArgs(extraArguments)) {
+            throw new InvalidOptionsException(HELP_STR);
+        }
 
-    RelatedOptions evalOpts = new RelatedOptions("SQL evaluation arguments");
-    evalOpts.addOption(OptionBuilder.withArgName("statement")
-        .hasArg()
-        .withDescription("Execute 'statement' in SQL and exit")
-        .withLongOpt(SQL_QUERY_ARG)
-        .create(SQL_QUERY_SHORT_ARG));
+        String sqlCmd = options.getSqlQuery();
+        if (null == sqlCmd || sqlCmd.length() == 0) {
+            throw new InvalidOptionsException(
+                "This command requires the " + SQL_QUERY_ARG + " argument."
+                + HELP_STR);
+        }
 
-    toolOptions.addUniqueOptions(evalOpts);
-  }
-
-  @Override
-  /** {@inheritDoc} */
-  public void applyOptions(CommandLine in, SqoopOptions out)
-      throws InvalidOptionsException {
-
-    applyCommonOptions(in, out);
-    if (in.hasOption(SQL_QUERY_ARG)) {
-      out.setSqlQuery(in.getOptionValue(SQL_QUERY_ARG));
+        validateCommonOptions(options);
     }
-  }
-
-  @Override
-  /** {@inheritDoc} */
-  public void validateOptions(SqoopOptions options)
-      throws InvalidOptionsException {
-
-    if (hasUnrecognizedArgs(extraArguments)) {
-      throw new InvalidOptionsException(HELP_STR);
-    }
-
-    String sqlCmd = options.getSqlQuery();
-    if (null == sqlCmd || sqlCmd.length() == 0) {
-      throw new InvalidOptionsException(
-          "This command requires the " + SQL_QUERY_ARG + " argument."
-          + HELP_STR);
-    }
-
-    validateCommonOptions(options);
-  }
 }
 

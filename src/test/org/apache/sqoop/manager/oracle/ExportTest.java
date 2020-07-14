@@ -33,53 +33,53 @@ import static org.junit.Assert.assertEquals;
 @Category(OracleEeTest.class)
 public class ExportTest extends OraOopTestCase {
 
-  private static final ExportTest TEST_CASE = new ExportTest();
+    private static final ExportTest TEST_CASE = new ExportTest();
 
-  private static final boolean DISABLE_ORACLE_ESCAPING_FLAG = false;
+    private static final boolean DISABLE_ORACLE_ESCAPING_FLAG = false;
 
-  @BeforeClass
-  public static void setUpHdfsData() throws Exception {
-    // Copy the TST_PRODUCT table into HDFS which can be used for the export
-    // tests
-    TEST_CASE.setSqoopTargetDirectory(TEST_CASE.getSqoopTargetDirectory()
-        + "tst_product");
-    TEST_CASE.createTable("table_tst_product.xml");
+    @BeforeClass
+    public static void setUpHdfsData() throws Exception {
+        // Copy the TST_PRODUCT table into HDFS which can be used for the export
+        // tests
+        TEST_CASE.setSqoopTargetDirectory(TEST_CASE.getSqoopTargetDirectory()
+                                          + "tst_product");
+        TEST_CASE.createTable("table_tst_product.xml");
 
-    int retCode =
- TEST_CASE.runImport("TST_PRODUCT", TEST_CASE.getSqoopConf(), false, DISABLE_ORACLE_ESCAPING_FLAG);
-    assertEquals("Return code should be 0", 0, retCode);
-  }
+        int retCode =
+            TEST_CASE.runImport("TST_PRODUCT", TEST_CASE.getSqoopConf(), false, DISABLE_ORACLE_ESCAPING_FLAG);
+        assertEquals("Return code should be 0", 0, retCode);
+    }
 
-  @Test
-  public void testProductExport() throws Exception {
-    int retCode =
-        TEST_CASE.runExportFromTemplateTable("TST_PRODUCT", "TST_PRODUCT_EXP", false, DISABLE_ORACLE_ESCAPING_FLAG);
-    assertEquals("Return code should be 0", 0, retCode);
-  }
+    @Test
+    public void testProductExport() throws Exception {
+        int retCode =
+            TEST_CASE.runExportFromTemplateTable("TST_PRODUCT", "TST_PRODUCT_EXP", false, DISABLE_ORACLE_ESCAPING_FLAG);
+        assertEquals("Return code should be 0", 0, retCode);
+    }
 
-  @Test
-  public void testProductExportMixedCaseTableName() throws Exception {
-    int retCode =
-        TEST_CASE.runExportFromTemplateTable("TST_PRODUCT",
-            "\"\"T5+_Pr#duct_Exp\"\"", false, DISABLE_ORACLE_ESCAPING_FLAG);
-    assertEquals("Return code should be 0", 0, retCode);
-  }
+    @Test
+    public void testProductExportMixedCaseTableName() throws Exception {
+        int retCode =
+            TEST_CASE.runExportFromTemplateTable("TST_PRODUCT",
+                    "\"\"T5+_Pr#duct_Exp\"\"", false, DISABLE_ORACLE_ESCAPING_FLAG);
+        assertEquals("Return code should be 0", 0, retCode);
+    }
 
-  @AfterClass
-  public static void cleanUpHdfsData() throws Exception {
-    TEST_CASE.cleanupFolders();
-    TEST_CASE.closeTestEnvConnection();
-  }
+    @AfterClass
+    public static void cleanUpHdfsData() throws Exception {
+        TEST_CASE.cleanupFolders();
+        TEST_CASE.closeTestEnvConnection();
+    }
 
-  protected String getConnectString() {
-    return org.apache.sqoop.manager.oracle.util.OracleUtils.EE_CONNECT_STRING;
-  }
+    protected String getConnectString() {
+        return org.apache.sqoop.manager.oracle.util.OracleUtils.EE_CONNECT_STRING;
+    }
 
-  protected String getUsername() {
-    return org.apache.sqoop.manager.oracle.util.OracleUtils.ORACLE_EE_USER_NAME;
-  }
+    protected String getUsername() {
+        return org.apache.sqoop.manager.oracle.util.OracleUtils.ORACLE_EE_USER_NAME;
+    }
 
-  protected String getPassword() {
-    return OracleUtils.ORACLE_EE_USER_PASS;
-  }
+    protected String getPassword() {
+        return OracleUtils.ORACLE_EE_USER_PASS;
+    }
 }

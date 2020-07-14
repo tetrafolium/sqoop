@@ -34,125 +34,125 @@ import org.apache.sqoop.manager.sqlserver.MSSQLTestData.KEY_STRINGS;
 */
 public class MSSQLTestDataFileParser {
 
-  public static final Log LOG = LogFactory.getLog(
-      MSSQLTestDataFileParser.class.getName());
+    public static final Log LOG = LogFactory.getLog(
+                                      MSSQLTestDataFileParser.class.getName());
 
-  private String filename;
-  private String delim;
-  private List records;
+    private String filename;
+    private String delim;
+    private List records;
 
-  MSSQLTestDataFileParser(String filename) throws Exception {
-    this.filename = filename;
+    MSSQLTestDataFileParser(String filename) throws Exception {
+        this.filename = filename;
 
-  }
-
-  enum DATATYPES {
-    DECIMAL, NUMERIC, VARBINARY, TIME, SMALLDATETIME, DATETIME, DATETIME2,
-    DATETIMEOFFSET, BIGINT, INT, MONEY, SMALLMONEY, TEXT, NTEXT, NCHAR,
-    NVARCHAR, IMAGE, SMALLINT, FLOAT, REAL, DATE, CHAR, VARCHAR, BINARY,
-    TINYINT;
-
-  }
-
-  public void parse() throws Exception {
-    if (this.filename == null) {
-      throw new Exception("No test data file specified.");
     }
 
-    BufferedReader br = new BufferedReader(new FileReader(this.filename));
+    enum DATATYPES {
+        DECIMAL, NUMERIC, VARBINARY, TIME, SMALLDATETIME, DATETIME, DATETIME2,
+        DATETIMEOFFSET, BIGINT, INT, MONEY, SMALLMONEY, TEXT, NTEXT, NCHAR,
+        NVARCHAR, IMAGE, SMALLINT, FLOAT, REAL, DATE, CHAR, VARCHAR, BINARY,
+        TINYINT;
 
-    if (br != null) {
-      records = new ArrayList();
+    }
 
-      String tmp;
-      String del = this.getDelim();
-      int offset = 0;
-      while ((tmp = br.readLine()) != null) {
-        offset++;
-        String[] splits = tmp.split(del);
-
-        if (splits.length == 5 || splits.length == 6
-            || splits.length == 7) {
-          System.out.println(Integer.toString(offset));
-          MSSQLTestData td = new MSSQLTestData(splits[0]);
-          td.setData(KEY_STRINGS.OFFSET, Integer.toString(offset));
-
-          if (splits[0].equals(DATATYPES.DECIMAL.toString())
-              || splits[0].equals(DATATYPES.NUMERIC.toString())) {
-
-            td.setData(KEY_STRINGS.TO_INSERT, splits[1]);
-            td.setData(KEY_STRINGS.DB_READBACK, splits[2]);
-            td.setData(KEY_STRINGS.HDFS_READBACK, splits[3]);
-            td.setData(KEY_STRINGS.SCALE, splits[4]);
-            td.setData(KEY_STRINGS.PREC, splits[5]);
-            td.setData(KEY_STRINGS.NEG_POS_FLAG, splits[6]);
-
-            records.add(td);
-          } else if (splits[0].equals(DATATYPES.NCHAR.toString())
-              || splits[0].equals(DATATYPES.VARBINARY.toString())
-              || splits[0].equals(DATATYPES.NVARCHAR.toString())
-              || splits[0].equals(DATATYPES.CHAR.toString())
-              || splits[0].equals(DATATYPES.VARCHAR.toString())
-              || splits[0].equals(DATATYPES.BINARY.toString())) {
-
-            td.setData(KEY_STRINGS.TO_INSERT, splits[1]);
-            td.setData(KEY_STRINGS.DB_READBACK, splits[2]);
-            td.setData(KEY_STRINGS.HDFS_READBACK, splits[3]);
-            td.setData(KEY_STRINGS.SCALE, splits[4]);
-            td.setData(KEY_STRINGS.NEG_POS_FLAG, splits[5]);
-
-            records.add(td);
-
-          } else {
-            td.setData(KEY_STRINGS.TO_INSERT, splits[1]);
-            td.setData(KEY_STRINGS.DB_READBACK, splits[2]);
-            td.setData(KEY_STRINGS.HDFS_READBACK, splits[3]);
-            td.setData(KEY_STRINGS.NEG_POS_FLAG, splits[4]);
-
-            records.add(td);
-          }
-
+    public void parse() throws Exception {
+        if (this.filename == null) {
+            throw new Exception("No test data file specified.");
         }
 
-      }
-      System.out.println("\n\n Records" + records.size() + "\n\n");
-    }
+        BufferedReader br = new BufferedReader(new FileReader(this.filename));
 
-  }
+        if (br != null) {
+            records = new ArrayList();
 
-  public List getRecords() {
-    return records;
-  }
+            String tmp;
+            String del = this.getDelim();
+            int offset = 0;
+            while ((tmp = br.readLine()) != null) {
+                offset++;
+                String[] splits = tmp.split(del);
 
-  public List getTestdata(DATATYPES dt) {
-    List l;
-    l = new ArrayList();
+                if (splits.length == 5 || splits.length == 6
+                        || splits.length == 7) {
+                    System.out.println(Integer.toString(offset));
+                    MSSQLTestData td = new MSSQLTestData(splits[0]);
+                    td.setData(KEY_STRINGS.OFFSET, Integer.toString(offset));
 
-    if (records != null) {
-      for (Iterator<MSSQLTestData> i = records.iterator(); i.hasNext();) {
-        MSSQLTestData tmp = i.next();
-        if (tmp.getDatatype().equals(dt.toString())) {
-          l.add(tmp);
+                    if (splits[0].equals(DATATYPES.DECIMAL.toString())
+                            || splits[0].equals(DATATYPES.NUMERIC.toString())) {
+
+                        td.setData(KEY_STRINGS.TO_INSERT, splits[1]);
+                        td.setData(KEY_STRINGS.DB_READBACK, splits[2]);
+                        td.setData(KEY_STRINGS.HDFS_READBACK, splits[3]);
+                        td.setData(KEY_STRINGS.SCALE, splits[4]);
+                        td.setData(KEY_STRINGS.PREC, splits[5]);
+                        td.setData(KEY_STRINGS.NEG_POS_FLAG, splits[6]);
+
+                        records.add(td);
+                    } else if (splits[0].equals(DATATYPES.NCHAR.toString())
+                               || splits[0].equals(DATATYPES.VARBINARY.toString())
+                               || splits[0].equals(DATATYPES.NVARCHAR.toString())
+                               || splits[0].equals(DATATYPES.CHAR.toString())
+                               || splits[0].equals(DATATYPES.VARCHAR.toString())
+                               || splits[0].equals(DATATYPES.BINARY.toString())) {
+
+                        td.setData(KEY_STRINGS.TO_INSERT, splits[1]);
+                        td.setData(KEY_STRINGS.DB_READBACK, splits[2]);
+                        td.setData(KEY_STRINGS.HDFS_READBACK, splits[3]);
+                        td.setData(KEY_STRINGS.SCALE, splits[4]);
+                        td.setData(KEY_STRINGS.NEG_POS_FLAG, splits[5]);
+
+                        records.add(td);
+
+                    } else {
+                        td.setData(KEY_STRINGS.TO_INSERT, splits[1]);
+                        td.setData(KEY_STRINGS.DB_READBACK, splits[2]);
+                        td.setData(KEY_STRINGS.HDFS_READBACK, splits[3]);
+                        td.setData(KEY_STRINGS.NEG_POS_FLAG, splits[4]);
+
+                        records.add(td);
+                    }
+
+                }
+
+            }
+            System.out.println("\n\n Records" + records.size() + "\n\n");
         }
-      }
+
     }
 
-    return l;
-  }
-
-  private void trim(String[] strings) {
-    for (int i = 0; i < strings.length; i++) {
-      strings[i] = strings[i].trim();
+    public List getRecords() {
+        return records;
     }
 
-  }
+    public List getTestdata(DATATYPES dt) {
+        List l;
+        l = new ArrayList();
 
-  public String getDelim() {
-    return delim;
-  }
+        if (records != null) {
+            for (Iterator<MSSQLTestData> i = records.iterator(); i.hasNext();) {
+                MSSQLTestData tmp = i.next();
+                if (tmp.getDatatype().equals(dt.toString())) {
+                    l.add(tmp);
+                }
+            }
+        }
 
-  public void setDelim(String delim1) {
-    this.delim = delim1;
-  }
+        return l;
+    }
+
+    private void trim(String[] strings) {
+        for (int i = 0; i < strings.length; i++) {
+            strings[i] = strings[i].trim();
+        }
+
+    }
+
+    public String getDelim() {
+        return delim;
+    }
+
+    public void setDelim(String delim1) {
+        this.delim = delim1;
+    }
 
 }

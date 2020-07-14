@@ -28,58 +28,58 @@ import org.apache.accumulo.core.data.Mutation;
  */
 public abstract class MutationTransformer {
 
-  private String columnFamily;
-  private String rowKeyColumn;
-  private String visibility;
+    private String columnFamily;
+    private String rowKeyColumn;
+    private String visibility;
 
-  /**
-   * @return the default column family to insert into.
-   */
-  public String getColumnFamily() {
-    return this.columnFamily;
-  }
+    /**
+     * @return the default column family to insert into.
+     */
+    public String getColumnFamily() {
+        return this.columnFamily;
+    }
 
-  /**
-   * Set the default column family to insert into.
-   */
-  public void setColumnFamily(String colFamily) {
-    this.columnFamily = colFamily;
-  }
+    /**
+     * Set the default column family to insert into.
+     */
+    public void setColumnFamily(String colFamily) {
+        this.columnFamily = colFamily;
+    }
 
-  /**
-   * @return the field name identifying the value to use as the row id.
-   */
-  public String getRowKeyColumn() {
-    return this.rowKeyColumn;
-  }
+    /**
+     * @return the field name identifying the value to use as the row id.
+     */
+    public String getRowKeyColumn() {
+        return this.rowKeyColumn;
+    }
 
-  /**
-   * Set the column of the input fields which should be used to calculate
-   * the row id.
-   */
-  public void setRowKeyColumn(String rowKeyCol) {
-    this.rowKeyColumn = rowKeyCol;
-  }
+    /**
+     * Set the column of the input fields which should be used to calculate
+     * the row id.
+     */
+    public void setRowKeyColumn(String rowKeyCol) {
+        this.rowKeyColumn = rowKeyCol;
+    }
 
-  /**
-   * @return the field name identifying the visibility token.
-   */
-  public String getVisibility() {
-    return this.visibility;
-  }
+    /**
+     * @return the field name identifying the visibility token.
+     */
+    public String getVisibility() {
+        return this.visibility;
+    }
 
-  /**
-   * Set the visibility token to set for each cell.
-   */
-  public void setVisibility(String vis) {
-    this.visibility = vis;
-  }
+    /**
+     * Set the visibility token to set for each cell.
+     */
+    public void setVisibility(String vis) {
+        this.visibility = vis;
+    }
 
-  /**
-   * Returns a list of Mutations that inserts the fields into a row in Accumulo.
-   * @param fields a map of field names to values to insert.
-   * @return A list of Mutations that inserts these into Accumulo.
-   */
-  public abstract Iterable<Mutation> getMutations(Map<String, Object> fields)
-      throws IOException;
+    /**
+     * Returns a list of Mutations that inserts the fields into a row in Accumulo.
+     * @param fields a map of field names to values to insert.
+     * @return A list of Mutations that inserts these into Accumulo.
+     */
+    public abstract Iterable<Mutation> getMutations(Map<String, Object> fields)
+    throws IOException;
 }

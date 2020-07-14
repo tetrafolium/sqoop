@@ -27,35 +27,35 @@ import java.security.NoSuchAlgorithmException;
  */
 public final class RandomHash {
 
-  private RandomHash() { }
+    private RandomHash() { }
 
-  /**
-   * Generate a new random md5 hash.
-   * @return a securely-generated random 16 byte sequence.
-   */
-  public static byte [] generateMD5Bytes() {
-    try {
-      MessageDigest digester = MessageDigest.getInstance("MD5");
-      long time = System.currentTimeMillis();
-      digester.update((new UID() + "@" + time).getBytes());
-      return digester.digest();
-    } catch (NoSuchAlgorithmException e) {
-      throw new RuntimeException(e);
+    /**
+     * Generate a new random md5 hash.
+     * @return a securely-generated random 16 byte sequence.
+     */
+    public static byte [] generateMD5Bytes() {
+        try {
+            MessageDigest digester = MessageDigest.getInstance("MD5");
+            long time = System.currentTimeMillis();
+            digester.update((new UID() + "@" + time).getBytes());
+            return digester.digest();
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
     }
-  }
 
-  /**
-   * Generate a new random md5 hash and convert it to a string.
-   * @return a securely-generated random string.
-   */
-  public static String generateMD5String() {
-    byte [] bytes = generateMD5Bytes();
-    StringBuilder sb = new StringBuilder();
-    for (byte b : bytes) {
-      int x = ((int) b) & 0xFF;
-      sb.append(String.format("%02x", x));
+    /**
+     * Generate a new random md5 hash and convert it to a string.
+     * @return a securely-generated random string.
+     */
+    public static String generateMD5String() {
+        byte [] bytes = generateMD5Bytes();
+        StringBuilder sb = new StringBuilder();
+        for (byte b : bytes) {
+            int x = ((int) b) & 0xFF;
+            sb.append(String.format("%02x", x));
+        }
+        return sb.toString();
     }
-    return sb.toString();
-  }
 }
 

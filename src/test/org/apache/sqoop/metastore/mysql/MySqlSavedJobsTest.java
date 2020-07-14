@@ -50,6 +50,6 @@ public class MySqlSavedJobsTest extends SavedJobsTestBase {
 
     public MySqlSavedJobsTest() {
         super(mySQLTestUtils.getMySqlConnectString(), mySQLTestUtils.getUserName(),
-                mySQLTestUtils.getUserPass(), JdbcDrivers.MYSQL.getDriverClass());
+              mySQLTestUtils.getUserPass(), JdbcDrivers.MYSQL.getDriverClass());
     }
 }

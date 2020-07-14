@@ -40,38 +40,38 @@ import static org.junit.Assert.assertEquals;
 @Category(KerberizedTest.class)
 public class TestHiveServer2TextImport extends ImportJobTestCase {
 
-  @ClassRule
-  public static MiniKdcInfrastructureRule miniKdcInfrastructure = new MiniKdcInfrastructureRule();
+    @ClassRule
+    public static MiniKdcInfrastructureRule miniKdcInfrastructure = new MiniKdcInfrastructureRule();
 
-  private HiveMiniCluster hiveMiniCluster;
+    private HiveMiniCluster hiveMiniCluster;
 
-  private HiveServer2TestUtil hiveServer2TestUtil;
+    private HiveServer2TestUtil hiveServer2TestUtil;
 
-  @Override
-  @Before
-  public void setUp() {
-    super.setUp();
-    KerberosAuthenticationConfiguration authenticationConfiguration = new KerberosAuthenticationConfiguration(miniKdcInfrastructure);
-    hiveMiniCluster = new HiveMiniCluster(authenticationConfiguration);
-    hiveMiniCluster.start();
-    hiveServer2TestUtil = new HiveServer2TestUtil(hiveMiniCluster.getUrl());
-  }
+    @Override
+    @Before
+    public void setUp() {
+        super.setUp();
+        KerberosAuthenticationConfiguration authenticationConfiguration = new KerberosAuthenticationConfiguration(miniKdcInfrastructure);
+        hiveMiniCluster = new HiveMiniCluster(authenticationConfiguration);
+        hiveMiniCluster.start();
+        hiveServer2TestUtil = new HiveServer2TestUtil(hiveMiniCluster.getUrl());
+    }
 
-  @Override
-  @After
-  public void tearDown() {
-    super.tearDown();
-    hiveMiniCluster.stop();
-  }
+    @Override
+    @After
+    public void tearDown() {
+        super.tearDown();
+        hiveMiniCluster.stop();
+    }
 
-  @Test
-  public void testImport() throws Exception {
-    List<Object> columnValues = Arrays.<Object>asList("test", 42, "somestring");
+    @Test
+    public void testImport() throws Exception {
+        List<Object> columnValues = Arrays.<Object>asList("test", 42, "somestring");
 
-    String[] types = {"VARCHAR(32)", "INTEGER", "CHAR(64)"};
-    createTableWithColTypes(types, columnValues);
+        String[] types = {"VARCHAR(32)", "INTEGER", "CHAR(64)"};
+        createTableWithColTypes(types, columnValues);
 
-    String[] args = new ArgumentArrayBuilder()
+        String[] args = new ArgumentArrayBuilder()
         .withProperty(YarnConfiguration.RM_PRINCIPAL, miniKdcInfrastructure.getTestPrincipal())
         .withOption("connect", getConnectString())
         .withOption("table", getTableName())
@@ -81,9 +81,9 @@ public class TestHiveServer2TextImport extends ImportJobTestCase {
         .withOption("delete-target-dir")
         .build();
 
-    runImport(args);
+        runImport(args);
 
-    List<List<Object>> rows = hiveServer2TestUtil.loadRawRowsFromTable(getTableName());
-    assertEquals(columnValues, rows.get(0));
-  }
+        List<List<Object>> rows = hiveServer2TestUtil.loadRawRowsFromTable(getTableName());
+        assertEquals(columnValues, rows.get(0));
+    }
 }

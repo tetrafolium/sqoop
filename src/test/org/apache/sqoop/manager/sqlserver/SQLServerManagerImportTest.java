@@ -87,293 +87,293 @@ import static org.junit.Assert.fail;
 @Category(SqlServerTest.class)
 public class SQLServerManagerImportTest extends ImportJobTestCase {
 
-  public static final Log LOG = LogFactory.getLog(
-          SQLServerManagerImportTest.class.getName());
+    public static final Log LOG = LogFactory.getLog(
+                                      SQLServerManagerImportTest.class.getName());
 
-  static final String SCHEMA_DBO = "dbo";
-  static final String DBO_TABLE_NAME = "EMPLOYEES_MSSQL";
-  static final String SCHEMA_SCH = "sch";
-  static final String SCH_TABLE_NAME = "PRIVATE_TABLE";
-  static final String CONNECT_STRING = HOST_URL + ";databaseName=" + DATABASE_NAME;
+    static final String SCHEMA_DBO = "dbo";
+    static final String DBO_TABLE_NAME = "EMPLOYEES_MSSQL";
+    static final String SCHEMA_SCH = "sch";
+    static final String SCH_TABLE_NAME = "PRIVATE_TABLE";
+    static final String CONNECT_STRING = HOST_URL + ";databaseName=" + DATABASE_NAME;
 
-  static final String CONNECTOR_FACTORY = System.getProperty(
-      "sqoop.test.msserver.connector.factory",
-      ConnFactory.DEFAULT_FACTORY_CLASS_NAMES);
+    static final String CONNECTOR_FACTORY = System.getProperty(
+            "sqoop.test.msserver.connector.factory",
+            ConnFactory.DEFAULT_FACTORY_CLASS_NAMES);
 
-  // instance variables populated during setUp, used during tests
-  private SQLServerManager manager;
+    // instance variables populated during setUp, used during tests
+    private SQLServerManager manager;
 
-  private Configuration conf = new Configuration();
+    private Configuration conf = new Configuration();
 
-  private Connection conn = null;
+    private Connection conn = null;
 
-  public static final String[] EXPECTED_RESULTS = new String[]{
-      "1,Aaron,1000000.0,engineering",
-      "2,Bob,400.0,sales",
-      "3,Fred,15.0,marketing",
-  };
+    public static final String[] EXPECTED_RESULTS = new String[] {
+        "1,Aaron,1000000.0,engineering",
+        "2,Bob,400.0,sales",
+        "3,Fred,15.0,marketing",
+    };
 
-  @Parameters(name = "Builder: {0}, Table: {1}")
-  public static Iterable<? extends Object> testConfigurations() {
-    ArgumentArrayBuilder builderForTableImportWithExplicitSchema = getArgsBuilderForTableImport().withToolOption("schema", SCHEMA_DBO);
-    return Arrays.asList(
-        new Object[] { getArgsBuilderForQueryImport(), DBO_TABLE_NAME },
-        new Object[] { getArgsBuilderForTableImport(), DBO_TABLE_NAME },
-        new Object[] { getArgsBuilderForDifferentSchemaTableImport(), SCH_TABLE_NAME },
-        new Object[] { builderForTableImportWithExplicitSchema, DBO_TABLE_NAME }
-    );
-  }
+    @Parameters(name = "Builder: {0}, Table: {1}")
+    public static Iterable<? extends Object> testConfigurations() {
+        ArgumentArrayBuilder builderForTableImportWithExplicitSchema = getArgsBuilderForTableImport().withToolOption("schema", SCHEMA_DBO);
+        return Arrays.asList(
+                   new Object[] { getArgsBuilderForQueryImport(), DBO_TABLE_NAME },
+                   new Object[] { getArgsBuilderForTableImport(), DBO_TABLE_NAME },
+                   new Object[] { getArgsBuilderForDifferentSchemaTableImport(), SCH_TABLE_NAME },
+                   new Object[] { builderForTableImportWithExplicitSchema, DBO_TABLE_NAME }
+               );
+    }
 
-  private final ArgumentArrayBuilder builder;
-  private final String tableName;
+    private final ArgumentArrayBuilder builder;
+    private final String tableName;
 
-  public SQLServerManagerImportTest(ArgumentArrayBuilder builder, String tableName) {
-    this.builder = new ArgumentArrayBuilder().with(builder);
-    this.tableName = tableName;
-  }
+    public SQLServerManagerImportTest(ArgumentArrayBuilder builder, String tableName) {
+        this.builder = new ArgumentArrayBuilder().with(builder);
+        this.tableName = tableName;
+    }
 
-  @Override
-  protected Configuration getConf() {
-    return conf;
-  }
+    @Override
+    protected Configuration getConf() {
+        return conf;
+    }
 
-  @Override
-  protected boolean useHsqldbTestServer() {
-    return false;
-  }
+    @Override
+    protected boolean useHsqldbTestServer() {
+        return false;
+    }
 
-  private String getDropTableStatement(String schema, String tableName) {
-    return "DROP TABLE IF EXISTS " + manager.escapeObjectName(schema)
-        + "." + manager.escapeObjectName(tableName);
-  }
+    private String getDropTableStatement(String schema, String tableName) {
+        return "DROP TABLE IF EXISTS " + manager.escapeObjectName(schema)
+               + "." + manager.escapeObjectName(tableName);
+    }
 
-  @Before
-  public void setUp() {
-    super.setUp();
+    @Before
+    public void setUp() {
+        super.setUp();
 
-    SqoopOptions options = new SqoopOptions(CONNECT_STRING, DBO_TABLE_NAME);
-    options.setUsername(DATABASE_USER);
-    options.setPassword(DATABASE_PASSWORD);
+        SqoopOptions options = new SqoopOptions(CONNECT_STRING, DBO_TABLE_NAME);
+        options.setUsername(DATABASE_USER);
+        options.setPassword(DATABASE_PASSWORD);
 
-    manager = new SQLServerManager(options);
+        manager = new SQLServerManager(options);
 
-    createTableAndPopulateData(SCHEMA_DBO, DBO_TABLE_NAME);
-    createTableAndPopulateData(SCHEMA_SCH, SCH_TABLE_NAME);
+        createTableAndPopulateData(SCHEMA_DBO, DBO_TABLE_NAME);
+        createTableAndPopulateData(SCHEMA_SCH, SCH_TABLE_NAME);
 
-    // To test with Microsoft SQL server connector, copy the connector jar to
-    // sqoop.thirdparty.lib.dir and set sqoop.test.msserver.connector.factory
-    // to com.microsoft.sqoop.SqlServer.MSSQLServerManagerFactory. By default,
-    // the built-in SQL server connector is used.
-    conf.setStrings(ConnFactory.FACTORY_CLASS_NAMES_KEY, CONNECTOR_FACTORY);
-  }
+        // To test with Microsoft SQL server connector, copy the connector jar to
+        // sqoop.thirdparty.lib.dir and set sqoop.test.msserver.connector.factory
+        // to com.microsoft.sqoop.SqlServer.MSSQLServerManagerFactory. By default,
+        // the built-in SQL server connector is used.
+        conf.setStrings(ConnFactory.FACTORY_CLASS_NAMES_KEY, CONNECTOR_FACTORY);
+    }
 
-  public void createTableAndPopulateData(String schema, String table) {
-    String fulltableName = manager.escapeObjectName(schema)
-      + "." + manager.escapeObjectName(table);
+    public void createTableAndPopulateData(String schema, String table) {
+        String fulltableName = manager.escapeObjectName(schema)
+                               + "." + manager.escapeObjectName(table);
 
-    Statement stmt = null;
+        Statement stmt = null;
 
-    // Create schema if needed
-    try {
-      conn = manager.getConnection();
-      stmt = conn.createStatement();
-      stmt.execute("CREATE SCHEMA " + schema);
-    } catch (SQLException sqlE) {
-      LOG.info("Can't create schema: " + sqlE.getMessage());
-    } finally {
-      try {
-        if (null != stmt) {
-          stmt.close();
+        // Create schema if needed
+        try {
+            conn = manager.getConnection();
+            stmt = conn.createStatement();
+            stmt.execute("CREATE SCHEMA " + schema);
+        } catch (SQLException sqlE) {
+            LOG.info("Can't create schema: " + sqlE.getMessage());
+        } finally {
+            try {
+                if (null != stmt) {
+                    stmt.close();
+                }
+            } catch (Exception ex) {
+                LOG.warn("Exception while closing stmt", ex);
+            }
         }
-      } catch (Exception ex) {
-        LOG.warn("Exception while closing stmt", ex);
-      }
-    }
 
-    // Drop the existing table, if there is one.
-    try {
-      conn = manager.getConnection();
-      stmt = conn.createStatement();
-      stmt.execute("DROP TABLE " + fulltableName);
-    } catch (SQLException sqlE) {
-      LOG.info("Table was not dropped: " + sqlE.getMessage());
-    } finally {
-      try {
-        if (null != stmt) {
-          stmt.close();
+        // Drop the existing table, if there is one.
+        try {
+            conn = manager.getConnection();
+            stmt = conn.createStatement();
+            stmt.execute("DROP TABLE " + fulltableName);
+        } catch (SQLException sqlE) {
+            LOG.info("Table was not dropped: " + sqlE.getMessage());
+        } finally {
+            try {
+                if (null != stmt) {
+                    stmt.close();
+                }
+            } catch (Exception ex) {
+                LOG.warn("Exception while closing stmt", ex);
+            }
         }
-      } catch (Exception ex) {
-        LOG.warn("Exception while closing stmt", ex);
-      }
-    }
 
-   // Create and populate table
-   try {
-      conn = manager.getConnection();
-      conn.setAutoCommit(false);
-      stmt = conn.createStatement();
+        // Create and populate table
+        try {
+            conn = manager.getConnection();
+            conn.setAutoCommit(false);
+            stmt = conn.createStatement();
 
-      // create the database table and populate it with data.
-      stmt.executeUpdate("CREATE TABLE " + fulltableName + " ("
-          + "id INT NOT NULL, "
-          + "name VARCHAR(24) NOT NULL, "
-          + "salary FLOAT, "
-          + "dept VARCHAR(32), "
-          + "PRIMARY KEY (id))");
+            // create the database table and populate it with data.
+            stmt.executeUpdate("CREATE TABLE " + fulltableName + " ("
+                               + "id INT NOT NULL, "
+                               + "name VARCHAR(24) NOT NULL, "
+                               + "salary FLOAT, "
+                               + "dept VARCHAR(32), "
+                               + "PRIMARY KEY (id))");
 
-      stmt.executeUpdate("INSERT INTO " + fulltableName + " VALUES("
-          + "1,'Aaron', "
-          + "1000000.00,'engineering')");
-      stmt.executeUpdate("INSERT INTO " + fulltableName + " VALUES("
-          + "2,'Bob', "
-          + "400.00,'sales')");
-      stmt.executeUpdate("INSERT INTO " + fulltableName + " VALUES("
-          + "3,'Fred', 15.00,"
-          + "'marketing')");
-      conn.commit();
-    } catch (SQLException sqlE) {
-      LOG.error("Encountered SQL Exception: ", sqlE);
-      sqlE.printStackTrace();
-      fail("SQLException when running test setUp(): " + sqlE);
-    } finally {
-      try {
-        if (null != stmt) {
-          stmt.close();
+            stmt.executeUpdate("INSERT INTO " + fulltableName + " VALUES("
+                               + "1,'Aaron', "
+                               + "1000000.00,'engineering')");
+            stmt.executeUpdate("INSERT INTO " + fulltableName + " VALUES("
+                               + "2,'Bob', "
+                               + "400.00,'sales')");
+            stmt.executeUpdate("INSERT INTO " + fulltableName + " VALUES("
+                               + "3,'Fred', 15.00,"
+                               + "'marketing')");
+            conn.commit();
+        } catch (SQLException sqlE) {
+            LOG.error("Encountered SQL Exception: ", sqlE);
+            sqlE.printStackTrace();
+            fail("SQLException when running test setUp(): " + sqlE);
+        } finally {
+            try {
+                if (null != stmt) {
+                    stmt.close();
+                }
+            } catch (Exception ex) {
+                LOG.warn("Exception while closing connection/stmt", ex);
+            }
         }
-      } catch (Exception ex) {
-        LOG.warn("Exception while closing connection/stmt", ex);
-      }
-    }
-  }
-
-  @After
-  public void tearDown() {
-    try {
-      Statement stmt = conn.createStatement();
-      stmt.executeUpdate(getDropTableStatement(SCHEMA_DBO, DBO_TABLE_NAME));
-      stmt.executeUpdate(getDropTableStatement(SCHEMA_SCH, SCH_TABLE_NAME));
-    } catch (SQLException e) {
-      LOG.error("Can't clean up the database:", e);
     }
 
-    super.tearDown();
-    try {
-      manager.close();
-    } catch (SQLException sqlE) {
-      LOG.error("Got SQLException: " + sqlE.toString());
-      fail("Got SQLException: " + sqlE.toString());
-    }
-  }
+    @After
+    public void tearDown() {
+        try {
+            Statement stmt = conn.createStatement();
+            stmt.executeUpdate(getDropTableStatement(SCHEMA_DBO, DBO_TABLE_NAME));
+            stmt.executeUpdate(getDropTableStatement(SCHEMA_SCH, SCH_TABLE_NAME));
+        } catch (SQLException e) {
+            LOG.error("Can't clean up the database:", e);
+        }
 
-  @Rule
-  public ExpectedLogMessage logMessage = new ExpectedLogMessage();
-
-  @Test
-  public void testImportSimple() throws IOException {
-    doImportAndVerify(builder, tableName);
-  }
-
-  @Test
-  public void testImportTableHints() throws IOException {
-    builder.withToolOption("table-hints", "NOLOCK");
-    doImportAndVerify(builder, tableName);
-  }
-
-  @Test
-  public void testImportTableHintsMultiple() throws IOException {
-    builder.withToolOption("table-hints", "NOLOCK,NOWAIT");
-    doImportAndVerify(builder, tableName);
-  }
-
-  @Test
-  public void testImportTableResilient() throws IOException {
-    logMessage.expectWarn("Sqoop will use resilient operations! In case of import, the split-by column also has to be specified, unique, and in ascending order.");
-    builder.withToolOption("resilient");
-    doImportAndVerify(builder, tableName);
-  }
-
-  /**
-   * The resilient option was named non-resilient before, but got renamed.
-   * This test is here to ensure backward compatibility in the sense that
-   * using the non-resilient option won't break any job.
-   *
-   * @throws IOException
-   */
-  @Test
-  public void testImportTableNonResilient() throws IOException {
-    builder.withToolOption("non-resilient");
-    doImportAndVerify(builder, tableName);
-  }
-
-  private static ArgumentArrayBuilder getArgsBuilder() {
-    ArgumentArrayBuilder builder = new ArgumentArrayBuilder();
-    return builder.withCommonHadoopFlags(true)
-        .withOption("connect", CONNECT_STRING)
-        .withOption("username", DATABASE_USER)
-        .withOption("password", DATABASE_PASSWORD)
-        .withOption("num-mappers",  "1")
-        .withOption("split-by", "id");
-  }
-
-  private static ArgumentArrayBuilder getArgsBuilderForTableImport() {
-    ArgumentArrayBuilder builder = getArgsBuilder();
-    return builder.withCommonHadoopFlags(true)
-        .withOption("warehouse-dir", BaseSqoopTestCase.getLocalWarehouseDir())
-        .withOption("table", DBO_TABLE_NAME);
-  }
-
-  private static ArgumentArrayBuilder getArgsBuilderForQueryImport() {
-    ArgumentArrayBuilder builder = getArgsBuilder();
-    return builder.withCommonHadoopFlags(true)
-        .withOption("query", "SELECT * FROM EMPLOYEES_MSSQL WHERE $CONDITIONS")
-        .withOption("target-dir", BaseSqoopTestCase.getLocalWarehouseDir() + "/" + DBO_TABLE_NAME);
-  }
-
-  private static ArgumentArrayBuilder getArgsBuilderForDifferentSchemaTableImport() {
-    ArgumentArrayBuilder builder = getArgsBuilder();
-    return builder.withCommonHadoopFlags(true)
-        .withOption("warehouse-dir", BaseSqoopTestCase.getLocalWarehouseDir())
-        .withOption("table", SCH_TABLE_NAME)
-        .withToolOption("schema", SCHEMA_SCH);
-  }
-
-  private void doImportAndVerify(ArgumentArrayBuilder argBuilder,
-                                 String tableName) throws IOException {
-
-    Path warehousePath = new Path(this.getWarehouseDir());
-    Path tablePath = new Path(warehousePath, tableName);
-    Path filePath = new Path(tablePath, "part-m-00000");
-
-    File tableFile = new File(tablePath.toString());
-    if (tableFile.exists() && tableFile.isDirectory()) {
-      // remove the directory before running the import.
-      FileListing.recursiveDeleteDir(tableFile);
+        super.tearDown();
+        try {
+            manager.close();
+        } catch (SQLException sqlE) {
+            LOG.error("Got SQLException: " + sqlE.toString());
+            fail("Got SQLException: " + sqlE.toString());
+        }
     }
 
-    String [] argv = argBuilder.build();
-    try {
-      runImport(argv);
-    } catch (IOException ioe) {
-      LOG.error("Got IOException during import: " + ioe.toString());
-      ioe.printStackTrace();
-      fail(ioe.toString());
+    @Rule
+    public ExpectedLogMessage logMessage = new ExpectedLogMessage();
+
+    @Test
+    public void testImportSimple() throws IOException {
+        doImportAndVerify(builder, tableName);
     }
 
-    File f = new File(filePath.toString());
-    assertTrue("Could not find imported data file", f.exists());
-    BufferedReader r = null;
-    try {
-      // Read through the file and make sure it's all there.
-      r = new BufferedReader(new InputStreamReader(new FileInputStream(f)));
-      for (String expectedLine : EXPECTED_RESULTS) {
-        assertEquals(expectedLine, r.readLine());
-      }
-    } catch (IOException ioe) {
-      LOG.error("Got IOException verifying results: " + ioe.toString());
-      ioe.printStackTrace();
-      fail(ioe.toString());
-    } finally {
-      IOUtils.closeStream(r);
+    @Test
+    public void testImportTableHints() throws IOException {
+        builder.withToolOption("table-hints", "NOLOCK");
+        doImportAndVerify(builder, tableName);
     }
-  }
+
+    @Test
+    public void testImportTableHintsMultiple() throws IOException {
+        builder.withToolOption("table-hints", "NOLOCK,NOWAIT");
+        doImportAndVerify(builder, tableName);
+    }
+
+    @Test
+    public void testImportTableResilient() throws IOException {
+        logMessage.expectWarn("Sqoop will use resilient operations! In case of import, the split-by column also has to be specified, unique, and in ascending order.");
+        builder.withToolOption("resilient");
+        doImportAndVerify(builder, tableName);
+    }
+
+    /**
+     * The resilient option was named non-resilient before, but got renamed.
+     * This test is here to ensure backward compatibility in the sense that
+     * using the non-resilient option won't break any job.
+     *
+     * @throws IOException
+     */
+    @Test
+    public void testImportTableNonResilient() throws IOException {
+        builder.withToolOption("non-resilient");
+        doImportAndVerify(builder, tableName);
+    }
+
+    private static ArgumentArrayBuilder getArgsBuilder() {
+        ArgumentArrayBuilder builder = new ArgumentArrayBuilder();
+        return builder.withCommonHadoopFlags(true)
+               .withOption("connect", CONNECT_STRING)
+               .withOption("username", DATABASE_USER)
+               .withOption("password", DATABASE_PASSWORD)
+               .withOption("num-mappers",  "1")
+               .withOption("split-by", "id");
+    }
+
+    private static ArgumentArrayBuilder getArgsBuilderForTableImport() {
+        ArgumentArrayBuilder builder = getArgsBuilder();
+        return builder.withCommonHadoopFlags(true)
+               .withOption("warehouse-dir", BaseSqoopTestCase.getLocalWarehouseDir())
+               .withOption("table", DBO_TABLE_NAME);
+    }
+
+    private static ArgumentArrayBuilder getArgsBuilderForQueryImport() {
+        ArgumentArrayBuilder builder = getArgsBuilder();
+        return builder.withCommonHadoopFlags(true)
+               .withOption("query", "SELECT * FROM EMPLOYEES_MSSQL WHERE $CONDITIONS")
+               .withOption("target-dir", BaseSqoopTestCase.getLocalWarehouseDir() + "/" + DBO_TABLE_NAME);
+    }
+
+    private static ArgumentArrayBuilder getArgsBuilderForDifferentSchemaTableImport() {
+        ArgumentArrayBuilder builder = getArgsBuilder();
+        return builder.withCommonHadoopFlags(true)
+               .withOption("warehouse-dir", BaseSqoopTestCase.getLocalWarehouseDir())
+               .withOption("table", SCH_TABLE_NAME)
+               .withToolOption("schema", SCHEMA_SCH);
+    }
+
+    private void doImportAndVerify(ArgumentArrayBuilder argBuilder,
+                                   String tableName) throws IOException {
+
+        Path warehousePath = new Path(this.getWarehouseDir());
+        Path tablePath = new Path(warehousePath, tableName);
+        Path filePath = new Path(tablePath, "part-m-00000");
+
+        File tableFile = new File(tablePath.toString());
+        if (tableFile.exists() && tableFile.isDirectory()) {
+            // remove the directory before running the import.
+            FileListing.recursiveDeleteDir(tableFile);
+        }
+
+        String [] argv = argBuilder.build();
+        try {
+            runImport(argv);
+        } catch (IOException ioe) {
+            LOG.error("Got IOException during import: " + ioe.toString());
+            ioe.printStackTrace();
+            fail(ioe.toString());
+        }
+
+        File f = new File(filePath.toString());
+        assertTrue("Could not find imported data file", f.exists());
+        BufferedReader r = null;
+        try {
+            // Read through the file and make sure it's all there.
+            r = new BufferedReader(new InputStreamReader(new FileInputStream(f)));
+            for (String expectedLine : EXPECTED_RESULTS) {
+                assertEquals(expectedLine, r.readLine());
+            }
+        } catch (IOException ioe) {
+            LOG.error("Got IOException verifying results: " + ioe.toString());
+            ioe.printStackTrace();
+            fail(ioe.toString());
+        } finally {
+            IOUtils.closeStream(r);
+        }
+    }
 }

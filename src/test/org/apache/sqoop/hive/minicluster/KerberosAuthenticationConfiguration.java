@@ -35,52 +35,52 @@ import java.util.Map;
 
 public class KerberosAuthenticationConfiguration implements AuthenticationConfiguration {
 
-  private final KerberosConfigurationProvider kerberosConfig;
+    private final KerberosConfigurationProvider kerberosConfig;
 
-  private KerberosAuthenticator authenticator;
+    private KerberosAuthenticator authenticator;
 
-  public KerberosAuthenticationConfiguration(KerberosConfigurationProvider kerberosConfig) {
-    this.kerberosConfig = kerberosConfig;
-  }
+    public KerberosAuthenticationConfiguration(KerberosConfigurationProvider kerberosConfig) {
+        this.kerberosConfig = kerberosConfig;
+    }
 
-  @Override
-  public Map<String, String> getAuthenticationConfig() {
-    Map<String, String> result = new HashMap<>();
+    @Override
+    public Map<String, String> getAuthenticationConfig() {
+        Map<String, String> result = new HashMap<>();
 
-    result.put(HiveConf.ConfVars.HIVE_SERVER2_KERBEROS_PRINCIPAL.varname, kerberosConfig.getTestPrincipal());
-    result.put(HiveConf.ConfVars.HIVE_SERVER2_KERBEROS_KEYTAB.varname, kerberosConfig.getKeytabFilePath());
-    result.put(HiveConf.ConfVars.HIVE_SERVER2_AUTHENTICATION.varname, HiveAuthFactory.AuthTypes.KERBEROS.toString());
-    result.put(CommonConfigurationKeysPublic.HADOOP_SECURITY_AUTHENTICATION, HiveAuthFactory.AuthTypes.KERBEROS.toString());
-    result.put(YarnConfiguration.RM_PRINCIPAL, kerberosConfig.getTestPrincipal());
+        result.put(HiveConf.ConfVars.HIVE_SERVER2_KERBEROS_PRINCIPAL.varname, kerberosConfig.getTestPrincipal());
+        result.put(HiveConf.ConfVars.HIVE_SERVER2_KERBEROS_KEYTAB.varname, kerberosConfig.getKeytabFilePath());
+        result.put(HiveConf.ConfVars.HIVE_SERVER2_AUTHENTICATION.varname, HiveAuthFactory.AuthTypes.KERBEROS.toString());
+        result.put(CommonConfigurationKeysPublic.HADOOP_SECURITY_AUTHENTICATION, HiveAuthFactory.AuthTypes.KERBEROS.toString());
+        result.put(YarnConfiguration.RM_PRINCIPAL, kerberosConfig.getTestPrincipal());
 
-    return result;
-  }
+        return result;
+    }
 
-  @Override
-  public String getUrlParams() {
-    return ";principal=" + kerberosConfig.getTestPrincipal();
-  }
+    @Override
+    public String getUrlParams() {
+        return ";principal=" + kerberosConfig.getTestPrincipal();
+    }
 
-  @Override
-  public <T> T doAsAuthenticated(PrivilegedAction<T> action) {
-    return authenticator.authenticate().doAs(action);
-  }
+    @Override
+    public <T> T doAsAuthenticated(PrivilegedAction<T> action) {
+        return authenticator.authenticate().doAs(action);
+    }
 
-  @Override
-  public void init() {
-    authenticator = createKerberosAuthenticator();
-  }
+    @Override
+    public void init() {
+        authenticator = createKerberosAuthenticator();
+    }
 
-  @Override
-  public JdbcConnectionFactory decorateConnectionFactory(JdbcConnectionFactory connectionFactory) {
-    return new KerberizedConnectionFactoryDecorator(connectionFactory, authenticator);
-  }
+    @Override
+    public JdbcConnectionFactory decorateConnectionFactory(JdbcConnectionFactory connectionFactory) {
+        return new KerberizedConnectionFactoryDecorator(connectionFactory, authenticator);
+    }
 
-  private KerberosAuthenticator createKerberosAuthenticator() {
-    Configuration conf = new Configuration();
-    conf.set(CommonConfigurationKeys.HADOOP_SECURITY_AUTHENTICATION, "kerberos");
-    KerberosAuthenticator result = new KerberosAuthenticator(conf, kerberosConfig.getTestPrincipal(), kerberosConfig.getKeytabFilePath());
-    return result;
-  }
+    private KerberosAuthenticator createKerberosAuthenticator() {
+        Configuration conf = new Configuration();
+        conf.set(CommonConfigurationKeys.HADOOP_SECURITY_AUTHENTICATION, "kerberos");
+        KerberosAuthenticator result = new KerberosAuthenticator(conf, kerberosConfig.getTestPrincipal(), kerberosConfig.getKeytabFilePath());
+        return result;
+    }
 
 }

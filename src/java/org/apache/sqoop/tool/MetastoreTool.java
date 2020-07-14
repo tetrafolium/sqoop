@@ -34,58 +34,58 @@ import org.apache.sqoop.metastore.hsqldb.HsqldbMetaStore;
  */
 public class MetastoreTool extends BaseSqoopTool {
 
-  public static final Log LOG = LogFactory.getLog(
-      MetastoreTool.class.getName());
+    public static final Log LOG = LogFactory.getLog(
+                                      MetastoreTool.class.getName());
 
-  private HsqldbMetaStore metastore;
+    private HsqldbMetaStore metastore;
 
-  // If set to true, shut an existing metastore down.
-  private boolean shutdown = false;
+    // If set to true, shut an existing metastore down.
+    private boolean shutdown = false;
 
-  public MetastoreTool() {
-    super("metastore");
-  }
-
-  @Override
-  /** {@inheritDoc} */
-  public int run(SqoopOptions options) {
-    metastore = new HsqldbMetaStore(options.getConf());
-    if (shutdown) {
-      LOG.info("Shutting down metastore...");
-      metastore.shutdown();
-    } else {
-      metastore.start();
-      metastore.waitForServer();
-      LOG.info("Server thread has quit.");
+    public MetastoreTool() {
+        super("metastore");
     }
-    return 0;
-  }
 
-  @Override
-  /** Configure the command-line arguments we expect to receive */
-  public void configureOptions(ToolOptions toolOptions) {
-    RelatedOptions opts = new RelatedOptions("metastore arguments");
-    opts.addOption(OptionBuilder
-        .withDescription("Cleanly shut down a running metastore")
-        .withLongOpt(METASTORE_SHUTDOWN_ARG)
-        .create());
-
-    toolOptions.addUniqueOptions(opts);
-  }
-
-  @Override
-  /** {@inheritDoc} */
-  public void applyOptions(CommandLine in, SqoopOptions out)
-      throws InvalidOptionsException {
-    if (in.hasOption(METASTORE_SHUTDOWN_ARG)) {
-      this.shutdown = true;
+    @Override
+    /** {@inheritDoc} */
+    public int run(SqoopOptions options) {
+        metastore = new HsqldbMetaStore(options.getConf());
+        if (shutdown) {
+            LOG.info("Shutting down metastore...");
+            metastore.shutdown();
+        } else {
+            metastore.start();
+            metastore.waitForServer();
+            LOG.info("Server thread has quit.");
+        }
+        return 0;
     }
-  }
 
-  @Override
-  /** {@inheritDoc} */
-  public void validateOptions(SqoopOptions options)
-      throws InvalidOptionsException {
-  }
+    @Override
+    /** Configure the command-line arguments we expect to receive */
+    public void configureOptions(ToolOptions toolOptions) {
+        RelatedOptions opts = new RelatedOptions("metastore arguments");
+        opts.addOption(OptionBuilder
+                       .withDescription("Cleanly shut down a running metastore")
+                       .withLongOpt(METASTORE_SHUTDOWN_ARG)
+                       .create());
+
+        toolOptions.addUniqueOptions(opts);
+    }
+
+    @Override
+    /** {@inheritDoc} */
+    public void applyOptions(CommandLine in, SqoopOptions out)
+    throws InvalidOptionsException {
+        if (in.hasOption(METASTORE_SHUTDOWN_ARG)) {
+            this.shutdown = true;
+        }
+    }
+
+    @Override
+    /** {@inheritDoc} */
+    public void validateOptions(SqoopOptions options)
+    throws InvalidOptionsException {
+    }
 }
 

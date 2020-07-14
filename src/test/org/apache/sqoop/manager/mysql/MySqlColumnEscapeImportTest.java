@@ -42,77 +42,77 @@ import static org.junit.Assert.assertEquals;
 @Category(MysqlTest.class)
 public class MySqlColumnEscapeImportTest extends ImportJobTestCase {
 
-  public static final Log LOG = LogFactory.getLog(
-      MySqlColumnEscapeImportTest.class.getName());
-  private MySQLTestUtils mySQLTestUtils = new MySQLTestUtils();
+    public static final Log LOG = LogFactory.getLog(
+                                      MySqlColumnEscapeImportTest.class.getName());
+    private MySQLTestUtils mySQLTestUtils = new MySQLTestUtils();
 
-  @Override
-  protected boolean useHsqldbTestServer() {
-    return false;
-  }
+    @Override
+    protected boolean useHsqldbTestServer() {
+        return false;
+    }
 
-  @Override
-  protected String getConnectString() {
-    return mySQLTestUtils.getMySqlConnectString();
-  }
+    @Override
+    protected String getConnectString() {
+        return mySQLTestUtils.getMySqlConnectString();
+    }
 
-  @Override
-  protected SqoopOptions getSqoopOptions(Configuration conf) {
-    SqoopOptions opts = new SqoopOptions(conf);
-    opts.setUsername(mySQLTestUtils.getUserName());
-    mySQLTestUtils.addPasswordIfIsSet(opts);
-    return opts;
-  }
+    @Override
+    protected SqoopOptions getSqoopOptions(Configuration conf) {
+        SqoopOptions opts = new SqoopOptions(conf);
+        opts.setUsername(mySQLTestUtils.getUserName());
+        mySQLTestUtils.addPasswordIfIsSet(opts);
+        return opts;
+    }
 
-  @Override
-  protected String dropTableIfExistsCommand(String table) {
-    return "DROP TABLE IF EXISTS " + getManager().escapeTableName(table);
-  }
+    @Override
+    protected String dropTableIfExistsCommand(String table) {
+        return "DROP TABLE IF EXISTS " + getManager().escapeTableName(table);
+    }
 
-  @After
-  public void tearDown() {
-      try {
-        dropTableIfExists(getTableName());
-      } catch (SQLException e) {
-        LOG.error("Could not delete test table", e);
-      }
-      super.tearDown();
-  }
+    @After
+    public void tearDown() {
+        try {
+            dropTableIfExists(getTableName());
+        } catch (SQLException e) {
+            LOG.error("Could not delete test table", e);
+        }
+        super.tearDown();
+    }
 
-  protected String [] getArgv() {
-    ArrayList<String> args = new ArrayList<String>();
+    protected String [] getArgv() {
+        ArrayList<String> args = new ArrayList<String>();
 
-    CommonArgs.addHadoopFlags(args);
+        CommonArgs.addHadoopFlags(args);
 
-    args.add("--connect");
-    args.add(getConnectString());
-    args.add("--username");
-    args.add(mySQLTestUtils.getUserName());
-    mySQLTestUtils.addPasswordIfIsSet(args);
-    args.add("--target-dir");
-    args.add(getTablePath().toString());
-    args.add("--num-mappers");
-    args.add("1");
-    args.add("--table");
-    args.add(getTableName());
+        args.add("--connect");
+        args.add(getConnectString());
+        args.add("--username");
+        args.add(mySQLTestUtils.getUserName());
+        mySQLTestUtils.addPasswordIfIsSet(args);
+        args.add("--target-dir");
+        args.add(getTablePath().toString());
+        args.add("--num-mappers");
+        args.add("1");
+        args.add("--table");
+        args.add(getTableName());
 
-    return args.toArray(new String[0]);
-  }
+        return args.toArray(new String[0]);
+    }
 
-  @Test
-  public void testEscapeColumnWithDoubleQuote() throws IOException {
-    String[] colNames = { "column\"withdoublequote" };
-    String[] types = { "VARCHAR(50)"};
-    String[] vals = { "'hello, world'"};
-    createTableWithColTypesAndNames(colNames, types, vals);
-    String[] args = getArgv();
-    runImport(args);
+    @Test
+    public void testEscapeColumnWithDoubleQuote() throws IOException {
+        String[] colNames = { "column\"withdoublequote" };
+        String[] types = { "VARCHAR(50)"};
+        String[] vals = { "'hello, world'"};
+        createTableWithColTypesAndNames(colNames, types, vals);
+        String[] args = getArgv();
+        runImport(args);
 
-    Path filePath = new Path(getTablePath(), "part-m-00000");
-    String output = Files.toString(new File(filePath.toString()), Charsets.UTF_8);
+        Path filePath = new Path(getTablePath(), "part-m-00000");
+        String output = Files.toString(new File(filePath.toString()), Charsets.UTF_8);
 
-    assertEquals("hello, world", output.trim());
-  }
+        assertEquals("hello, world", output.trim());
+    }
 
 }
 

@@ -73,7 +73,7 @@ public class TestMetastoreConfigurationParameters {
     @Test
     public void testJobToolWithAutoConnectDisabledFails() throws IOException {
         ArgumentArrayBuilder builder = new ArgumentArrayBuilder()
-            .withProperty("sqoop.metastore.client.enable.autoconnect", "false");
+        .withProperty("sqoop.metastore.client.enable.autoconnect", "false");
         String[] arguments = builder.build();
         assertEquals(STATUS_FAILURE, Sqoop.runSqoop(sqoop, arguments));
     }
@@ -92,10 +92,10 @@ public class TestMetastoreConfigurationParameters {
 
     private int runJobToolWithAutoConnectUrlAndCorrectUsernamePasswordSpecified() {
         ArgumentArrayBuilder builder = new ArgumentArrayBuilder()
-            .withProperty("sqoop.metastore.client.autoconnect.url", HsqldbTestServer.getUrl())
-            .withProperty("sqoop.metastore.client.autoconnect.username", TEST_USER)
-            .withProperty("sqoop.metastore.client.autoconnect.password", TEST_PASSWORD)
-            .withOption("list");
+        .withProperty("sqoop.metastore.client.autoconnect.url", HsqldbTestServer.getUrl())
+        .withProperty("sqoop.metastore.client.autoconnect.username", TEST_USER)
+        .withProperty("sqoop.metastore.client.autoconnect.password", TEST_PASSWORD)
+        .withOption("list");
         String[] arguments = builder.build();
         return Sqoop.runSqoop(sqoop, arguments);
     }

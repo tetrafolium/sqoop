@@ -33,10 +33,10 @@ import java.util.List;
 @Parameterized.UseParametersRunnerFactory(BlockJUnit4ClassRunnerWithParametersFactory.class)
 public class TestS3ExternalHiveTableImport extends AbstractTestExternalHiveTableImport {
 
-  @ClassRule
-  public static S3CredentialsRule credentialsRule = new S3CredentialsRule();
+    @ClassRule
+    public static S3CredentialsRule credentialsRule = new S3CredentialsRule();
 
-  public TestS3ExternalHiveTableImport(String fileFormatArg, List<String> expectedResult) {
-    super(credentialsRule, fileFormatArg, expectedResult);
-  }
+    public TestS3ExternalHiveTableImport(String fileFormatArg, List<String> expectedResult) {
+        super(credentialsRule, fileFormatArg, expectedResult);
+    }
 }

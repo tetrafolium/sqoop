@@ -43,70 +43,70 @@ import org.apache.sqoop.config.ConfigurationHelper;
 public class NetezzaExternalTableInputFormat extends
     InputFormat<Integer, NullWritable> {
 
-  public static final Log LOG = LogFactory
-      .getLog(NetezzaExternalTableInputFormat.class.getName());
+    public static final Log LOG = LogFactory
+                                  .getLog(NetezzaExternalTableInputFormat.class.getName());
 
-  /**
-   * A RecordReader that just takes the WHERE conditions from the DBInputSplit
-   * and relates them to the mapper as a single input record.
-   */
-  public static class NetezzaExternalTableRecordReader extends
-      RecordReader<Integer, NullWritable> {
+    /**
+     * A RecordReader that just takes the WHERE conditions from the DBInputSplit
+     * and relates them to the mapper as a single input record.
+     */
+    public static class NetezzaExternalTableRecordReader extends
+        RecordReader<Integer, NullWritable> {
 
-    private boolean delivered;
-    private InputSplit split;
+        private boolean delivered;
+        private InputSplit split;
 
-    public NetezzaExternalTableRecordReader(InputSplit split) {
-      initialize(split, null);
+        public NetezzaExternalTableRecordReader(InputSplit split) {
+            initialize(split, null);
+        }
+
+        @Override
+        public boolean nextKeyValue() {
+            boolean hasNext = !delivered;
+            delivered = true;
+            return hasNext;
+        }
+
+        @Override
+        public Integer getCurrentKey() {
+            return ((NetezzaExternalTableInputSplit) this.split).getDataSliceId();
+        }
+
+        @Override
+        public NullWritable getCurrentValue() {
+            return NullWritable.get();
+        }
+
+        @Override
+        public void close() {
+        }
+
+        @Override
+        public float getProgress() {
+            return delivered ? 1.0f : 0.0f;
+        }
+
+        @Override
+        public void initialize(InputSplit s, TaskAttemptContext context) {
+            this.split = s;
+            this.delivered = false;
+        }
+    }
+
+    public RecordReader<Integer, NullWritable> createRecordReader(
+        InputSplit split, TaskAttemptContext context) {
+        return new NetezzaExternalTableRecordReader(split);
     }
 
     @Override
-    public boolean nextKeyValue() {
-      boolean hasNext = !delivered;
-      delivered = true;
-      return hasNext;
+    public List<InputSplit> getSplits(JobContext context) throws IOException,
+        InterruptedException {
+        int targetNumTasks = ConfigurationHelper.getJobNumMaps(context);
+        List<InputSplit> splits = new ArrayList<InputSplit>(targetNumTasks);
+        for (int i = 0; i < targetNumTasks; ++i) {
+            splits.add(new NetezzaExternalTableInputSplit(i));
+        }
+        return splits;
     }
-
-    @Override
-    public Integer getCurrentKey() {
-      return ((NetezzaExternalTableInputSplit) this.split).getDataSliceId();
-    }
-
-    @Override
-    public NullWritable getCurrentValue() {
-      return NullWritable.get();
-    }
-
-    @Override
-    public void close() {
-    }
-
-    @Override
-    public float getProgress() {
-      return delivered ? 1.0f : 0.0f;
-    }
-
-    @Override
-    public void initialize(InputSplit s, TaskAttemptContext context) {
-      this.split = s;
-      this.delivered = false;
-    }
-  }
-
-  public RecordReader<Integer, NullWritable> createRecordReader(
-      InputSplit split, TaskAttemptContext context) {
-    return new NetezzaExternalTableRecordReader(split);
-  }
-
-  @Override
-  public List<InputSplit> getSplits(JobContext context) throws IOException,
-      InterruptedException {
-    int targetNumTasks = ConfigurationHelper.getJobNumMaps(context);
-    List<InputSplit> splits = new ArrayList<InputSplit>(targetNumTasks);
-    for (int i = 0; i < targetNumTasks; ++i) {
-      splits.add(new NetezzaExternalTableInputSplit(i));
-    }
-    return splits;
-  }
 
 }

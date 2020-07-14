@@ -31,38 +31,38 @@ import org.junit.experimental.categories.Category;
 @Category(UnitTest.class)
 public class TestSqoopHCatUtilities {
 
-  private static final String[] VALID_HCAT_ARGS = new String[] {"-h"};
-  private static final String[] INVALID_HCAT_ARGS = new String[] {};
+    private static final String[] VALID_HCAT_ARGS = new String[] {"-h"};
+    private static final String[] INVALID_HCAT_ARGS = new String[] {};
 
-  private SqoopHCatUtilities sqoopHCatUtilities;
-  private ClassLoader originalClassLoader;
+    private SqoopHCatUtilities sqoopHCatUtilities;
+    private ClassLoader originalClassLoader;
 
-  @Before
-  public void before() {
-    sqoopHCatUtilities = SqoopHCatUtilities.instance();
-    originalClassLoader = currentThread().getContextClassLoader();
-  }
-
-  @Test
-  public void testOriginalClassLoaderIsRestoredWhenHCatCliIsInvokedWithValidArguments() throws IOException {
-    sqoopHCatUtilities.executeHCatProgramInProcess(VALID_HCAT_ARGS);
-
-    assertSame(originalClassLoader, currentThread().getContextClassLoader());
-  }
-
-  @Test
-  public void testOriginalClassLoaderIsRestoredWhenHCatCliIsInvokedWithInvalidArguments() {
-    try {
-      sqoopHCatUtilities.executeHCatProgramInProcess(INVALID_HCAT_ARGS);
-    } catch (IOException e) {
-      // Exception is swallowed because we test the classloader value only.
+    @Before
+    public void before() {
+        sqoopHCatUtilities = SqoopHCatUtilities.instance();
+        originalClassLoader = currentThread().getContextClassLoader();
     }
 
-    assertSame(originalClassLoader, currentThread().getContextClassLoader());
-  }
+    @Test
+    public void testOriginalClassLoaderIsRestoredWhenHCatCliIsInvokedWithValidArguments() throws IOException {
+        sqoopHCatUtilities.executeHCatProgramInProcess(VALID_HCAT_ARGS);
 
-  @Test(expected = IOException.class)
-  public void testExecuteHCatProgramInProcessThrowsWithInvalidArguments() throws IOException {
-    sqoopHCatUtilities.executeHCatProgramInProcess(INVALID_HCAT_ARGS);
-  }
+        assertSame(originalClassLoader, currentThread().getContextClassLoader());
+    }
+
+    @Test
+    public void testOriginalClassLoaderIsRestoredWhenHCatCliIsInvokedWithInvalidArguments() {
+        try {
+            sqoopHCatUtilities.executeHCatProgramInProcess(INVALID_HCAT_ARGS);
+        } catch (IOException e) {
+            // Exception is swallowed because we test the classloader value only.
+        }
+
+        assertSame(originalClassLoader, currentThread().getContextClassLoader());
+    }
+
+    @Test(expected = IOException.class)
+    public void testExecuteHCatProgramInProcessThrowsWithInvalidArguments() throws IOException {
+        sqoopHCatUtilities.executeHCatProgramInProcess(INVALID_HCAT_ARGS);
+    }
 }

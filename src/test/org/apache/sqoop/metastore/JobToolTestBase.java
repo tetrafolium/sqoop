@@ -50,7 +50,7 @@ import java.util.List;
 public abstract class JobToolTestBase extends BaseSqoopTestCase {
 
     public static final Log LOG = LogFactory
-            .getLog(MetaConnectIncrementalImportTestBase.class.getName());
+                                  .getLog(MetaConnectIncrementalImportTestBase.class.getName());
 
     private String metaConnectString;
     private String metaUser;
@@ -79,16 +79,16 @@ public abstract class JobToolTestBase extends BaseSqoopTestCase {
             LOG.error("Failed to clear metastore database");
         }
         //Methods from BaseSqoopTestClass reference the test Hsqldb database, not the metastore
-        try{
+        try {
             dropTableIfExists("CarLocations");
         } catch (SQLException e) {
             LOG.error("Failed to drop table CarLocations");
         }
         setCurTableName("CarLocations");
         createTableWithColTypesAndNames(
-                new String [] {"carId", "Locations"},
-                new String [] {"INTEGER", "VARCHAR"},
-                new String [] {"1", "'Lexus'"});
+            new String [] {"carId", "Locations"},
+            new String [] {"INTEGER", "VARCHAR"},
+            new String [] {"1", "'Lexus'"});
     }
 
     private Connection getConnection(SqoopOptions options) {

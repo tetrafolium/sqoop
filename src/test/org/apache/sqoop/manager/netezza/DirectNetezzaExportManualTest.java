@@ -40,213 +40,213 @@ import static org.junit.Assert.fail;
 @Category({ManualTest.class, NetezzaTest.class})
 public class DirectNetezzaExportManualTest extends NetezzaExportManualTest {
 
-  public static final Log LOG = LogFactory
-      .getLog(DirectNetezzaExportManualTest.class.getName());
+    public static final Log LOG = LogFactory
+                                  .getLog(DirectNetezzaExportManualTest.class.getName());
 
-  static final String TABLE_PREFIX = "EMPNZ_D_EXP";
+    static final String TABLE_PREFIX = "EMPNZ_D_EXP";
 
-  @Override
-  protected String getTablePrefix() {
-    return TABLE_PREFIX;
-  }
-
-  @Override
-  protected boolean isDirectMode() {
-    return true;
-  }
-
-  @Override
-  protected String[] getCodeGenArgv(String... extraArgs) {
-
-    String[] moreArgs = new String[extraArgs.length + 4];
-    int i = 0;
-    for (i = 0; i < extraArgs.length; i++) {
-      moreArgs[i] = extraArgs[i];
+    @Override
+    protected String getTablePrefix() {
+        return TABLE_PREFIX;
     }
 
-    // Add username argument for netezza.
-    moreArgs[i++] = "--username";
-    moreArgs[i++] = NetezzaTestUtils.getNZUser();
-    moreArgs[i++] = "--password";
-    moreArgs[i++] = NetezzaTestUtils.getNZPassword();
-
-    return super.getCodeGenArgv(moreArgs);
-  }
-
-  @Override
-  protected String[] getArgv(boolean includeHadoopFlags, int rowsPerStatement,
-      int statementsPerTx, String... additionalArgv) {
-
-    String[] argV = super.getArgv(includeHadoopFlags,
-        rowsPerStatement, statementsPerTx);
-    String[] subArgV = newStrArray(argV, "--direct",
-      "--username",  NetezzaTestUtils.getNZUser(), "--password",
-      NetezzaTestUtils.getNZPassword());
-    String[] newArgV = new String[subArgV.length + additionalArgv.length];
-    int i = 0;
-    for (String s : subArgV) {
-      newArgV[i++] = s;
+    @Override
+    protected boolean isDirectMode() {
+        return true;
     }
-    for (String s: additionalArgv) {
-      newArgV[i++] = s;
+
+    @Override
+    protected String[] getCodeGenArgv(String... extraArgs) {
+
+        String[] moreArgs = new String[extraArgs.length + 4];
+        int i = 0;
+        for (i = 0; i < extraArgs.length; i++) {
+            moreArgs[i] = extraArgs[i];
+        }
+
+        // Add username argument for netezza.
+        moreArgs[i++] = "--username";
+        moreArgs[i++] = NetezzaTestUtils.getNZUser();
+        moreArgs[i++] = "--password";
+        moreArgs[i++] = NetezzaTestUtils.getNZPassword();
+
+        return super.getCodeGenArgv(moreArgs);
     }
-    return newArgV;
-  }
+
+    @Override
+    protected String[] getArgv(boolean includeHadoopFlags, int rowsPerStatement,
+                               int statementsPerTx, String... additionalArgv) {
+
+        String[] argV = super.getArgv(includeHadoopFlags,
+                                      rowsPerStatement, statementsPerTx);
+        String[] subArgV = newStrArray(argV, "--direct",
+                                       "--username",  NetezzaTestUtils.getNZUser(), "--password",
+                                       NetezzaTestUtils.getNZPassword());
+        String[] newArgV = new String[subArgV.length + additionalArgv.length];
+        int i = 0;
+        for (String s : subArgV) {
+            newArgV[i++] = s;
+        }
+        for (String s: additionalArgv) {
+            newArgV[i++] = s;
+        }
+        return newArgV;
+    }
 
 
-  /**
-   * Create the table definition to export to, removing any prior table. By
-   * specifying ColumnGenerator arguments, you can add extra columns to the
-   * table of arbitrary type.
-   */
-  @Override
-  public void createTable(ColumnGenerator... extraColumns)
+    /**
+     * Create the table definition to export to, removing any prior table. By
+     * specifying ColumnGenerator arguments, you can add extra columns to the
+     * table of arbitrary type.
+     */
+    @Override
+    public void createTable(ColumnGenerator... extraColumns)
     throws SQLException {
-    NetezzaTestUtils.createTableNZ(conn, getTableName(), extraColumns);
-  }
+        NetezzaTestUtils.createTableNZ(conn, getTableName(), extraColumns);
+    }
 
-  /**
-   * Creates the staging table.
-   * @param extraColumns extra columns that go in the staging table
-   * @throws SQLException if an error occurs during export
-   */
-  @Override
-  public void createStagingTable(ColumnGenerator... extraColumns)
+    /**
+     * Creates the staging table.
+     * @param extraColumns extra columns that go in the staging table
+     * @throws SQLException if an error occurs during export
+     */
+    @Override
+    public void createStagingTable(ColumnGenerator... extraColumns)
     throws SQLException {
-    NetezzaTestUtils.createTableNZ(conn, getStagingTableName(), extraColumns);
-  }
-
-
-
-  protected void runNetezzaTest(String tableName, String[] argv,
-    ColumnGenerator...extraCols) throws IOException {
-    SqoopOptions options = new SqoopOptions(
-        NetezzaTestUtils.getNZConnectString(), getTableName());
-    options.setUsername(NetezzaTestUtils.getNZUser());
-    options.setPassword(NetezzaTestUtils.getNZPassword());
-
-    LOG.info("Running export with argv : " + Arrays.toString(argv));
-    manager = new DirectNetezzaManager(options);
-
-    try {
-      createTable(extraCols);
-      LOG.info("Created table " + tableName);
-      createExportFile(extraCols);
-      // run the export and verify that the results are good.
-      runExport(argv);
-      verifyExport(3, conn);
-      if (extraCols.length > 0) {
-        assertColMinAndMax(forIdx(0), extraCols[0]);
-      }
-    } catch (SQLException sqlE) {
-      LOG.error("Encountered SQL Exception: " + sqlE);
-      sqlE.printStackTrace();
-      fail("SQLException when accessing target table. " + sqlE);
+        NetezzaTestUtils.createTableNZ(conn, getStagingTableName(), extraColumns);
     }
-  }
-
-  /**
-   * Test an authenticated export using netezza external table import.
-   */
-  @Test
-  public void testSimpleExport() throws IOException, SQLException {
-    String[] argv = getArgv(true, 10, 10);
-    runNetezzaTest(getTableName(), argv);
-  }
-
-  @Test
-  public void testValidExtraArgs() throws Exception {
-
-    String [] extraArgs = {
-        "--",
-        "--log-dir", "/tmp",
-        "--max-errors", "2",
-        "--trunc-string",
-        "--ctrl-chars"
-     };
-    String[] argv = getArgv(true, 10, 10, extraArgs);
-    runNetezzaTest(getTableName(), argv);
-  }
-
-  @Test
-  public void testNullStringExport() throws Exception {
-
-    String [] extraArgs = {
-        "--input-null-string", "\\\\N",
-        "--input-null-non-string", "\\\\N",
-        "--input-escaped-by", "\\",
-    };
-    ColumnGenerator[] extraCols = new ColumnGenerator[] {
-       new NullColumnGenerator(),
-    };
-
-    String[] argv = getArgv(true, 10, 10, extraArgs);
-    runNetezzaTest(getTableName(), argv, extraCols);
-  }
 
 
-  @Test
-  public void testDifferentNullStrings() throws IOException, SQLException {
-    ColumnGenerator[] extraCols = new ColumnGenerator[] {
-        new NullColumnGenerator(),
-    };
 
-    String [] extraArgs = {
-       "--input-null-string", "\\N",
-       "--input-null-non-string", "\\M",
-    };
-    String[] argv = getArgv(true, 10, 10, extraArgs);
-    try {
-      runNetezzaTest(getTableName(), argv, extraCols);
-      fail("Expected failure for different null strings");
-    } catch(IOException ioe) {
-      // success
+    protected void runNetezzaTest(String tableName, String[] argv,
+                                  ColumnGenerator...extraCols) throws IOException {
+        SqoopOptions options = new SqoopOptions(
+            NetezzaTestUtils.getNZConnectString(), getTableName());
+        options.setUsername(NetezzaTestUtils.getNZUser());
+        options.setPassword(NetezzaTestUtils.getNZPassword());
+
+        LOG.info("Running export with argv : " + Arrays.toString(argv));
+        manager = new DirectNetezzaManager(options);
+
+        try {
+            createTable(extraCols);
+            LOG.info("Created table " + tableName);
+            createExportFile(extraCols);
+            // run the export and verify that the results are good.
+            runExport(argv);
+            verifyExport(3, conn);
+            if (extraCols.length > 0) {
+                assertColMinAndMax(forIdx(0), extraCols[0]);
+            }
+        } catch (SQLException sqlE) {
+            LOG.error("Encountered SQL Exception: " + sqlE);
+            sqlE.printStackTrace();
+            fail("SQLException when accessing target table. " + sqlE);
+        }
     }
-  }
 
-  @Test(expected = java.io.IOException.class)
-  public void testLongNullStrings() throws IOException, SQLException {
-    ColumnGenerator[] extraCols = new ColumnGenerator[] {
-        new NullColumnGenerator(),
-    };
-
-    String [] extraArgs = {
-       "--input-null-string", "morethan4chars",
-       "--input-null-non-string", "morethan4chars",
-    };
-    String[] argv = getArgv(true, 10, 10, extraArgs);
-    try {
-      runNetezzaTest(getTableName(), argv, extraCols);
-      fail("Expected failure for long null strings");
-    } catch(IOException ioe) {
-      // success
+    /**
+     * Test an authenticated export using netezza external table import.
+     */
+    @Test
+    public void testSimpleExport() throws IOException, SQLException {
+        String[] argv = getArgv(true, 10, 10);
+        runNetezzaTest(getTableName(), argv);
     }
-  }
+
+    @Test
+    public void testValidExtraArgs() throws Exception {
+
+        String [] extraArgs = {
+            "--",
+            "--log-dir", "/tmp",
+            "--max-errors", "2",
+            "--trunc-string",
+            "--ctrl-chars"
+        };
+        String[] argv = getArgv(true, 10, 10, extraArgs);
+        runNetezzaTest(getTableName(), argv);
+    }
+
+    @Test
+    public void testNullStringExport() throws Exception {
+
+        String [] extraArgs = {
+            "--input-null-string", "\\\\N",
+            "--input-null-non-string", "\\\\N",
+            "--input-escaped-by", "\\",
+        };
+        ColumnGenerator[] extraCols = new ColumnGenerator[] {
+            new NullColumnGenerator(),
+        };
+
+        String[] argv = getArgv(true, 10, 10, extraArgs);
+        runNetezzaTest(getTableName(), argv, extraCols);
+    }
 
 
-  @Override
-  @Test
-  public void testMultiMapTextExportWithStaging() throws IOException,
-      SQLException {
-    // disable this test as staging is not supported in direct mode
-  }
+    @Test
+    public void testDifferentNullStrings() throws IOException, SQLException {
+        ColumnGenerator[] extraCols = new ColumnGenerator[] {
+            new NullColumnGenerator(),
+        };
 
-  @Override
-  @Test
-  public void testMultiTransactionWithStaging() throws IOException,
-      SQLException {
-    // disable this test as staging is not supported in direct mode
-  }
+        String [] extraArgs = {
+            "--input-null-string", "\\N",
+            "--input-null-non-string", "\\M",
+        };
+        String[] argv = getArgv(true, 10, 10, extraArgs);
+        try {
+            runNetezzaTest(getTableName(), argv, extraCols);
+            fail("Expected failure for different null strings");
+        } catch(IOException ioe) {
+            // success
+        }
+    }
 
-  @Override
-  @Test
-  public void testColumnsExport() throws IOException, SQLException {
-    // disable this test as it is not supported in direct mode
-  }
+    @Test(expected = java.io.IOException.class)
+    public void testLongNullStrings() throws IOException, SQLException {
+        ColumnGenerator[] extraCols = new ColumnGenerator[] {
+            new NullColumnGenerator(),
+        };
 
-  @Override
-  @Test
-  public void testSequenceFileExport() throws IOException, SQLException {
-    // disable this test as it is not supported in direct mode
-  }
+        String [] extraArgs = {
+            "--input-null-string", "morethan4chars",
+            "--input-null-non-string", "morethan4chars",
+        };
+        String[] argv = getArgv(true, 10, 10, extraArgs);
+        try {
+            runNetezzaTest(getTableName(), argv, extraCols);
+            fail("Expected failure for long null strings");
+        } catch(IOException ioe) {
+            // success
+        }
+    }
+
+
+    @Override
+    @Test
+    public void testMultiMapTextExportWithStaging() throws IOException,
+        SQLException {
+        // disable this test as staging is not supported in direct mode
+    }
+
+    @Override
+    @Test
+    public void testMultiTransactionWithStaging() throws IOException,
+        SQLException {
+        // disable this test as staging is not supported in direct mode
+    }
+
+    @Override
+    @Test
+    public void testColumnsExport() throws IOException, SQLException {
+        // disable this test as it is not supported in direct mode
+    }
+
+    @Override
+    @Test
+    public void testSequenceFileExport() throws IOException, SQLException {
+        // disable this test as it is not supported in direct mode
+    }
 }

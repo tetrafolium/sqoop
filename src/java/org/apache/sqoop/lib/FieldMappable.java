@@ -25,10 +25,10 @@ import java.util.Map;
  */
 public interface FieldMappable {
 
-  /**
-   * Returns a map containing all fields of this record.
-   * @return a map from column names to the object-based values for
-   * this record. The map may not be null, though it may be empty.
-   */
-  Map<String, Object> getFieldMap();
+    /**
+     * Returns a map containing all fields of this record.
+     * @return a map from column names to the object-based values for
+     * this record. The map may not be null, though it may be empty.
+     */
+    Map<String, Object> getFieldMap();
 }

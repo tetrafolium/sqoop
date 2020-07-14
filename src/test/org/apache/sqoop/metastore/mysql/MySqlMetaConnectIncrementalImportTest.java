@@ -50,6 +50,6 @@ public class MySqlMetaConnectIncrementalImportTest extends MetaConnectIncrementa
 
     public MySqlMetaConnectIncrementalImportTest() {
         super(mySQLTestUtils.getMySqlConnectString(), mySQLTestUtils.getUserName(),
-                mySQLTestUtils.getUserPass());
+              mySQLTestUtils.getUserPass());
     }
 }

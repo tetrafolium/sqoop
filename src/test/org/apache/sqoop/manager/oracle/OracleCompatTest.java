@@ -41,228 +41,228 @@ import static org.junit.Assert.fail;
 @Category(OracleTest.class)
 public class OracleCompatTest extends ManagerCompatTestCase {
 
-  public static final Log LOG = LogFactory.getLog(
-      OracleCompatTest.class.getName());
+    public static final Log LOG = LogFactory.getLog(
+                                      OracleCompatTest.class.getName());
 
-  @Override
-  protected Log getLogger() {
-    return LOG;
-  }
-
-  @Override
-  protected String getDbFriendlyName() {
-    return "Oracle";
-  }
-
-  @Override
-  protected String getConnectString() {
-    return OracleUtils.CONNECT_STRING;
-  }
-
-  @Override
-  protected SqoopOptions getSqoopOptions(Configuration conf) {
-    SqoopOptions opts = new SqoopOptions(conf);
-    OracleUtils.setOracleAuth(opts);
-    return opts;
-
-  }
-
-  @Override
-  protected void dropTableIfExists(String table) throws SQLException {
-    OracleUtils.dropTable(table, getManager());
-  }
-
-  @Override
-  public void tearDown() {
-    super.tearDown();
-
-    // If we actually ran the test, we'll need to 'cool off' afterwards.
-    if (!skipped) {
-      // Oracle XE will block connections if you create new ones too quickly.
-      // See http://forums.oracle.com/forums/thread.jspa?messageID=1145120
-      LOG.info("Sleeping to wait for Oracle connection cache clear...");
-      try {
-        Thread.sleep(250);
-      } catch (InterruptedException ie) {
-        // This delay may run a bit short.. no problem.
-      }
+    @Override
+    protected Log getLogger() {
+        return LOG;
     }
-  }
 
-  @Override
-  protected String getDoubleType() {
-    return "DOUBLE PRECISION";
-  }
-
-  @Override
-  protected String getVarBinaryType() {
-    return "RAW(12)";
-  }
-
-  // Oracle does not provide a BOOLEAN type.
-  @Override
-  protected boolean supportsBoolean() {
-    return false;
-  }
-
-  // Oracle does not provide a BIGINT type.
-  @Override
-  protected boolean supportsBigInt() {
-    return false;
-  }
-
-  // Oracle does not provide a TINYINT type.
-  @Override
-  protected boolean supportsTinyInt() {
-    return false;
-  }
-
-  // Oracle does not provide a LONGVARCHAR type.
-  @Override
-  protected boolean supportsLongVarChar() {
-    return false;
-  }
-
-  // Oracle does not provide a TIME type. We test DATE and TIMESTAMP
-  @Override
-  protected boolean supportsTime() {
-    return false;
-  }
-
-  @Override
-  protected String getDateInsertStr(String dateStr) {
-    return "TO_DATE(" + dateStr + ", 'YYYY-MM-DD')";
-  }
-
-  @Override
-  protected String getTimestampInsertStr(String tsStr) {
-    return "TO_TIMESTAMP(" + tsStr + ", 'YYYY-MM-DD HH24:MI:SS.FF')";
-  }
-
-  @Override
-  protected String getDateSeqOutput(String asInserted) {
-    // DATE is actually a TIMESTAMP in Oracle; add a time component.
-    return asInserted + " 00:00:00.0";
-  }
-
-  @Override
-  protected String getFixedCharSeqOut(int fieldWidth, String asInserted) {
-    return padString(fieldWidth, asInserted);
-  }
-
-  @Override
-  protected String getRealSeqOutput(String realAsInserted) {
-    return realAsInserted;
-  }
-
-  @Override
-  protected String getFloatSeqOutput(String floatAsInserted) {
-    return floatAsInserted;
-  }
-
-  @Override
-  protected String getDoubleSeqOutput(String doubleAsInserted) {
-    return doubleAsInserted;
-  }
-
-  @Override
-  protected String getVarBinarySeqOutput(String asInserted) {
-    return toLowerHexString(asInserted);
-  }
-
-  @Override
-  protected String getBlobInsertStr(String blobData) {
-    // Oracle wants blob data encoded as hex (e.g. '01fca3b5').
-
-    StringBuilder sb = new StringBuilder();
-    sb.append("'");
-
-    Formatter fmt = new Formatter(sb);
-    try {
-      for (byte b : blobData.getBytes("UTF-8")) {
-        fmt.format("%02X", b);
-      }
-    } catch (UnsupportedEncodingException uee) {
-      // Should not happen; Java always supports UTF-8.
-      fail("Could not get utf-8 bytes for blob string");
-      return null;
+    @Override
+    protected String getDbFriendlyName() {
+        return "Oracle";
     }
-    sb.append("'");
-    return sb.toString();
-  }
 
-  protected String getBinaryFloatInsertStr(float f) {
-    return "TO_BINARY_FLOAT(" + f + "F)";
-  }
+    @Override
+    protected String getConnectString() {
+        return OracleUtils.CONNECT_STRING;
+    }
 
-  protected String getBinaryDoubleInsertStr(double d) {
-    return "TO_BINARY_DOUBLE(" + d + "D)";
-  }
+    @Override
+    protected SqoopOptions getSqoopOptions(Configuration conf) {
+        SqoopOptions opts = new SqoopOptions(conf);
+        OracleUtils.setOracleAuth(opts);
+        return opts;
 
-  // Disable this test since Oracle isn't ANSI compliant.
-  @Override
-  @Test
-  public void testEmptyStringCol() {
-    this.skipped = true;
-    LOG.info(
-        "Oracle treats empty strings as null (non-ANSI compliant). Skipping.");
-  }
+    }
 
-  @Override
-  @Test
-  public void testTimestamp1() {
-    verifyType(getTimestampType(),
-        getTimestampInsertStr("'2009-04-24 18:24:00'"),
-        "2009-04-24 18:24:00.0");
-  }
+    @Override
+    protected void dropTableIfExists(String table) throws SQLException {
+        OracleUtils.dropTable(table, getManager());
+    }
 
-  @Override
-  @Test
-  public void testTimestamp2() {
-    verifyType(getTimestampType(),
-        getTimestampInsertStr("'2009-04-24 18:24:00.0002'"),
-        "2009-04-24 18:24:00.0002");
-  }
+    @Override
+    public void tearDown() {
+        super.tearDown();
 
-  @Override
-  @Test
-  public void testDate1() {
-    verifyType("DATE", getDateInsertStr("'2009-01-12'"),
-        getDateSeqOutput("2009-01-12"));
-  }
+        // If we actually ran the test, we'll need to 'cool off' afterwards.
+        if (!skipped) {
+            // Oracle XE will block connections if you create new ones too quickly.
+            // See http://forums.oracle.com/forums/thread.jspa?messageID=1145120
+            LOG.info("Sleeping to wait for Oracle connection cache clear...");
+            try {
+                Thread.sleep(250);
+            } catch (InterruptedException ie) {
+                // This delay may run a bit short.. no problem.
+            }
+        }
+    }
 
-  @Override
-  @Test
-  public void testDate2() {
-    verifyType("DATE", getDateInsertStr("'2009-04-24'"),
-        getDateSeqOutput("2009-04-24"));
-  }
+    @Override
+    protected String getDoubleType() {
+        return "DOUBLE PRECISION";
+    }
 
-  @Test
-  public void testRawVal() {
-    verifyType("RAW(8)", "'12ABCD'", getVarBinarySeqOutput("12ABCD"), true);
-  }
+    @Override
+    protected String getVarBinaryType() {
+        return "RAW(12)";
+    }
 
-  @Test
-  public void testBinaryFloat() {
-    verifyType("BINARY_FLOAT", getBinaryFloatInsertStr(25f), "25.0");
-    verifyType("BINARY_FLOAT", getBinaryFloatInsertStr(+6.34f), "6.34");
+    // Oracle does not provide a BOOLEAN type.
+    @Override
+    protected boolean supportsBoolean() {
+        return false;
+    }
 
-    // Max and min are from Oracle DB SQL reference for 10g release 2
-    // https://stackoverflow.com/questions/3884793/why-is-double-min-value-in-not-negative
-    verifyType("BINARY_FLOAT", getBinaryFloatInsertStr(Float.MAX_VALUE), "3.4028235E38");
-    verifyType("BINARY_FLOAT", getBinaryFloatInsertStr(-Float.MAX_VALUE), "-3.4028235E38");
-  }
+    // Oracle does not provide a BIGINT type.
+    @Override
+    protected boolean supportsBigInt() {
+        return false;
+    }
 
-  @Test
-  public void testBinaryDouble() {
-    verifyType("BINARY_DOUBLE", getBinaryDoubleInsertStr(0.5), "0.5");
-    verifyType("BINARY_DOUBLE", getBinaryDoubleInsertStr(-1), "-1.0");
+    // Oracle does not provide a TINYINT type.
+    @Override
+    protected boolean supportsTinyInt() {
+        return false;
+    }
 
-    // Max and min are from Oracle DB SQL reference for 10g release 2
-    // https://stackoverflow.com/questions/3884793/why-is-double-min-value-in-not-negative
-    verifyType("BINARY_DOUBLE", getBinaryDoubleInsertStr(Double.MAX_VALUE), "1.7976931348623157E308");
-    verifyType("BINARY_DOUBLE", getBinaryDoubleInsertStr(-Double.MAX_VALUE), "-1.7976931348623157E308");
-  }
+    // Oracle does not provide a LONGVARCHAR type.
+    @Override
+    protected boolean supportsLongVarChar() {
+        return false;
+    }
+
+    // Oracle does not provide a TIME type. We test DATE and TIMESTAMP
+    @Override
+    protected boolean supportsTime() {
+        return false;
+    }
+
+    @Override
+    protected String getDateInsertStr(String dateStr) {
+        return "TO_DATE(" + dateStr + ", 'YYYY-MM-DD')";
+    }
+
+    @Override
+    protected String getTimestampInsertStr(String tsStr) {
+        return "TO_TIMESTAMP(" + tsStr + ", 'YYYY-MM-DD HH24:MI:SS.FF')";
+    }
+
+    @Override
+    protected String getDateSeqOutput(String asInserted) {
+        // DATE is actually a TIMESTAMP in Oracle; add a time component.
+        return asInserted + " 00:00:00.0";
+    }
+
+    @Override
+    protected String getFixedCharSeqOut(int fieldWidth, String asInserted) {
+        return padString(fieldWidth, asInserted);
+    }
+
+    @Override
+    protected String getRealSeqOutput(String realAsInserted) {
+        return realAsInserted;
+    }
+
+    @Override
+    protected String getFloatSeqOutput(String floatAsInserted) {
+        return floatAsInserted;
+    }
+
+    @Override
+    protected String getDoubleSeqOutput(String doubleAsInserted) {
+        return doubleAsInserted;
+    }
+
+    @Override
+    protected String getVarBinarySeqOutput(String asInserted) {
+        return toLowerHexString(asInserted);
+    }
+
+    @Override
+    protected String getBlobInsertStr(String blobData) {
+        // Oracle wants blob data encoded as hex (e.g. '01fca3b5').
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("'");
+
+        Formatter fmt = new Formatter(sb);
+        try {
+            for (byte b : blobData.getBytes("UTF-8")) {
+                fmt.format("%02X", b);
+            }
+        } catch (UnsupportedEncodingException uee) {
+            // Should not happen; Java always supports UTF-8.
+            fail("Could not get utf-8 bytes for blob string");
+            return null;
+        }
+        sb.append("'");
+        return sb.toString();
+    }
+
+    protected String getBinaryFloatInsertStr(float f) {
+        return "TO_BINARY_FLOAT(" + f + "F)";
+    }
+
+    protected String getBinaryDoubleInsertStr(double d) {
+        return "TO_BINARY_DOUBLE(" + d + "D)";
+    }
+
+    // Disable this test since Oracle isn't ANSI compliant.
+    @Override
+    @Test
+    public void testEmptyStringCol() {
+        this.skipped = true;
+        LOG.info(
+            "Oracle treats empty strings as null (non-ANSI compliant). Skipping.");
+    }
+
+    @Override
+    @Test
+    public void testTimestamp1() {
+        verifyType(getTimestampType(),
+                   getTimestampInsertStr("'2009-04-24 18:24:00'"),
+                   "2009-04-24 18:24:00.0");
+    }
+
+    @Override
+    @Test
+    public void testTimestamp2() {
+        verifyType(getTimestampType(),
+                   getTimestampInsertStr("'2009-04-24 18:24:00.0002'"),
+                   "2009-04-24 18:24:00.0002");
+    }
+
+    @Override
+    @Test
+    public void testDate1() {
+        verifyType("DATE", getDateInsertStr("'2009-01-12'"),
+                   getDateSeqOutput("2009-01-12"));
+    }
+
+    @Override
+    @Test
+    public void testDate2() {
+        verifyType("DATE", getDateInsertStr("'2009-04-24'"),
+                   getDateSeqOutput("2009-04-24"));
+    }
+
+    @Test
+    public void testRawVal() {
+        verifyType("RAW(8)", "'12ABCD'", getVarBinarySeqOutput("12ABCD"), true);
+    }
+
+    @Test
+    public void testBinaryFloat() {
+        verifyType("BINARY_FLOAT", getBinaryFloatInsertStr(25f), "25.0");
+        verifyType("BINARY_FLOAT", getBinaryFloatInsertStr(+6.34f), "6.34");
+
+        // Max and min are from Oracle DB SQL reference for 10g release 2
+        // https://stackoverflow.com/questions/3884793/why-is-double-min-value-in-not-negative
+        verifyType("BINARY_FLOAT", getBinaryFloatInsertStr(Float.MAX_VALUE), "3.4028235E38");
+        verifyType("BINARY_FLOAT", getBinaryFloatInsertStr(-Float.MAX_VALUE), "-3.4028235E38");
+    }
+
+    @Test
+    public void testBinaryDouble() {
+        verifyType("BINARY_DOUBLE", getBinaryDoubleInsertStr(0.5), "0.5");
+        verifyType("BINARY_DOUBLE", getBinaryDoubleInsertStr(-1), "-1.0");
+
+        // Max and min are from Oracle DB SQL reference for 10g release 2
+        // https://stackoverflow.com/questions/3884793/why-is-double-min-value-in-not-negative
+        verifyType("BINARY_DOUBLE", getBinaryDoubleInsertStr(Double.MAX_VALUE), "1.7976931348623157E308");
+        verifyType("BINARY_DOUBLE", getBinaryDoubleInsertStr(-Double.MAX_VALUE), "-1.7976931348623157E308");
+    }
 }
 

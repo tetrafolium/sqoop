@@ -33,20 +33,20 @@ import java.io.IOException;
  */
 public class DirCleanupHook extends Thread {
 
-  private File dir;
+    private File dir;
 
-  public static final Log LOG = LogFactory.getLog(DirCleanupHook.class.getName());
+    public static final Log LOG = LogFactory.getLog(DirCleanupHook.class.getName());
 
-  public DirCleanupHook(String dirPath) {
-    dir = new File(dirPath);
-  }
-
-  public void run() {
-    try {
-      LOG.debug("Removing directory: " + dir + " in the clean up hook.");
-      FileUtils.deleteDirectory(dir);
-    } catch (IOException e) {
-      LOG.error("Unable to remove directory: " + dir + ". Error was: " + e.getMessage());
+    public DirCleanupHook(String dirPath) {
+        dir = new File(dirPath);
     }
-  }
+
+    public void run() {
+        try {
+            LOG.debug("Removing directory: " + dir + " in the clean up hook.");
+            FileUtils.deleteDirectory(dir);
+        } catch (IOException e) {
+            LOG.error("Unable to remove directory: " + dir + ". Error was: " + e.getMessage());
+        }
+    }
 }

@@ -26,8 +26,8 @@ import org.junit.experimental.categories.Category;
 @Category(SqlServerTest.class)
 public class SqlServerSplitByImportTest extends SplitByImportTestBase {
 
-  @Override
-  public DatabaseAdapter createAdapter() {
-    return new SqlServerDatabaseAdapter();
-  }
+    @Override
+    public DatabaseAdapter createAdapter() {
+        return new SqlServerDatabaseAdapter();
+    }
 }

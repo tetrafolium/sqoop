@@ -30,15 +30,15 @@ import static org.junit.Assert.assertEquals;
 @Category(UnitTest.class)
 public class TestSubstitutionUtils {
 
-  @Test
-  public void testRemoveEscapeCharacters() {
-    assertEquals("\\N", SubstitutionUtils.removeEscapeCharacters("\\\\N"));
-    assertEquals("\n", SubstitutionUtils.removeEscapeCharacters("\\n"));
-    assertEquals("\b", SubstitutionUtils.removeEscapeCharacters("\\b"));
-    assertEquals("\t", SubstitutionUtils.removeEscapeCharacters("\\t"));
-    assertEquals("\f", SubstitutionUtils.removeEscapeCharacters("\\f"));
-    assertEquals("\'", SubstitutionUtils.removeEscapeCharacters("\\'"));
-    assertEquals("\"", SubstitutionUtils.removeEscapeCharacters("\\\""));
-    assertEquals("sqoop", SubstitutionUtils.removeEscapeCharacters("sqoop"));
-  }
+    @Test
+    public void testRemoveEscapeCharacters() {
+        assertEquals("\\N", SubstitutionUtils.removeEscapeCharacters("\\\\N"));
+        assertEquals("\n", SubstitutionUtils.removeEscapeCharacters("\\n"));
+        assertEquals("\b", SubstitutionUtils.removeEscapeCharacters("\\b"));
+        assertEquals("\t", SubstitutionUtils.removeEscapeCharacters("\\t"));
+        assertEquals("\f", SubstitutionUtils.removeEscapeCharacters("\\f"));
+        assertEquals("\'", SubstitutionUtils.removeEscapeCharacters("\\'"));
+        assertEquals("\"", SubstitutionUtils.removeEscapeCharacters("\\\""));
+        assertEquals("sqoop", SubstitutionUtils.removeEscapeCharacters("sqoop"));
+    }
 }

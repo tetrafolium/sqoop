@@ -24,9 +24,9 @@ package org.apache.sqoop.manager.oracle.util;
  * and negative zero.
  */
 public class BinaryDoubleGenerator extends OraOopTestDataGenerator<Double> {
-  @Override
-  public Double next() {
-    return Double.longBitsToDouble(rng.nextLong());
-  }
+    @Override
+    public Double next() {
+        return Double.longBitsToDouble(rng.nextLong());
+    }
 
 }

@@ -39,49 +39,49 @@ public abstract class ParquetImportMapper<KEYOUT, VALOUT>
     extends AutoProgressMapper<LongWritable, SqoopRecord,
     KEYOUT, VALOUT> {
 
-  private Schema schema = null;
-  private boolean bigDecimalFormatString = true;
-  private LargeObjectLoader lobLoader = null;
-  private boolean bigDecimalPadding;
+    private Schema schema = null;
+    private boolean bigDecimalFormatString = true;
+    private LargeObjectLoader lobLoader = null;
+    private boolean bigDecimalPadding;
 
-  @Override
-  protected void setup(Context context)
-      throws IOException, InterruptedException {
-    Configuration conf = context.getConfiguration();
-    schema = getAvroSchema(conf);
-    bigDecimalFormatString = conf.getBoolean(
-        ImportJobBase.PROPERTY_BIGDECIMAL_FORMAT,
-        ImportJobBase.PROPERTY_BIGDECIMAL_FORMAT_DEFAULT);
-    lobLoader = createLobLoader(context);
-    GenericData.get().addLogicalTypeConversion(new Conversions.DecimalConversion());
-    bigDecimalPadding = conf.getBoolean(ConfigurationConstants.PROP_ENABLE_AVRO_DECIMAL_PADDING, false);
-  }
-
-  @Override
-  protected void map(LongWritable key, SqoopRecord val, Context context)
-      throws IOException, InterruptedException {
-    try {
-      // Loading of LOBs was delayed until we have a Context.
-      val.loadLargeObjects(lobLoader);
-    } catch (SQLException sqlE) {
-      throw new IOException(sqlE);
+    @Override
+    protected void setup(Context context)
+    throws IOException, InterruptedException {
+        Configuration conf = context.getConfiguration();
+        schema = getAvroSchema(conf);
+        bigDecimalFormatString = conf.getBoolean(
+                                     ImportJobBase.PROPERTY_BIGDECIMAL_FORMAT,
+                                     ImportJobBase.PROPERTY_BIGDECIMAL_FORMAT_DEFAULT);
+        lobLoader = createLobLoader(context);
+        GenericData.get().addLogicalTypeConversion(new Conversions.DecimalConversion());
+        bigDecimalPadding = conf.getBoolean(ConfigurationConstants.PROP_ENABLE_AVRO_DECIMAL_PADDING, false);
     }
 
-    GenericRecord record = AvroUtil.toGenericRecord(val.getFieldMap(), schema,
-        bigDecimalFormatString, bigDecimalPadding);
-    write(context, record);
-  }
+    @Override
+    protected void map(LongWritable key, SqoopRecord val, Context context)
+    throws IOException, InterruptedException {
+        try {
+            // Loading of LOBs was delayed until we have a Context.
+            val.loadLargeObjects(lobLoader);
+        } catch (SQLException sqlE) {
+            throw new IOException(sqlE);
+        }
 
-  @Override
-  protected void cleanup(Context context) throws IOException {
-    if (null != lobLoader) {
-      lobLoader.close();
+        GenericRecord record = AvroUtil.toGenericRecord(val.getFieldMap(), schema,
+                               bigDecimalFormatString, bigDecimalPadding);
+        write(context, record);
     }
-  }
 
-  protected abstract LargeObjectLoader createLobLoader(Context context) throws IOException, InterruptedException;
+    @Override
+    protected void cleanup(Context context) throws IOException {
+        if (null != lobLoader) {
+            lobLoader.close();
+        }
+    }
 
-  protected abstract Schema getAvroSchema(Configuration configuration);
+    protected abstract LargeObjectLoader createLobLoader(Context context) throws IOException, InterruptedException;
 
-  protected abstract void write(Context context, GenericRecord record) throws IOException, InterruptedException;
+    protected abstract Schema getAvroSchema(Configuration configuration);
+
+    protected abstract void write(Context context, GenericRecord record) throws IOException, InterruptedException;
 }

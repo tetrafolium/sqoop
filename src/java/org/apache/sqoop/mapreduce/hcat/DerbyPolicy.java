@@ -44,53 +44,53 @@ import java.util.List;
  */
 public class DerbyPolicy extends Policy {
 
-  private static PermissionCollection perms;
+    private static PermissionCollection perms;
 
-  public DerbyPolicy() {
-    super();
-    if (perms == null) {
-      perms = new DerbyPermissionCollection();
-      addPermissions();
-    }
-  }
-
-  @Override
-  public PermissionCollection getPermissions(CodeSource codesource) {
-    return perms;
-  }
-
-  private void addPermissions() {
-    SystemPermission systemPermission = new SystemPermission("engine", "usederbyinternals");
-    perms.add(systemPermission);
-  }
-
-  class DerbyPermissionCollection extends PermissionCollection {
-
-    List<Permission> perms = new ArrayList<>();
-
-    @Override
-    public void add(Permission p) {
-      perms.add(p);
-    }
-
-    @Override
-    public boolean implies(Permission p) {
-      for (Permission perm : perms) {
-        if (perm.implies(p)) {
-          return true;
+    public DerbyPolicy() {
+        super();
+        if (perms == null) {
+            perms = new DerbyPermissionCollection();
+            addPermissions();
         }
-      }
-      return false;
     }
 
     @Override
-    public Enumeration<Permission> elements() {
-      return Collections.enumeration(perms);
+    public PermissionCollection getPermissions(CodeSource codesource) {
+        return perms;
     }
 
-    @Override
-    public boolean isReadOnly() {
-      return false;
+    private void addPermissions() {
+        SystemPermission systemPermission = new SystemPermission("engine", "usederbyinternals");
+        perms.add(systemPermission);
     }
-  }
+
+    class DerbyPermissionCollection extends PermissionCollection {
+
+        List<Permission> perms = new ArrayList<>();
+
+        @Override
+        public void add(Permission p) {
+            perms.add(p);
+        }
+
+        @Override
+        public boolean implies(Permission p) {
+            for (Permission perm : perms) {
+                if (perm.implies(p)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        @Override
+        public Enumeration<Permission> elements() {
+            return Collections.enumeration(perms);
+        }
+
+        @Override
+        public boolean isReadOnly() {
+            return false;
+        }
+    }
 }

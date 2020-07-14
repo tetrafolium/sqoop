@@ -46,122 +46,122 @@ import static org.junit.Assert.fail;
  */
 public class TestSplitBy extends ImportJobTestCase {
 
-  /**
-   * Create the argv to pass to Sqoop.
-   * @return the argv as an array of strings.
-   */
-  protected String [] getArgv(boolean includeHadoopFlags, String [] colNames,
-      String splitByCol) {
-    String columnsString = "";
-    for (String col : colNames) {
-      columnsString += col + ",";
+    /**
+     * Create the argv to pass to Sqoop.
+     * @return the argv as an array of strings.
+     */
+    protected String [] getArgv(boolean includeHadoopFlags, String [] colNames,
+                                String splitByCol) {
+        String columnsString = "";
+        for (String col : colNames) {
+            columnsString += col + ",";
+        }
+
+        ArrayList<String> args = new ArrayList<String>();
+
+        if (includeHadoopFlags) {
+            CommonArgs.addHadoopFlags(args);
+        }
+
+        args.add("--table");
+        args.add(HsqldbTestServer.getTableName());
+        args.add("--columns");
+        args.add(columnsString);
+        args.add("--split-by");
+        args.add(splitByCol);
+        args.add("--warehouse-dir");
+        args.add(getWarehouseDir());
+        args.add("--connect");
+        args.add(HsqldbTestServer.getUrl());
+        args.add("--as-sequencefile");
+        args.add("--num-mappers");
+        args.add("1");
+
+        return args.toArray(new String[0]);
     }
 
-    ArrayList<String> args = new ArrayList<String>();
-
-    if (includeHadoopFlags) {
-      CommonArgs.addHadoopFlags(args);
+    // this test just uses the two int table.
+    protected String getTableName() {
+        return HsqldbTestServer.getTableName();
     }
 
-    args.add("--table");
-    args.add(HsqldbTestServer.getTableName());
-    args.add("--columns");
-    args.add(columnsString);
-    args.add("--split-by");
-    args.add(splitByCol);
-    args.add("--warehouse-dir");
-    args.add(getWarehouseDir());
-    args.add("--connect");
-    args.add(HsqldbTestServer.getUrl());
-    args.add("--as-sequencefile");
-    args.add("--num-mappers");
-    args.add("1");
 
-    return args.toArray(new String[0]);
-  }
-
-  // this test just uses the two int table.
-  protected String getTableName() {
-    return HsqldbTestServer.getTableName();
-  }
-
-
-  /**
-   * Given a comma-delimited list of integers, grab and parse the first int.
-   * @param str a comma-delimited list of values, the first of which is an int.
-   * @return the first field in the string, cast to int
-   */
-  private int getFirstInt(String str) {
-    String [] parts = str.split(",");
-    return Integer.parseInt(parts[0]);
-  }
-
-  public void runSplitByTest(String splitByCol, int expectedSum)
-      throws IOException {
-
-    String [] columns = HsqldbTestServer.getFieldNames();
-    ClassLoader prevClassLoader = null;
-    SequenceFile.Reader reader = null;
-
-    String [] argv = getArgv(true, columns, splitByCol);
-    runImport(argv);
-    try {
-      SqoopOptions opts = new ImportTool().parseArguments(
-          getArgv(false, columns, splitByCol),
-          null, null, true);
-
-      CompilationManager compileMgr = new CompilationManager(opts);
-      String jarFileName = compileMgr.getJarFilename();
-      LOG.debug("Got jar from import job: " + jarFileName);
-
-      prevClassLoader = ClassLoaderStack.addJarFile(jarFileName,
-          getTableName());
-
-      reader = SeqFileReader.getSeqFileReader(getDataFilePath().toString());
-
-      // here we can actually instantiate (k, v) pairs.
-      Configuration conf = new Configuration();
-      Object key = ReflectionUtils.newInstance(reader.getKeyClass(), conf);
-      Object val = ReflectionUtils.newInstance(reader.getValueClass(), conf);
-
-      // We know that these values are two ints separated by a ',' character.
-      // Since this is all dynamic, though, we don't want to actually link
-      // against the class and use its methods. So we just parse this back
-      // into int fields manually.  Sum them up and ensure that we get the
-      // expected total for the first column, to verify that we got all the
-      // results from the db into the file.
-
-      // Sum up everything in the file.
-      int curSum = 0;
-      while (reader.next(key) != null) {
-        reader.getCurrentValue(val);
-        curSum += getFirstInt(val.toString());
-      }
-
-      assertEquals("Total sum of first db column mismatch", expectedSum,
-          curSum);
-    } catch (InvalidOptionsException ioe) {
-      fail(ioe.toString());
-    } catch (ParseException pe) {
-      fail(pe.toString());
-    } finally {
-      IOUtils.closeStream(reader);
-
-      if (null != prevClassLoader) {
-        ClassLoaderStack.setCurrentClassLoader(prevClassLoader);
-      }
+    /**
+     * Given a comma-delimited list of integers, grab and parse the first int.
+     * @param str a comma-delimited list of values, the first of which is an int.
+     * @return the first field in the string, cast to int
+     */
+    private int getFirstInt(String str) {
+        String [] parts = str.split(",");
+        return Integer.parseInt(parts[0]);
     }
-  }
 
-  @Test
-  public void testSplitByFirstCol() throws IOException {
-    String splitByCol = "INTFIELD1";
-    runSplitByTest(splitByCol, HsqldbTestServer.getFirstColSum());
-  }
+    public void runSplitByTest(String splitByCol, int expectedSum)
+    throws IOException {
 
-  @Test
-  public void testSplitBySecondCol() throws IOException {
-    String splitByCol = "INTFIELD2";
-    runSplitByTest(splitByCol, HsqldbTestServer.getFirstColSum());
-  }
+        String [] columns = HsqldbTestServer.getFieldNames();
+        ClassLoader prevClassLoader = null;
+        SequenceFile.Reader reader = null;
+
+        String [] argv = getArgv(true, columns, splitByCol);
+        runImport(argv);
+        try {
+            SqoopOptions opts = new ImportTool().parseArguments(
+                getArgv(false, columns, splitByCol),
+                null, null, true);
+
+            CompilationManager compileMgr = new CompilationManager(opts);
+            String jarFileName = compileMgr.getJarFilename();
+            LOG.debug("Got jar from import job: " + jarFileName);
+
+            prevClassLoader = ClassLoaderStack.addJarFile(jarFileName,
+                              getTableName());
+
+            reader = SeqFileReader.getSeqFileReader(getDataFilePath().toString());
+
+            // here we can actually instantiate (k, v) pairs.
+            Configuration conf = new Configuration();
+            Object key = ReflectionUtils.newInstance(reader.getKeyClass(), conf);
+            Object val = ReflectionUtils.newInstance(reader.getValueClass(), conf);
+
+            // We know that these values are two ints separated by a ',' character.
+            // Since this is all dynamic, though, we don't want to actually link
+            // against the class and use its methods. So we just parse this back
+            // into int fields manually.  Sum them up and ensure that we get the
+            // expected total for the first column, to verify that we got all the
+            // results from the db into the file.
+
+            // Sum up everything in the file.
+            int curSum = 0;
+            while (reader.next(key) != null) {
+                reader.getCurrentValue(val);
+                curSum += getFirstInt(val.toString());
+            }
+
+            assertEquals("Total sum of first db column mismatch", expectedSum,
+                         curSum);
+        } catch (InvalidOptionsException ioe) {
+            fail(ioe.toString());
+        } catch (ParseException pe) {
+            fail(pe.toString());
+        } finally {
+            IOUtils.closeStream(reader);
+
+            if (null != prevClassLoader) {
+                ClassLoaderStack.setCurrentClassLoader(prevClassLoader);
+            }
+        }
+    }
+
+    @Test
+    public void testSplitByFirstCol() throws IOException {
+        String splitByCol = "INTFIELD1";
+        runSplitByTest(splitByCol, HsqldbTestServer.getFirstColSum());
+    }
+
+    @Test
+    public void testSplitBySecondCol() throws IOException {
+        String splitByCol = "INTFIELD2";
+        runSplitByTest(splitByCol, HsqldbTestServer.getFirstColSum());
+    }
 }

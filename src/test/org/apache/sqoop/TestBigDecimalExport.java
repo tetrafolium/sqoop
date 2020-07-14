@@ -46,73 +46,73 @@ import static org.junit.Assert.assertEquals;
  */
 public class TestBigDecimalExport extends ExportJobTestCase {
 
-  private void runBigDecimalExport(String line)
-      throws IOException, SQLException {
-    FileSystem fs = FileSystem.get(getConf());
-    Path tablePath = getTablePath();
-    fs.mkdirs(tablePath);
-    Path filePath = getDataFilePath();
-    DataOutputStream stream = fs.create(filePath);
-    BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(stream));
-    writer.write(line);
-    writer.close();
-    String[] types =
-      { "DECIMAL", "NUMERIC" };
-    createTableWithColTypes(types, emptyList());
+    private void runBigDecimalExport(String line)
+    throws IOException, SQLException {
+        FileSystem fs = FileSystem.get(getConf());
+        Path tablePath = getTablePath();
+        fs.mkdirs(tablePath);
+        Path filePath = getDataFilePath();
+        DataOutputStream stream = fs.create(filePath);
+        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(stream));
+        writer.write(line);
+        writer.close();
+        String[] types =
+        { "DECIMAL", "NUMERIC" };
+        createTableWithColTypes(types, emptyList());
 
-    List<String> args = new ArrayList<String>();
+        List<String> args = new ArrayList<String>();
 
-    CommonArgs.addHadoopFlags(args);
+        CommonArgs.addHadoopFlags(args);
 
-    args.add("--table");
-    args.add(getTableName());
-    args.add("--export-dir");
-    args.add(tablePath.toString());
-    args.add("--connect");
-    args.add(getConnectString());
-    args.add("-m");
-    args.add("1");
+        args.add("--table");
+        args.add(getTableName());
+        args.add("--export-dir");
+        args.add(tablePath.toString());
+        args.add("--connect");
+        args.add(getConnectString());
+        args.add("-m");
+        args.add("1");
 
-    runExport(args.toArray(new String[args.size()]));
+        runExport(args.toArray(new String[args.size()]));
 
-    BigDecimal actual1 = null;
-    BigDecimal actual2 = null;
+        BigDecimal actual1 = null;
+        BigDecimal actual2 = null;
 
-    Connection conn = getConnection();
-    try {
-      PreparedStatement stmt = conn.prepareStatement("SELECT * FROM "
-          + getTableName());
-      try {
-        ResultSet rs = stmt.executeQuery();
+        Connection conn = getConnection();
         try {
-          rs.next();
-          actual1 = rs.getBigDecimal(1);
-          actual2 = rs.getBigDecimal(2);
+            PreparedStatement stmt = conn.prepareStatement("SELECT * FROM "
+                                     + getTableName());
+            try {
+                ResultSet rs = stmt.executeQuery();
+                try {
+                    rs.next();
+                    actual1 = rs.getBigDecimal(1);
+                    actual2 = rs.getBigDecimal(2);
+                } finally {
+                    rs.close();
+                }
+            } finally {
+                stmt.close();
+            }
         } finally {
-          rs.close();
+            conn.close();
         }
-      } finally {
-        stmt.close();
-      }
-    } finally {
-      conn.close();
+
+        BigDecimal expected1 = new BigDecimal("0.000001");
+        BigDecimal expected2 = new BigDecimal("0.0000001");
+
+        assertEquals(expected1, actual1);
+        assertEquals(expected2, actual2);
     }
 
-    BigDecimal expected1 = new BigDecimal("0.000001");
-    BigDecimal expected2 = new BigDecimal("0.0000001");
+    @Test
+    public void testBigDecimalDefault() throws IOException, SQLException {
+        runBigDecimalExport("0.000001,0.0000001");
+    }
 
-    assertEquals(expected1, actual1);
-    assertEquals(expected2, actual2);
-  }
-
-  @Test
-  public void testBigDecimalDefault() throws IOException, SQLException {
-    runBigDecimalExport("0.000001,0.0000001");
-  }
-
-  @Test
-  public void testBigDecimalNoFormat() throws IOException, SQLException {
-    runBigDecimalExport("0.000001,1E-7");
-  }
+    @Test
+    public void testBigDecimalNoFormat() throws IOException, SQLException {
+        runBigDecimalExport("0.000001,1E-7");
+    }
 
 }

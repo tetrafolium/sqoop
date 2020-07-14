@@ -32,33 +32,33 @@ public class SequenceFileImportMapper
     extends AutoProgressMapper<LongWritable, SqoopRecord, LongWritable,
     SqoopRecord> {
 
-  private LargeObjectLoader lobLoader;
+    private LargeObjectLoader lobLoader;
 
-  @Override
-  protected void setup(Context context)
-      throws IOException, InterruptedException {
-    this.lobLoader = new LargeObjectLoader(context.getConfiguration(), FileOutputFormat.getWorkOutputPath(context));
-  }
-
-  @Override
-  public void map(LongWritable key, SqoopRecord val, Context context)
-      throws IOException, InterruptedException {
-
-    try {
-      // Loading of LOBs was delayed until we have a Context.
-      val.loadLargeObjects(lobLoader);
-    } catch (SQLException sqlE) {
-      throw new IOException(sqlE);
+    @Override
+    protected void setup(Context context)
+    throws IOException, InterruptedException {
+        this.lobLoader = new LargeObjectLoader(context.getConfiguration(), FileOutputFormat.getWorkOutputPath(context));
     }
 
-    context.write(key, val);
-  }
+    @Override
+    public void map(LongWritable key, SqoopRecord val, Context context)
+    throws IOException, InterruptedException {
 
-  @Override
-  protected void cleanup(Context context) throws IOException {
-    if (null != lobLoader) {
-      lobLoader.close();
+        try {
+            // Loading of LOBs was delayed until we have a Context.
+            val.loadLargeObjects(lobLoader);
+        } catch (SQLException sqlE) {
+            throw new IOException(sqlE);
+        }
+
+        context.write(key, val);
     }
-  }
+
+    @Override
+    protected void cleanup(Context context) throws IOException {
+        if (null != lobLoader) {
+            lobLoader.close();
+        }
+    }
 }
 

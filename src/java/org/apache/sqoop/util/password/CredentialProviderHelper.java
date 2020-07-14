@@ -33,123 +33,124 @@ import org.apache.hadoop.conf.Configuration;
  * provider is only introduced in 2.6.0 and later
  */
 public class CredentialProviderHelper {
-  public static final Log LOG =
-    LogFactory.getLog(CredentialProviderHelper.class.getName());
+    public static final Log LOG =
+        LogFactory.getLog(CredentialProviderHelper.class.getName());
 
-  private static Class<?> clsCredProvider;
-  private static Class<?> clsCredProviderFactory;
-  private static Method methGetPassword;
-  private static Method methGetProviders;
-  private static Method methCreateCredEntry;
-  private static Method methFlush;
+    private static Class<?> clsCredProvider;
+    private static Class<?> clsCredProviderFactory;
+    private static Method methGetPassword;
+    private static Method methGetProviders;
+    private static Method methCreateCredEntry;
+    private static Method methFlush;
 
-  static {
-    try {
-      LOG.debug("Reflecting credential provider classes and methods");
-      clsCredProvider = Class
-        .forName("org.apache.hadoop.security.alias.CredentialProvider");
-      LOG
-        .debug("Found org.apache.hadoop.security.alias.CredentialProvider");
-      clsCredProviderFactory = Class.forName(
-        "org.apache.hadoop.security.alias.CredentialProviderFactory");
-      LOG
-        .debug("Found org.apache.hadoop.security.alias.CredentialProviderFactory");
+    static {
+        try {
+            LOG.debug("Reflecting credential provider classes and methods");
+            clsCredProvider = Class
+                              .forName("org.apache.hadoop.security.alias.CredentialProvider");
+            LOG
+            .debug("Found org.apache.hadoop.security.alias.CredentialProvider");
+            clsCredProviderFactory = Class.forName(
+                                         "org.apache.hadoop.security.alias.CredentialProviderFactory");
+            LOG
+            .debug("Found org.apache.hadoop.security.alias.CredentialProviderFactory");
 
-      methCreateCredEntry = clsCredProvider.getMethod("createCredentialEntry",
-        new Class[] { String.class, char[].class });
-      LOG
-        .debug("Found CredentialProvider#createCredentialEntry");
+            methCreateCredEntry = clsCredProvider.getMethod("createCredentialEntry",
+                                  new Class[] { String.class, char[].class });
+            LOG
+            .debug("Found CredentialProvider#createCredentialEntry");
 
-      methFlush = clsCredProvider.getMethod("flush",
-        new Class[] {});
-      LOG
-        .debug("Found CredentialProvider#flush");
+            methFlush = clsCredProvider.getMethod("flush",
+                                                  new Class[] {});
+            LOG
+            .debug("Found CredentialProvider#flush");
 
-      methGetPassword = Configuration.class.getMethod("getPassword",
-        new Class[] { String.class });
-      LOG
-        .debug("Found Configuration#getPassword");
+            methGetPassword = Configuration.class.getMethod("getPassword",
+                              new Class[] { String.class });
+            LOG
+            .debug("Found Configuration#getPassword");
 
-      methGetProviders = clsCredProviderFactory.getMethod("getProviders",
-        new Class[] { Configuration.class });
-      LOG
-        .debug("Found CredentialProviderFactory#getProviders");
-    } catch (ClassNotFoundException cnfe) {
-      LOG.debug("Ignoring exception", cnfe);
-    } catch (NoSuchMethodException nsme) {
-      LOG.debug("Ignoring exception", nsme);
+            methGetProviders = clsCredProviderFactory.getMethod("getProviders",
+                               new Class[] { Configuration.class });
+            LOG
+            .debug("Found CredentialProviderFactory#getProviders");
+        } catch (ClassNotFoundException cnfe) {
+            LOG.debug("Ignoring exception", cnfe);
+        } catch (NoSuchMethodException nsme) {
+            LOG.debug("Ignoring exception", nsme);
+        }
     }
-  }
-  // Should track what is specified in JavaKeyStoreProvider class.
-  public static final String SCHEME_NAME = "jceks";
-  // Should track what is in CredentialProvider class.
-  public static final String HADOOP_CREDENTIAL_PROVIDER_PATH =
-    "hadoop.security.credential.provider.path";
-  public static final String S3A_CREDENTIAL_PROVIDER_PATH =
-          "fs.s3a.security.credential.provider.path";
-  public static final String CREDENTIAL_PROVIDER_PASSWORD_FILE =
-          "hadoop.security.credstore.java-keystore-provider.password-file";
+    // Should track what is specified in JavaKeyStoreProvider class.
+    public static final String SCHEME_NAME = "jceks";
+    // Should track what is in CredentialProvider class.
+    public static final String HADOOP_CREDENTIAL_PROVIDER_PATH =
+        "hadoop.security.credential.provider.path";
+    public static final String S3A_CREDENTIAL_PROVIDER_PATH =
+        "fs.s3a.security.credential.provider.path";
+    public static final String CREDENTIAL_PROVIDER_PASSWORD_FILE =
+        "hadoop.security.credstore.java-keystore-provider.password-file";
 
-  public static boolean isProviderAvailable() {
+    public static boolean isProviderAvailable() {
 
-    if (clsCredProvider == null
-      || clsCredProviderFactory == null
-      || methCreateCredEntry == null
-      || methGetPassword == null
-      || methFlush == null) {
-      return false;
+        if (clsCredProvider == null
+                || clsCredProviderFactory == null
+                || methCreateCredEntry == null
+                || methGetPassword == null
+                || methFlush == null) {
+            return false;
+        }
+        return true;
     }
-    return true;
-  }
 
-  public static String resolveAlias(Configuration conf, String alias)
+    public static String resolveAlias(Configuration conf, String alias)
     throws IOException {
-    LOG.debug("Resolving alias with credential provider path set to "
-      + conf.get(HADOOP_CREDENTIAL_PROVIDER_PATH));
-    try {
-      char[] cred = (char[])
-        methGetPassword.invoke(conf, new Object[] { alias });
-      if (cred == null) {
-        throw new IOException("The provided alias cannot be resolved");
-      }
-      String pass = new String(cred);
-      return pass;
-    } catch (InvocationTargetException ite) {
-      throw new RuntimeException("Error resolving password "
-        + " from the credential providers ", ite.getTargetException());
-    } catch (IllegalAccessException iae) {
-      throw new RuntimeException("Error invoking the credential provider method",
-        iae);
+        LOG.debug("Resolving alias with credential provider path set to "
+                  + conf.get(HADOOP_CREDENTIAL_PROVIDER_PATH));
+        try {
+            char[] cred = (char[])
+                          methGetPassword.invoke(conf, new Object[] { alias });
+            if (cred == null) {
+                throw new IOException("The provided alias cannot be resolved");
+            }
+            String pass = new String(cred);
+            return pass;
+        } catch (InvocationTargetException ite) {
+            throw new RuntimeException("Error resolving password "
+                                       + " from the credential providers ", ite.getTargetException());
+        } catch (IllegalAccessException iae) {
+            throw new RuntimeException("Error invoking the credential provider method",
+                                       iae);
+        }
     }
-  }
-  /**
-   * Test utility to create an entry
-   */
-  public static void createCredentialEntry(Configuration conf,
+    /**
+     * Test utility to create an entry
+     */
+    public static void createCredentialEntry(Configuration conf,
 
-    String alias, String credential) throws IOException {
+            String alias, String credential) throws IOException {
 
-    if (!isProviderAvailable()) {
-      throw new RuntimeException("CredentialProvider facility not available "
-        + "in the hadoop environment");
+        if (!isProviderAvailable()) {
+            throw new RuntimeException("CredentialProvider facility not available "
+                                       + "in the hadoop environment");
+        }
+
+
+        try {
+            List<?> result = (List<?>)
+                             methGetProviders.invoke(null, new Object[] { conf });
+            Object provider = result.get(0);
+            LOG.debug("Using credential provider " + provider);
+
+            methCreateCredEntry.invoke(provider, new Object[] {
+                                           alias, credential.toCharArray()
+                                       });
+            methFlush.invoke(provider, new Object[] {});
+        } catch (InvocationTargetException ite) {
+            throw new RuntimeException("Error creating credential entry "
+                                       + " using the credentail provider", ite.getTargetException());
+        } catch (IllegalAccessException iae) {
+            throw new RuntimeException("Error accessing the credential create method",
+                                       iae);
+        }
     }
-
-
-    try {
-      List<?> result = (List<?>)
-        methGetProviders.invoke(null, new Object[] { conf });
-      Object provider = result.get(0);
-      LOG.debug("Using credential provider " + provider);
-
-      methCreateCredEntry.invoke(provider, new Object[] {
-        alias, credential.toCharArray() });
-      methFlush.invoke(provider, new Object[] {});
-    } catch (InvocationTargetException ite) {
-      throw new RuntimeException("Error creating credential entry "
-        + " using the credentail provider", ite.getTargetException());
-    } catch (IllegalAccessException iae) {
-      throw new RuntimeException("Error accessing the credential create method",
-        iae);
-    }
-  }
 }

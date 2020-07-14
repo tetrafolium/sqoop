@@ -38,76 +38,76 @@ import static org.junit.Assert.assertSame;
 @Category({KerberizedTest.class, IntegrationTest.class})
 public class TestKerberosAuthenticator {
 
-  private static final String KERBEROS_RULE_TEMPLATE = "RULE:[2:$1@$0](.*@%s)s/@%s//";
+    private static final String KERBEROS_RULE_TEMPLATE = "RULE:[2:$1@$0](.*@%s)s/@%s//";
 
-  @ClassRule
-  public static MiniKdcInfrastructureRule miniKdc = new MiniKdcInfrastructureRule();
+    @ClassRule
+    public static MiniKdcInfrastructureRule miniKdc = new MiniKdcInfrastructureRule();
 
-  private KerberosAuthenticator kerberosAuthenticator;
+    private KerberosAuthenticator kerberosAuthenticator;
 
-  @Rule
-  public ExpectedException expectedException = ExpectedException.none();
+    @Rule
+    public ExpectedException expectedException = ExpectedException.none();
 
-  @Test
-  public void testAuthenticateReturnsCurrentUserIfKerberosIsNotEnabled() throws Exception {
-    kerberosAuthenticator = new KerberosAuthenticator(new Configuration(), miniKdc.getTestPrincipal(), miniKdc.getKeytabFilePath());
+    @Test
+    public void testAuthenticateReturnsCurrentUserIfKerberosIsNotEnabled() throws Exception {
+        kerberosAuthenticator = new KerberosAuthenticator(new Configuration(), miniKdc.getTestPrincipal(), miniKdc.getKeytabFilePath());
 
-    assertSame(UserGroupInformation.getCurrentUser(), kerberosAuthenticator.authenticate());
-  }
+        assertSame(UserGroupInformation.getCurrentUser(), kerberosAuthenticator.authenticate());
+    }
 
-  @Test
-  public void testAuthenticateReturnsAUserDifferentThanCurrentUserIfKerberosIsEnabled() throws Exception {
-    kerberosAuthenticator = new KerberosAuthenticator(createKerberosConfiguration(), miniKdc.getTestPrincipal(), miniKdc.getKeytabFilePath());
+    @Test
+    public void testAuthenticateReturnsAUserDifferentThanCurrentUserIfKerberosIsEnabled() throws Exception {
+        kerberosAuthenticator = new KerberosAuthenticator(createKerberosConfiguration(), miniKdc.getTestPrincipal(), miniKdc.getKeytabFilePath());
 
-    assertNotSame(UserGroupInformation.getCurrentUser(), kerberosAuthenticator.authenticate());
-  }
+        assertNotSame(UserGroupInformation.getCurrentUser(), kerberosAuthenticator.authenticate());
+    }
 
-  @Test
-  public void testAuthenticateReturnsAKerberosAuthenticatedUserIfKerberosIsEnabled() throws Exception {
-    kerberosAuthenticator = new KerberosAuthenticator(createKerberosConfiguration(), miniKdc.getTestPrincipal(), miniKdc.getKeytabFilePath());
+    @Test
+    public void testAuthenticateReturnsAKerberosAuthenticatedUserIfKerberosIsEnabled() throws Exception {
+        kerberosAuthenticator = new KerberosAuthenticator(createKerberosConfiguration(), miniKdc.getTestPrincipal(), miniKdc.getKeytabFilePath());
 
-    UserGroupInformation authenticatedUser = kerberosAuthenticator.authenticate();
-    assertEquals(KERBEROS, authenticatedUser.getRealAuthenticationMethod());
-  }
+        UserGroupInformation authenticatedUser = kerberosAuthenticator.authenticate();
+        assertEquals(KERBEROS, authenticatedUser.getRealAuthenticationMethod());
+    }
 
-  @Test
-  public void testAuthenticateReturnsAnAuthenticatedUserWithProperUsernameIfKerberosIsEnabled() throws Exception {
-    kerberosAuthenticator = new KerberosAuthenticator(createKerberosConfiguration(), miniKdc.getTestPrincipal(), miniKdc.getKeytabFilePath());
+    @Test
+    public void testAuthenticateReturnsAnAuthenticatedUserWithProperUsernameIfKerberosIsEnabled() throws Exception {
+        kerberosAuthenticator = new KerberosAuthenticator(createKerberosConfiguration(), miniKdc.getTestPrincipal(), miniKdc.getKeytabFilePath());
 
-    UserGroupInformation authenticatedUser = kerberosAuthenticator.authenticate();
-    assertEquals(miniKdc.getTestPrincipal(), authenticatedUser.getUserName());
-  }
+        UserGroupInformation authenticatedUser = kerberosAuthenticator.authenticate();
+        assertEquals(miniKdc.getTestPrincipal(), authenticatedUser.getUserName());
+    }
 
-  @Test
-  public void testAuthenticateThrowsIfKerberosIsEnabledAndInvalidKeytabIsProvided() throws Exception {
-    String invalidKeytabLocation = "invalid_keytab_location";
-    kerberosAuthenticator = new KerberosAuthenticator(createKerberosConfiguration(), miniKdc.getTestPrincipal(), invalidKeytabLocation);
+    @Test
+    public void testAuthenticateThrowsIfKerberosIsEnabledAndInvalidKeytabIsProvided() throws Exception {
+        String invalidKeytabLocation = "invalid_keytab_location";
+        kerberosAuthenticator = new KerberosAuthenticator(createKerberosConfiguration(), miniKdc.getTestPrincipal(), invalidKeytabLocation);
 
-    expectedException.expect(RuntimeException.class);
-    expectedException.expectMessage("Kerberos authentication failed!");
-    kerberosAuthenticator.authenticate();
-  }
+        expectedException.expect(RuntimeException.class);
+        expectedException.expectMessage("Kerberos authentication failed!");
+        kerberosAuthenticator.authenticate();
+    }
 
-  @Test
-  public void testAuthenticateThrowsIfKerberosIsEnabledAndInvalidPrincipalIsProvided() throws Exception {
-    String invalidPrincipal = "invalid_principal";
-    kerberosAuthenticator = new KerberosAuthenticator(createKerberosConfiguration(), invalidPrincipal, miniKdc.getKeytabFilePath());
+    @Test
+    public void testAuthenticateThrowsIfKerberosIsEnabledAndInvalidPrincipalIsProvided() throws Exception {
+        String invalidPrincipal = "invalid_principal";
+        kerberosAuthenticator = new KerberosAuthenticator(createKerberosConfiguration(), invalidPrincipal, miniKdc.getKeytabFilePath());
 
-    expectedException.expect(RuntimeException.class);
-    expectedException.expectMessage("Kerberos authentication failed!");
-    kerberosAuthenticator.authenticate();
-  }
+        expectedException.expect(RuntimeException.class);
+        expectedException.expectMessage("Kerberos authentication failed!");
+        kerberosAuthenticator.authenticate();
+    }
 
-  private Configuration createKerberosConfiguration() {
-    Configuration configuration = new Configuration();
-    configuration.set(CommonConfigurationKeys.HADOOP_SECURITY_AUTHENTICATION, "kerberos");
-    // Adding a rule for the realm used by the MiniKdc since the default kerberos configuration might contain another realm.
-    configuration.set(CommonConfigurationKeys.HADOOP_SECURITY_AUTH_TO_LOCAL, buildKerberosRule());
-    return configuration;
-  }
+    private Configuration createKerberosConfiguration() {
+        Configuration configuration = new Configuration();
+        configuration.set(CommonConfigurationKeys.HADOOP_SECURITY_AUTHENTICATION, "kerberos");
+        // Adding a rule for the realm used by the MiniKdc since the default kerberos configuration might contain another realm.
+        configuration.set(CommonConfigurationKeys.HADOOP_SECURITY_AUTH_TO_LOCAL, buildKerberosRule());
+        return configuration;
+    }
 
-  private String buildKerberosRule() {
-    return String.format(KERBEROS_RULE_TEMPLATE, miniKdc.getRealm(), miniKdc.getRealm());
-  }
+    private String buildKerberosRule() {
+        return String.format(KERBEROS_RULE_TEMPLATE, miniKdc.getRealm(), miniKdc.getRealm());
+    }
 
 }

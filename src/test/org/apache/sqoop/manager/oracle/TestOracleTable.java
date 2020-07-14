@@ -27,16 +27,16 @@ import static org.junit.Assert.assertEquals;
  */
 public class TestOracleTable extends OraOopTestCase {
 
-  @Test
-  public void testToString() {
-    OracleTable table = new OracleTable("ORAOOP", "TEST_TABLE");
-    assertEquals("\"ORAOOP\".\"TEST_TABLE\"", table.toString());
+    @Test
+    public void testToString() {
+        OracleTable table = new OracleTable("ORAOOP", "TEST_TABLE");
+        assertEquals("\"ORAOOP\".\"TEST_TABLE\"", table.toString());
 
-    table = new OracleTable("", "TEST_TABLE2");
-    assertEquals("\"TEST_TABLE2\"", table.toString());
+        table = new OracleTable("", "TEST_TABLE2");
+        assertEquals("\"TEST_TABLE2\"", table.toString());
 
-    table = new OracleTable("TEST_TABLE3");
-    assertEquals("\"TEST_TABLE3\"", table.toString());
-  }
+        table = new OracleTable("TEST_TABLE3");
+        assertEquals("\"TEST_TABLE3\"", table.toString());
+    }
 
 }

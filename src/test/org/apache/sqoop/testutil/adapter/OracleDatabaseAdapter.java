@@ -27,25 +27,25 @@ import java.sql.SQLException;
 
 public class OracleDatabaseAdapter implements DatabaseAdapter {
 
-  @Override
-  public SqoopOptions injectConnectionParameters(SqoopOptions options) {
-    org.apache.sqoop.manager.oracle.util.OracleUtils.setOracleAuth(options);
-    return options;
-  }
+    @Override
+    public SqoopOptions injectConnectionParameters(SqoopOptions options) {
+        org.apache.sqoop.manager.oracle.util.OracleUtils.setOracleAuth(options);
+        return options;
+    }
 
-  @Override
-  public void dropTableIfExists(String tableName, ConnManager manager) throws SQLException {
-    String dropTableStatement = OracleUtils.getDropTableStatement(tableName);
-    SqlUtil.executeStatement(dropTableStatement, manager);
-  }
+    @Override
+    public void dropTableIfExists(String tableName, ConnManager manager) throws SQLException {
+        String dropTableStatement = OracleUtils.getDropTableStatement(tableName);
+        SqlUtil.executeStatement(dropTableStatement, manager);
+    }
 
-  @Override
-  public String getConnectionString() {
-    return OracleUtils.CONNECT_STRING;
-  }
+    @Override
+    public String getConnectionString() {
+        return OracleUtils.CONNECT_STRING;
+    }
 
-  @Override
-  public String toString() {
-    return getClass().getSimpleName();
-  }
+    @Override
+    public String toString() {
+        return getClass().getSimpleName();
+    }
 }

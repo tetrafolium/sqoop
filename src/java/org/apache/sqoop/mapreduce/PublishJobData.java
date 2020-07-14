@@ -48,7 +48,7 @@ public final class PublishJobData {
                 if (obj instanceof SqoopJobDataPublisher) {
                     SqoopJobDataPublisher publisher = (SqoopJobDataPublisher) obj;
                     SqoopJobDataPublisher.Data data =
-                            new SqoopJobDataPublisher.Data(operation, options, tableName, startTime, endTime);
+                        new SqoopJobDataPublisher.Data(operation, options, tableName, startTime, endTime);
                     LOG.info("Published data is " + data.toString());
                     publisher.publish(data);
                 } else {

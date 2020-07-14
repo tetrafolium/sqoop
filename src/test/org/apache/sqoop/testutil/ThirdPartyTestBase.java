@@ -31,71 +31,71 @@ import java.util.List;
 
 public abstract class ThirdPartyTestBase<T extends ImportJobTestConfiguration> extends ImportJobTestCase implements DatabaseAdapterFactory {
 
-  private final DatabaseAdapter adapter;
-  protected final T configuration;
+    private final DatabaseAdapter adapter;
+    protected final T configuration;
 
-  private Configuration conf = new Configuration();
+    private Configuration conf = new Configuration();
 
-  public DatabaseAdapter getAdapter() {
-    return adapter;
-  }
-
-  public T getConfiguration() {
-    return configuration;
-  }
-
-  protected ThirdPartyTestBase(T configuration) {
-    this.adapter = createAdapter();
-    this.configuration = configuration;
-  }
-
-  @Override
-  protected String getConnectString() {
-    return adapter.getConnectionString();
-  }
-
-  @Override
-  protected SqoopOptions getSqoopOptions(Configuration conf) {
-    SqoopOptions opts = new SqoopOptions(conf);
-    adapter.injectConnectionParameters(opts);
-    return opts;
-  }
-
-  @Override
-  protected void dropTableIfExists(String table) throws SQLException {
-    adapter.dropTableIfExists(table, getManager());
-  }
-
-  @Override
-  protected Configuration getConf() {
-    return conf;
-  }
-
-  @Override
-  protected boolean useHsqldbTestServer() {
-    return false;
-  }
-
-  @Before
-  public void setUp() {
-    super.setUp();
-    String[] names = configuration.getNames();
-    String[] types = configuration.getTypes();
-    createTableWithColTypesAndNames(names, types, new String[0]);
-    List<String[]> inputData = configuration.getSampleData();
-    for (String[] input  : inputData) {
-      insertIntoTable(names, types, input);
+    public DatabaseAdapter getAdapter() {
+        return adapter;
     }
-  }
 
-  @After
-  public void tearDown() {
-    try {
-      dropTableIfExists(getTableName());
-    } catch (SQLException e) {
-      LOG.warn("Error trying to drop table on tearDown: " + e);
+    public T getConfiguration() {
+        return configuration;
     }
-    super.tearDown();
-  }
+
+    protected ThirdPartyTestBase(T configuration) {
+        this.adapter = createAdapter();
+        this.configuration = configuration;
+    }
+
+    @Override
+    protected String getConnectString() {
+        return adapter.getConnectionString();
+    }
+
+    @Override
+    protected SqoopOptions getSqoopOptions(Configuration conf) {
+        SqoopOptions opts = new SqoopOptions(conf);
+        adapter.injectConnectionParameters(opts);
+        return opts;
+    }
+
+    @Override
+    protected void dropTableIfExists(String table) throws SQLException {
+        adapter.dropTableIfExists(table, getManager());
+    }
+
+    @Override
+    protected Configuration getConf() {
+        return conf;
+    }
+
+    @Override
+    protected boolean useHsqldbTestServer() {
+        return false;
+    }
+
+    @Before
+    public void setUp() {
+        super.setUp();
+        String[] names = configuration.getNames();
+        String[] types = configuration.getTypes();
+        createTableWithColTypesAndNames(names, types, new String[0]);
+        List<String[]> inputData = configuration.getSampleData();
+        for (String[] input  : inputData) {
+            insertIntoTable(names, types, input);
+        }
+    }
+
+    @After
+    public void tearDown() {
+        try {
+            dropTableIfExists(getTableName());
+        } catch (SQLException e) {
+            LOG.warn("Error trying to drop table on tearDown: " + e);
+        }
+        super.tearDown();
+    }
 
 }

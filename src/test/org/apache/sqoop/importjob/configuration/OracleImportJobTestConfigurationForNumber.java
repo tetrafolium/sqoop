@@ -31,51 +31,51 @@ import java.util.List;
  */
 public class OracleImportJobTestConfigurationForNumber implements ImportJobTestConfiguration, AvroTestConfiguration, ParquetTestConfiguration, HiveTestConfiguration {
 
-  @Override
-  public String[] getTypes() {
-    return new String[]{"INT", "NUMBER", "NUMBER(20)", "NUMBER(20,5)"};
-  }
+    @Override
+    public String[] getTypes() {
+        return new String[] {"INT", "NUMBER", "NUMBER(20)", "NUMBER(20,5)"};
+    }
 
-  @Override
-  public String[] getNames() {
-    return new String[]{"ID", "N1", "N2", "N3"};
-  }
+    @Override
+    public String[] getNames() {
+        return new String[] {"ID", "N1", "N2", "N3"};
+    }
 
-  @Override
-  public List<String[]> getSampleData() {
-    List<String[]> data = new ArrayList<>();
-    data.add(new String[]{"1", "100.01", "100.01", "100.03"});
-    return data;
-  }
+    @Override
+    public List<String[]> getSampleData() {
+        List<String[]> data = new ArrayList<>();
+        data.add(new String[] {"1", "100.01", "100.01", "100.03"});
+        return data;
+    }
 
-  @Override
-  public String[] getExpectedResultsForAvro() {
-    String expectedRecord = "{\"ID\": 1, \"N1\": 100.010, \"N2\": 100, \"N3\": 100.03000}";
-    String[] expectedResult = new String[1];
-    expectedResult[0] = expectedRecord;
-    return expectedResult;
-  }
+    @Override
+    public String[] getExpectedResultsForAvro() {
+        String expectedRecord = "{\"ID\": 1, \"N1\": 100.010, \"N2\": 100, \"N3\": 100.03000}";
+        String[] expectedResult = new String[1];
+        expectedResult[0] = expectedRecord;
+        return expectedResult;
+    }
 
-  @Override
-  public String[] getExpectedResultsForParquet() {
-    String expectedRecord = "1,100.010,100,100.03000";
-    String[] expectedResult = new String[1];
-    expectedResult[0] = expectedRecord;
-    return expectedResult;
-  }
+    @Override
+    public String[] getExpectedResultsForParquet() {
+        String expectedRecord = "1,100.010,100,100.03000";
+        String[] expectedResult = new String[1];
+        expectedResult[0] = expectedRecord;
+        return expectedResult;
+    }
 
-  @Override
-  public String toString() {
-    return getClass().getSimpleName();
-  }
+    @Override
+    public String toString() {
+        return getClass().getSimpleName();
+    }
 
-  @Override
-  public Object[] getExpectedResultsForHive() {
-    return new Object[]{
-        new BigDecimal("1"),
-        new BigDecimal("100.010"),
-        new BigDecimal("100"),
-        new BigDecimal("100.03000")
-    };
-  }
+    @Override
+    public Object[] getExpectedResultsForHive() {
+        return new Object[] {
+                   new BigDecimal("1"),
+                   new BigDecimal("100.010"),
+                   new BigDecimal("100"),
+                   new BigDecimal("100.03000")
+               };
+    }
 }

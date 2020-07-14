@@ -27,45 +27,45 @@ import static org.junit.Assert.assertArrayEquals;
 @Category(UnitTest.class)
 public class TestArgumentArrayBuilder {
 
-  @Test
-  public void testArgumentArrayBuilder() {
-    String[] expectedArray = { "-D", "property=value3", "--option", "value2", "--", "--toolOption", "value1" };
-    ArgumentArrayBuilder builder = new ArgumentArrayBuilder();
-    builder.withToolOption("toolOption", "value1")
+    @Test
+    public void testArgumentArrayBuilder() {
+        String[] expectedArray = { "-D", "property=value3", "--option", "value2", "--", "--toolOption", "value1" };
+        ArgumentArrayBuilder builder = new ArgumentArrayBuilder();
+        builder.withToolOption("toolOption", "value1")
         .withOption("option", "value2")
         .withProperty("property", "value3");
-    String[] argArray = builder.build();
-    assertArrayEquals(expectedArray, argArray);
-  }
+        String[] argArray = builder.build();
+        assertArrayEquals(expectedArray, argArray);
+    }
 
-  @Test
-  public void testArgumentArrayBuilderOverriddenValues() {
-    String[] expectedArray = { "-D", "property=modifiedProperty", "--option", "modifiedOption", "--", "--toolOption", "modifiedToolOption" };
+    @Test
+    public void testArgumentArrayBuilderOverriddenValues() {
+        String[] expectedArray = { "-D", "property=modifiedProperty", "--option", "modifiedOption", "--", "--toolOption", "modifiedToolOption" };
 
-    ArgumentArrayBuilder builder = new ArgumentArrayBuilder();
-    builder.withToolOption("toolOption", "originalToolOption")
+        ArgumentArrayBuilder builder = new ArgumentArrayBuilder();
+        builder.withToolOption("toolOption", "originalToolOption")
         .withOption("option", "originalOption")
         .withProperty("property", "originalProperty");
-    builder.withProperty("property", "modifiedProperty")
+        builder.withProperty("property", "modifiedProperty")
         .withOption("option", "modifiedOption")
         .withToolOption("toolOption", "modifiedToolOption");
-    String[] argArray = builder.build();
+        String[] argArray = builder.build();
 
-    assertArrayEquals(expectedArray, argArray);
-  }
+        assertArrayEquals(expectedArray, argArray);
+    }
 
-  @Test
-  public void testArgumentArrayBuilderCopiesEverything() {
-    String[] expectedArray = { "-D", "property=value3", "--option", "value2", "--", "--toolOption", "value1" };
-    ArgumentArrayBuilder builder = new ArgumentArrayBuilder();
-    builder.withToolOption("toolOption", "value1")
+    @Test
+    public void testArgumentArrayBuilderCopiesEverything() {
+        String[] expectedArray = { "-D", "property=value3", "--option", "value2", "--", "--toolOption", "value1" };
+        ArgumentArrayBuilder builder = new ArgumentArrayBuilder();
+        builder.withToolOption("toolOption", "value1")
         .withOption("option", "value2")
         .withProperty("property", "value3");
 
-    ArgumentArrayBuilder otherBuilder = new ArgumentArrayBuilder();
-    otherBuilder.with(builder);
-    String[] argArray = otherBuilder.build();
-    assertArrayEquals(expectedArray, argArray);
-  }
+        ArgumentArrayBuilder otherBuilder = new ArgumentArrayBuilder();
+        otherBuilder.with(builder);
+        String[] argArray = otherBuilder.build();
+        assertArrayEquals(expectedArray, argArray);
+    }
 
 }

@@ -26,30 +26,30 @@ package org.apache.sqoop.validation;
  */
 public interface Validator {
 
-  /**
-   * Method to validate the data copy with default implementations
-   * for ValidationThreshold and ValidationFailureHandler.
-   *
-   * @param validationContext validation context
-   * @return if validation was successful or not
-   * @throws ValidationException
-   */
-  boolean validate(ValidationContext validationContext)
+    /**
+     * Method to validate the data copy with default implementations
+     * for ValidationThreshold and ValidationFailureHandler.
+     *
+     * @param validationContext validation context
+     * @return if validation was successful or not
+     * @throws ValidationException
+     */
+    boolean validate(ValidationContext validationContext)
     throws ValidationException;
 
-  /**
-   * Method to validate the data copy with specific implementations
-   * for ValidationThreshold and ValidationFailureHandler.
-   *
-   * @param validationContext validation context
-   * @param validationThreshold specific implementation of ValidationThreshold
-   * @param validationFailureHandler specific implementation of
-   *                                 ValidationFailureHandler
-   * @return if validation was successful or not
-   * @throws ValidationException
-   */
-  boolean validate(ValidationContext validationContext,
-                   ValidationThreshold validationThreshold,
-                   ValidationFailureHandler validationFailureHandler)
+    /**
+     * Method to validate the data copy with specific implementations
+     * for ValidationThreshold and ValidationFailureHandler.
+     *
+     * @param validationContext validation context
+     * @param validationThreshold specific implementation of ValidationThreshold
+     * @param validationFailureHandler specific implementation of
+     *                                 ValidationFailureHandler
+     * @return if validation was successful or not
+     * @throws ValidationException
+     */
+    boolean validate(ValidationContext validationContext,
+                     ValidationThreshold validationThreshold,
+                     ValidationFailureHandler validationFailureHandler)
     throws ValidationException;
 }
