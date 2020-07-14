@@ -20,56 +20,59 @@ package org.apache.sqoop.mapreduce;
 
 import java.io.IOException;
 import java.util.Map;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.MapWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
-
 import org.apache.sqoop.lib.SqoopRecord;
 
 public class MergeGenericRecordExportMapper<K, V>
     extends AutoProgressMapper<K, V, Text, MergeRecord> {
 
-    protected MapWritable columnTypes = new MapWritable();
-    private String keyColName;
-    private boolean isNewDatasetSplit;
+  protected MapWritable columnTypes = new MapWritable();
+  private String keyColName;
+  private boolean isNewDatasetSplit;
 
-    @Override
-    protected void setup(Context context) throws IOException, InterruptedException {
-        Configuration conf = context.getConfiguration();
-        keyColName = conf.get(MergeJob.MERGE_KEY_COL_KEY);
+  @Override
+  protected void setup(Context context)
+      throws IOException, InterruptedException {
+    Configuration conf = context.getConfiguration();
+    keyColName = conf.get(MergeJob.MERGE_KEY_COL_KEY);
 
-        InputSplit inputSplit = context.getInputSplit();
-        FileSplit fileSplit = (FileSplit) inputSplit;
-        Path splitPath = fileSplit.getPath();
+    InputSplit inputSplit = context.getInputSplit();
+    FileSplit fileSplit = (FileSplit)inputSplit;
+    Path splitPath = fileSplit.getPath();
 
-        if (splitPath.toString().startsWith(conf.get(MergeJob.MERGE_NEW_PATH_KEY))) {
-            this.isNewDatasetSplit = true;
-        } else if (splitPath.toString().startsWith(conf.get(MergeJob.MERGE_OLD_PATH_KEY))) {
-            this.isNewDatasetSplit = false;
-        } else {
-            throw new IOException(
-                "File " + splitPath + " is not under new path " + conf.get(MergeJob.MERGE_NEW_PATH_KEY)
-                + " or old path " + conf.get(MergeJob.MERGE_OLD_PATH_KEY));
-        }
-        super.setup(context);
+    if (splitPath.toString().startsWith(
+            conf.get(MergeJob.MERGE_NEW_PATH_KEY))) {
+      this.isNewDatasetSplit = true;
+    } else if (splitPath.toString().startsWith(
+                   conf.get(MergeJob.MERGE_OLD_PATH_KEY))) {
+      this.isNewDatasetSplit = false;
+    } else {
+      throw new IOException("File " + splitPath + " is not under new path " +
+                            conf.get(MergeJob.MERGE_NEW_PATH_KEY) +
+                            " or old path " +
+                            conf.get(MergeJob.MERGE_OLD_PATH_KEY));
     }
+    super.setup(context);
+  }
 
-    protected void processRecord(SqoopRecord sqoopRecord, Context context) throws IOException, InterruptedException {
-        MergeRecord mergeRecord = new MergeRecord(sqoopRecord, isNewDatasetSplit);
-        Map<String, Object> fieldMap = sqoopRecord.getFieldMap();
-        if (null == fieldMap) {
-            throw new IOException("No field map in record " + sqoopRecord);
-        }
-        Object keyObj = fieldMap.get(keyColName);
-        if (null == keyObj) {
-            throw new IOException(
-                "Cannot join values on null key. " + "Did you specify a key column that exists?");
-        } else {
-            context.write(new Text(keyObj.toString()), mergeRecord);
-        }
+  protected void processRecord(SqoopRecord sqoopRecord, Context context)
+      throws IOException, InterruptedException {
+    MergeRecord mergeRecord = new MergeRecord(sqoopRecord, isNewDatasetSplit);
+    Map<String, Object> fieldMap = sqoopRecord.getFieldMap();
+    if (null == fieldMap) {
+      throw new IOException("No field map in record " + sqoopRecord);
     }
+    Object keyObj = fieldMap.get(keyColName);
+    if (null == keyObj) {
+      throw new IOException("Cannot join values on null key. "
+                            + "Did you specify a key column that exists?");
+    } else {
+      context.write(new Text(keyObj.toString()), mergeRecord);
+    }
+  }
 }

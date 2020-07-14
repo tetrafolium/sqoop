@@ -18,33 +18,30 @@
 
 package org.apache.sqoop.mapreduce;
 
-import java.io.IOException;
-import java.sql.Types;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
+import java.sql.Types;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import org.apache.hadoop.io.DefaultStringifier;
 import org.apache.hadoop.io.MapWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
+import org.apache.sqoop.SqoopOptions;
+import org.apache.sqoop.manager.ConnManager;
+import org.apache.sqoop.manager.ExportJobContext;
 import org.apache.sqoop.mapreduce.ExportJobBase.FileType;
 import org.apache.sqoop.mapreduce.parquet.ParquetExportJobConfigurator;
 import org.apache.sqoop.testcategories.sqooptest.UnitTest;
 import org.junit.Test;
-
-import org.apache.sqoop.SqoopOptions;
-import org.apache.sqoop.manager.ConnManager;
-import org.apache.sqoop.manager.ExportJobContext;
 import org.junit.experimental.categories.Category;
-
 
 /**
  * Test methods of the JdbcExportJob implementation.
@@ -52,90 +49,125 @@ import org.junit.experimental.categories.Category;
 @Category(UnitTest.class)
 public class TestJdbcExportJob {
 
-    @Test
-    public void testAvroWithNoColumnsSpecified() throws Exception {
-        SqoopOptions opts = new SqoopOptions();
-        opts.setExportDir("myexportdir");
-        JdbcExportJob jdbcExportJob = stubJdbcExportJob(opts, FileType.AVRO_DATA_FILE);
-        Job job = new Job();
-        jdbcExportJob.configureInputFormat(job, null, null, null);
-        assertEquals(asSetOfText("Age", "Name", "Gender"), DefaultStringifier.load(job.getConfiguration(), AvroExportMapper.AVRO_COLUMN_TYPES_MAP, MapWritable.class).keySet());
-    }
+  @Test
+  public void testAvroWithNoColumnsSpecified() throws Exception {
+    SqoopOptions opts = new SqoopOptions();
+    opts.setExportDir("myexportdir");
+    JdbcExportJob jdbcExportJob =
+        stubJdbcExportJob(opts, FileType.AVRO_DATA_FILE);
+    Job job = new Job();
+    jdbcExportJob.configureInputFormat(job, null, null, null);
+    assertEquals(asSetOfText("Age", "Name", "Gender"),
+                 DefaultStringifier
+                     .load(job.getConfiguration(),
+                           AvroExportMapper.AVRO_COLUMN_TYPES_MAP,
+                           MapWritable.class)
+                     .keySet());
+  }
 
-    @Test
-    public void testAvroWithAllColumnsSpecified() throws Exception {
-        SqoopOptions opts = new SqoopOptions();
-        opts.setExportDir("myexportdir");
-        String[] columns = { "Age", "Name", "Gender" };
-        opts.setColumns(columns);
-        JdbcExportJob jdbcExportJob = stubJdbcExportJob(opts, FileType.AVRO_DATA_FILE);
-        Job job = new Job();
-        jdbcExportJob.configureInputFormat(job, null, null, null);
-        assertEquals(asSetOfText("Age", "Name", "Gender"), DefaultStringifier.load(job.getConfiguration(), AvroExportMapper.AVRO_COLUMN_TYPES_MAP, MapWritable.class).keySet());
-    }
+  @Test
+  public void testAvroWithAllColumnsSpecified() throws Exception {
+    SqoopOptions opts = new SqoopOptions();
+    opts.setExportDir("myexportdir");
+    String[] columns = {"Age", "Name", "Gender"};
+    opts.setColumns(columns);
+    JdbcExportJob jdbcExportJob =
+        stubJdbcExportJob(opts, FileType.AVRO_DATA_FILE);
+    Job job = new Job();
+    jdbcExportJob.configureInputFormat(job, null, null, null);
+    assertEquals(asSetOfText("Age", "Name", "Gender"),
+                 DefaultStringifier
+                     .load(job.getConfiguration(),
+                           AvroExportMapper.AVRO_COLUMN_TYPES_MAP,
+                           MapWritable.class)
+                     .keySet());
+  }
 
-    @Test
-    public void testAvroWithOneColumnSpecified() throws Exception {
-        SqoopOptions opts = new SqoopOptions();
-        opts.setExportDir("myexportdir");
-        String[] columns = { "Gender" };
-        opts.setColumns(columns);
-        JdbcExportJob jdbcExportJob = stubJdbcExportJob(opts, FileType.AVRO_DATA_FILE);
-        Job job = new Job();
-        jdbcExportJob.configureInputFormat(job, null, null, null);
-        assertEquals(asSetOfText("Gender"), DefaultStringifier.load(job.getConfiguration(), AvroExportMapper.AVRO_COLUMN_TYPES_MAP, MapWritable.class).keySet());
-    }
+  @Test
+  public void testAvroWithOneColumnSpecified() throws Exception {
+    SqoopOptions opts = new SqoopOptions();
+    opts.setExportDir("myexportdir");
+    String[] columns = {"Gender"};
+    opts.setColumns(columns);
+    JdbcExportJob jdbcExportJob =
+        stubJdbcExportJob(opts, FileType.AVRO_DATA_FILE);
+    Job job = new Job();
+    jdbcExportJob.configureInputFormat(job, null, null, null);
+    assertEquals(asSetOfText("Gender"),
+                 DefaultStringifier
+                     .load(job.getConfiguration(),
+                           AvroExportMapper.AVRO_COLUMN_TYPES_MAP,
+                           MapWritable.class)
+                     .keySet());
+  }
 
-    @Test
-    public void testAvroWithSomeColumnsSpecified() throws Exception {
-        SqoopOptions opts = new SqoopOptions();
-        opts.setExportDir("myexportdir");
-        String[] columns = { "Age", "Name" };
-        opts.setColumns(columns);
-        JdbcExportJob jdbcExportJob = stubJdbcExportJob(opts, FileType.AVRO_DATA_FILE);
-        Job job = new Job();
-        jdbcExportJob.configureInputFormat(job, null, null, null);
-        assertEquals(asSetOfText("Age", "Name"), DefaultStringifier.load(job.getConfiguration(), AvroExportMapper.AVRO_COLUMN_TYPES_MAP, MapWritable.class).keySet());
-    }
+  @Test
+  public void testAvroWithSomeColumnsSpecified() throws Exception {
+    SqoopOptions opts = new SqoopOptions();
+    opts.setExportDir("myexportdir");
+    String[] columns = {"Age", "Name"};
+    opts.setColumns(columns);
+    JdbcExportJob jdbcExportJob =
+        stubJdbcExportJob(opts, FileType.AVRO_DATA_FILE);
+    Job job = new Job();
+    jdbcExportJob.configureInputFormat(job, null, null, null);
+    assertEquals(asSetOfText("Age", "Name"),
+                 DefaultStringifier
+                     .load(job.getConfiguration(),
+                           AvroExportMapper.AVRO_COLUMN_TYPES_MAP,
+                           MapWritable.class)
+                     .keySet());
+  }
 
-    @Test
-    public void testAvroWithMoreColumnsSpecified() throws Exception {
-        SqoopOptions opts = new SqoopOptions();
-        opts.setExportDir("myexportdir");
-        String[] columns = { "Age", "Name", "Gender", "Address" };
-        opts.setColumns(columns);
-        JdbcExportJob jdbcExportJob = stubJdbcExportJob(opts, FileType.AVRO_DATA_FILE);
-        Job job = new Job();
-        jdbcExportJob.configureInputFormat(job, null, null, null);
-        assertEquals(asSetOfText("Age", "Name", "Gender"), DefaultStringifier.load(job.getConfiguration(), AvroExportMapper.AVRO_COLUMN_TYPES_MAP, MapWritable.class).keySet());
-    }
+  @Test
+  public void testAvroWithMoreColumnsSpecified() throws Exception {
+    SqoopOptions opts = new SqoopOptions();
+    opts.setExportDir("myexportdir");
+    String[] columns = {"Age", "Name", "Gender", "Address"};
+    opts.setColumns(columns);
+    JdbcExportJob jdbcExportJob =
+        stubJdbcExportJob(opts, FileType.AVRO_DATA_FILE);
+    Job job = new Job();
+    jdbcExportJob.configureInputFormat(job, null, null, null);
+    assertEquals(asSetOfText("Age", "Name", "Gender"),
+                 DefaultStringifier
+                     .load(job.getConfiguration(),
+                           AvroExportMapper.AVRO_COLUMN_TYPES_MAP,
+                           MapWritable.class)
+                     .keySet());
+  }
 
-    private JdbcExportJob stubJdbcExportJob(SqoopOptions opts, final FileType inputFileType) throws IOException {
-        ExportJobContext mockContext = mock(ExportJobContext.class);
-        when(mockContext.getOptions()).thenReturn(opts);
-        ConnManager mockConnManager = mock(ConnManager.class);
-        Map<String, Integer> columnTypeInts = new HashMap<String, Integer>();
-        columnTypeInts.put("Name", Types.VARCHAR);
-        columnTypeInts.put("Age", Types.SMALLINT);
-        columnTypeInts.put("Gender", Types.CHAR);
-        when(mockConnManager.getColumnTypes(anyString(), anyString())).thenReturn(columnTypeInts);
-        when(mockConnManager.toJavaType(anyString(), anyString(), anyInt())).thenReturn("String");
-        when(mockContext.getConnManager()).thenReturn(mockConnManager);
-        JdbcExportJob jdbcExportJob = new JdbcExportJob(mockContext, mock(ParquetExportJobConfigurator.class)) {
-            @Override
-            protected FileType getInputFileType() {
-                return inputFileType;
-            }
-        };
-        jdbcExportJob.options = opts;
-        return jdbcExportJob;
-    }
+  private JdbcExportJob stubJdbcExportJob(SqoopOptions opts,
+                                          final FileType inputFileType)
+      throws IOException {
+    ExportJobContext mockContext = mock(ExportJobContext.class);
+    when(mockContext.getOptions()).thenReturn(opts);
+    ConnManager mockConnManager = mock(ConnManager.class);
+    Map<String, Integer> columnTypeInts = new HashMap<String, Integer>();
+    columnTypeInts.put("Name", Types.VARCHAR);
+    columnTypeInts.put("Age", Types.SMALLINT);
+    columnTypeInts.put("Gender", Types.CHAR);
+    when(mockConnManager.getColumnTypes(anyString(), anyString()))
+        .thenReturn(columnTypeInts);
+    when(mockConnManager.toJavaType(anyString(), anyString(), anyInt()))
+        .thenReturn("String");
+    when(mockContext.getConnManager()).thenReturn(mockConnManager);
+    JdbcExportJob jdbcExportJob = new JdbcExportJob(
+        mockContext, mock(ParquetExportJobConfigurator.class)) {
+      @Override
+      protected FileType getInputFileType() {
+        return inputFileType;
+      }
+    };
+    jdbcExportJob.options = opts;
+    return jdbcExportJob;
+  }
 
-    private Set<Text> asSetOfText(String... strings) {
-        Set<Text> setOfText = new HashSet<Text>();
-        for (String string : strings) {
-            setOfText.add(new Text(string));
-        }
-        return setOfText;
+  private Set<Text> asSetOfText(String... strings) {
+    Set<Text> setOfText = new HashSet<Text>();
+    for (String string : strings) {
+      setOfText.add(new Text(string));
     }
+    return setOfText;
+  }
 }

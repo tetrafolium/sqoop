@@ -18,35 +18,36 @@
 
 package org.apache.sqoop.util;
 
+import java.io.File;
+import java.io.IOException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.io.File;
-import java.io.IOException;
-
 /**
  * This Hook is currently used to clean up the temp directory that is used
- * to hold the generated JAR files for each table class under /tmp/sqoop-<username>/compile.
+ * to hold the generated JAR files for each table class under
+ * /tmp/sqoop-<username>/compile.
  *
- * But it is generic so it can also be used to clean up other directories if needed
+ * But it is generic so it can also be used to clean up other directories if
+ * needed
  */
 public class DirCleanupHook extends Thread {
 
-    private File dir;
+  private File dir;
 
-    public static final Log LOG = LogFactory.getLog(DirCleanupHook.class.getName());
+  public static final Log LOG =
+      LogFactory.getLog(DirCleanupHook.class.getName());
 
-    public DirCleanupHook(String dirPath) {
-        dir = new File(dirPath);
+  public DirCleanupHook(String dirPath) { dir = new File(dirPath); }
+
+  public void run() {
+    try {
+      LOG.debug("Removing directory: " + dir + " in the clean up hook.");
+      FileUtils.deleteDirectory(dir);
+    } catch (IOException e) {
+      LOG.error("Unable to remove directory: " + dir +
+                ". Error was: " + e.getMessage());
     }
-
-    public void run() {
-        try {
-            LOG.debug("Removing directory: " + dir + " in the clean up hook.");
-            FileUtils.deleteDirectory(dir);
-        } catch (IOException e) {
-            LOG.error("Unable to remove directory: " + dir + ". Error was: " + e.getMessage());
-        }
-    }
+  }
 }

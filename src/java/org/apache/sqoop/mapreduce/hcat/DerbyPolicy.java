@@ -18,8 +18,6 @@
 
 package org.apache.sqoop.mapreduce.hcat;
 
-import org.apache.derby.security.SystemPermission;
-
 import java.security.CodeSource;
 import java.security.Permission;
 import java.security.PermissionCollection;
@@ -28,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
+import org.apache.derby.security.SystemPermission;
 
 /**
  *
@@ -36,61 +35,64 @@ import java.util.List;
  * A security policy that grants usederbyinternals
  *
  * <p>
- *   HCatalog tests use Security Manager to handle exits.  With Derby version 10.14.1, if a
- *   security manager is configured, embedded Derby requires usederbyinternals permission, and
- *   that is checked directly using AccessController.checkPermission.  This class will be used to
- *   setup a security policy to grant usederbyinternals, in tests that use NoExitSecurityManager.
+ *   HCatalog tests use Security Manager to handle exits.  With Derby
+ * version 10.14.1, if a security manager is configured, embedded Derby requires
+ * usederbyinternals permission, and that is checked directly using
+ * AccessController.checkPermission.  This class will be used to setup a
+ * security policy to grant usederbyinternals, in tests that use
+ * NoExitSecurityManager.
  * </p>
  */
 public class DerbyPolicy extends Policy {
 
-    private static PermissionCollection perms;
+  private static PermissionCollection perms;
 
-    public DerbyPolicy() {
-        super();
-        if (perms == null) {
-            perms = new DerbyPermissionCollection();
-            addPermissions();
-        }
+  public DerbyPolicy() {
+    super();
+    if (perms == null) {
+      perms = new DerbyPermissionCollection();
+      addPermissions();
+    }
+  }
+
+  @Override
+  public PermissionCollection getPermissions(CodeSource codesource) {
+    return perms;
+  }
+
+  private void addPermissions() {
+    SystemPermission systemPermission =
+        new SystemPermission("engine", "usederbyinternals");
+    perms.add(systemPermission);
+  }
+
+  class DerbyPermissionCollection extends PermissionCollection {
+
+    List<Permission> perms = new ArrayList<>();
+
+    @Override
+    public void add(Permission p) {
+      perms.add(p);
     }
 
     @Override
-    public PermissionCollection getPermissions(CodeSource codesource) {
-        return perms;
+    public boolean implies(Permission p) {
+      for (Permission perm : perms) {
+        if (perm.implies(p)) {
+          return true;
+        }
+      }
+      return false;
     }
 
-    private void addPermissions() {
-        SystemPermission systemPermission = new SystemPermission("engine", "usederbyinternals");
-        perms.add(systemPermission);
+    @Override
+    public Enumeration<Permission> elements() {
+      return Collections.enumeration(perms);
     }
 
-    class DerbyPermissionCollection extends PermissionCollection {
-
-        List<Permission> perms = new ArrayList<>();
-
-        @Override
-        public void add(Permission p) {
-            perms.add(p);
-        }
-
-        @Override
-        public boolean implies(Permission p) {
-            for (Permission perm : perms) {
-                if (perm.implies(p)) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        @Override
-        public Enumeration<Permission> elements() {
-            return Collections.enumeration(perms);
-        }
-
-        @Override
-        public boolean isReadOnly() {
-            return false;
-        }
+    @Override
+    public boolean isReadOnly() {
+      return false;
     }
+  }
 }

@@ -18,6 +18,9 @@
 
 package org.apache.sqoop.manager.sqlserver;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -30,7 +33,6 @@ import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.util.ReflectionUtils;
 import org.apache.hadoop.util.StringUtils;
-
 import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.SqoopOptions.InvalidOptionsException;
 import org.apache.sqoop.orm.CompilationManager;
@@ -45,9 +47,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
-
 /**
  * Test that --split-by works in SQL Server.
  *
@@ -60,216 +59,209 @@ import static org.junit.Assert.fail;
  *
  * You need to put SQL Server JDBC driver library (sqljdbc4.jar) in a location
  * where Sqoop will be able to access it (since this library cannot be checked
- * into Apache's tree for licensing reasons) and set it's path through -Dsqoop.thirdparty.lib.dir.
+ * into Apache's tree for licensing reasons) and set it's path through
+ * -Dsqoop.thirdparty.lib.dir.
  *
  * To set up your test environment:
  *   Install SQL Server Express 2012
  *   Create a database SQOOPTEST
  *   Create a login SQOOPUSER with password PASSWORD and grant all
  *   access for SQOOPTEST to SQOOPUSER.
- *   Set these through -Dsqoop.test.sqlserver.connectstring.host_url, -Dsqoop.test.sqlserver.database and
- *   -Dms.sqlserver.password
+ *   Set these through -Dsqoop.test.sqlserver.connectstring.host_url,
+ * -Dsqoop.test.sqlserver.database and -Dms.sqlserver.password
  */
 @Category(SqlServerTest.class)
 public class SQLServerSplitByTest extends ImportJobTestCase {
 
-    @Before
-    public void setUp() {
-        super.setUp();
-        MSSQLTestUtils utils = new MSSQLTestUtils();
-        try {
-            utils.createTableFromSQL(MSSQLTestUtils.CREATE_TALBE_LINEITEM);
-            utils.populateLineItem();
-        } catch (SQLException e) {
-            LOG.error("Setup fail with SQLException: " + StringUtils.stringifyException(e));
-            fail("Setup fail with SQLException: " + e.toString());
-        }
+  @Before
+  public void setUp() {
+    super.setUp();
+    MSSQLTestUtils utils = new MSSQLTestUtils();
+    try {
+      utils.createTableFromSQL(MSSQLTestUtils.CREATE_TALBE_LINEITEM);
+      utils.populateLineItem();
+    } catch (SQLException e) {
+      LOG.error("Setup fail with SQLException: " +
+                StringUtils.stringifyException(e));
+      fail("Setup fail with SQLException: " + e.toString());
+    }
+  }
 
+  @After
+  public void tearDown() {
+    super.tearDown();
+    MSSQLTestUtils utils = new MSSQLTestUtils();
+    try {
+      utils.dropTableIfExists("TPCH1M_LINEITEM");
+    } catch (SQLException e) {
+      LOG.error("TearDown fail with SQLException: " +
+                StringUtils.stringifyException(e));
+      fail("TearDown fail with SQLException: " + e.toString());
+    }
+  }
+
+  /**
+   * Create the argv to pass to Sqoop.
+   *
+   * @return the argv as an array of strings.
+   */
+  protected String[] getArgv(boolean includeHadoopFlags, String[] colNames,
+                             String splitByCol) {
+    String columnsString = "";
+    for (String col : colNames) {
+      columnsString += col + ",";
     }
 
-    @After
-    public void tearDown() {
-        super.tearDown();
-        MSSQLTestUtils utils = new MSSQLTestUtils();
-        try {
-            utils.dropTableIfExists("TPCH1M_LINEITEM");
-        } catch (SQLException e) {
-            LOG.error("TearDown fail with SQLException: " + StringUtils.stringifyException(e));
-            fail("TearDown fail with SQLException: " + e.toString());
-        }
+    ArrayList<String> args = new ArrayList<String>();
+
+    if (includeHadoopFlags) {
+      CommonArgs.addHadoopFlags(args);
     }
 
-    /**
-     * Create the argv to pass to Sqoop.
-     *
-     * @return the argv as an array of strings.
-     */
-    protected String[] getArgv(boolean includeHadoopFlags, String[] colNames,
-                               String splitByCol) {
-        String columnsString = "";
-        for (String col : colNames) {
-            columnsString += col + ",";
-        }
+    args.add("--table");
+    args.add("tpch1m_lineitem");
+    args.add("--columns");
+    args.add(columnsString);
+    args.add("--split-by");
+    args.add("L_ORDERKEY");
+    args.add("--warehouse-dir");
+    args.add(getWarehouseDir());
+    args.add("--connect");
+    args.add(getConnectString());
+    args.add("--as-sequencefile");
+    args.add("--num-mappers");
+    args.add("1");
 
-        ArrayList<String> args = new ArrayList<String>();
+    return args.toArray(new String[0]);
+  }
 
-        if (includeHadoopFlags) {
-            CommonArgs.addHadoopFlags(args);
-        }
+  /**
+   * Given a comma-delimited list of integers, grab and parse the first int.
+   *
+   * @param str
+   *            a comma-delimited list of values, the first of which is an
+   *            int.
+   * @return the first field in the string, cast to int
+   */
+  private int getFirstInt(String str) {
+    String[] parts = str.split(",");
+    return Integer.parseInt(parts[0]);
+  }
 
-        args.add("--table");
-        args.add("tpch1m_lineitem");
-        args.add("--columns");
-        args.add(columnsString);
-        args.add("--split-by");
-        args.add("L_ORDERKEY");
-        args.add("--warehouse-dir");
-        args.add(getWarehouseDir());
-        args.add("--connect");
-        args.add(getConnectString());
-        args.add("--as-sequencefile");
-        args.add("--num-mappers");
-        args.add("1");
+  public void runSplitByTest(String splitByCol, int expectedSum)
+      throws IOException {
 
-        return args.toArray(new String[0]);
+    String[] columns = new String[] {
+        "L_ORDERKEY",    "L_PARTKEY",       "L_SUPPKEY",  "L_LINENUMBER",
+        "L_QUANTITY",    "L_EXTENDEDPRICE", "L_DISCOUNT", "L_TAX",
+        "L_RETURNFLAG",  "L_LINESTATUS",    "L_SHIPDATE", "L_COMMITDATE",
+        "L_RECEIPTDATE", "L_SHIPINSTRUCT",  "L_SHIPMODE", "L_COMMENT",
+    };
+    ClassLoader prevClassLoader = null;
+    SequenceFile.Reader reader = null;
+
+    String[] argv = getArgv(true, columns, splitByCol);
+    runImport(argv);
+    try {
+      SqoopOptions opts = new ImportTool().parseArguments(
+          getArgv(false, columns, splitByCol), null, null, true);
+
+      CompilationManager compileMgr = new CompilationManager(opts);
+      String jarFileName = compileMgr.getJarFilename();
+      LOG.debug("Got jar from import job: " + jarFileName);
+
+      prevClassLoader =
+          ClassLoaderStack.addJarFile(jarFileName, getTableName());
+
+      reader = SeqFileReader.getSeqFileReader(getDataFilePath().toString());
+
+      // here we can actually instantiate (k, v) pairs.
+      Configuration conf = new Configuration();
+      Object key = ReflectionUtils.newInstance(reader.getKeyClass(), conf);
+      Object val = ReflectionUtils.newInstance(reader.getValueClass(), conf);
+
+      // We know that these values are two ints separated by a ','
+      // character.
+      // Since this is all dynamic, though, we don't want to actually link
+      // against the class and use its methods. So we just parse this back
+      // into int fields manually. Sum them up and ensure that we get the
+      // expected total for the first column, to verify that we got all
+      // the
+      // results from the db into the file.
+
+      // Sum up everything in the file.
+      int curSum = 0;
+      while (reader.next(key) != null) {
+        reader.getCurrentValue(val);
+        curSum += getFirstInt(val.toString());
+      }
+      System.out.println("Sum : e,c" + expectedSum + " : " + curSum);
+      assertEquals("Total sum of first db column mismatch", expectedSum,
+                   curSum);
+    } catch (InvalidOptionsException ioe) {
+      LOG.error(StringUtils.stringifyException(ioe));
+      fail(ioe.toString());
+    } catch (ParseException pe) {
+      LOG.error(StringUtils.stringifyException(pe));
+      fail(pe.toString());
+    } finally {
+      IOUtils.closeStream(reader);
+
+      if (null != prevClassLoader) {
+        ClassLoaderStack.setCurrentClassLoader(prevClassLoader);
+      }
     }
+  }
 
-    /**
-     * Given a comma-delimited list of integers, grab and parse the first int.
-     *
-     * @param str
-     *            a comma-delimited list of values, the first of which is an
-     *            int.
-     * @return the first field in the string, cast to int
-     */
-    private int getFirstInt(String str) {
-        String[] parts = str.split(",");
-        return Integer.parseInt(parts[0]);
+  @Test
+  public void testSplitByFirstCol() throws IOException {
+    String splitByCol = "L_ORDERKEY";
+    runSplitByTest(splitByCol, 10);
+  }
+
+  @Test
+  public void testSplitBySecondCol() throws IOException {
+    String splitByCol = "L_PARTKEY";
+    runSplitByTest(splitByCol, 10);
+  }
+
+  protected boolean useHsqldbTestServer() { return false; }
+
+  protected String getConnectString() {
+    return MSSQLTestUtils.getDBConnectString();
+  }
+
+  protected String getTableName() { return "tpch1m_lineitem"; }
+
+  /**
+   * Drop a table if it already exists in the database.
+   *
+   * @param table
+   *            the name of the table to drop.
+   * @throws SQLException
+   *             if something goes wrong.
+   */
+  protected void dropTableIfExists(String table) throws SQLException {
+    Connection conn = getManager().getConnection();
+    String sqlStmt =
+        "IF OBJECT_ID('" + table + "') IS NOT NULL  DROP TABLE " + table;
+    System.out.println("@abhi SQL for drop :" + sqlStmt);
+    PreparedStatement statement = conn.prepareStatement(
+        sqlStmt, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+    try {
+      statement.executeUpdate();
+      conn.commit();
+    } finally {
+      statement.close();
     }
+  }
 
-    public void runSplitByTest(String splitByCol, int expectedSum)
-    throws IOException {
-
-        String[] columns = new String[] { "L_ORDERKEY", "L_PARTKEY",
-                                          "L_SUPPKEY", "L_LINENUMBER", "L_QUANTITY", "L_EXTENDEDPRICE",
-                                          "L_DISCOUNT", "L_TAX", "L_RETURNFLAG", "L_LINESTATUS",
-                                          "L_SHIPDATE", "L_COMMITDATE", "L_RECEIPTDATE",
-                                          "L_SHIPINSTRUCT", "L_SHIPMODE", "L_COMMENT",
-                                        };
-        ClassLoader prevClassLoader = null;
-        SequenceFile.Reader reader = null;
-
-        String[] argv = getArgv(true, columns, splitByCol);
-        runImport(argv);
-        try {
-            SqoopOptions opts = new ImportTool().parseArguments(getArgv(false,
-                    columns, splitByCol), null, null, true);
-
-            CompilationManager compileMgr = new CompilationManager(opts);
-            String jarFileName = compileMgr.getJarFilename();
-            LOG.debug("Got jar from import job: " + jarFileName);
-
-            prevClassLoader = ClassLoaderStack.addJarFile(jarFileName,
-                              getTableName());
-
-            reader = SeqFileReader.getSeqFileReader(getDataFilePath()
-                                                    .toString());
-
-            // here we can actually instantiate (k, v) pairs.
-            Configuration conf = new Configuration();
-            Object key = ReflectionUtils
-                         .newInstance(reader.getKeyClass(), conf);
-            Object val = ReflectionUtils.newInstance(reader.getValueClass(),
-                         conf);
-
-            // We know that these values are two ints separated by a ','
-            // character.
-            // Since this is all dynamic, though, we don't want to actually link
-            // against the class and use its methods. So we just parse this back
-            // into int fields manually. Sum them up and ensure that we get the
-            // expected total for the first column, to verify that we got all
-            // the
-            // results from the db into the file.
-
-            // Sum up everything in the file.
-            int curSum = 0;
-            while (reader.next(key) != null) {
-                reader.getCurrentValue(val);
-                curSum += getFirstInt(val.toString());
-            }
-            System.out.println("Sum : e,c" + expectedSum + " : " + curSum);
-            assertEquals("Total sum of first db column mismatch", expectedSum,
-                         curSum);
-        } catch (InvalidOptionsException ioe) {
-            LOG.error(StringUtils.stringifyException(ioe));
-            fail(ioe.toString());
-        } catch (ParseException pe) {
-            LOG.error(StringUtils.stringifyException(pe));
-            fail(pe.toString());
-        } finally {
-            IOUtils.closeStream(reader);
-
-            if (null != prevClassLoader) {
-                ClassLoaderStack.setCurrentClassLoader(prevClassLoader);
-            }
-        }
-    }
-
-    @Test
-    public void testSplitByFirstCol() throws IOException {
-        String splitByCol = "L_ORDERKEY";
-        runSplitByTest(splitByCol, 10);
-    }
-
-    @Test
-    public void testSplitBySecondCol() throws IOException {
-        String splitByCol = "L_PARTKEY";
-        runSplitByTest(splitByCol, 10);
-    }
-
-    protected boolean useHsqldbTestServer() {
-
-        return false;
-    }
-
-    protected String getConnectString() {
-        return MSSQLTestUtils.getDBConnectString();
-    }
-
-    protected String getTableName() {
-        return "tpch1m_lineitem";
-    }
-
-    /**
-     * Drop a table if it already exists in the database.
-     *
-     * @param table
-     *            the name of the table to drop.
-     * @throws SQLException
-     *             if something goes wrong.
-     */
-    protected void dropTableIfExists(String table) throws SQLException {
-        Connection conn = getManager().getConnection();
-        String sqlStmt = "IF OBJECT_ID('" + table
-                         + "') IS NOT NULL  DROP TABLE " + table;
-        System.out.println("@abhi SQL for drop :" + sqlStmt);
-        PreparedStatement statement = conn.prepareStatement(sqlStmt,
-                                      ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-        try {
-            statement.executeUpdate();
-            conn.commit();
-        } finally {
-            statement.close();
-        }
-    }
-
-    protected SqoopOptions getSqoopOptions(Configuration conf) {
-        SqoopOptions opts = new SqoopOptions(conf);
-        String username = MSSQLTestUtils.getDBUserName();
-        String password = MSSQLTestUtils.getDBPassWord();
-        opts.setUsername(username);
-        opts.setPassword(password);
-        return opts;
-
-    }
+  protected SqoopOptions getSqoopOptions(Configuration conf) {
+    SqoopOptions opts = new SqoopOptions(conf);
+    String username = MSSQLTestUtils.getDBUserName();
+    String password = MSSQLTestUtils.getDBPassWord();
+    opts.setUsername(username);
+    opts.setPassword(password);
+    return opts;
+  }
 }

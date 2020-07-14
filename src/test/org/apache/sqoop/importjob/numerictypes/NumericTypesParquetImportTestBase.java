@@ -18,6 +18,9 @@
 
 package org.apache.sqoop.importjob.numerictypes;
 
+import static org.junit.Assert.assertEquals;
+
+import java.util.Arrays;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.parquet.schema.MessageType;
@@ -27,55 +30,57 @@ import org.apache.sqoop.testutil.ArgumentArrayBuilder;
 import org.apache.sqoop.testutil.NumericTypesTestUtils;
 import org.apache.sqoop.util.ParquetReader;
 
-import java.util.Arrays;
+public abstract class NumericTypesParquetImportTestBase<
+    T extends ParquetTestConfiguration> extends NumericTypesImportTestBase<T> {
 
-import static org.junit.Assert.assertEquals;
+  public static final Log LOG =
+      LogFactory.getLog(NumericTypesParquetImportTestBase.class.getName());
 
-public abstract class NumericTypesParquetImportTestBase<T extends ParquetTestConfiguration> extends NumericTypesImportTestBase<T>  {
+  public NumericTypesParquetImportTestBase(T configuration,
+                                           boolean failWithoutExtraArgs,
+                                           boolean failWithPaddingOnly) {
+    super(configuration, failWithoutExtraArgs, failWithPaddingOnly);
+  }
 
-    public static final Log LOG = LogFactory.getLog(NumericTypesParquetImportTestBase.class.getName());
+  @Override
+  public ArgumentArrayBuilder getArgsBuilder() {
+    ArgumentArrayBuilder builder = new ArgumentArrayBuilder();
+    includeCommonOptions(builder);
+    builder.withOption("as-parquetfile");
+    NumericTypesTestUtils.addEnableParquetDecimal(builder);
+    return builder;
+  }
 
-    public NumericTypesParquetImportTestBase(T configuration, boolean failWithoutExtraArgs, boolean failWithPaddingOnly) {
-        super(configuration, failWithoutExtraArgs, failWithPaddingOnly);
+  @Override
+  public void verify() {
+    verifyParquetSchema();
+    verifyParquetContent();
+  }
+
+  private void verifyParquetContent() {
+    ParquetReader reader = new ParquetReader(tableDirPath);
+    assertEquals(Arrays.asList(configuration.getExpectedResultsForParquet()),
+                 reader.readAllInCsvSorted());
+  }
+
+  private void verifyParquetSchema() {
+    ParquetReader reader = new ParquetReader(tableDirPath);
+    MessageType parquetSchema = reader.readParquetSchema();
+
+    String[] types = configuration.getTypes();
+    for (int i = 0; i < types.length; i++) {
+      String type = types[i];
+      if (isNumericSqlType(type)) {
+        OriginalType parquetFieldType =
+            parquetSchema.getFields().get(i).getOriginalType();
+        assertEquals(OriginalType.DECIMAL, parquetFieldType);
+      }
     }
+  }
 
-    @Override
-    public ArgumentArrayBuilder getArgsBuilder() {
-        ArgumentArrayBuilder builder = new ArgumentArrayBuilder();
-        includeCommonOptions(builder);
-        builder.withOption("as-parquetfile");
-        NumericTypesTestUtils.addEnableParquetDecimal(builder);
-        return builder;
-    }
-
-    @Override
-    public void verify() {
-        verifyParquetSchema();
-        verifyParquetContent();
-    }
-
-    private void verifyParquetContent() {
-        ParquetReader reader = new ParquetReader(tableDirPath);
-        assertEquals(Arrays.asList(configuration.getExpectedResultsForParquet()), reader.readAllInCsvSorted());
-    }
-
-    private void verifyParquetSchema() {
-        ParquetReader reader = new ParquetReader(tableDirPath);
-        MessageType parquetSchema = reader.readParquetSchema();
-
-        String[] types = configuration.getTypes();
-        for (int i = 0; i < types.length; i++) {
-            String type = types[i];
-            if (isNumericSqlType(type)) {
-                OriginalType parquetFieldType = parquetSchema.getFields().get(i).getOriginalType();
-                assertEquals(OriginalType.DECIMAL, parquetFieldType);
-            }
-        }
-    }
-
-    private boolean isNumericSqlType(String type) {
-        return type.toUpperCase().startsWith("DECIMAL")
-               || type.toUpperCase().startsWith("NUMBER")
-               || type.toUpperCase().startsWith("NUMERIC");
-    }
+  private boolean isNumericSqlType(String type) {
+    return type.toUpperCase().startsWith("DECIMAL") ||
+        type.toUpperCase().startsWith("NUMBER") ||
+        type.toUpperCase().startsWith("NUMERIC");
+  }
 }

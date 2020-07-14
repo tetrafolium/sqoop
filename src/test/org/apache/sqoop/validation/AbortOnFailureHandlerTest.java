@@ -18,14 +18,14 @@
 
 package org.apache.sqoop.validation;
 
-import org.apache.sqoop.SqoopOptions;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
 import org.apache.hadoop.conf.Configuration;
+import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.testcategories.sqooptest.UnitTest;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 
 /**
  * Tests for AbortOnFailureHandler.
@@ -33,39 +33,42 @@ import static org.junit.Assert.fail;
 @Category(UnitTest.class)
 public class AbortOnFailureHandlerTest {
 
-    @Test
-    public void testAbortOnFailureHandlerIsDefaultOption() {
-        assertEquals(AbortOnFailureHandler.class,
-                     new SqoopOptions(new Configuration()).getValidationFailureHandlerClass());
-    }
+  @Test
+  public void testAbortOnFailureHandlerIsDefaultOption() {
+    assertEquals(AbortOnFailureHandler.class,
+                 new SqoopOptions(new Configuration())
+                     .getValidationFailureHandlerClass());
+  }
 
-    /**
-     * Positive case.
-     */
-    @Test
-    public void testAbortOnFailureHandlerAborting() {
-        try {
-            Validator validator = new RowCountValidator();
-            validator.validate(new ValidationContext(100, 90));
-            fail("AbortOnFailureHandler should have thrown an exception");
-        } catch (ValidationException e) {
-            assertEquals("Validation failed by RowCountValidator. "
-                         + "Reason: The expected counter value was 100 but the actual value "
-                         + "was 90, Row Count at Source: 100, Row Count at Target: 90",
-                         e.getMessage());
-        }
+  /**
+   * Positive case.
+   */
+  @Test
+  public void testAbortOnFailureHandlerAborting() {
+    try {
+      Validator validator = new RowCountValidator();
+      validator.validate(new ValidationContext(100, 90));
+      fail("AbortOnFailureHandler should have thrown an exception");
+    } catch (ValidationException e) {
+      assertEquals(
+          "Validation failed by RowCountValidator. "
+              +
+              "Reason: The expected counter value was 100 but the actual value "
+              + "was 90, Row Count at Source: 100, Row Count at Target: 90",
+          e.getMessage());
     }
+  }
 
-    /**
-     * Negative case.
-     */
-    @Test
-    public void testAbortOnFailureHandlerNotAborting() {
-        try {
-            Validator validator = new RowCountValidator();
-            validator.validate(new ValidationContext(100, 100));
-        } catch (ValidationException e) {
-            fail("AbortOnFailureHandler should NOT have thrown an exception");
-        }
+  /**
+   * Negative case.
+   */
+  @Test
+  public void testAbortOnFailureHandlerNotAborting() {
+    try {
+      Validator validator = new RowCountValidator();
+      validator.validate(new ValidationContext(100, 100));
+    } catch (ValidationException e) {
+      fail("AbortOnFailureHandler should NOT have thrown an exception");
     }
+  }
 }

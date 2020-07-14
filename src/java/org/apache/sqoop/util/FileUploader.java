@@ -19,7 +19,6 @@
 package org.apache.sqoop.util;
 
 import java.io.IOException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -27,39 +26,38 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
 public class FileUploader {
-    public static final Log LOG =
-        LogFactory.getLog(FileUploader.class.getName());
+  public static final Log LOG = LogFactory.getLog(FileUploader.class.getName());
 
-    private FileUploader() { }
+  private FileUploader() {}
 
-    public static void uploadFilesToDFS(String srcBasePath, String src,
-                                        String destBasePath, String dest, Configuration conf) throws IOException {
+  public static void uploadFilesToDFS(String srcBasePath, String src,
+                                      String destBasePath, String dest,
+                                      Configuration conf) throws IOException {
 
-        Path srcPath = new Path(srcBasePath, src);
+    Path srcPath = new Path(srcBasePath, src);
 
-        if (destBasePath == null || destBasePath.isEmpty()) {
-            destBasePath = ".";
-        }
-
-        Path targetPath = new Path(destBasePath, dest);
-        FileSystem fs = targetPath.getFileSystem(conf);
-
-        if (!fs.exists(targetPath)) {
-            fs.mkdirs(targetPath);
-        }
-
-        Path targetPath2 = new Path(targetPath, src);
-        fs.delete(targetPath2, true);
-
-        try {
-            LOG.info("Copying " + srcPath + " to " + targetPath);
-            // Copy srcPath (on local FS) to targetPath on DFS.
-            // The first boolean arg instructs not to delete source and the second
-            // boolean arg instructs to overwrite dest if exists.
-            fs.copyFromLocalFile(false, true, srcPath, targetPath);
-        } catch (IOException ioe) {
-            LOG.warn("Unable to copy " + srcPath + " to " + targetPath);
-        }
+    if (destBasePath == null || destBasePath.isEmpty()) {
+      destBasePath = ".";
     }
 
+    Path targetPath = new Path(destBasePath, dest);
+    FileSystem fs = targetPath.getFileSystem(conf);
+
+    if (!fs.exists(targetPath)) {
+      fs.mkdirs(targetPath);
+    }
+
+    Path targetPath2 = new Path(targetPath, src);
+    fs.delete(targetPath2, true);
+
+    try {
+      LOG.info("Copying " + srcPath + " to " + targetPath);
+      // Copy srcPath (on local FS) to targetPath on DFS.
+      // The first boolean arg instructs not to delete source and the second
+      // boolean arg instructs to overwrite dest if exists.
+      fs.copyFromLocalFile(false, true, srcPath, targetPath);
+    } catch (IOException ioe) {
+      LOG.warn("Unable to copy " + srcPath + " to " + targetPath);
+    }
+  }
 }

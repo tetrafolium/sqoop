@@ -28,9 +28,8 @@ import org.apache.sqoop.lib.SqoopRecord;
 public class MergeRecordMapper
     extends MergeMapperBase<LongWritable, SqoopRecord> {
 
-    public void map(LongWritable key, SqoopRecord val, Context c)
-    throws IOException, InterruptedException {
-        processRecord(val, c);
-    }
-
+  public void map(LongWritable key, SqoopRecord val, Context c)
+      throws IOException, InterruptedException {
+    processRecord(val, c);
+  }
 }

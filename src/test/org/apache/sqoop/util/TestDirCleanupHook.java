@@ -18,6 +18,8 @@
 
 package org.apache.sqoop.util;
 
+import static org.junit.Assert.assertFalse;
+
 import org.apache.sqoop.testcategories.sqooptest.UnitTest;
 import org.junit.Before;
 import org.junit.Rule;
@@ -25,27 +27,24 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.rules.TemporaryFolder;
 
-import static org.junit.Assert.assertFalse;
-
 @Category(UnitTest.class)
 public class TestDirCleanupHook {
-    @Rule
-    public TemporaryFolder tmpFolder = new TemporaryFolder();
+  @Rule public TemporaryFolder tmpFolder = new TemporaryFolder();
 
-    private DirCleanupHook dirCleanupHook;
+  private DirCleanupHook dirCleanupHook;
 
-    @Before
-    public void before() throws Exception {
-        // Make sure the directory is not empty.
-        tmpFolder.newFile();
+  @Before
+  public void before() throws Exception {
+    // Make sure the directory is not empty.
+    tmpFolder.newFile();
 
-        dirCleanupHook = new DirCleanupHook(tmpFolder.getRoot().getAbsolutePath());
-    }
+    dirCleanupHook = new DirCleanupHook(tmpFolder.getRoot().getAbsolutePath());
+  }
 
-    @Test
-    public void testDirCleanup() {
-        dirCleanupHook.run();
+  @Test
+  public void testDirCleanup() {
+    dirCleanupHook.run();
 
-        assertFalse(tmpFolder.getRoot().exists());
-    }
+    assertFalse(tmpFolder.getRoot().exists());
+  }
 }

@@ -18,28 +18,26 @@
 
 package org.apache.sqoop.manager.cubrid;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Arrays;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.sqoop.SqoopOptions;
+import org.apache.sqoop.manager.ConnManager;
 import org.apache.sqoop.manager.CubridManager;
 import org.apache.sqoop.testcategories.thirdpartytest.CubridTest;
+import org.apache.sqoop.testutil.ImportJobTestCase;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
-import org.apache.sqoop.SqoopOptions;
-import org.apache.sqoop.manager.ConnManager;
-import org.apache.sqoop.testutil.ImportJobTestCase;
 import org.junit.experimental.categories.Category;
-
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * Test authentication.
@@ -67,103 +65,99 @@ import static org.junit.Assert.fail;
 @Category(CubridTest.class)
 public class CubridAuthTest extends ImportJobTestCase {
 
-    public static final Log LOG = LogFactory.getLog(CubridAuthTest.class
-                                  .getName());
+  public static final Log LOG =
+      LogFactory.getLog(CubridAuthTest.class.getName());
 
-    static final String TABLE_NAME = "employees_cubrid";
+  static final String TABLE_NAME = "employees_cubrid";
 
-    private CubridManager manager;
-    private Configuration conf = new Configuration();
+  private CubridManager manager;
+  private Configuration conf = new Configuration();
 
-    @Override
-    protected boolean useHsqldbTestServer() {
-        return false;
-    }
+  @Override
+  protected boolean useHsqldbTestServer() {
+    return false;
+  }
 
-    @Before
-    public void setUp() {
-        super.setUp();
-        LOG.debug("Setting up another CubridImport test: "
-                  + CubridTestUtils.getConnectString());
-        setUpData(TABLE_NAME, true);
-        LOG.debug("setUp complete.");
-    }
+  @Before
+  public void setUp() {
+    super.setUp();
+    LOG.debug("Setting up another CubridImport test: " +
+              CubridTestUtils.getConnectString());
+    setUpData(TABLE_NAME, true);
+    LOG.debug("setUp complete.");
+  }
 
-    public void setUpData(String tableName, boolean nullEntry) {
-        SqoopOptions options = new SqoopOptions(
-            CubridTestUtils.getConnectString(), TABLE_NAME);
-        options.setUsername(CubridTestUtils.getCurrentUser());
-        options.setPassword(CubridTestUtils.getPassword());
+  public void setUpData(String tableName, boolean nullEntry) {
+    SqoopOptions options =
+        new SqoopOptions(CubridTestUtils.getConnectString(), TABLE_NAME);
+    options.setUsername(CubridTestUtils.getCurrentUser());
+    options.setPassword(CubridTestUtils.getPassword());
 
-        LOG.debug("Setting up another CubridImport test: "
-                  + CubridTestUtils.getConnectString());
-        manager = new CubridManager(options);
-        Connection connection = null;
-        Statement st = null;
+    LOG.debug("Setting up another CubridImport test: " +
+              CubridTestUtils.getConnectString());
+    manager = new CubridManager(options);
+    Connection connection = null;
+    Statement st = null;
 
-        try {
-            connection = manager.getConnection();
-            connection.setAutoCommit(false);
-            st = connection.createStatement();
+    try {
+      connection = manager.getConnection();
+      connection.setAutoCommit(false);
+      st = connection.createStatement();
 
-            // create the database table and populate it with data.
-            st.executeUpdate("DROP TABLE IF EXISTS " + TABLE_NAME);
-            String sqlStmt = "CREATE TABLE "
-                             + TABLE_NAME + " ("
-                             + manager.escapeColName("id")
-                             + " INT NOT NULL PRIMARY KEY, "
-                             + manager.escapeColName("name")
-                             + " VARCHAR(24) NOT NULL);";
-            st.executeUpdate(sqlStmt);
-            st.executeUpdate("INSERT INTO " + TABLE_NAME
-                             + " VALUES(1,'Aaron');");
-            connection.commit();
-        } catch (SQLException sqlE) {
-            LOG.error("Encountered SQL Exception: " + sqlE);
-            sqlE.printStackTrace();
-            fail("SQLException when running test setUp(): " + sqlE);
-        } finally {
-            try {
-                if (null != st) {
-                    st.close();
-                }
-
-                if (null != connection) {
-                    connection.close();
-                }
-            } catch (SQLException sqlE) {
-                LOG.warn("Got SQLException when closing connection: "
-                         + sqlE);
-            }
+      // create the database table and populate it with data.
+      st.executeUpdate("DROP TABLE IF EXISTS " + TABLE_NAME);
+      String sqlStmt =
+          "CREATE TABLE " + TABLE_NAME + " (" + manager.escapeColName("id") +
+          " INT NOT NULL PRIMARY KEY, " + manager.escapeColName("name") +
+          " VARCHAR(24) NOT NULL);";
+      st.executeUpdate(sqlStmt);
+      st.executeUpdate("INSERT INTO " + TABLE_NAME + " VALUES(1,'Aaron');");
+      connection.commit();
+    } catch (SQLException sqlE) {
+      LOG.error("Encountered SQL Exception: " + sqlE);
+      sqlE.printStackTrace();
+      fail("SQLException when running test setUp(): " + sqlE);
+    } finally {
+      try {
+        if (null != st) {
+          st.close();
         }
-    }
 
-    @After
-    public void tearDown() {
-        super.tearDown();
-        try {
-            manager.close();
-        } catch (SQLException sqlE) {
-            LOG.error("Got SQLException: " + sqlE.toString());
-            fail("Got SQLException: " + sqlE.toString());
+        if (null != connection) {
+          connection.close();
         }
+      } catch (SQLException sqlE) {
+        LOG.warn("Got SQLException when closing connection: " + sqlE);
+      }
     }
+  }
 
-    /**
-     * Connect to a db and ensure that password-based
-     *  authentication succeeds.
-     */
-    @Test
-    public void testAuthAccess() throws IOException {
-        SqoopOptions options = new SqoopOptions(conf);
-        options.setConnectString(CubridTestUtils.getConnectString());
-        options.setUsername(CubridTestUtils.getCurrentUser());
-        options.setPassword(CubridTestUtils.getPassword());
-
-        ConnManager mgr = new CubridManager(options);
-        String[] tables = mgr.listTables();
-        Arrays.sort(tables);
-        assertTrue(TABLE_NAME + " is not found!",
-                   Arrays.binarySearch(tables, TABLE_NAME) >= 0);
+  @After
+  public void tearDown() {
+    super.tearDown();
+    try {
+      manager.close();
+    } catch (SQLException sqlE) {
+      LOG.error("Got SQLException: " + sqlE.toString());
+      fail("Got SQLException: " + sqlE.toString());
     }
+  }
+
+  /**
+   * Connect to a db and ensure that password-based
+   *  authentication succeeds.
+   */
+  @Test
+  public void testAuthAccess() throws IOException {
+    SqoopOptions options = new SqoopOptions(conf);
+    options.setConnectString(CubridTestUtils.getConnectString());
+    options.setUsername(CubridTestUtils.getCurrentUser());
+    options.setPassword(CubridTestUtils.getPassword());
+
+    ConnManager mgr = new CubridManager(options);
+    String[] tables = mgr.listTables();
+    Arrays.sort(tables);
+    assertTrue(TABLE_NAME + " is not found!",
+               Arrays.binarySearch(tables, TABLE_NAME) >= 0);
+  }
 }

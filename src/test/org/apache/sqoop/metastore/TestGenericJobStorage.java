@@ -18,6 +18,13 @@
 
 package org.apache.sqoop.metastore;
 
+import static org.apache.sqoop.metastore.GenericJobStorage.META_CONNECT_KEY;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.sqoop.testcategories.sqooptest.UnitTest;
 import org.junit.Before;
 import org.junit.Rule;
@@ -25,55 +32,48 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.rules.ExpectedException;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.apache.sqoop.metastore.GenericJobStorage.META_CONNECT_KEY;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
 @Category(UnitTest.class)
 public class TestGenericJobStorage {
 
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
+  @Rule public ExpectedException expectedException = ExpectedException.none();
 
-    private GenericJobStorage jobStorage;
+  private GenericJobStorage jobStorage;
 
-    private Map<String, String> descriptor;
+  private Map<String, String> descriptor;
 
-    @Before
-    public void before() {
-        jobStorage = new GenericJobStorage();
-        descriptor = new HashMap<>();
-    }
+  @Before
+  public void before() {
+    jobStorage = new GenericJobStorage();
+    descriptor = new HashMap<>();
+  }
 
-    @Test
-    public void testCanAcceptWithMetaConnectStringSetReturnsTrue() {
-        descriptor.put(META_CONNECT_KEY, "anyvalue");
-        assertTrue(jobStorage.canAccept(descriptor));
-    }
+  @Test
+  public void testCanAcceptWithMetaConnectStringSetReturnsTrue() {
+    descriptor.put(META_CONNECT_KEY, "anyvalue");
+    assertTrue(jobStorage.canAccept(descriptor));
+  }
 
-    @Test
-    public void testCanAcceptWithoutMetaConnectStringSetReturnsFalse() {
-        assertFalse(jobStorage.canAccept(descriptor));
-    }
+  @Test
+  public void testCanAcceptWithoutMetaConnectStringSetReturnsFalse() {
+    assertFalse(jobStorage.canAccept(descriptor));
+  }
 
-    /**
-     * This method validates that the public open() method invokes the connection string validation before connecting.
-     * For detailed testing of the validation check TestGenericJobStorageValidate test class.
-     * @see org.apache.sqoop.metastore.TestGenericJobStorageValidate
-     * @throws IOException
-     */
-    @Test
-    public void testOpenWithInvalidConnectionStringThrows() throws IOException {
-        String invalidConnectionString = "invalidConnectionString";
-        expectedException.expect(RuntimeException.class);
-        expectedException.expectMessage(invalidConnectionString + " is an invalid connection string or the required RDBMS is not supported.");
-        descriptor.put(META_CONNECT_KEY, invalidConnectionString);
+  /**
+   * This method validates that the public open() method invokes the connection
+   * string validation before connecting. For detailed testing of the validation
+   * check TestGenericJobStorageValidate test class.
+   * @see org.apache.sqoop.metastore.TestGenericJobStorageValidate
+   * @throws IOException
+   */
+  @Test
+  public void testOpenWithInvalidConnectionStringThrows() throws IOException {
+    String invalidConnectionString = "invalidConnectionString";
+    expectedException.expect(RuntimeException.class);
+    expectedException.expectMessage(
+        invalidConnectionString +
+        " is an invalid connection string or the required RDBMS is not supported.");
+    descriptor.put(META_CONNECT_KEY, invalidConnectionString);
 
-        jobStorage.open(descriptor);
-    }
-
+    jobStorage.open(descriptor);
+  }
 }

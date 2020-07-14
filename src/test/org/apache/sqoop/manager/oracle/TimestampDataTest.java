@@ -18,13 +18,13 @@
 
 package org.apache.sqoop.manager.oracle;
 
+import static org.junit.Assert.assertEquals;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.sqoop.manager.oracle.util.OracleUtils;
 import org.apache.sqoop.testcategories.thirdpartytest.OracleEeTest;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
-
-import static org.junit.Assert.assertEquals;
 
 /**
  * These tests need to be separate as changing the mapping type for timestamp
@@ -34,35 +34,34 @@ import static org.junit.Assert.assertEquals;
 @Category(OracleEeTest.class)
 public class TimestampDataTest extends OraOopTestCase {
 
-    private static final boolean DISABLE_ORACLE_ESCAPING_FLAG = false;
+  private static final boolean DISABLE_ORACLE_ESCAPING_FLAG = false;
 
-    @Test
-    public void testProductImportTimezone() throws Exception {
-        setSqoopTargetDirectory(getSqoopTargetDirectory() + "tst_product_timezone");
-        createTable("table_tst_product.xml");
+  @Test
+  public void testProductImportTimezone() throws Exception {
+    setSqoopTargetDirectory(getSqoopTargetDirectory() + "tst_product_timezone");
+    createTable("table_tst_product.xml");
 
-        Configuration sqoopConf = getSqoopConf();
-        sqoopConf.setBoolean(OraOopConstants.ORAOOP_MAP_TIMESTAMP_AS_STRING, false);
+    Configuration sqoopConf = getSqoopConf();
+    sqoopConf.setBoolean(OraOopConstants.ORAOOP_MAP_TIMESTAMP_AS_STRING, false);
 
-        try {
-            int retCode = runImport("TST_PRODUCT", sqoopConf, false, DISABLE_ORACLE_ESCAPING_FLAG);
-            assertEquals("Return code should be 0", 0, retCode);
+    try {
+      int retCode = runImport("TST_PRODUCT", sqoopConf, false,
+                              DISABLE_ORACLE_ESCAPING_FLAG);
+      assertEquals("Return code should be 0", 0, retCode);
 
-        } finally {
-            cleanupFolders();
-            closeTestEnvConnection();
-        }
+    } finally {
+      cleanupFolders();
+      closeTestEnvConnection();
     }
+  }
 
-    protected String getConnectString() {
-        return org.apache.sqoop.manager.oracle.util.OracleUtils.EE_CONNECT_STRING;
-    }
+  protected String getConnectString() {
+    return org.apache.sqoop.manager.oracle.util.OracleUtils.EE_CONNECT_STRING;
+  }
 
-    protected String getUsername() {
-        return org.apache.sqoop.manager.oracle.util.OracleUtils.ORACLE_EE_USER_NAME;
-    }
+  protected String getUsername() {
+    return org.apache.sqoop.manager.oracle.util.OracleUtils.ORACLE_EE_USER_NAME;
+  }
 
-    protected String getPassword() {
-        return OracleUtils.ORACLE_EE_USER_PASS;
-    }
+  protected String getPassword() { return OracleUtils.ORACLE_EE_USER_PASS; }
 }

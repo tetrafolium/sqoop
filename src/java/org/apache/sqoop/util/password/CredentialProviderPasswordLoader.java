@@ -18,7 +18,6 @@
 package org.apache.sqoop.util.password;
 
 import java.io.IOException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -31,29 +30,29 @@ import org.apache.hadoop.fs.Path;
  * if available.
  */
 public class CredentialProviderPasswordLoader extends FilePasswordLoader {
-    public static final Log LOG =
-        LogFactory.getLog(CredentialProviderPasswordLoader.class.getName());
+  public static final Log LOG =
+      LogFactory.getLog(CredentialProviderPasswordLoader.class.getName());
 
-    /**
-     * If credential provider is available (made available as part of 2.6.0 and
-     * 3.0, then use the credential provider to get the password. Else throw an
-     * exception saying this provider is not available.
-     */
-    @Override
-    public String loadPassword(String p, Configuration configuration)
-    throws IOException {
-        if (!CredentialProviderHelper.isProviderAvailable()) {
-            throw new IOException("CredentialProvider facility not available "
-                                  + "in the hadoop environment used");
-        }
-        LOG.debug("Fetching alias from the specified path: " + p);
-        Path path = new Path(p);
-        FileSystem fs = path.getFileSystem(configuration);
-
-        // Not closing FileSystem object because of SQOOP-1226
-        verifyPath(fs, path);
-        String alias = new String(readBytes(fs, path));
-        String pass = CredentialProviderHelper.resolveAlias(configuration, alias);
-        return pass;
+  /**
+   * If credential provider is available (made available as part of 2.6.0 and
+   * 3.0, then use the credential provider to get the password. Else throw an
+   * exception saying this provider is not available.
+   */
+  @Override
+  public String loadPassword(String p, Configuration configuration)
+      throws IOException {
+    if (!CredentialProviderHelper.isProviderAvailable()) {
+      throw new IOException("CredentialProvider facility not available "
+                            + "in the hadoop environment used");
     }
+    LOG.debug("Fetching alias from the specified path: " + p);
+    Path path = new Path(p);
+    FileSystem fs = path.getFileSystem(configuration);
+
+    // Not closing FileSystem object because of SQOOP-1226
+    verifyPath(fs, path);
+    String alias = new String(readBytes(fs, path));
+    String pass = CredentialProviderHelper.resolveAlias(configuration, alias);
+    return pass;
+  }
 }

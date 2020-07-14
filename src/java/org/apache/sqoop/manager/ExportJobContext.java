@@ -19,9 +19,8 @@
 package org.apache.sqoop.manager;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.sqoop.util.Jars;
-
 import org.apache.sqoop.SqoopOptions;
+import org.apache.sqoop.util.Jars;
 
 /**
  * A set of parameters describing an export operation; this is passed to
@@ -29,62 +28,50 @@ import org.apache.sqoop.SqoopOptions;
  */
 public class ExportJobContext {
 
-    private String tableName;
-    private String jarFile;
-    private SqoopOptions options;
-    private ConnManager manager;
-    private Class outputFormatClass;
+  private String tableName;
+  private String jarFile;
+  private SqoopOptions options;
+  private ConnManager manager;
+  private Class outputFormatClass;
 
-    public ExportJobContext(final String table, final String jar,
-                            final SqoopOptions opts) {
-        this.tableName = table;
-        this.jarFile = jar;
-        if (this.jarFile == null) {
-            // Set the jarFile to the hadoop core jar file.
-            this.jarFile = Jars.getJarPathForClass(Configuration.class);
-        }
-        this.options = opts;
+  public ExportJobContext(final String table, final String jar,
+                          final SqoopOptions opts) {
+    this.tableName = table;
+    this.jarFile = jar;
+    if (this.jarFile == null) {
+      // Set the jarFile to the hadoop core jar file.
+      this.jarFile = Jars.getJarPathForClass(Configuration.class);
     }
+    this.options = opts;
+  }
 
-    /** @return the name of the table to export. */
-    public String getTableName() {
-        return tableName;
-    }
+  /** @return the name of the table to export. */
+  public String getTableName() { return tableName; }
 
-    /** @return the name of the jar file containing the user's compiled
-     * ORM classes to use during the export.
-     */
-    public String getJarFile() {
-        return jarFile;
-    }
+  /**
+   * @return the name of the jar file containing the user's compiled
+   * ORM classes to use during the export.
+   */
+  public String getJarFile() { return jarFile; }
 
-    /** @return the SqoopOptions configured by the user */
-    public SqoopOptions getOptions() {
-        return options;
-    }
+  /** @return the SqoopOptions configured by the user */
+  public SqoopOptions getOptions() { return options; }
 
-    /**
-     * Set the ConnManager instance to be used during the export's
-     * configuration.
-     */
-    public void setConnManager(ConnManager mgr) {
-        this.manager = mgr;
-    }
+  /**
+   * Set the ConnManager instance to be used during the export's
+   * configuration.
+   */
+  public void setConnManager(ConnManager mgr) { this.manager = mgr; }
 
-    /**
-     * Get the ConnManager instance to use during an export's
-     * configuration stage.
-     */
-    public ConnManager getConnManager() {
-        return this.manager;
-    }
+  /**
+   * Get the ConnManager instance to use during an export's
+   * configuration stage.
+   */
+  public ConnManager getConnManager() { return this.manager; }
 
-    public Class getOutputFormatClass() {
-        return outputFormatClass;
-    }
+  public Class getOutputFormatClass() { return outputFormatClass; }
 
-    public void setOutputFormatClass(Class outputFormatClass) {
-        this.outputFormatClass = outputFormatClass;
-    }
+  public void setOutputFormatClass(Class outputFormatClass) {
+    this.outputFormatClass = outputFormatClass;
+  }
 }
-

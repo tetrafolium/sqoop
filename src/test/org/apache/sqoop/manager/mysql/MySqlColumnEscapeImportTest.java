@@ -18,101 +18,99 @@
 
 package org.apache.sqoop.manager.mysql;
 
-import org.apache.sqoop.SqoopOptions;
-import org.apache.sqoop.testcategories.thirdpartytest.MysqlTest;
-import org.apache.sqoop.testutil.CommonArgs;
-import org.apache.sqoop.testutil.ImportJobTestCase;
+import static org.junit.Assert.assertEquals;
+
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.Path;
-import org.junit.After;
-import org.junit.Test;
-import org.junit.experimental.categories.Category;
-
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
-
-import static org.junit.Assert.assertEquals;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
+import org.apache.sqoop.SqoopOptions;
+import org.apache.sqoop.testcategories.thirdpartytest.MysqlTest;
+import org.apache.sqoop.testutil.CommonArgs;
+import org.apache.sqoop.testutil.ImportJobTestCase;
+import org.junit.After;
+import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 @Category(MysqlTest.class)
 public class MySqlColumnEscapeImportTest extends ImportJobTestCase {
 
-    public static final Log LOG = LogFactory.getLog(
-                                      MySqlColumnEscapeImportTest.class.getName());
-    private MySQLTestUtils mySQLTestUtils = new MySQLTestUtils();
+  public static final Log LOG =
+      LogFactory.getLog(MySqlColumnEscapeImportTest.class.getName());
+  private MySQLTestUtils mySQLTestUtils = new MySQLTestUtils();
 
-    @Override
-    protected boolean useHsqldbTestServer() {
-        return false;
+  @Override
+  protected boolean useHsqldbTestServer() {
+    return false;
+  }
+
+  @Override
+  protected String getConnectString() {
+    return mySQLTestUtils.getMySqlConnectString();
+  }
+
+  @Override
+  protected SqoopOptions getSqoopOptions(Configuration conf) {
+    SqoopOptions opts = new SqoopOptions(conf);
+    opts.setUsername(mySQLTestUtils.getUserName());
+    mySQLTestUtils.addPasswordIfIsSet(opts);
+    return opts;
+  }
+
+  @Override
+  protected String dropTableIfExistsCommand(String table) {
+    return "DROP TABLE IF EXISTS " + getManager().escapeTableName(table);
+  }
+
+  @After
+  public void tearDown() {
+    try {
+      dropTableIfExists(getTableName());
+    } catch (SQLException e) {
+      LOG.error("Could not delete test table", e);
     }
+    super.tearDown();
+  }
 
-    @Override
-    protected String getConnectString() {
-        return mySQLTestUtils.getMySqlConnectString();
-    }
+  protected String[] getArgv() {
+    ArrayList<String> args = new ArrayList<String>();
 
-    @Override
-    protected SqoopOptions getSqoopOptions(Configuration conf) {
-        SqoopOptions opts = new SqoopOptions(conf);
-        opts.setUsername(mySQLTestUtils.getUserName());
-        mySQLTestUtils.addPasswordIfIsSet(opts);
-        return opts;
-    }
+    CommonArgs.addHadoopFlags(args);
 
-    @Override
-    protected String dropTableIfExistsCommand(String table) {
-        return "DROP TABLE IF EXISTS " + getManager().escapeTableName(table);
-    }
+    args.add("--connect");
+    args.add(getConnectString());
+    args.add("--username");
+    args.add(mySQLTestUtils.getUserName());
+    mySQLTestUtils.addPasswordIfIsSet(args);
+    args.add("--target-dir");
+    args.add(getTablePath().toString());
+    args.add("--num-mappers");
+    args.add("1");
+    args.add("--table");
+    args.add(getTableName());
 
-    @After
-    public void tearDown() {
-        try {
-            dropTableIfExists(getTableName());
-        } catch (SQLException e) {
-            LOG.error("Could not delete test table", e);
-        }
-        super.tearDown();
-    }
+    return args.toArray(new String[0]);
+  }
 
-    protected String [] getArgv() {
-        ArrayList<String> args = new ArrayList<String>();
+  @Test
+  public void testEscapeColumnWithDoubleQuote() throws IOException {
+    String[] colNames = {"column\"withdoublequote"};
+    String[] types = {"VARCHAR(50)"};
+    String[] vals = {"'hello, world'"};
+    createTableWithColTypesAndNames(colNames, types, vals);
+    String[] args = getArgv();
+    runImport(args);
 
-        CommonArgs.addHadoopFlags(args);
+    Path filePath = new Path(getTablePath(), "part-m-00000");
+    String output =
+        Files.toString(new File(filePath.toString()), Charsets.UTF_8);
 
-        args.add("--connect");
-        args.add(getConnectString());
-        args.add("--username");
-        args.add(mySQLTestUtils.getUserName());
-        mySQLTestUtils.addPasswordIfIsSet(args);
-        args.add("--target-dir");
-        args.add(getTablePath().toString());
-        args.add("--num-mappers");
-        args.add("1");
-        args.add("--table");
-        args.add(getTableName());
-
-        return args.toArray(new String[0]);
-    }
-
-    @Test
-    public void testEscapeColumnWithDoubleQuote() throws IOException {
-        String[] colNames = { "column\"withdoublequote" };
-        String[] types = { "VARCHAR(50)"};
-        String[] vals = { "'hello, world'"};
-        createTableWithColTypesAndNames(colNames, types, vals);
-        String[] args = getArgv();
-        runImport(args);
-
-        Path filePath = new Path(getTablePath(), "part-m-00000");
-        String output = Files.toString(new File(filePath.toString()), Charsets.UTF_8);
-
-        assertEquals("hello, world", output.trim());
-    }
-
+    assertEquals("hello, world", output.trim());
+  }
 }
-

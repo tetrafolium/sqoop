@@ -23,73 +23,72 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
 
-public class DriverManagerJdbcConnectionFactory implements JdbcConnectionFactory {
+public class DriverManagerJdbcConnectionFactory
+    implements JdbcConnectionFactory {
 
-    private final String driverClass;
-    private final String connectionString;
-    private final String username;
-    private final String password;
-    private final Properties additionalProps;
+  private final String driverClass;
+  private final String connectionString;
+  private final String username;
+  private final String password;
+  private final Properties additionalProps;
 
-    public DriverManagerJdbcConnectionFactory(String driverClass, String connectionString, String username,
-            String password, Properties additionalProps) {
-        this.driverClass = driverClass;
-        this.connectionString = connectionString;
-        this.username = username;
-        this.password = password;
-        this.additionalProps = additionalProps;
+  public DriverManagerJdbcConnectionFactory(String driverClass,
+                                            String connectionString,
+                                            String username, String password,
+                                            Properties additionalProps) {
+    this.driverClass = driverClass;
+    this.connectionString = connectionString;
+    this.username = username;
+    this.password = password;
+    this.additionalProps = additionalProps;
+  }
+
+  public DriverManagerJdbcConnectionFactory(String driverClass,
+                                            String connectionString,
+                                            String username, String password) {
+    this(driverClass, connectionString, username, password, new Properties());
+  }
+
+  @Override
+  public Connection createConnection() {
+    loadDriverClass();
+
+    Properties connectionProperties = new Properties();
+    if (username != null) {
+      connectionProperties.put("user", username);
     }
 
-    public DriverManagerJdbcConnectionFactory(String driverClass, String connectionString, String username, String password) {
-        this(driverClass, connectionString, username, password, new Properties());
+    if (password != null) {
+      connectionProperties.put("password", password);
     }
 
-    @Override
-    public Connection createConnection() {
-        loadDriverClass();
-
-        Properties connectionProperties = new Properties();
-        if (username != null) {
-            connectionProperties.put("user", username);
-        }
-
-        if (password != null) {
-            connectionProperties.put("password", password);
-        }
-
-        connectionProperties.putAll(additionalProps);
-        try {
-            return DriverManager.getConnection(connectionString, connectionProperties);
-        } catch (SQLException e) {
-            throw new RuntimeException("Establishing connection failed!", e);
-        }
+    connectionProperties.putAll(additionalProps);
+    try {
+      return DriverManager.getConnection(connectionString,
+                                         connectionProperties);
+    } catch (SQLException e) {
+      throw new RuntimeException("Establishing connection failed!", e);
     }
+  }
 
-    private void loadDriverClass() {
-        try {
-            Class.forName(driverClass);
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException("Could not load db driver class: " + driverClass);
-        }
+  private void loadDriverClass() {
+    try {
+      Class.forName(driverClass);
+    } catch (ClassNotFoundException e) {
+      throw new RuntimeException("Could not load db driver class: " +
+                                 driverClass);
     }
+  }
 
-    public String getDriverClass() {
-        return driverClass;
-    }
+  public String getDriverClass() { return driverClass; }
 
-    public String getConnectionString() {
-        return connectionString;
-    }
+  public String getConnectionString() { return connectionString; }
 
-    public String getUsername() {
-        return username;
-    }
+  public String getUsername() { return username; }
 
-    public String getPassword() {
-        return password;
-    }
+  public String getPassword() { return password; }
 
-    public Properties getAdditionalProps() {
-        return new Properties(additionalProps);
-    }
+  public Properties getAdditionalProps() {
+    return new Properties(additionalProps);
+  }
 }

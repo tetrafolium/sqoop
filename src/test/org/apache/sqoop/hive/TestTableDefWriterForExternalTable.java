@@ -19,111 +19,133 @@ package org.apache.sqoop.hive;
 
 import static org.mockito.Mockito.*;
 
-import org.apache.sqoop.manager.ConnManager;
-import org.apache.sqoop.SqoopOptions;
-
+import java.io.IOException;
+import java.sql.*;
+import java.util.HashMap;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.sqoop.SqoopOptions;
+import org.apache.sqoop.manager.ConnManager;
 import org.apache.sqoop.testcategories.sqooptest.UnitTest;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.mockito.Mockito;
 
-import java.sql.*;
-import java.util.HashMap;
-import java.io.IOException;
-
 @Category(UnitTest.class)
 public class TestTableDefWriterForExternalTable {
-    static String inputTableName = "genres";
-    static String outputTableName = "genres";
-    static String testTargetDir = "/tmp/testDB/genre";
-    static String hdfsTableDir = "/data/movielens/genre";
-    static String testDbUri = "jdbc:postgresql://localhost/movielens";
-    static ConnManager manager;
-    static SqoopOptions options;
-    public static final Log LOG = LogFactory.getLog(
-                                      TestTableDefWriterForExternalTable.class.getName());
-    TableDefWriter tableDefWriter;
+  static String inputTableName = "genres";
+  static String outputTableName = "genres";
+  static String testTargetDir = "/tmp/testDB/genre";
+  static String hdfsTableDir = "/data/movielens/genre";
+  static String testDbUri = "jdbc:postgresql://localhost/movielens";
+  static ConnManager manager;
+  static SqoopOptions options;
+  public static final Log LOG =
+      LogFactory.getLog(TestTableDefWriterForExternalTable.class.getName());
+  TableDefWriter tableDefWriter;
 
-    @BeforeClass
-    public static void setup() {
-        // create mock
-        HashMap<String, Integer> map = new HashMap<String, Integer>();
-        map.put("id", Types.TINYINT);
-        map.put("name", Types.VARCHAR);
-        manager = Mockito.mock(ConnManager.class);
-        when(manager.getColumnNames(inputTableName)).thenReturn(new String[] { "id", "name" });
-        when(manager.getColumnTypes(inputTableName)).thenReturn(map);
-        options = new SqoopOptions(testDbUri, inputTableName);
-        options.setTargetDir(testTargetDir);
-        options.setHiveExternalTableDir(hdfsTableDir);
-        String[] cols = new String[] { "id", "name" };
-        options.setColumns(cols);
-        options.setMapColumnHive("id=TINYINT,name=STRING");
-    }
+  @BeforeClass
+  public static void setup() {
+    // create mock
+    HashMap<String, Integer> map = new HashMap<String, Integer>();
+    map.put("id", Types.TINYINT);
+    map.put("name", Types.VARCHAR);
+    manager = Mockito.mock(ConnManager.class);
+    when(manager.getColumnNames(inputTableName))
+        .thenReturn(new String[] {"id", "name"});
+    when(manager.getColumnTypes(inputTableName)).thenReturn(map);
+    options = new SqoopOptions(testDbUri, inputTableName);
+    options.setTargetDir(testTargetDir);
+    options.setHiveExternalTableDir(hdfsTableDir);
+    String[] cols = new String[] {"id", "name"};
+    options.setColumns(cols);
+    options.setMapColumnHive("id=TINYINT,name=STRING");
+  }
 
-    @Test
-    public void testGenerateExternalTableStatement() throws IOException, SQLException {
-        // need to set this as the other unit test functions may override it for their own test.
-        options.setHiveExternalTableDir(hdfsTableDir);
-        tableDefWriter = new TableDefWriter(options, manager, inputTableName, outputTableName,
-                                            options.getConf(), false);
-        String stmt = tableDefWriter.getCreateTableStmt();
-        Boolean isHiveExternalTableSet = !StringUtils.isBlank(options.getHiveExternalTableDir());
-        LOG.debug("External table dir: "+options.getHiveExternalTableDir());
-        assert (isHiveExternalTableSet && stmt.contains("CREATE EXTERNAL TABLE ") && stmt.contains("LOCATION '" + hdfsTableDir));
-    }
+  @Test
+  public void testGenerateExternalTableStatement()
+      throws IOException, SQLException {
+    // need to set this as the other unit test functions may override it for
+    // their own test.
+    options.setHiveExternalTableDir(hdfsTableDir);
+    tableDefWriter =
+        new TableDefWriter(options, manager, inputTableName, outputTableName,
+                           options.getConf(), false);
+    String stmt = tableDefWriter.getCreateTableStmt();
+    Boolean isHiveExternalTableSet =
+        !StringUtils.isBlank(options.getHiveExternalTableDir());
+    LOG.debug("External table dir: " + options.getHiveExternalTableDir());
+    assert (isHiveExternalTableSet && stmt.contains("CREATE EXTERNAL TABLE ") &&
+            stmt.contains("LOCATION '" + hdfsTableDir));
+  }
 
-    @Test
-    public void testGenerateTableStatement() throws IOException, SQLException {
-        // need to set this as the other unit test functions may override it for their own test.
-        options.setHiveExternalTableDir(null);
-        tableDefWriter = new TableDefWriter(options, manager, inputTableName, outputTableName,
-                                            options.getConf(), false);
-        String stmt = tableDefWriter.getCreateTableStmt();
-        Boolean isHiveExternalTableSet = !StringUtils.isBlank(options.getHiveExternalTableDir());
-        LOG.debug("External table dir: "+options.getHiveExternalTableDir());
-        assert (!isHiveExternalTableSet && stmt.contains("CREATE TABLE "));
-    }
+  @Test
+  public void testGenerateTableStatement() throws IOException, SQLException {
+    // need to set this as the other unit test functions may override it for
+    // their own test.
+    options.setHiveExternalTableDir(null);
+    tableDefWriter =
+        new TableDefWriter(options, manager, inputTableName, outputTableName,
+                           options.getConf(), false);
+    String stmt = tableDefWriter.getCreateTableStmt();
+    Boolean isHiveExternalTableSet =
+        !StringUtils.isBlank(options.getHiveExternalTableDir());
+    LOG.debug("External table dir: " + options.getHiveExternalTableDir());
+    assert (!isHiveExternalTableSet && stmt.contains("CREATE TABLE "));
+  }
 
-    @Test
-    public void testGenerateExternalTableIfExistsStatement() throws IOException, SQLException {
-        options.setFailIfHiveTableExists(false);
-        // need to set this as the other unit test functions may override it for their own test.
-        options.setHiveExternalTableDir(hdfsTableDir);
-        tableDefWriter = new TableDefWriter(options, manager, inputTableName, outputTableName,
-                                            options.getConf(), false);
-        String stmt = tableDefWriter.getCreateTableStmt();
-        Boolean isHiveExternalTableSet = !StringUtils.isBlank(options.getHiveExternalTableDir());
-        LOG.debug("External table dir: "+options.getHiveExternalTableDir());
-        assert (isHiveExternalTableSet && stmt.contains("CREATE EXTERNAL TABLE IF NOT EXISTS") && stmt.contains("LOCATION '"
-                + hdfsTableDir));
-    }
+  @Test
+  public void testGenerateExternalTableIfExistsStatement()
+      throws IOException, SQLException {
+    options.setFailIfHiveTableExists(false);
+    // need to set this as the other unit test functions may override it for
+    // their own test.
+    options.setHiveExternalTableDir(hdfsTableDir);
+    tableDefWriter =
+        new TableDefWriter(options, manager, inputTableName, outputTableName,
+                           options.getConf(), false);
+    String stmt = tableDefWriter.getCreateTableStmt();
+    Boolean isHiveExternalTableSet =
+        !StringUtils.isBlank(options.getHiveExternalTableDir());
+    LOG.debug("External table dir: " + options.getHiveExternalTableDir());
+    assert (isHiveExternalTableSet &&
+            stmt.contains("CREATE EXTERNAL TABLE IF NOT EXISTS") &&
+            stmt.contains("LOCATION '" + hdfsTableDir));
+  }
 
-    @Test
-    public void testGenerateTableIfExistsStatement() throws IOException, SQLException {
-        // need to set this as the other unit test functions may override it for their own test.
-        options.setHiveExternalTableDir(null);
-        tableDefWriter = new TableDefWriter(options, manager, inputTableName, outputTableName,
-                                            options.getConf(), false);
-        String stmt = tableDefWriter.getCreateTableStmt();
-        Boolean isHiveExternalTableSet = !StringUtils.isBlank(options.getHiveExternalTableDir());
-        LOG.debug("External table dir: "+options.getHiveExternalTableDir());
-        assert (!isHiveExternalTableSet && stmt.contains("CREATE TABLE IF NOT EXISTS"));
-    }
+  @Test
+  public void testGenerateTableIfExistsStatement()
+      throws IOException, SQLException {
+    // need to set this as the other unit test functions may override it for
+    // their own test.
+    options.setHiveExternalTableDir(null);
+    tableDefWriter =
+        new TableDefWriter(options, manager, inputTableName, outputTableName,
+                           options.getConf(), false);
+    String stmt = tableDefWriter.getCreateTableStmt();
+    Boolean isHiveExternalTableSet =
+        !StringUtils.isBlank(options.getHiveExternalTableDir());
+    LOG.debug("External table dir: " + options.getHiveExternalTableDir());
+    assert (!isHiveExternalTableSet &&
+            stmt.contains("CREATE TABLE IF NOT EXISTS"));
+  }
 
-    @Test
-    public void testGenerateExternalTableLoadStatement() throws IOException, SQLException {
-        // need to set this as the other unit test functions may override it for their own test.
-        options.setHiveExternalTableDir(hdfsTableDir);
-        tableDefWriter = new TableDefWriter(options, manager, inputTableName, outputTableName,
-                                            options.getConf(), false);
-        String stmt = tableDefWriter.getLoadDataStmt();
-        Boolean isHiveExternalTableSet = !StringUtils.isBlank(options.getHiveExternalTableDir());
-        LOG.debug("External table dir: "+options.getHiveExternalTableDir());
-        assert (isHiveExternalTableSet && stmt.contains("LOAD DATA INPATH ") && stmt.contains(testTargetDir));
-    }
+  @Test
+  public void testGenerateExternalTableLoadStatement()
+      throws IOException, SQLException {
+    // need to set this as the other unit test functions may override it for
+    // their own test.
+    options.setHiveExternalTableDir(hdfsTableDir);
+    tableDefWriter =
+        new TableDefWriter(options, manager, inputTableName, outputTableName,
+                           options.getConf(), false);
+    String stmt = tableDefWriter.getLoadDataStmt();
+    Boolean isHiveExternalTableSet =
+        !StringUtils.isBlank(options.getHiveExternalTableDir());
+    LOG.debug("External table dir: " + options.getHiveExternalTableDir());
+    assert (isHiveExternalTableSet && stmt.contains("LOAD DATA INPATH ") &&
+            stmt.contains(testTargetDir));
+  }
 }

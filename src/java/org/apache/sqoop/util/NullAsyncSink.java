@@ -19,10 +19,9 @@
 package org.apache.sqoop.util;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.IOException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -31,56 +30,52 @@ import org.apache.commons.logging.LogFactory;
  */
 public class NullAsyncSink extends AsyncSink {
 
-    public static final Log LOG = LogFactory.getLog(
-                                      NullAsyncSink.class.getName());
+  public static final Log LOG =
+      LogFactory.getLog(NullAsyncSink.class.getName());
 
-    private Thread child;
+  private Thread child;
 
-    public void processStream(InputStream is) {
-        child = new IgnoringThread(is);
-        child.start();
-    }
+  public void processStream(InputStream is) {
+    child = new IgnoringThread(is);
+    child.start();
+  }
 
-    public int join() throws InterruptedException {
-        child.join();
-        return 0; // always successful.
-    }
+  public int join() throws InterruptedException {
+    child.join();
+    return 0; // always successful.
+  }
 
-    /**
-     * Run a background thread that reads and ignores the
-     * contents of the stream.
-     */
-    private static class IgnoringThread extends Thread {
+  /**
+   * Run a background thread that reads and ignores the
+   * contents of the stream.
+   */
+  private static class IgnoringThread extends Thread {
 
-        private InputStream stream;
+    private InputStream stream;
 
-        IgnoringThread(final InputStream is) {
-            this.stream = is;
+    IgnoringThread(final InputStream is) { this.stream = is; }
+
+    public void run() {
+      InputStreamReader isr = new InputStreamReader(this.stream);
+      BufferedReader r = new BufferedReader(isr);
+
+      try {
+        while (true) {
+          String line = r.readLine();
+          if (null == line) {
+            break; // stream was closed by remote end.
+          }
         }
+      } catch (IOException ioe) {
+        LOG.warn("IOException reading from (ignored) stream: " +
+                 ioe.toString());
+      }
 
-        public void run() {
-            InputStreamReader isr = new InputStreamReader(this.stream);
-            BufferedReader r = new BufferedReader(isr);
-
-            try {
-                while (true) {
-                    String line = r.readLine();
-                    if (null == line) {
-                        break; // stream was closed by remote end.
-                    }
-                }
-            } catch (IOException ioe) {
-                LOG.warn("IOException reading from (ignored) stream: "
-                         + ioe.toString());
-            }
-
-            try {
-                r.close();
-            } catch (IOException ioe) {
-                LOG.warn("Error closing stream in NullAsyncSink: " + ioe.toString());
-            }
-        }
+      try {
+        r.close();
+      } catch (IOException ioe) {
+        LOG.warn("Error closing stream in NullAsyncSink: " + ioe.toString());
+      }
     }
-
+  }
 }
-

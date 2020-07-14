@@ -18,20 +18,21 @@
 
 package org.apache.sqoop.mapreduce.parquet.hadoop;
 
+import java.io.IOException;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.sqoop.mapreduce.GenericRecordExportMapper;
 
-import java.io.IOException;
-
 /**
- * An implementation of {@link GenericRecordExportMapper} which depends on the Hadoop Parquet library.
+ * An implementation of {@link GenericRecordExportMapper} which depends on the
+ * Hadoop Parquet library.
  */
-public class HadoopParquetExportMapper extends GenericRecordExportMapper<Void, GenericRecord> {
+public class HadoopParquetExportMapper
+    extends GenericRecordExportMapper<Void, GenericRecord> {
 
-    @Override
-    protected void map(Void key, GenericRecord val, Context context) throws IOException, InterruptedException {
-        context.write(toSqoopRecord(val), NullWritable.get());
-    }
-
+  @Override
+  protected void map(Void key, GenericRecord val, Context context)
+      throws IOException, InterruptedException {
+    context.write(toSqoopRecord(val), NullWritable.get());
+  }
 }

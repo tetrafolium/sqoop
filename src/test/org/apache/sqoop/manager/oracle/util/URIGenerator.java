@@ -27,31 +27,30 @@ package org.apache.sqoop.manager.oracle.util;
  * import/export tests only, and not used to reference data.
  */
 public class URIGenerator extends OraOopTestDataGenerator<String> {
-    private static final int MIN_LENGTH = 15;
-    private static final int MAX_LENGTH = 30;
+  private static final int MIN_LENGTH = 15;
+  private static final int MAX_LENGTH = 30;
 
-    @Override
-    public String next() {
-        StringBuilder sb = new StringBuilder();
-        switch (rng.nextInt(3)) {
-        case 0: // Generate a String that will detect as an HTTPURIType
-            sb.append("http://");
-            break;
-        case 1: // Generate a String that will detect as an DBURIType
-            sb.append("/oradb/");
-            break;
-        case 2: // Generate a String that will detect as an XDBURIType
-            break;
-        default:
-            throw new RuntimeException("Invalid number generated.");
-        }
-
-        int length =
-            sb.length() + MIN_LENGTH + rng.nextInt(MAX_LENGTH - MIN_LENGTH + 1);
-        while (sb.length() < length) {
-            sb.append(Character.toChars(rng.nextInt(128)));
-        }
-        return sb.toString();
+  @Override
+  public String next() {
+    StringBuilder sb = new StringBuilder();
+    switch (rng.nextInt(3)) {
+    case 0: // Generate a String that will detect as an HTTPURIType
+      sb.append("http://");
+      break;
+    case 1: // Generate a String that will detect as an DBURIType
+      sb.append("/oradb/");
+      break;
+    case 2: // Generate a String that will detect as an XDBURIType
+      break;
+    default:
+      throw new RuntimeException("Invalid number generated.");
     }
 
+    int length =
+        sb.length() + MIN_LENGTH + rng.nextInt(MAX_LENGTH - MIN_LENGTH + 1);
+    while (sb.length() < length) {
+      sb.append(Character.toChars(rng.nextInt(128)));
+    }
+    return sb.toString();
+  }
 }

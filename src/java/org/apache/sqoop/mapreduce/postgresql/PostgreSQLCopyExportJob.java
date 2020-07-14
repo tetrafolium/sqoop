@@ -18,9 +18,6 @@
 
 package org.apache.sqoop.mapreduce.postgresql;
 
-import org.apache.sqoop.SqoopOptions;
-import org.apache.sqoop.config.ConfigurationHelper;
-import org.apache.sqoop.manager.ExportJobContext;
 import java.io.IOException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -30,82 +27,87 @@ import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.OutputFormat;
+import org.apache.sqoop.SqoopOptions;
+import org.apache.sqoop.config.ConfigurationHelper;
 import org.apache.sqoop.lib.DelimiterSet;
+import org.apache.sqoop.manager.ExportJobContext;
 import org.apache.sqoop.mapreduce.JdbcExportJob;
 import org.apache.sqoop.mapreduce.parquet.ParquetExportJobConfigurator;
-
 
 /**
  * Run an export using PostgreSQL JDBC Copy API.
  */
 public class PostgreSQLCopyExportJob extends JdbcExportJob {
-    public static final Log LOG =
-        LogFactory.getLog(PostgreSQLCopyExportJob.class.getName());
+  public static final Log LOG =
+      LogFactory.getLog(PostgreSQLCopyExportJob.class.getName());
 
-    public PostgreSQLCopyExportJob(final ExportJobContext context, final ParquetExportJobConfigurator parquetExportJobConfigurator) {
-        super(context, parquetExportJobConfigurator);
+  public PostgreSQLCopyExportJob(final ExportJobContext context,
+                                 final ParquetExportJobConfigurator
+                                     parquetExportJobConfigurator) {
+    super(context, parquetExportJobConfigurator);
+  }
+
+  public PostgreSQLCopyExportJob(
+      final ExportJobContext ctxt, final Class<? extends Mapper> mapperClass,
+      final Class<? extends InputFormat> inputFormatClass,
+      final Class<? extends OutputFormat> outputFormatClass,
+      final ParquetExportJobConfigurator parquetExportJobConfigurator) {
+    super(ctxt, mapperClass, inputFormatClass, outputFormatClass,
+          parquetExportJobConfigurator);
+  }
+
+  @Override
+  protected Class<? extends Mapper> getMapperClass() {
+    return PostgreSQLCopyExportMapper.class;
+  }
+
+  @Override
+  protected void configureMapper(Job job, String tableName,
+                                 String tableClassName)
+      throws ClassNotFoundException, IOException {
+    if (isHCatJob) {
+      throw new IOException("Sqoop-HCatalog Integration is not supported.");
+    }
+    switch (getInputFileType()) {
+    case AVRO_DATA_FILE:
+      throw new IOException("Avro data file is not supported.");
+    case SEQUENCE_FILE:
+    case UNKNOWN:
+    default:
+      job.setMapperClass(getMapperClass());
     }
 
-    public PostgreSQLCopyExportJob(final ExportJobContext ctxt,
-                                   final Class<? extends Mapper> mapperClass,
-                                   final Class<? extends InputFormat> inputFormatClass,
-                                   final Class<? extends OutputFormat> outputFormatClass,
-                                   final ParquetExportJobConfigurator parquetExportJobConfigurator) {
-        super(ctxt, mapperClass, inputFormatClass, outputFormatClass, parquetExportJobConfigurator);
-    }
+    // Concurrent writes of the same records would be problematic.
+    ConfigurationHelper.setJobMapSpeculativeExecution(job, false);
+    job.setMapOutputKeyClass(NullWritable.class);
+    job.setMapOutputValueClass(NullWritable.class);
+  }
 
-    @Override
-    protected Class<? extends Mapper> getMapperClass() {
-        return PostgreSQLCopyExportMapper.class;
+  protected void propagateOptionsToJob(Job job) {
+    super.propagateOptionsToJob(job);
+    SqoopOptions opts = context.getOptions();
+    Configuration conf = job.getConfiguration();
+    if (opts.getNullStringValue() != null) {
+      conf.set("postgresql.null.string", opts.getNullStringValue());
     }
+    setDelimiter("postgresql.input.field.delim", opts.getInputFieldDelim(),
+                 conf);
+    setDelimiter("postgresql.input.record.delim", opts.getInputRecordDelim(),
+                 conf);
+    setDelimiter("postgresql.input.enclosedby", opts.getInputEnclosedBy(),
+                 conf);
+    setDelimiter("postgresql.input.escapedby", opts.getInputEscapedBy(), conf);
+    conf.setBoolean("postgresql.input.encloserequired",
+                    opts.isInputEncloseRequired());
+  }
 
-    @Override
-    protected void configureMapper(Job job, String tableName,
-                                   String tableClassName) throws ClassNotFoundException, IOException {
-        if (isHCatJob) {
-            throw new IOException("Sqoop-HCatalog Integration is not supported.");
-        }
-        switch (getInputFileType()) {
-        case AVRO_DATA_FILE:
-            throw new IOException("Avro data file is not supported.");
-        case SEQUENCE_FILE:
-        case UNKNOWN:
-        default:
-            job.setMapperClass(getMapperClass());
-        }
-
-        // Concurrent writes of the same records would be problematic.
-        ConfigurationHelper.setJobMapSpeculativeExecution(job, false);
-        job.setMapOutputKeyClass(NullWritable.class);
-        job.setMapOutputValueClass(NullWritable.class);
+  private void setDelimiter(String prop, char val, Configuration conf) {
+    switch (val) {
+    case DelimiterSet.NULL_CHAR:
+      break;
+    case '\t':
+    default:
+      conf.set(prop, String.valueOf(val));
     }
-
-    protected void propagateOptionsToJob(Job job) {
-        super.propagateOptionsToJob(job);
-        SqoopOptions opts = context.getOptions();
-        Configuration conf = job.getConfiguration();
-        if (opts.getNullStringValue() != null) {
-            conf.set("postgresql.null.string", opts.getNullStringValue());
-        }
-        setDelimiter("postgresql.input.field.delim",
-                     opts.getInputFieldDelim(), conf);
-        setDelimiter("postgresql.input.record.delim",
-                     opts.getInputRecordDelim(), conf);
-        setDelimiter("postgresql.input.enclosedby",
-                     opts.getInputEnclosedBy(), conf);
-        setDelimiter("postgresql.input.escapedby",
-                     opts.getInputEscapedBy(), conf);
-        conf.setBoolean("postgresql.input.encloserequired",
-                        opts.isInputEncloseRequired());
-    }
-
-    private void setDelimiter(String prop, char val, Configuration conf) {
-        switch (val) {
-        case DelimiterSet.NULL_CHAR:
-            break;
-        case '\t':
-        default:
-            conf.set(prop, String.valueOf(val));
-        }
-    }
+  }
 }

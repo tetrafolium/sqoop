@@ -21,7 +21,6 @@ package org.apache.sqoop.tool;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.SqoopOptions.InvalidOptionsException;
 import org.apache.sqoop.cli.ToolOptions;
@@ -31,60 +30,57 @@ import org.apache.sqoop.cli.ToolOptions;
  */
 public class ListDatabasesTool extends BaseSqoopTool {
 
-    public static final Log LOG = LogFactory.getLog(
-                                      ListDatabasesTool.class.getName());
+  public static final Log LOG =
+      LogFactory.getLog(ListDatabasesTool.class.getName());
 
-    public ListDatabasesTool() {
-        super("list-databases");
+  public ListDatabasesTool() { super("list-databases"); }
+
+  @Override
+  /** {@inheritDoc} */
+  public int run(SqoopOptions options) {
+    if (!init(options)) {
+      return 1;
     }
 
-    @Override
-    /** {@inheritDoc} */
-    public int run(SqoopOptions options) {
-        if (!init(options)) {
-            return 1;
+    try {
+      String[] databases = manager.listDatabases();
+      if (null == databases) {
+        System.err.println("Could not retrieve database list from server");
+        LOG.error("manager.listDatabases() returned null");
+        return 1;
+      } else {
+        for (String db : databases) {
+          System.out.println(db);
         }
-
-        try {
-            String [] databases = manager.listDatabases();
-            if (null == databases) {
-                System.err.println("Could not retrieve database list from server");
-                LOG.error("manager.listDatabases() returned null");
-                return 1;
-            } else {
-                for (String db : databases) {
-                    System.out.println(db);
-                }
-            }
-        } finally {
-            destroy(options);
-        }
-
-        return 0;
+      }
+    } finally {
+      destroy(options);
     }
 
-    @Override
-    /** Configure the command-line arguments we expect to receive */
-    public void configureOptions(ToolOptions toolOptions) {
-        toolOptions.addUniqueOptions(getCommonOptions());
-    }
+    return 0;
+  }
 
-    @Override
-    /** {@inheritDoc} */
-    public void applyOptions(CommandLine in, SqoopOptions out)
-    throws InvalidOptionsException {
-        applyCommonOptions(in, out);
-    }
+  @Override
+  /** Configure the command-line arguments we expect to receive */
+  public void configureOptions(ToolOptions toolOptions) {
+    toolOptions.addUniqueOptions(getCommonOptions());
+  }
 
-    @Override
-    /** {@inheritDoc} */
-    public void validateOptions(SqoopOptions options)
-    throws InvalidOptionsException {
+  @Override
+  /** {@inheritDoc} */
+  public void applyOptions(CommandLine in, SqoopOptions out)
+      throws InvalidOptionsException {
+    applyCommonOptions(in, out);
+  }
 
-        if (hasUnrecognizedArgs(extraArguments)) {
-            throw new InvalidOptionsException(HELP_STR);
-        }
-        validateCommonOptions(options);
+  @Override
+  /** {@inheritDoc} */
+  public void validateOptions(SqoopOptions options)
+      throws InvalidOptionsException {
+
+    if (hasUnrecognizedArgs(extraArguments)) {
+      throw new InvalidOptionsException(HELP_STR);
     }
+    validateCommonOptions(options);
+  }
 }
-

@@ -34,13 +34,11 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 public class AvroInputFormat<T>
     extends FileInputFormat<AvroWrapper<T>, NullWritable> {
 
-    @Override
-    public RecordReader<AvroWrapper<T>, NullWritable> createRecordReader(
-        InputSplit split, TaskAttemptContext context) throws IOException,
-        InterruptedException {
-        context.setStatus(split.toString());
-        return new AvroRecordReader<T>();
-    }
-
+  @Override
+  public RecordReader<AvroWrapper<T>, NullWritable>
+  createRecordReader(InputSplit split, TaskAttemptContext context)
+      throws IOException, InterruptedException {
+    context.setStatus(split.toString());
+    return new AvroRecordReader<T>();
+  }
 }
-

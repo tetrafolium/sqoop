@@ -18,16 +18,16 @@
 
 package org.apache.sqoop.testutil.adapter;
 
+import java.sql.SQLException;
 import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.manager.ConnManager;
 
-import java.sql.SQLException;
-
 public interface DatabaseAdapter {
 
-    String getConnectionString();
+  String getConnectionString();
 
-    SqoopOptions injectConnectionParameters(SqoopOptions options);
+  SqoopOptions injectConnectionParameters(SqoopOptions options);
 
-    void dropTableIfExists(String tableName, ConnManager manager) throws SQLException;
+  void dropTableIfExists(String tableName, ConnManager manager)
+      throws SQLException;
 }

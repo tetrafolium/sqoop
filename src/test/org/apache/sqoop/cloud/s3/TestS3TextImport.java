@@ -26,10 +26,8 @@ import org.junit.experimental.categories.Category;
 @Category(S3Test.class)
 public class TestS3TextImport extends AbstractTestTextImport {
 
-    @ClassRule
-    public static S3CredentialsRule credentialsRule = new S3CredentialsRule();
+  @ClassRule
+  public static S3CredentialsRule credentialsRule = new S3CredentialsRule();
 
-    public TestS3TextImport() {
-        super(credentialsRule);
-    }
+  public TestS3TextImport() { super(credentialsRule); }
 }

@@ -20,10 +20,9 @@ package org.apache.sqoop.infrastructure.kerberos;
 
 public interface KerberosConfigurationProvider {
 
-    String getTestPrincipal();
+  String getTestPrincipal();
 
-    String getRealm();
+  String getRealm();
 
-    String getKeytabFilePath();
-
+  String getKeytabFilePath();
 }

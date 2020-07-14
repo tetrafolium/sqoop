@@ -18,143 +18,124 @@
 
 package org.apache.sqoop;
 
+import java.util.Properties;
 import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.sqoop.mapreduce.ExportJobBase;
 import org.apache.sqoop.mapreduce.ImportJobBase;
 import org.apache.sqoop.mapreduce.hcat.SqoopHCatUtilities;
 import org.apache.sqoop.metastore.PasswordRedactor;
 
-import java.util.Properties;
-
 /**
- * Publisher class for publising data to a consumer upon completion of Sqoop actions.
- * Currently supports Hive import actions only.
+ * Publisher class for publising data to a consumer upon completion of Sqoop
+ * actions. Currently supports Hive import actions only.
  */
 public class SqoopJobDataPublisher {
 
-    public static class Data {
+  public static class Data {
 
-        public static final String JDBC_STORE = "JDBCStore";
+    public static final String JDBC_STORE = "JDBCStore";
 
-        String operation;
-        String user;
-        String storeType;
-        String storeTable;
-        String storeQuery;
-        String hiveDB;
-        String hiveTable;
-        Properties commandLineOpts;
-        long startTime;
-        long endTime;
+    String operation;
+    String user;
+    String storeType;
+    String storeTable;
+    String storeQuery;
+    String hiveDB;
+    String hiveTable;
+    Properties commandLineOpts;
+    long startTime;
+    long endTime;
 
-        String url;
+    String url;
 
-        public String getOperation() {
-            return operation;
-        }
+    public String getOperation() { return operation; }
 
-        public String getUser() {
-            return user;
-        }
+    public String getUser() { return user; }
 
-        public String getStoreType() {
-            return storeType;
-        }
+    public String getStoreType() { return storeType; }
 
-        public String getStoreTable() {
-            return storeTable;
-        }
+    public String getStoreTable() { return storeTable; }
 
-        public String getStoreQuery() {
-            return storeQuery;
-        }
+    public String getStoreQuery() { return storeQuery; }
 
-        public String getHiveDB() {
-            return hiveDB;
-        }
+    public String getHiveDB() { return hiveDB; }
 
-        public String getHiveTable() {
-            return hiveTable;
-        }
+    public String getHiveTable() { return hiveTable; }
 
-        public Properties getOptions() {
-            return commandLineOpts;
-        }
+    public Properties getOptions() { return commandLineOpts; }
 
-        public String getUrl() {
-            return url;
-        }
+    public String getUrl() { return url; }
 
-        public long getStartTime() {
-            return startTime;
-        }
+    public long getStartTime() { return startTime; }
 
-        public long getEndTime() {
-            return endTime;
-        }
+    public long getEndTime() { return endTime; }
 
-        private void init(String operation, String url, String user, String storeType, String storeTable,
-                          String storeQuery, String hiveDB, String hiveTable, Properties commandLineOpts,
-                          long startTime, long endTime) {
-            this.operation = operation;
-            this.url = url;
-            this.user = user;
-            this.storeType = storeType;
-            this.storeTable = (storeTable == null) ? hiveTable : storeTable;
-            this.storeQuery = storeQuery;
-            this.hiveDB = (hiveDB == null) ? SqoopHCatUtilities.DEFHCATDB : hiveDB;
-            this.hiveTable = hiveTable;
-            this.commandLineOpts = commandLineOpts;
-            this.startTime = startTime;
-            this.endTime = endTime;
-        }
-
-        public Data(String operation, String url, String user, String storeType,
-                    String storeTable, String storeQuery, String hiveDB, String hiveTable,
-                    Properties commandLineOpts, long startTime, long endTime) throws Exception {
-            init(operation, url, user, storeType, storeTable, storeQuery,
-                 hiveDB, hiveTable, commandLineOpts, startTime, endTime);
-        }
-
-        public Data(String operation, SqoopOptions options, String tableName,
-                    long startTime, long endTime) throws Exception {
-            String hiveTableName = null;
-            String hiveDatabase = null;
-            if (ExportJobBase.OPERATION.equals(operation)) {
-                // export job data
-                hiveTableName = options.getHCatTableName();
-                hiveDatabase = options.getHCatDatabaseName();
-            } else if (ImportJobBase.OPERATION.equals(operation)) {
-                // import job data
-                hiveTableName = options.doHiveImport()
-                                ? options.getHiveTableName() : options.getHCatTableName();
-                hiveDatabase = options.doHiveImport()
-                               ? options.getHiveDatabaseName() : options.getHCatDatabaseName();
-            } else {
-                throw new Exception("Data published for unsupported Operation "
-                                    + operation + " in SqoopJobDataPublisher");
-            }
-
-            String dataStoreType = JDBC_STORE;
-            String[] storeTypeFields = options.getConnectString().split(":");
-            if (storeTypeFields.length > 2) {
-                dataStoreType = storeTypeFields[1];
-            }
-
-            init(operation, options.getConnectString(), UserGroupInformation.getCurrentUser().getShortUserName(),
-                 dataStoreType, tableName, options.getSqlQuery(), hiveDatabase, hiveTableName,
-                 options.writeProperties(), startTime, endTime);
-        }
-
-        public String toString() {
-            return  "Operation=" + operation + ", Url=" + url + ", User=" + user + ", StoreType=" + storeType
-                    + ", StoreTable=" + storeTable + ", StoreQuery=" + storeQuery + ", HiveDB=" + hiveDB
-                    + ", HiveTable=" + hiveTable + ", StartTime=" + startTime + ", EndTime=" + endTime
-                    + ", CmdLineArgs=" + PasswordRedactor.redactValues(commandLineOpts);
-        }
+    private void init(String operation, String url, String user,
+                      String storeType, String storeTable, String storeQuery,
+                      String hiveDB, String hiveTable,
+                      Properties commandLineOpts, long startTime,
+                      long endTime) {
+      this.operation = operation;
+      this.url = url;
+      this.user = user;
+      this.storeType = storeType;
+      this.storeTable = (storeTable == null) ? hiveTable : storeTable;
+      this.storeQuery = storeQuery;
+      this.hiveDB = (hiveDB == null) ? SqoopHCatUtilities.DEFHCATDB : hiveDB;
+      this.hiveTable = hiveTable;
+      this.commandLineOpts = commandLineOpts;
+      this.startTime = startTime;
+      this.endTime = endTime;
     }
 
-    public void publish(Data data) throws Exception {
-
+    public Data(String operation, String url, String user, String storeType,
+                String storeTable, String storeQuery, String hiveDB,
+                String hiveTable, Properties commandLineOpts, long startTime,
+                long endTime) throws Exception {
+      init(operation, url, user, storeType, storeTable, storeQuery, hiveDB,
+           hiveTable, commandLineOpts, startTime, endTime);
     }
+
+    public Data(String operation, SqoopOptions options, String tableName,
+                long startTime, long endTime) throws Exception {
+      String hiveTableName = null;
+      String hiveDatabase = null;
+      if (ExportJobBase.OPERATION.equals(operation)) {
+        // export job data
+        hiveTableName = options.getHCatTableName();
+        hiveDatabase = options.getHCatDatabaseName();
+      } else if (ImportJobBase.OPERATION.equals(operation)) {
+        // import job data
+        hiveTableName = options.doHiveImport() ? options.getHiveTableName()
+                                               : options.getHCatTableName();
+        hiveDatabase = options.doHiveImport() ? options.getHiveDatabaseName()
+                                              : options.getHCatDatabaseName();
+      } else {
+        throw new Exception("Data published for unsupported Operation " +
+                            operation + " in SqoopJobDataPublisher");
+      }
+
+      String dataStoreType = JDBC_STORE;
+      String[] storeTypeFields = options.getConnectString().split(":");
+      if (storeTypeFields.length > 2) {
+        dataStoreType = storeTypeFields[1];
+      }
+
+      init(operation, options.getConnectString(),
+           UserGroupInformation.getCurrentUser().getShortUserName(),
+           dataStoreType, tableName, options.getSqlQuery(), hiveDatabase,
+           hiveTableName, options.writeProperties(), startTime, endTime);
+    }
+
+    public String toString() {
+      return "Operation=" + operation + ", Url=" + url + ", User=" + user +
+          ", StoreType=" + storeType + ", StoreTable=" + storeTable +
+          ", StoreQuery=" + storeQuery + ", HiveDB=" + hiveDB +
+          ", HiveTable=" + hiveTable + ", StartTime=" + startTime +
+          ", EndTime=" + endTime +
+          ", CmdLineArgs=" + PasswordRedactor.redactValues(commandLineOpts);
+    }
+  }
+
+  public void publish(Data data) throws Exception {}
 }

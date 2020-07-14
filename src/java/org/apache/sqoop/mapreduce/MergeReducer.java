@@ -28,13 +28,11 @@ import org.apache.sqoop.lib.SqoopRecord;
  * Reducer for merge tool. Given records tagged as 'old' or 'new', emit
  * a new one if possible; otherwise, an old one.
  */
-public class MergeReducer
-    extends MergeReducerBase<SqoopRecord, NullWritable> {
+public class MergeReducer extends MergeReducerBase<SqoopRecord, NullWritable> {
 
-    @Override
-    protected void writeRecord(SqoopRecord record, Context c)
-    throws IOException, InterruptedException {
-        c.write(record, NullWritable.get());
-    }
+  @Override
+  protected void writeRecord(SqoopRecord record, Context c)
+      throws IOException, InterruptedException {
+    c.write(record, NullWritable.get());
+  }
 }
-

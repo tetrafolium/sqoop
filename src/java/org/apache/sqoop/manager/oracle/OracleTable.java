@@ -23,46 +23,33 @@ package org.apache.sqoop.manager.oracle;
  */
 public class OracleTable {
 
-    private String schema;
-    private String name;
+  private String schema;
+  private String name;
 
-    public String getSchema() {
-        return schema;
-    }
+  public String getSchema() { return schema; }
 
-    private void setSchema(String newSchema) {
-        this.schema = newSchema;
-    }
+  private void setSchema(String newSchema) { this.schema = newSchema; }
 
-    public String getName() {
-        return name;
-    }
+  public String getName() { return name; }
 
-    private void setName(String newName) {
-        this.name = newName;
-    }
+  private void setName(String newName) { this.name = newName; }
 
-    public OracleTable() {
+  public OracleTable() {}
 
-    }
+  public OracleTable(String schema, String name) {
 
-    public OracleTable(String schema, String name) {
+    setSchema(schema);
+    setName(name);
+  }
 
-        setSchema(schema);
-        setName(name);
-    }
+  public OracleTable(String name) { setName(name); }
 
-    public OracleTable(String name) {
-        setName(name);
-    }
-
-    @Override
-    public String toString() {
-        String result =
-            (getSchema() == null || getSchema().isEmpty()) ? "" : "\""
-            + getSchema() + "\".";
-        result += "\"" + getName() + "\"";
-        return result;
-    }
-
+  @Override
+  public String toString() {
+    String result = (getSchema() == null || getSchema().isEmpty())
+                        ? ""
+                        : "\"" + getSchema() + "\".";
+    result += "\"" + getName() + "\"";
+    return result;
+  }
 }

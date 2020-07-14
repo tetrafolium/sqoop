@@ -17,33 +17,37 @@
  */
 package org.apache.sqoop.mapreduce.mainframe;
 
-public class MainframeConfiguration
-{
-    public static final String MAINFRAME_INPUT_DATASET_NAME
-        = "mapreduce.mainframe.input.dataset.name";
+public class MainframeConfiguration {
+  public static final String MAINFRAME_INPUT_DATASET_NAME =
+      "mapreduce.mainframe.input.dataset.name";
 
-    public static final String MAINFRAME_INPUT_DATASET_TYPE
-        = "mapreduce.mainframe.input.dataset.type";
-    public static final String MAINFRAME_INPUT_DATASET_TYPE_SEQUENTIAL
-        = "s";
-    public static final String MAINFRAME_INPUT_DATASET_TYPE_GDG
-        = "g";
-    public static final String MAINFRAME_INPUT_DATASET_TYPE_PARTITIONED
-        = "p";
-    public static final String MAINFRAME_INPUT_DATASET_TAPE = "mainframe.input.dataset.tape";
-    public static final String MAINFRAME_FTP_FILE_GDG_ENTRY_PARSER_CLASSNAME = MainframeFTPFileGdgEntryParser.class.getName();
-    public static final String MAINFRAME_FTP_FILE_ENTRY_PARSER_CLASSNAME = "org.apache.sqoop.mapreduce.mainframe.MainframeFTPFileEntryParser";
+  public static final String MAINFRAME_INPUT_DATASET_TYPE =
+      "mapreduce.mainframe.input.dataset.type";
+  public static final String MAINFRAME_INPUT_DATASET_TYPE_SEQUENTIAL = "s";
+  public static final String MAINFRAME_INPUT_DATASET_TYPE_GDG = "g";
+  public static final String MAINFRAME_INPUT_DATASET_TYPE_PARTITIONED = "p";
+  public static final String MAINFRAME_INPUT_DATASET_TAPE =
+      "mainframe.input.dataset.tape";
+  public static final String MAINFRAME_FTP_FILE_GDG_ENTRY_PARSER_CLASSNAME =
+      MainframeFTPFileGdgEntryParser.class.getName();
+  public static final String MAINFRAME_FTP_FILE_ENTRY_PARSER_CLASSNAME =
+      "org.apache.sqoop.mapreduce.mainframe.MainframeFTPFileEntryParser";
 
-    public static final String MAINFRAME_FTP_TRANSFER_MODE = "mainframe.ftp.transfermode";
+  public static final String MAINFRAME_FTP_TRANSFER_MODE =
+      "mainframe.ftp.transfermode";
 
-    public static final String MAINFRAME_FTP_TRANSFER_MODE_ASCII = "ascii";
+  public static final String MAINFRAME_FTP_TRANSFER_MODE_ASCII = "ascii";
 
-    public static final String MAINFRAME_FTP_TRANSFER_MODE_BINARY = "binary";
+  public static final String MAINFRAME_FTP_TRANSFER_MODE_BINARY = "binary";
 
-    // this is the default buffer size used when doing binary ftp transfers from mainframe
-    public static final Integer MAINFRAME_FTP_TRANSFER_BINARY_DEFAULT_BUFFER_SIZE = 32760;
+  // this is the default buffer size used when doing binary ftp transfers from
+  // mainframe
+  public static final Integer
+      MAINFRAME_FTP_TRANSFER_BINARY_DEFAULT_BUFFER_SIZE = 32760;
 
-    public static final String MAINFRAME_FTP_TRANSFER_BINARY_BUFFER_SIZE = "mainframe.ftp.buffersize";
+  public static final String MAINFRAME_FTP_TRANSFER_BINARY_BUFFER_SIZE =
+      "mainframe.ftp.buffersize";
 
-    public static final String MAINFRAME_FTP_CUSTOM_COMMANDS = "mainframe.ftp.commands";
+  public static final String MAINFRAME_FTP_CUSTOM_COMMANDS =
+      "mainframe.ftp.commands";
 }

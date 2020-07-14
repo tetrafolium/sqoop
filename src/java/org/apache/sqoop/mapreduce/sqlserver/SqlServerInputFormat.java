@@ -17,15 +17,14 @@
  */
 package org.apache.sqoop.mapreduce.sqlserver;
 
-import org.apache.sqoop.mapreduce.db.DBConfiguration;
-import org.apache.sqoop.mapreduce.db.DataDrivenDBInputFormat;
+import java.io.IOException;
+import java.sql.SQLException;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.sqoop.mapreduce.DBWritable;
-
-import java.io.IOException;
-import java.sql.SQLException;
+import org.apache.sqoop.mapreduce.db.DBConfiguration;
+import org.apache.sqoop.mapreduce.db.DataDrivenDBInputFormat;
 
 /**
  * Input format specific for Microsoft SQL Server.
@@ -33,22 +32,24 @@ import java.sql.SQLException;
 public class SqlServerInputFormat<T extends DBWritable>
     extends DataDrivenDBInputFormat {
 
-    /** {@inheritDoc} */
-    @Override
-    protected RecordReader<LongWritable, T> createDBRecordReader(
-        DBInputSplit split, Configuration conf) throws IOException {
+  /** {@inheritDoc} */
+  @Override
+  protected RecordReader<LongWritable, T>
+  createDBRecordReader(DBInputSplit split, Configuration conf)
+      throws IOException {
 
-        DBConfiguration dbConf = getDBConf();
-        @SuppressWarnings("unchecked")
-        Class<T> inputClass = (Class<T>) (dbConf.getInputClass());
+    DBConfiguration dbConf = getDBConf();
+    @SuppressWarnings("unchecked")
+    Class<T> inputClass = (Class<T>)(dbConf.getInputClass());
 
-        try {
-            // Use Microsoft SQL Server specific db reader
-            return new SqlServerRecordReader<T>(split, inputClass,
-                                                conf, getConnection(), dbConf, dbConf.getInputConditions(),
-                                                dbConf.getInputFieldNames(), dbConf.getInputTableName());
-        } catch (SQLException ex) {
-            throw new IOException(ex);
-        }
+    try {
+      // Use Microsoft SQL Server specific db reader
+      return new SqlServerRecordReader<T>(
+          split, inputClass, conf, getConnection(), dbConf,
+          dbConf.getInputConditions(), dbConf.getInputFieldNames(),
+          dbConf.getInputTableName());
+    } catch (SQLException ex) {
+      throw new IOException(ex);
     }
+  }
 }

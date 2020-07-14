@@ -27,12 +27,13 @@ import org.apache.sqoop.metastore.JobToolTestBase;
  * not run it. You need to run this manually with
  * -Dtestcase=HsqldbJobToolTest or -Dthirdparty=true.
  *
- * This uses JDBC to store and retrieve metastore data from a local Hsqldb server
+ * This uses JDBC to store and retrieve metastore data from a local Hsqldb
+ * server
  */
 
 public class HsqldbJobToolTest extends JobToolTestBase {
 
-    public HsqldbJobToolTest() {
-        super("jdbc:hsqldb:mem:sqoopmetastore", "SA", "");
-    }
+  public HsqldbJobToolTest() {
+    super("jdbc:hsqldb:mem:sqoopmetastore", "SA", "");
+  }
 }

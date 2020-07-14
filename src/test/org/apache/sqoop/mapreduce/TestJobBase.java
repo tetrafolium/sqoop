@@ -24,80 +24,80 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.Job;
+import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.config.ConfigurationConstants;
 import org.apache.sqoop.testcategories.sqooptest.UnitTest;
 import org.junit.Before;
 import org.junit.Test;
-
-import org.apache.sqoop.SqoopOptions;
 import org.junit.experimental.categories.Category;
 
 @Category(UnitTest.class)
 public class TestJobBase {
 
-    SqoopOptions options;
-    Configuration conf;
-    JobBase jobBase;
-    Job job;
+  SqoopOptions options;
+  Configuration conf;
+  JobBase jobBase;
+  Job job;
 
-    @Before
-    public void setUp() {
-        // set Sqoop command line arguments
-        options = new SqoopOptions();
-        conf = options.getConf();
-        jobBase = spy(new JobBase(options));
-    }
+  @Before
+  public void setUp() {
+    // set Sqoop command line arguments
+    options = new SqoopOptions();
+    conf = options.getConf();
+    jobBase = spy(new JobBase(options));
+  }
 
-    private void tmpjarsValidatingSeed(String tmpjarsInput) throws IOException {
+  private void tmpjarsValidatingSeed(String tmpjarsInput) throws IOException {
 
-        // call cacheJars(...)
-        conf.set(ConfigurationConstants.MAPRED_DISTCACHE_CONF_PARAM, tmpjarsInput);
-        job = jobBase.createJob(conf);
-        jobBase.cacheJars(job, null);
+    // call cacheJars(...)
+    conf.set(ConfigurationConstants.MAPRED_DISTCACHE_CONF_PARAM, tmpjarsInput);
+    job = jobBase.createJob(conf);
+    jobBase.cacheJars(job, null);
+  }
 
-    }
+  public void tmpjarsValidatingVerif(String expectedOutput, int numWarnings)
+      throws IOException {
+    // check outputs
+    assertEquals("Expected " + expectedOutput +
+                     "but received something different",
+                 expectedOutput,
+                 job.getConfiguration().get(
+                     ConfigurationConstants.MAPRED_DISTCACHE_CONF_PARAM));
 
-    public void tmpjarsValidatingVerif(String expectedOutput, int numWarnings) throws IOException {
-        // check outputs
-        assertEquals("Expected " + expectedOutput + "but received something different", expectedOutput,
-                     job.getConfiguration().get(ConfigurationConstants.MAPRED_DISTCACHE_CONF_PARAM));
-
-        // check for warnings
-        verify(jobBase, times(numWarnings))
+    // check for warnings
+    verify(jobBase, times(numWarnings))
         .warn("Empty input is invalid and was removed from tmpjars.");
-    }
+  }
 
-    @Test
-    public void testTmpjarsValidatingMultipleValidInputs() throws IOException {
+  @Test
+  public void testTmpjarsValidatingMultipleValidInputs() throws IOException {
 
-        String tmpjarsInput = "valid,validother";
-        String expectedOutput = "valid,validother";
+    String tmpjarsInput = "valid,validother";
+    String expectedOutput = "valid,validother";
 
-        tmpjarsValidatingSeed(tmpjarsInput);
-        tmpjarsValidatingVerif(expectedOutput, 0);
-    }
+    tmpjarsValidatingSeed(tmpjarsInput);
+    tmpjarsValidatingVerif(expectedOutput, 0);
+  }
 
-    @Test
-    public void testTmpjarsValidatingFullEmptyInput() throws IOException {
+  @Test
+  public void testTmpjarsValidatingFullEmptyInput() throws IOException {
 
-        String tmpjarsInput = "";
-        String expectedOutput = "";
+    String tmpjarsInput = "";
+    String expectedOutput = "";
 
-        tmpjarsValidatingSeed(tmpjarsInput);
-        tmpjarsValidatingVerif(expectedOutput, 0);
-    }
+    tmpjarsValidatingSeed(tmpjarsInput);
+    tmpjarsValidatingVerif(expectedOutput, 0);
+  }
 
-    @Test
-    public void testTmpjarsValidatingMixedInput() throws IOException {
+  @Test
+  public void testTmpjarsValidatingMixedInput() throws IOException {
 
-        String tmpjarsInput = ",,valid,,,validother,,";
-        String expectedOutput = "valid,validother";
+    String tmpjarsInput = ",,valid,,,validother,,";
+    String expectedOutput = "valid,validother";
 
-        tmpjarsValidatingSeed(tmpjarsInput);
-        tmpjarsValidatingVerif(expectedOutput, 4);
-    }
-
+    tmpjarsValidatingSeed(tmpjarsInput);
+    tmpjarsValidatingVerif(expectedOutput, 4);
+  }
 }

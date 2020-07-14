@@ -22,7 +22,6 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.hadoop.conf.Configured;
 
 /**
@@ -38,56 +37,49 @@ import org.apache.hadoop.conf.Configured;
  */
 public abstract class JobStorage extends Configured implements Closeable {
 
-    /**
-     * Returns true if the JobStorage system can use the metadata in
-     * the descriptor to connect to an underlying storage resource.
-     */
-    public abstract boolean canAccept(Map<String, String> descriptor);
+  /**
+   * Returns true if the JobStorage system can use the metadata in
+   * the descriptor to connect to an underlying storage resource.
+   */
+  public abstract boolean canAccept(Map<String, String> descriptor);
 
+  /**
+   * Opens / connects to the underlying storage resource specified by the
+   * descriptor.
+   */
+  public abstract void open(Map<String, String> descriptor) throws IOException;
 
-    /**
-     * Opens / connects to the underlying storage resource specified by the
-     * descriptor.
-     */
-    public abstract void open(Map<String, String> descriptor)
-    throws IOException;
+  /**
+   * Given a job name, reconstitute a JobData that contains all
+   * configuration information required for the job. Returns null if the
+   * job name does not match an available job.
+   */
+  public abstract JobData read(String jobName) throws IOException;
 
-    /**
-     * Given a job name, reconstitute a JobData that contains all
-     * configuration information required for the job. Returns null if the
-     * job name does not match an available job.
-     */
-    public abstract JobData read(String jobName)
-    throws IOException;
+  /**
+   * Forget about a saved job.
+   */
+  public abstract void delete(String jobName)throws IOException;
 
-    /**
-     * Forget about a saved job.
-     */
-    public abstract void delete(String jobName) throws IOException;
+  /**
+   * Given a job name and the data describing a configured job, record the job
+   * information to the storage medium.
+   */
+  public abstract void create(String jobName, JobData data) throws IOException;
 
-    /**
-     * Given a job name and the data describing a configured job, record the job
-     * information to the storage medium.
-     */
-    public abstract void create(String jobName, JobData data)
-    throws IOException;
+  /**
+   * Given a job name and configured job data, update the underlying resource
+   * to match the current job configuration.
+   */
+  public abstract void update(String jobName, JobData data) throws IOException;
 
-    /**
-     * Given a job name and configured job data, update the underlying resource
-     * to match the current job configuration.
-     */
-    public abstract void update(String jobName, JobData data)
-    throws IOException;
+  /**
+   * Close any resources opened by the JobStorage system.
+   */
+  public void close() throws IOException {}
 
-    /**
-     * Close any resources opened by the JobStorage system.
-     */
-    public void close() throws IOException {
-    }
-
-    /**
-     * Enumerate all jobs held in the connected resource.
-     */
-    public abstract List<String> list() throws IOException;
+  /**
+   * Enumerate all jobs held in the connected resource.
+   */
+  public abstract List<String> list() throws IOException;
 }
-

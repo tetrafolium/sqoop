@@ -18,35 +18,36 @@
 
 package org.apache.sqoop.testutil.adapter;
 
+import java.sql.SQLException;
 import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.manager.ConnManager;
 import org.apache.sqoop.manager.sqlserver.MSSQLTestUtils;
 
-import java.sql.SQLException;
-
 public class SqlServerDatabaseAdapter implements DatabaseAdapter {
 
-    @Override
-    public String getConnectionString() {
-        return MSSQLTestUtils.CONNECT_STRING;
-    }
+  @Override
+  public String getConnectionString() {
+    return MSSQLTestUtils.CONNECT_STRING;
+  }
 
-    @Override
-    public SqoopOptions injectConnectionParameters(SqoopOptions options) {
-        options.setConnectString(MSSQLTestUtils.CONNECT_STRING);
-        options.setUsername(MSSQLTestUtils.DATABASE_USER);
-        options.setPassword(MSSQLTestUtils.DATABASE_PASSWORD);
-        return options;
-    }
+  @Override
+  public SqoopOptions injectConnectionParameters(SqoopOptions options) {
+    options.setConnectString(MSSQLTestUtils.CONNECT_STRING);
+    options.setUsername(MSSQLTestUtils.DATABASE_USER);
+    options.setPassword(MSSQLTestUtils.DATABASE_PASSWORD);
+    return options;
+  }
 
-    @Override
-    public void dropTableIfExists(String tableName, ConnManager manager) throws SQLException {
-        String dropTableStatement = "DROP TABLE IF EXISTS " + manager.escapeTableName(tableName);
-        manager.execAndPrint(dropTableStatement);
-    }
+  @Override
+  public void dropTableIfExists(String tableName, ConnManager manager)
+      throws SQLException {
+    String dropTableStatement =
+        "DROP TABLE IF EXISTS " + manager.escapeTableName(tableName);
+    manager.execAndPrint(dropTableStatement);
+  }
 
-    @Override
-    public String toString() {
-        return getClass().getSimpleName();
-    }
+  @Override
+  public String toString() {
+    return getClass().getSimpleName();
+  }
 }

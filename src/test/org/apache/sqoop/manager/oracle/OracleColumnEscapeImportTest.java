@@ -18,100 +18,100 @@
 
 package org.apache.sqoop.manager.oracle;
 
+import static org.junit.Assert.assertEquals;
+
+import com.google.common.base.Charsets;
+import com.google.common.io.Files;
+import java.io.File;
+import java.io.IOException;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
 import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.manager.oracle.util.OracleUtils;
 import org.apache.sqoop.testcategories.thirdpartytest.OracleTest;
 import org.apache.sqoop.testutil.CommonArgs;
 import org.apache.sqoop.testutil.ImportJobTestCase;
-import com.google.common.base.Charsets;
-import com.google.common.io.Files;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.Path;
 import org.junit.After;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
-import java.io.File;
-import java.io.IOException;
-import java.sql.SQLException;
-import java.util.ArrayList;
-
-import static org.junit.Assert.assertEquals;
-
 @Category(OracleTest.class)
 public class OracleColumnEscapeImportTest extends ImportJobTestCase {
 
-    public static final Log LOG = LogFactory.getLog(
-                                      OracleColumnEscapeImportTest.class.getName());
+  public static final Log LOG =
+      LogFactory.getLog(OracleColumnEscapeImportTest.class.getName());
 
-    @Override
-    protected boolean useHsqldbTestServer() {
-        return false;
+  @Override
+  protected boolean useHsqldbTestServer() {
+    return false;
+  }
+
+  @Override
+  protected String getConnectString() {
+    return OracleUtils.CONNECT_STRING;
+  }
+
+  @Override
+  protected SqoopOptions getSqoopOptions(Configuration conf) {
+    SqoopOptions opts = new SqoopOptions(conf);
+    OracleUtils.setOracleAuth(opts);
+    return opts;
+  }
+
+  @Override
+  protected void dropTableIfExists(String table) throws SQLException {
+    OracleUtils.dropTable(table, getManager());
+  }
+
+  @After
+  public void tearDown() {
+    try {
+      OracleUtils.dropTable(getTableName(), getManager());
+    } catch (SQLException e) {
+      LOG.error("Test table could not be dropped", e);
     }
+    super.tearDown();
+  }
 
-    @Override
-    protected String getConnectString() {
-        return OracleUtils.CONNECT_STRING;
-    }
+  protected String[] getArgv() {
+    ArrayList<String> args = new ArrayList<String>();
 
-    @Override
-    protected SqoopOptions getSqoopOptions(Configuration conf) {
-        SqoopOptions opts = new SqoopOptions(conf);
-        OracleUtils.setOracleAuth(opts);
-        return opts;
-    }
+    CommonArgs.addHadoopFlags(args);
 
-    @Override
-    protected void dropTableIfExists(String table) throws SQLException {
-        OracleUtils.dropTable(table, getManager());
-    }
+    args.add("--connect");
+    args.add(getConnectString());
+    args.add("--username");
+    args.add(OracleUtils.ORACLE_USER_NAME);
+    args.add("--password");
+    args.add(OracleUtils.ORACLE_USER_PASS);
+    args.add("--target-dir");
+    args.add(getTablePath().toString());
+    args.add("--num-mappers");
+    args.add("1");
+    args.add("--query");
+    args.add("select REGEXP_REPLACE(TRIM(" + getColName(0) +
+             "), '\\:','!') from " + getTableName() + " WHERE $CONDITIONS");
 
-    @After
-    public void tearDown() {
-        try {
-            OracleUtils.dropTable(getTableName(), getManager());
-        } catch (SQLException e) {
-            LOG.error("Test table could not be dropped", e);
-        }
-        super.tearDown();
-    }
+    return args.toArray(new String[0]);
+  }
 
-    protected String [] getArgv() {
-        ArrayList<String> args = new ArrayList<String>();
+  @Test
+  public void testRegexpReplaceEscapeWithSpecialCharacters()
+      throws IOException {
+    String[] types = {"VARCHAR(50)"};
+    String[] vals = {"'hello, world:'"};
+    createTableWithColTypes(types, vals);
+    String[] args = getArgv();
+    runImport(args);
 
-        CommonArgs.addHadoopFlags(args);
+    Path filePath = new Path(getTablePath(), "part-m-00000");
+    String output =
+        Files.toString(new File(filePath.toString()), Charsets.UTF_8);
 
-        args.add("--connect");
-        args.add(getConnectString());
-        args.add("--username");
-        args.add(OracleUtils.ORACLE_USER_NAME);
-        args.add("--password");
-        args.add(OracleUtils.ORACLE_USER_PASS);
-        args.add("--target-dir");
-        args.add(getTablePath().toString());
-        args.add("--num-mappers");
-        args.add("1");
-        args.add("--query");
-        args.add("select REGEXP_REPLACE(TRIM(" + getColName(0) + "), '\\:','!') from " + getTableName() + " WHERE $CONDITIONS");
-
-        return args.toArray(new String[0]);
-    }
-
-    @Test
-    public void testRegexpReplaceEscapeWithSpecialCharacters() throws IOException {
-        String [] types = { "VARCHAR(50)"};
-        String [] vals = { "'hello, world:'"};
-        createTableWithColTypes(types, vals);
-        String[] args = getArgv();
-        runImport(args);
-
-        Path filePath = new Path(getTablePath(), "part-m-00000");
-        String output = Files.toString(new File(filePath.toString()), Charsets.UTF_8);
-
-        assertEquals("hello, world!", output.trim());
-    }
-
+    assertEquals("hello, world!", output.trim());
+  }
 }
-

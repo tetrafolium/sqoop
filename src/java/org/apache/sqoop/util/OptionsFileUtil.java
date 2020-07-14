@@ -25,11 +25,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.apache.sqoop.Sqoop;
 
 /**
@@ -43,145 +41,149 @@ import org.apache.sqoop.Sqoop;
  */
 public final class OptionsFileUtil {
 
-    public static final Log LOG = LogFactory.getLog(
-                                      OptionsFileUtil.class.getName());
+  public static final Log LOG =
+      LogFactory.getLog(OptionsFileUtil.class.getName());
 
-    private OptionsFileUtil() { }
+  private OptionsFileUtil() {}
 
-    /**
-     * Expands any options file that may be present in the given set of arguments.
-     *
-     * @param args the given arguments
-     * @return a new string array that contains the expanded arguments.
-     * @throws Exception
-     */
-    public static String[] expandArguments(String[] args) throws Exception {
-        List<String> options = new ArrayList<String>();
+  /**
+   * Expands any options file that may be present in the given set of arguments.
+   *
+   * @param args the given arguments
+   * @return a new string array that contains the expanded arguments.
+   * @throws Exception
+   */
+  public static String[] expandArguments(String[] args) throws Exception {
+    List<String> options = new ArrayList<String>();
 
-        for (int i = 0; i < args.length; i++) {
-            if (args[i].equals(Sqoop.SQOOP_OPTIONS_FILE_SPECIFIER)) {
-                if (i == args.length - 1) {
-                    throw new Exception("Missing options file");
-                }
+    for (int i = 0; i < args.length; i++) {
+      if (args[i].equals(Sqoop.SQOOP_OPTIONS_FILE_SPECIFIER)) {
+        if (i == args.length - 1) {
+          throw new Exception("Missing options file");
+        }
 
-                String fileName = args[++i];
-                File optionsFile = new File(fileName);
-                BufferedReader reader = null;
-                StringBuilder buffer = new StringBuilder();
-                try {
-                    reader = new BufferedReader(new FileReader(optionsFile));
-                    String nextLine = null;
-                    while ((nextLine = reader.readLine()) != null) {
-                        nextLine = nextLine.trim();
-                        if (nextLine.length() == 0 || nextLine.startsWith("#")) {
-                            // empty line or comment
-                            continue;
-                        }
+        String fileName = args[++i];
+        File optionsFile = new File(fileName);
+        BufferedReader reader = null;
+        StringBuilder buffer = new StringBuilder();
+        try {
+          reader = new BufferedReader(new FileReader(optionsFile));
+          String nextLine = null;
+          while ((nextLine = reader.readLine()) != null) {
+            nextLine = nextLine.trim();
+            if (nextLine.length() == 0 || nextLine.startsWith("#")) {
+              // empty line or comment
+              continue;
+            }
 
-                        buffer.append(nextLine);
-                        if (nextLine.endsWith("\\")) {
-                            if (buffer.charAt(0) == '\'' || buffer.charAt(0) == '"') {
-                                throw new Exception(
-                                    "Multiline quoted strings not supported in file("
-                                    + fileName + "): " + buffer.toString());
-                            }
-                            // Remove the trailing back-slash and continue
-                            buffer.deleteCharAt(buffer.length()  - 1);
-                        } else {
-                            // The buffer contains a full option
-                            options.add(
-                                removeQuotesEncolosingOption(fileName, buffer.toString()));
-                            buffer.delete(0, buffer.length());
-                        }
-                    }
-
-                    // Assert that the buffer is empty
-                    if (buffer.length() != 0) {
-                        throw new Exception("Malformed option in options file("
-                                            + fileName + "): " + buffer.toString());
-                    }
-                } catch (IOException ex) {
-                    throw new Exception("Unable to read options file: " + fileName, ex);
-                } finally {
-                    if (reader != null) {
-                        try {
-                            reader.close();
-                        } catch (IOException ex) {
-                            LOG.info("Exception while closing reader", ex);
-                        }
-                    }
-                }
+            buffer.append(nextLine);
+            if (nextLine.endsWith("\\")) {
+              if (buffer.charAt(0) == '\'' || buffer.charAt(0) == '"') {
+                throw new Exception(
+                    "Multiline quoted strings not supported in file(" +
+                    fileName + "): " + buffer.toString());
+              }
+              // Remove the trailing back-slash and continue
+              buffer.deleteCharAt(buffer.length() - 1);
             } else {
-                // Regular option. Parse it and put it on the appropriate list
-                options.add(args[i]);
+              // The buffer contains a full option
+              options.add(
+                  removeQuotesEncolosingOption(fileName, buffer.toString()));
+              buffer.delete(0, buffer.length());
             }
-        }
+          }
 
-        return options.toArray(new String[options.size()]);
+          // Assert that the buffer is empty
+          if (buffer.length() != 0) {
+            throw new Exception("Malformed option in options file(" + fileName +
+                                "): " + buffer.toString());
+          }
+        } catch (IOException ex) {
+          throw new Exception("Unable to read options file: " + fileName, ex);
+        } finally {
+          if (reader != null) {
+            try {
+              reader.close();
+            } catch (IOException ex) {
+              LOG.info("Exception while closing reader", ex);
+            }
+          }
+        }
+      } else {
+        // Regular option. Parse it and put it on the appropriate list
+        options.add(args[i]);
+      }
     }
 
-    /**
-     * Removes the surrounding quote characters as needed. It first attempts to
-     * remove surrounding double quotes. If successful, the resultant string is
-     * returned. If no surrounding double quotes are found, it attempts to remove
-     * surrounding single quote characters. If successful, the resultant string
-     * is returned. If not the original string is returnred.
-     * @param fileName
-     * @param option
-     * @return
-     * @throws Exception
-     */
-    private static String removeQuotesEncolosingOption(
-        String fileName, String option) throws Exception {
+    return options.toArray(new String[options.size()]);
+  }
 
-        // Attempt to remove double quotes. If successful, return.
-        String option1 = removeQuoteCharactersIfNecessary(fileName, option, '"');
-        if (!option1.equals(option)) {
-            // Quotes were successfully removed
-            return option1;
-        }
+  /**
+   * Removes the surrounding quote characters as needed. It first attempts to
+   * remove surrounding double quotes. If successful, the resultant string is
+   * returned. If no surrounding double quotes are found, it attempts to remove
+   * surrounding single quote characters. If successful, the resultant string
+   * is returned. If not the original string is returnred.
+   * @param fileName
+   * @param option
+   * @return
+   * @throws Exception
+   */
+  private static String removeQuotesEncolosingOption(String fileName,
+                                                     String option)
+      throws Exception {
 
-        // Attempt to remove single quotes.
-        return removeQuoteCharactersIfNecessary(fileName, option, '\'');
+    // Attempt to remove double quotes. If successful, return.
+    String option1 = removeQuoteCharactersIfNecessary(fileName, option, '"');
+    if (!option1.equals(option)) {
+      // Quotes were successfully removed
+      return option1;
     }
 
-    /**
-     * Removes the surrounding quote characters from the given string. The quotes
-     * are identified by the quote parameter, the given string by option. The
-     * fileName parameter is used for raising exceptions with relevant message.
-     * @param fileName String The name of the file that contains sqoop options
-     * @param option String the actual options in the options file
-     * @param quote char The quote that we need to validate on, either single or double quotes
-     * @return String The validated options string
-     * @throws Exception
-     */
-    private static String removeQuoteCharactersIfNecessary(String fileName,
-            String option, char quote) throws Exception {
-        boolean startingQuote = (option.charAt(0) == quote);
-        boolean endingQuote = (option.charAt(option.length() - 1) == quote);
+    // Attempt to remove single quotes.
+    return removeQuoteCharactersIfNecessary(fileName, option, '\'');
+  }
 
-        if (startingQuote && endingQuote) {
-            if (option.length() == 1) {
-                throw new Exception("Malformed option in options file("
-                                    + fileName + "): " + option);
-            }
-            return option.substring(1, option.length() - 1);
-        }
+  /**
+   * Removes the surrounding quote characters from the given string. The quotes
+   * are identified by the quote parameter, the given string by option. The
+   * fileName parameter is used for raising exceptions with relevant message.
+   * @param fileName String The name of the file that contains sqoop options
+   * @param option String the actual options in the options file
+   * @param quote char The quote that we need to validate on, either single or
+   *     double quotes
+   * @return String The validated options string
+   * @throws Exception
+   */
+  private static String
+  removeQuoteCharactersIfNecessary(String fileName, String option, char quote)
+      throws Exception {
+    boolean startingQuote = (option.charAt(0) == quote);
+    boolean endingQuote = (option.charAt(option.length() - 1) == quote);
 
-        if (startingQuote || endingQuote) {
-            // Regular expression looks like below:
-            // .*=\s*".*"$ OR .*=\s*'.*'$
-            // it tries to match the following:
-            // .... column_name = "values" OR .... column_name = 'values'
-            // so that the query like:
-            // SELECT * FROM table WHERE column = "values"
-            // is valid even though it ends with double quote but no starting double quote
-            if (!Pattern.matches(".*=\\s*"+quote+".*"+quote+"$", option)) {
-                throw new Exception("Malformed option in options file("
-                                    + fileName + "): " + option);
-            }
-        }
-
-        return option;
+    if (startingQuote && endingQuote) {
+      if (option.length() == 1) {
+        throw new Exception("Malformed option in options file(" + fileName +
+                            "): " + option);
+      }
+      return option.substring(1, option.length() - 1);
     }
+
+    if (startingQuote || endingQuote) {
+      // Regular expression looks like below:
+      // .*=\s*".*"$ OR .*=\s*'.*'$
+      // it tries to match the following:
+      // .... column_name = "values" OR .... column_name = 'values'
+      // so that the query like:
+      // SELECT * FROM table WHERE column = "values"
+      // is valid even though it ends with double quote but no starting double
+      // quote
+      if (!Pattern.matches(".*=\\s*" + quote + ".*" + quote + "$", option)) {
+        throw new Exception("Malformed option in options file(" + fileName +
+                            "): " + option);
+      }
+    }
+
+    return option;
+  }
 }

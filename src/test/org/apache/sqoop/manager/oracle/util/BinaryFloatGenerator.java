@@ -24,9 +24,8 @@ package org.apache.sqoop.manager.oracle.util;
  * and negative zero.
  */
 public class BinaryFloatGenerator extends OraOopTestDataGenerator<Float> {
-    @Override
-    public Float next() {
-        return Float.intBitsToFloat(rng.nextInt());
-    }
-
+  @Override
+  public Float next() {
+    return Float.intBitsToFloat(rng.nextInt());
+  }
 }

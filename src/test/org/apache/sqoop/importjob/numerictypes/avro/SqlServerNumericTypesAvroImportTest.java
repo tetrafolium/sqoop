@@ -18,6 +18,9 @@
 
 package org.apache.sqoop.importjob.numerictypes.avro;
 
+import static org.apache.sqoop.testutil.NumericTypesTestUtils.SUCCEED_WITHOUT_EXTRA_ARGS;
+import static org.apache.sqoop.testutil.NumericTypesTestUtils.SUCCEED_WITH_PADDING_ONLY;
+
 import org.apache.sqoop.importjob.configuration.SqlServerImportJobTestConfiguration;
 import org.apache.sqoop.importjob.numerictypes.NumericTypesAvroImportTestBase;
 import org.apache.sqoop.testcategories.thirdpartytest.SqlServerTest;
@@ -25,18 +28,17 @@ import org.apache.sqoop.testutil.adapter.DatabaseAdapter;
 import org.apache.sqoop.testutil.adapter.SqlServerDatabaseAdapter;
 import org.junit.experimental.categories.Category;
 
-import static org.apache.sqoop.testutil.NumericTypesTestUtils.SUCCEED_WITHOUT_EXTRA_ARGS;
-import static org.apache.sqoop.testutil.NumericTypesTestUtils.SUCCEED_WITH_PADDING_ONLY;
-
 @Category(SqlServerTest.class)
-public class SqlServerNumericTypesAvroImportTest extends NumericTypesAvroImportTestBase {
+public class SqlServerNumericTypesAvroImportTest
+    extends NumericTypesAvroImportTestBase {
 
-    @Override
-    public DatabaseAdapter createAdapter() {
-        return new SqlServerDatabaseAdapter();
-    }
+  @Override
+  public DatabaseAdapter createAdapter() {
+    return new SqlServerDatabaseAdapter();
+  }
 
-    public SqlServerNumericTypesAvroImportTest() {
-        super(new SqlServerImportJobTestConfiguration(), SUCCEED_WITHOUT_EXTRA_ARGS, SUCCEED_WITH_PADDING_ONLY);
-    }
+  public SqlServerNumericTypesAvroImportTest() {
+    super(new SqlServerImportJobTestConfiguration(), SUCCEED_WITHOUT_EXTRA_ARGS,
+          SUCCEED_WITH_PADDING_ONLY);
+  }
 }

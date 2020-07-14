@@ -19,10 +19,9 @@
 package org.apache.sqoop.util;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.IOException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -32,66 +31,63 @@ import org.apache.commons.logging.LogFactory;
  */
 public class LoggingAsyncSink extends AsyncSink {
 
-    public static final Log LOG = LogFactory.getLog(
-                                      LoggingAsyncSink.class.getName());
+  public static final Log LOG =
+      LogFactory.getLog(LoggingAsyncSink.class.getName());
 
-    private Log contextLog;
+  private Log contextLog;
 
-    public LoggingAsyncSink(final Log context) {
-        if (null == context) {
-            this.contextLog = LOG;
-        } else {
-            this.contextLog = context;
+  public LoggingAsyncSink(final Log context) {
+    if (null == context) {
+      this.contextLog = LOG;
+    } else {
+      this.contextLog = context;
+    }
+  }
+
+  private Thread child;
+
+  public void processStream(InputStream is) {
+    child = new LoggingThread(is);
+    child.start();
+  }
+
+  public int join() throws InterruptedException {
+    child.join();
+    return 0; // always successful.
+  }
+
+  /**
+   * Run a background thread that copies the contents of the stream
+   * to the output context log.
+   */
+  private class LoggingThread extends Thread {
+
+    private InputStream stream;
+
+    LoggingThread(final InputStream is) { this.stream = is; }
+
+    public void run() {
+      InputStreamReader isr = new InputStreamReader(this.stream);
+      BufferedReader r = new BufferedReader(isr);
+
+      try {
+        while (true) {
+          String line = r.readLine();
+          if (null == line) {
+            break; // stream was closed by remote end.
+          }
+
+          LoggingAsyncSink.this.contextLog.info(line);
         }
+      } catch (IOException ioe) {
+        LOG.error("IOException reading from stream: " + ioe.toString());
+      }
+
+      try {
+        r.close();
+      } catch (IOException ioe) {
+        LOG.warn("Error closing stream in LoggingAsyncSink: " + ioe.toString());
+      }
     }
-
-    private Thread child;
-
-    public void processStream(InputStream is) {
-        child = new LoggingThread(is);
-        child.start();
-    }
-
-    public int join() throws InterruptedException {
-        child.join();
-        return 0; // always successful.
-    }
-
-    /**
-     * Run a background thread that copies the contents of the stream
-     * to the output context log.
-     */
-    private class LoggingThread extends Thread {
-
-        private InputStream stream;
-
-        LoggingThread(final InputStream is) {
-            this.stream = is;
-        }
-
-        public void run() {
-            InputStreamReader isr = new InputStreamReader(this.stream);
-            BufferedReader r = new BufferedReader(isr);
-
-            try {
-                while (true) {
-                    String line = r.readLine();
-                    if (null == line) {
-                        break; // stream was closed by remote end.
-                    }
-
-                    LoggingAsyncSink.this.contextLog.info(line);
-                }
-            } catch (IOException ioe) {
-                LOG.error("IOException reading from stream: " + ioe.toString());
-            }
-
-            try {
-                r.close();
-            } catch (IOException ioe) {
-                LOG.warn("Error closing stream in LoggingAsyncSink: " + ioe.toString());
-            }
-        }
-    }
-
+  }
 }

@@ -23,44 +23,35 @@ package org.apache.sqoop.manager.oracle.util;
  */
 public class OracleDataDefinition {
 
-    private String columnName;
-    private String dataType;
-    private String dataExpression;
+  private String columnName;
+  private String dataType;
+  private String dataExpression;
 
-    public OracleDataDefinition(String columnName, String dataType,
-                                String dataExpression) {
-        this.columnName = columnName;
-        this.dataType = dataType;
-        this.dataExpression = dataExpression;
-    }
+  public OracleDataDefinition(String columnName, String dataType,
+                              String dataExpression) {
+    this.columnName = columnName;
+    this.dataType = dataType;
+    this.dataExpression = dataExpression;
+  }
 
-    public String getColumnName() {
-        return columnName;
-    }
+  public String getColumnName() { return columnName; }
 
-    public void setColumnName(String newColumnName) {
-        this.columnName = newColumnName;
-    }
+  public void setColumnName(String newColumnName) {
+    this.columnName = newColumnName;
+  }
 
-    public String getDataExpression() {
-        return dataExpression;
-    }
+  public String getDataExpression() { return dataExpression; }
 
-    public void setDataExpression(String newDataExpression) {
-        this.dataExpression = newDataExpression;
-    }
+  public void setDataExpression(String newDataExpression) {
+    this.dataExpression = newDataExpression;
+  }
 
-    public String getDataType() {
-        return dataType;
-    }
+  public String getDataType() { return dataType; }
 
-    public void setDataType(String newDataType) {
-        this.dataType = newDataType;
-    }
+  public void setDataType(String newDataType) { this.dataType = newDataType; }
 
-    @Override
-    public String toString() {
-        return this.getColumnName();
-    }
-
+  @Override
+  public String toString() {
+    return this.getColumnName();
+  }
 }

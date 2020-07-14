@@ -19,14 +19,12 @@
 package org.apache.sqoop.manager.oracle;
 
 import java.sql.SQLException;
-
-import org.apache.sqoop.manager.oracle.util.OracleUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
-
 import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.TestFreeFormQueryImport;
+import org.apache.sqoop.manager.oracle.util.OracleUtils;
 import org.apache.sqoop.testcategories.thirdpartytest.OracleTest;
 import org.junit.experimental.categories.Category;
 
@@ -36,29 +34,28 @@ import org.junit.experimental.categories.Category;
 @Category(OracleTest.class)
 public class OracleFreeFormQueryTest extends TestFreeFormQueryImport {
 
-    public static final Log LOG = LogFactory.getLog(
-                                      OracleFreeFormQueryTest.class.getName());
+  public static final Log LOG =
+      LogFactory.getLog(OracleFreeFormQueryTest.class.getName());
 
-    @Override
-    protected boolean useHsqldbTestServer() {
-        return false;
-    }
+  @Override
+  protected boolean useHsqldbTestServer() {
+    return false;
+  }
 
-    @Override
-    protected String getConnectString() {
-        return OracleUtils.CONNECT_STRING;
-    }
+  @Override
+  protected String getConnectString() {
+    return OracleUtils.CONNECT_STRING;
+  }
 
-    @Override
-    protected SqoopOptions getSqoopOptions(Configuration conf) {
-        SqoopOptions opts = new SqoopOptions(conf);
-        OracleUtils.setOracleAuth(opts);
-        return opts;
-    }
+  @Override
+  protected SqoopOptions getSqoopOptions(Configuration conf) {
+    SqoopOptions opts = new SqoopOptions(conf);
+    OracleUtils.setOracleAuth(opts);
+    return opts;
+  }
 
-    @Override
-    protected void dropTableIfExists(String table) throws SQLException {
-        OracleUtils.dropTable(table, getManager());
-    }
+  @Override
+  protected void dropTableIfExists(String table) throws SQLException {
+    OracleUtils.dropTable(table, getManager());
+  }
 }
-

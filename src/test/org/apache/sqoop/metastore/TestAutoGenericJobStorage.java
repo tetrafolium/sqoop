@@ -18,52 +18,50 @@
 
 package org.apache.sqoop.metastore;
 
+import static org.apache.sqoop.metastore.AutoGenericJobStorage.AUTO_STORAGE_IS_ACTIVE_KEY;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.sqoop.testcategories.sqooptest.UnitTest;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.apache.sqoop.metastore.AutoGenericJobStorage.AUTO_STORAGE_IS_ACTIVE_KEY;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
 @Category(UnitTest.class)
 public class TestAutoGenericJobStorage {
 
-    private AutoGenericJobStorage jobStorage;
+  private AutoGenericJobStorage jobStorage;
 
-    private Configuration jobStorageConfiguration;
+  private Configuration jobStorageConfiguration;
 
-    private Map<String, String> descriptor;
+  private Map<String, String> descriptor;
 
-    @Before
-    public void before() {
-        jobStorage = new AutoGenericJobStorage();
-        jobStorageConfiguration = new Configuration();
-        descriptor = new HashMap<>();
+  @Before
+  public void before() {
+    jobStorage = new AutoGenericJobStorage();
+    jobStorageConfiguration = new Configuration();
+    descriptor = new HashMap<>();
 
-        jobStorage.setConf(jobStorageConfiguration);
-    }
+    jobStorage.setConf(jobStorageConfiguration);
+  }
 
-    @Test
-    public void testCanAcceptWithAutoStorageDisabledReturnsFalse() {
-        jobStorageConfiguration.setBoolean(AUTO_STORAGE_IS_ACTIVE_KEY, false);
-        assertFalse(jobStorage.canAccept(descriptor));
-    }
+  @Test
+  public void testCanAcceptWithAutoStorageDisabledReturnsFalse() {
+    jobStorageConfiguration.setBoolean(AUTO_STORAGE_IS_ACTIVE_KEY, false);
+    assertFalse(jobStorage.canAccept(descriptor));
+  }
 
-    @Test
-    public void testCanAcceptWithAutoStorageEnabledReturnsTrue() {
-        jobStorageConfiguration.setBoolean(AUTO_STORAGE_IS_ACTIVE_KEY, true);
-        assertTrue(jobStorage.canAccept(descriptor));
-    }
+  @Test
+  public void testCanAcceptWithAutoStorageEnabledReturnsTrue() {
+    jobStorageConfiguration.setBoolean(AUTO_STORAGE_IS_ACTIVE_KEY, true);
+    assertTrue(jobStorage.canAccept(descriptor));
+  }
 
-    @Test
-    public void testCanAcceptWithAutoStorageDefaultValueReturnsTrue() {
-        assertTrue(jobStorage.canAccept(descriptor));
-    }
-
+  @Test
+  public void testCanAcceptWithAutoStorageDefaultValueReturnsTrue() {
+    assertTrue(jobStorage.canAccept(descriptor));
+  }
 }

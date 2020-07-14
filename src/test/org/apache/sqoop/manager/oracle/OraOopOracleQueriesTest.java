@@ -18,45 +18,41 @@
 
 package org.apache.sqoop.manager.oracle;
 
-import org.junit.Assert;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-
-import org.junit.Test;
-
 import org.apache.sqoop.manager.oracle.util.OracleUtils;
+import org.junit.Assert;
+import org.junit.Test;
 
 /**
  * Test Oracle queries against Oracle database.
  */
 public class OraOopOracleQueriesTest extends OraOopTestCase {
 
-    @Test
-    public void testGetCurrentSchema() throws Exception {
-        Connection conn = getTestEnvConnection();
-        try {
-            String schema = OraOopOracleQueries.getCurrentSchema(conn);
-            Assert.assertEquals(OracleUtils.ORACLE_USER_NAME.toUpperCase(), schema
-                                .toUpperCase());
+  @Test
+  public void testGetCurrentSchema() throws Exception {
+    Connection conn = getTestEnvConnection();
+    try {
+      String schema = OraOopOracleQueries.getCurrentSchema(conn);
+      Assert.assertEquals(OracleUtils.ORACLE_USER_NAME.toUpperCase(),
+                          schema.toUpperCase());
 
-            PreparedStatement stmt =
-                conn.prepareStatement("ALTER SESSION SET CURRENT_SCHEMA=SYS");
-            stmt.execute();
+      PreparedStatement stmt =
+          conn.prepareStatement("ALTER SESSION SET CURRENT_SCHEMA=SYS");
+      stmt.execute();
 
-            schema = OraOopOracleQueries.getCurrentSchema(conn);
-            Assert.assertEquals("SYS", schema);
-        } finally {
-            closeTestEnvConnection();
-        }
+      schema = OraOopOracleQueries.getCurrentSchema(conn);
+      Assert.assertEquals("SYS", schema);
+    } finally {
+      closeTestEnvConnection();
     }
+  }
 
-    @Test
-    public void testLongBlockId() {
-        OraOopOracleDataChunkExtent chunk =
-            new OraOopOracleDataChunkExtent("1", 100, 1, 2147483648L, 4294967295L);
-        String whereClause = chunk.getWhereClause();
-        Assert.assertNotNull(whereClause);
-    }
-
+  @Test
+  public void testLongBlockId() {
+    OraOopOracleDataChunkExtent chunk =
+        new OraOopOracleDataChunkExtent("1", 100, 1, 2147483648L, 4294967295L);
+    String whereClause = chunk.getWhereClause();
+    Assert.assertNotNull(whereClause);
+  }
 }

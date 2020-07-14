@@ -19,19 +19,18 @@
 package org.apache.sqoop.testutil;
 
 import java.io.IOException;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
+import org.apache.hadoop.util.ReflectionUtils;
 import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.manager.HsqldbManager;
 import org.apache.sqoop.manager.ImportJobContext;
 import org.apache.sqoop.mapreduce.ImportJobBase;
 import org.apache.sqoop.util.ImportException;
-import org.apache.hadoop.util.ReflectionUtils;
 
 /**
  * A ConnManager that uses dependency injection to control "import jobs"
@@ -39,54 +38,53 @@ import org.apache.hadoop.util.ReflectionUtils;
  */
 public class InjectableConnManager extends HsqldbManager {
 
-    // The Configuration is used to control the injected classes.
-    public static final String MAPPER_KEY = "sqoop.inject.mapper.class";
-    public static final String INPUT_FORMAT_KEY =
-        "sqoop.inject.input.format.class";
-    public static final String OUTPUT_FORMAT_KEY =
-        "sqoop.inject.output.format.class";
-    public static final String IMPORT_JOB_KEY =
-        "sqoop.inject.import.job.class";
+  // The Configuration is used to control the injected classes.
+  public static final String MAPPER_KEY = "sqoop.inject.mapper.class";
+  public static final String INPUT_FORMAT_KEY =
+      "sqoop.inject.input.format.class";
+  public static final String OUTPUT_FORMAT_KEY =
+      "sqoop.inject.output.format.class";
+  public static final String IMPORT_JOB_KEY = "sqoop.inject.import.job.class";
 
-    public InjectableConnManager(final SqoopOptions options) {
-        super(options);
-    }
+  public InjectableConnManager(final SqoopOptions options) { super(options); }
 
-    /**
-     * Allow the user to inject custom mapper, input, and output formats
-     * into the importTable() process.
-     */
-    @Override
-    @SuppressWarnings("unchecked")
-    public void importTable(ImportJobContext context)
-    throws IOException, ImportException {
+  /**
+   * Allow the user to inject custom mapper, input, and output formats
+   * into the importTable() process.
+   */
+  @Override
+  @SuppressWarnings("unchecked")
+  public void importTable(ImportJobContext context)
+      throws IOException, ImportException {
 
-        SqoopOptions options = context.getOptions();
-        Configuration conf = options.getConf();
+    SqoopOptions options = context.getOptions();
+    Configuration conf = options.getConf();
 
-        Class<? extends Mapper> mapperClass = (Class<? extends Mapper>)
-                                              conf.getClass(MAPPER_KEY, Mapper.class);
-        Class<? extends InputFormat> ifClass = (Class<? extends InputFormat>)
-                                               conf.getClass(INPUT_FORMAT_KEY, TextInputFormat.class);
-        Class<? extends OutputFormat> ofClass = (Class<? extends OutputFormat>)
-                                                conf.getClass(OUTPUT_FORMAT_KEY, TextOutputFormat.class);
+    Class<? extends Mapper> mapperClass =
+        (Class<? extends Mapper>)conf.getClass(MAPPER_KEY, Mapper.class);
+    Class<? extends InputFormat> ifClass =
+        (Class<? extends InputFormat>)conf.getClass(INPUT_FORMAT_KEY,
+                                                    TextInputFormat.class);
+    Class<? extends OutputFormat> ofClass =
+        (Class<? extends OutputFormat>)conf.getClass(OUTPUT_FORMAT_KEY,
+                                                     TextOutputFormat.class);
 
-        Class<? extends ImportJobBase> jobClass = (Class<? extends ImportJobBase>)
-                conf.getClass(IMPORT_JOB_KEY, ImportJobBase.class);
+    Class<? extends ImportJobBase> jobClass =
+        (Class<? extends ImportJobBase>)conf.getClass(IMPORT_JOB_KEY,
+                                                      ImportJobBase.class);
 
-        String tableName = context.getTableName();
+    String tableName = context.getTableName();
 
-        // Instantiate the user's chosen ImportJobBase instance.
-        ImportJobBase importJob = ReflectionUtils.newInstance(jobClass, conf);
+    // Instantiate the user's chosen ImportJobBase instance.
+    ImportJobBase importJob = ReflectionUtils.newInstance(jobClass, conf);
 
-        // And configure the dependencies to inject
-        importJob.setOptions(options);
-        importJob.setMapperClass(mapperClass);
-        importJob.setInputFormatClass(ifClass);
-        importJob.setOutputFormatClass(ofClass);
+    // And configure the dependencies to inject
+    importJob.setOptions(options);
+    importJob.setMapperClass(mapperClass);
+    importJob.setInputFormatClass(ifClass);
+    importJob.setOutputFormatClass(ofClass);
 
-        importJob.runImport(tableName, context.getJarFile(),
-                            getSplitColumn(options, tableName), conf);
-    }
+    importJob.runImport(tableName, context.getJarFile(),
+                        getSplitColumn(options, tableName), conf);
+  }
 }
-

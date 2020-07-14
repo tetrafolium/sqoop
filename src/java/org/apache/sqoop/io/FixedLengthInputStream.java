@@ -19,7 +19,6 @@ package org.apache.sqoop.io;
 
 import java.io.IOException;
 import java.io.InputStream;
-
 import org.apache.commons.io.input.CloseShieldInputStream;
 import org.apache.commons.io.input.CountingInputStream;
 import org.apache.commons.io.input.ProxyInputStream;
@@ -32,56 +31,52 @@ import org.apache.commons.io.input.ProxyInputStream;
  */
 public class FixedLengthInputStream extends ProxyInputStream {
 
-    private CountingInputStream countingIn;
-    private long maxBytes;
+  private CountingInputStream countingIn;
+  private long maxBytes;
 
-    public FixedLengthInputStream(InputStream stream, long maxLen) {
-        super(new CountingInputStream(new CloseShieldInputStream(stream)));
+  public FixedLengthInputStream(InputStream stream, long maxLen) {
+    super(new CountingInputStream(new CloseShieldInputStream(stream)));
 
-        // Save a correctly-typed reference to the underlying stream.
-        this.countingIn = (CountingInputStream) this.in;
-        this.maxBytes = maxLen;
+    // Save a correctly-typed reference to the underlying stream.
+    this.countingIn = (CountingInputStream)this.in;
+    this.maxBytes = maxLen;
+  }
+
+  /** @return the number of bytes already consumed by the client. */
+  private long consumed() { return countingIn.getByteCount(); }
+
+  /**
+   * @return number of bytes remaining to be read before the limit
+   * is reached.
+   */
+  private long toLimit() { return maxBytes - consumed(); }
+
+  @Override
+  public int available() throws IOException {
+    return (int)Math.min(toLimit(), countingIn.available());
+  }
+
+  @Override
+  public int read() throws IOException {
+    if (toLimit() > 0) {
+      return super.read();
+    } else {
+      return -1; // EOF.
     }
+  }
 
-    /** @return the number of bytes already consumed by the client. */
-    private long consumed() {
-        return countingIn.getByteCount();
-    }
+  @Override
+  public int read(byte[] buf) throws IOException {
+    return read(buf, 0, buf.length);
+  }
 
-    /**
-     * @return number of bytes remaining to be read before the limit
-     * is reached.
-     */
-    private long toLimit() {
-        return maxBytes - consumed();
+  @Override
+  public int read(byte[] buf, int start, int count) throws IOException {
+    long limit = toLimit();
+    if (limit == 0) {
+      return -1; // EOF.
+    } else {
+      return super.read(buf, start, (int)Math.min(count, limit));
     }
-
-    @Override
-    public int available() throws IOException {
-        return (int) Math.min(toLimit(), countingIn.available());
-    }
-
-    @Override
-    public int read() throws IOException {
-        if (toLimit() > 0) {
-            return super.read();
-        } else {
-            return -1; // EOF.
-        }
-    }
-
-    @Override
-    public int read(byte [] buf) throws IOException {
-        return read(buf, 0, buf.length);
-    }
-
-    @Override
-    public int read(byte [] buf, int start, int count) throws IOException {
-        long limit = toLimit();
-        if (limit == 0) {
-            return -1; // EOF.
-        } else {
-            return super.read(buf, start, (int) Math.min(count, limit));
-        }
-    }
+  }
 }

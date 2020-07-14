@@ -29,13 +29,12 @@ import org.apache.sqoop.lib.SqoopRecord;
  */
 public class SequenceFileExportMapper
     extends AutoProgressMapper<LongWritable, SqoopRecord, SqoopRecord,
-    NullWritable> {
+                               NullWritable> {
 
-    public SequenceFileExportMapper() {
-    }
+  public SequenceFileExportMapper() {}
 
-    public void map(LongWritable key, SqoopRecord val, Context context)
-    throws IOException, InterruptedException {
-        context.write(val, NullWritable.get());
-    }
+  public void map(LongWritable key, SqoopRecord val, Context context)
+      throws IOException, InterruptedException {
+    context.write(val, NullWritable.get());
+  }
 }

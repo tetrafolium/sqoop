@@ -18,9 +18,9 @@
 
 package org.apache.sqoop.metastore.sqlserver;
 
-import org.apache.sqoop.metastore.SavedJobsTestBase;
 import org.apache.sqoop.manager.JdbcDrivers;
 import org.apache.sqoop.manager.sqlserver.MSSQLTestUtils;
+import org.apache.sqoop.metastore.SavedJobsTestBase;
 import org.apache.sqoop.testcategories.thirdpartytest.SqlServerTest;
 import org.junit.experimental.categories.Category;
 
@@ -36,22 +36,23 @@ import org.junit.experimental.categories.Category;
  *
  * You need to put SQL Server JDBC driver library (sqljdbc4.jar) in a location
  * where Sqoop will be able to access it (since this library cannot be checked
- * into Apache's tree for licensing reasons) and set it's path through -Dsqoop.thirdparty.lib.dir.
+ * into Apache's tree for licensing reasons) and set it's path through
+ * -Dsqoop.thirdparty.lib.dir.
  *
  *   Once you have a running SQLServer database,
  *   Set server URL, database name, username, and password with system variables
- *   -Dsqoop.test.sqlserver.connectstring.host_url, -Dsqoop.test.sqlserver.database,
- *   -Dms.sqlserver.username and -Dms.sqlserver.password respectively
+ *   -Dsqoop.test.sqlserver.connectstring.host_url,
+ * -Dsqoop.test.sqlserver.database, -Dms.sqlserver.username and
+ * -Dms.sqlserver.password respectively
  */
 @Category(SqlServerTest.class)
 public class SqlServerSavedJobsTest extends SavedJobsTestBase {
 
-    private static MSSQLTestUtils msSQLTestUtils = new MSSQLTestUtils();
+  private static MSSQLTestUtils msSQLTestUtils = new MSSQLTestUtils();
 
-    public SqlServerSavedJobsTest() {
-        super(msSQLTestUtils.getDBConnectString(),
-              msSQLTestUtils.getDBUserName(),
-              msSQLTestUtils.getDBPassWord(),
-              JdbcDrivers.SQLSERVER.getDriverClass());
-    }
+  public SqlServerSavedJobsTest() {
+    super(msSQLTestUtils.getDBConnectString(), msSQLTestUtils.getDBUserName(),
+          msSQLTestUtils.getDBPassWord(),
+          JdbcDrivers.SQLSERVER.getDriverClass());
+  }
 }

@@ -37,73 +37,73 @@ import org.apache.sqoop.mapreduce.parquet.ParquetExportJobConfigurator;
  */
 public class JdbcUpsertExportJob extends JdbcUpdateExportJob {
 
-    public static final Log LOG = LogFactory.getLog(
-                                      JdbcUpsertExportJob.class.getName());
+  public static final Log LOG =
+      LogFactory.getLog(JdbcUpsertExportJob.class.getName());
 
-    public JdbcUpsertExportJob(final ExportJobContext context,
-                               final Class<? extends OutputFormat> outputFormatClass,
-                               final ParquetExportJobConfigurator parquetExportJobConfigurator)
-    throws IOException {
-        super(context, null, null, outputFormatClass, parquetExportJobConfigurator);
-    }
+  public JdbcUpsertExportJob(
+      final ExportJobContext context,
+      final Class<? extends OutputFormat> outputFormatClass,
+      final ParquetExportJobConfigurator parquetExportJobConfigurator)
+      throws IOException {
+    super(context, null, null, outputFormatClass, parquetExportJobConfigurator);
+  }
 
-    @Override
-    protected void configureOutputFormat(Job job, String tableName,
-                                         String tableClassName) throws IOException {
+  @Override
+  protected void configureOutputFormat(Job job, String tableName,
+                                       String tableClassName)
+      throws IOException {
 
-        ConnManager mgr = context.getConnManager();
-        try {
-            String username = options.getUsername();
-            if (null == username || username.length() == 0) {
-                DBConfiguration.configureDB(job.getConfiguration(),
-                                            mgr.getDriverClass(),
-                                            options.getConnectString(),
-                                            options.getConnectionParams());
-            } else {
-                DBConfiguration.configureDB(job.getConfiguration(),
-                                            mgr.getDriverClass(),
-                                            options.getConnectString(),
-                                            username, options.getPassword(),
-                                            options.getConnectionParams());
-            }
+    ConnManager mgr = context.getConnManager();
+    try {
+      String username = options.getUsername();
+      if (null == username || username.length() == 0) {
+        DBConfiguration.configureDB(
+            job.getConfiguration(), mgr.getDriverClass(),
+            options.getConnectString(), options.getConnectionParams());
+      } else {
+        DBConfiguration.configureDB(
+            job.getConfiguration(), mgr.getDriverClass(),
+            options.getConnectString(), username, options.getPassword(),
+            options.getConnectionParams());
+      }
 
-            String [] colNames = options.getColumns();
-            if (null == colNames) {
-                colNames = mgr.getColumnNames(tableName);
-            }
-            if (null == colNames) {
-                throw new IOException(
-                    "Export column names could not be determined for " + tableName);
-            }
-            DBOutputFormat.setOutput(job, mgr.escapeTableName(tableName), mgr.escapeColNames(colNames));
+      String[] colNames = options.getColumns();
+      if (null == colNames) {
+        colNames = mgr.getColumnNames(tableName);
+      }
+      if (null == colNames) {
+        throw new IOException(
+            "Export column names could not be determined for " + tableName);
+      }
+      DBOutputFormat.setOutput(job, mgr.escapeTableName(tableName),
+                               mgr.escapeColNames(colNames));
 
-            String updateKeyColumns = options.getUpdateKeyCol();
-            if (null == updateKeyColumns) {
-                throw new IOException("Update key column not set in export job");
-            }
-            // Update key columns lookup and removal
-            Set<String> updateKeys = new LinkedHashSet<String>();
-            StringTokenizer stok = new StringTokenizer(updateKeyColumns, ",");
-            while (stok.hasMoreTokens()) {
-                String nextUpdateKey = stok.nextToken().trim();
-                if (nextUpdateKey.length() > 0) {
-                    updateKeys.add(nextUpdateKey);
-                } else {
-                    throw new RuntimeException("Invalid update key column value specified"
-                                               + ": '" + updateKeyColumns + "'");
-                }
-            }
-
-            if (updateKeys.size() == 0) {
-                throw new IOException("Unpdate key columns not valid in export job");
-            }
-
-            job.setOutputFormatClass(getOutputFormatClass());
-            job.getConfiguration().set(SQOOP_EXPORT_TABLE_CLASS_KEY, tableClassName);
-            job.getConfiguration().set(SQOOP_EXPORT_UPDATE_COL_KEY, updateKeyColumns);
-        } catch (ClassNotFoundException cnfe) {
-            throw new IOException("Could not load OutputFormat", cnfe);
+      String updateKeyColumns = options.getUpdateKeyCol();
+      if (null == updateKeyColumns) {
+        throw new IOException("Update key column not set in export job");
+      }
+      // Update key columns lookup and removal
+      Set<String> updateKeys = new LinkedHashSet<String>();
+      StringTokenizer stok = new StringTokenizer(updateKeyColumns, ",");
+      while (stok.hasMoreTokens()) {
+        String nextUpdateKey = stok.nextToken().trim();
+        if (nextUpdateKey.length() > 0) {
+          updateKeys.add(nextUpdateKey);
+        } else {
+          throw new RuntimeException("Invalid update key column value specified"
+                                     + ": '" + updateKeyColumns + "'");
         }
-    }
-}
+      }
 
+      if (updateKeys.size() == 0) {
+        throw new IOException("Unpdate key columns not valid in export job");
+      }
+
+      job.setOutputFormatClass(getOutputFormatClass());
+      job.getConfiguration().set(SQOOP_EXPORT_TABLE_CLASS_KEY, tableClassName);
+      job.getConfiguration().set(SQOOP_EXPORT_UPDATE_COL_KEY, updateKeyColumns);
+    } catch (ClassNotFoundException cnfe) {
+      throw new IOException("Could not load OutputFormat", cnfe);
+    }
+  }
+}

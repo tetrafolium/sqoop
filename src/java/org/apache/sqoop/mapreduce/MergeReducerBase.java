@@ -25,31 +25,31 @@ import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.Reducer.Context;
 import org.apache.sqoop.lib.SqoopRecord;
 
-public abstract class MergeReducerBase<KEYOUT, VALUEOUT> extends
-    Reducer<Text, MergeRecord, KEYOUT, VALUEOUT> {
+public abstract class MergeReducerBase<KEYOUT, VALUEOUT>
+    extends Reducer<Text, MergeRecord, KEYOUT, VALUEOUT> {
 
-    @Override
-    public void reduce(Text key, Iterable<MergeRecord> vals, Context c)
-    throws IOException, InterruptedException {
-        SqoopRecord bestRecord = null;
-        try {
-            for (MergeRecord val : vals) {
-                if (null == bestRecord && !val.isNewRecord()) {
-                    // Use an old record if we don't have a new record.
-                    bestRecord = (SqoopRecord) val.getSqoopRecord().clone();
-                } else if (val.isNewRecord()) {
-                    bestRecord = (SqoopRecord) val.getSqoopRecord().clone();
-                }
-            }
-        } catch (CloneNotSupportedException cnse) {
-            throw new IOException(cnse);
+  @Override
+  public void reduce(Text key, Iterable<MergeRecord> vals, Context c)
+      throws IOException, InterruptedException {
+    SqoopRecord bestRecord = null;
+    try {
+      for (MergeRecord val : vals) {
+        if (null == bestRecord && !val.isNewRecord()) {
+          // Use an old record if we don't have a new record.
+          bestRecord = (SqoopRecord)val.getSqoopRecord().clone();
+        } else if (val.isNewRecord()) {
+          bestRecord = (SqoopRecord)val.getSqoopRecord().clone();
         }
-
-        if (null != bestRecord) {
-            writeRecord(bestRecord, c);
-        }
+      }
+    } catch (CloneNotSupportedException cnse) {
+      throw new IOException(cnse);
     }
 
-    abstract protected void writeRecord(SqoopRecord record, Context c)
-    throws IOException, InterruptedException;
+    if (null != bestRecord) {
+      writeRecord(bestRecord, c);
+    }
+  }
+
+  abstract protected void writeRecord(SqoopRecord record, Context c)
+      throws IOException, InterruptedException;
 }

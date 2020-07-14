@@ -19,10 +19,8 @@
 package org.apache.sqoop;
 
 import java.io.IOException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.apache.sqoop.testutil.ImportJobTestCase;
 import org.junit.Test;
 
@@ -34,208 +32,208 @@ import org.junit.Test;
  */
 public class TestMultiCols extends ImportJobTestCase {
 
-    public static final Log LOG = LogFactory.getLog(
-                                      TestMultiCols.class.getName());
+  public static final Log LOG =
+      LogFactory.getLog(TestMultiCols.class.getName());
 
-    /**
-     * Do a full import verification test on a table containing one row.
-     * @param types the types of the columns to insert
-     * @param insertVals the SQL text to use to insert each value
-     * @param validateLine the text to expect as a toString() of the entire row,
-     * as imported by the tool
-     */
-    private void verifyTypes(String [] types, String [] insertVals,
-                             String validateLine) {
-        verifyTypes(types, insertVals, validateLine, null);
-    }
+  /**
+   * Do a full import verification test on a table containing one row.
+   * @param types the types of the columns to insert
+   * @param insertVals the SQL text to use to insert each value
+   * @param validateLine the text to expect as a toString() of the entire row,
+   * as imported by the tool
+   */
+  private void verifyTypes(String[] types, String[] insertVals,
+                           String validateLine) {
+    verifyTypes(types, insertVals, validateLine, null);
+  }
 
-    private void verifyTypes(String [] types, String [] insertVals,
-                             String validateLine, String [] importColumns) {
+  private void verifyTypes(String[] types, String[] insertVals,
+                           String validateLine, String[] importColumns) {
 
-        createTableWithColTypes(types, insertVals);
-        verifyImport(validateLine, importColumns);
-        LOG.debug("Verified input line as " + validateLine + " -- ok!");
-    }
+    createTableWithColTypes(types, insertVals);
+    verifyImport(validateLine, importColumns);
+    LOG.debug("Verified input line as " + validateLine + " -- ok!");
+  }
 
-    @Test
-    public void testThreeStrings() {
-        String [] types = { "VARCHAR(32)", "VARCHAR(32)", "VARCHAR(32)" };
-        String [] insertVals = { "'foo'", "'bar'", "'baz'" };
-        String validateLine = "foo,bar,baz";
+  @Test
+  public void testThreeStrings() {
+    String[] types = {"VARCHAR(32)", "VARCHAR(32)", "VARCHAR(32)"};
+    String[] insertVals = {"'foo'", "'bar'", "'baz'"};
+    String validateLine = "foo,bar,baz";
 
-        verifyTypes(types, insertVals, validateLine);
-    }
+    verifyTypes(types, insertVals, validateLine);
+  }
 
-    @Test
-    public void testStringsWithNull1() {
-        String [] types = { "VARCHAR(32)", "VARCHAR(32)", "VARCHAR(32)" };
-        String [] insertVals = { "'foo'", "null", "'baz'" };
-        String validateLine = "foo,null,baz";
+  @Test
+  public void testStringsWithNull1() {
+    String[] types = {"VARCHAR(32)", "VARCHAR(32)", "VARCHAR(32)"};
+    String[] insertVals = {"'foo'", "null", "'baz'"};
+    String validateLine = "foo,null,baz";
 
-        verifyTypes(types, insertVals, validateLine);
-    }
+    verifyTypes(types, insertVals, validateLine);
+  }
 
-    @Test
-    public void testStringsWithNull2() {
-        String [] types = { "VARCHAR(32)", "VARCHAR(32)", "VARCHAR(32)" };
-        String [] insertVals = { "null", "'foo'", "'baz'" };
-        String validateLine = "null,foo,baz";
+  @Test
+  public void testStringsWithNull2() {
+    String[] types = {"VARCHAR(32)", "VARCHAR(32)", "VARCHAR(32)"};
+    String[] insertVals = {"null", "'foo'", "'baz'"};
+    String validateLine = "null,foo,baz";
 
-        verifyTypes(types, insertVals, validateLine);
-    }
+    verifyTypes(types, insertVals, validateLine);
+  }
 
-    @Test
-    public void testStringsWithNull3() {
-        String [] types = { "VARCHAR(32)", "VARCHAR(32)", "VARCHAR(32)" };
-        String [] insertVals = { "'foo'", "'baz'", "null"};
-        String validateLine = "foo,baz,null";
+  @Test
+  public void testStringsWithNull3() {
+    String[] types = {"VARCHAR(32)", "VARCHAR(32)", "VARCHAR(32)"};
+    String[] insertVals = {"'foo'", "'baz'", "null"};
+    String validateLine = "foo,baz,null";
 
-        verifyTypes(types, insertVals, validateLine);
-    }
+    verifyTypes(types, insertVals, validateLine);
+  }
 
-    @Test
-    public void testThreeInts() {
-        String [] types = { "INTEGER", "INTEGER", "INTEGER" };
-        String [] insertVals = { "1", "2", "3" };
-        String validateLine = "1,2,3";
+  @Test
+  public void testThreeInts() {
+    String[] types = {"INTEGER", "INTEGER", "INTEGER"};
+    String[] insertVals = {"1", "2", "3"};
+    String validateLine = "1,2,3";
 
-        verifyTypes(types, insertVals, validateLine);
-    }
+    verifyTypes(types, insertVals, validateLine);
+  }
 
-    @Test
-    public void testIntsWithNulls() {
-        String [] types = { "INTEGER", "INTEGER", "INTEGER" };
-        String [] insertVals = { "1", "null", "3" };
-        String validateLine = "1,null,3";
+  @Test
+  public void testIntsWithNulls() {
+    String[] types = {"INTEGER", "INTEGER", "INTEGER"};
+    String[] insertVals = {"1", "null", "3"};
+    String validateLine = "1,null,3";
 
-        verifyTypes(types, insertVals, validateLine);
-    }
+    verifyTypes(types, insertVals, validateLine);
+  }
 
-    @Test
-    public void testMixed1() {
-        String [] types = { "INTEGER", "VARCHAR(32)", "DATE" };
-        String [] insertVals = { "1", "'meep'", "'2009-12-31'" };
-        String validateLine = "1,meep,2009-12-31";
+  @Test
+  public void testMixed1() {
+    String[] types = {"INTEGER", "VARCHAR(32)", "DATE"};
+    String[] insertVals = {"1", "'meep'", "'2009-12-31'"};
+    String validateLine = "1,meep,2009-12-31";
 
-        verifyTypes(types, insertVals, validateLine);
-    }
+    verifyTypes(types, insertVals, validateLine);
+  }
 
-    @Test
-    public void testMixed2() {
-        String [] types = { "INTEGER", "VARCHAR(32)", "DATE" };
-        String [] insertVals = { "null", "'meep'", "'2009-12-31'" };
-        String validateLine = "null,meep,2009-12-31";
+  @Test
+  public void testMixed2() {
+    String[] types = {"INTEGER", "VARCHAR(32)", "DATE"};
+    String[] insertVals = {"null", "'meep'", "'2009-12-31'"};
+    String validateLine = "null,meep,2009-12-31";
 
-        verifyTypes(types, insertVals, validateLine);
-    }
+    verifyTypes(types, insertVals, validateLine);
+  }
 
-    @Test
-    public void testMixed3() {
-        String [] types = { "INTEGER", "VARCHAR(32)", "DATE" };
-        String [] insertVals = { "1", "'meep'", "null" };
-        String validateLine = "1,meep,null";
+  @Test
+  public void testMixed3() {
+    String[] types = {"INTEGER", "VARCHAR(32)", "DATE"};
+    String[] insertVals = {"1", "'meep'", "null"};
+    String validateLine = "1,meep,null";
 
-        verifyTypes(types, insertVals, validateLine);
-    }
+    verifyTypes(types, insertVals, validateLine);
+  }
 
-    @Test
-    public void testMixed4() {
-        String [] types = { "NUMERIC", "INTEGER", "NUMERIC" };
-        String [] insertVals = { "-42", "17", "33333333333333333333333.1714" };
-        String validateLine = "-42,17,33333333333333333333333.1714";
+  @Test
+  public void testMixed4() {
+    String[] types = {"NUMERIC", "INTEGER", "NUMERIC"};
+    String[] insertVals = {"-42", "17", "33333333333333333333333.1714"};
+    String validateLine = "-42,17,33333333333333333333333.1714";
 
-        verifyTypes(types, insertVals, validateLine);
-    }
+    verifyTypes(types, insertVals, validateLine);
+  }
 
-    @Test
-    public void testMixed5() {
-        String [] types = { "NUMERIC", "INTEGER", "NUMERIC" };
-        String [] insertVals = { "null", "17", "33333333333333333333333.0" };
-        String validateLine = "null,17,33333333333333333333333.0";
+  @Test
+  public void testMixed5() {
+    String[] types = {"NUMERIC", "INTEGER", "NUMERIC"};
+    String[] insertVals = {"null", "17", "33333333333333333333333.0"};
+    String validateLine = "null,17,33333333333333333333333.0";
 
-        verifyTypes(types, insertVals, validateLine);
-    }
+    verifyTypes(types, insertVals, validateLine);
+  }
 
-    @Test
-    public void testMixed6() {
-        String [] types = { "NUMERIC", "INTEGER", "NUMERIC" };
-        String [] insertVals = { "33333333333333333333333", "17", "-42"};
-        String validateLine = "33333333333333333333333,17,-42";
+  @Test
+  public void testMixed6() {
+    String[] types = {"NUMERIC", "INTEGER", "NUMERIC"};
+    String[] insertVals = {"33333333333333333333333", "17", "-42"};
+    String validateLine = "33333333333333333333333,17,-42";
 
-        verifyTypes(types, insertVals, validateLine);
-    }
+    verifyTypes(types, insertVals, validateLine);
+  }
 
-    //////////////////////////////////////////////////////////////////////////
-    // the tests below here test the --columns parameter and ensure that
-    // we can selectively import only certain columns.
-    //////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////
+  // the tests below here test the --columns parameter and ensure that
+  // we can selectively import only certain columns.
+  //////////////////////////////////////////////////////////////////////////
 
-    @Test
-    public void testSkipFirstCol() {
-        String [] types = { "NUMERIC", "INTEGER", "NUMERIC" };
-        String [] insertVals = { "33333333333333333333333", "17", "-42"};
-        String validateLine = "17,-42";
+  @Test
+  public void testSkipFirstCol() {
+    String[] types = {"NUMERIC", "INTEGER", "NUMERIC"};
+    String[] insertVals = {"33333333333333333333333", "17", "-42"};
+    String validateLine = "17,-42";
 
-        String [] loadCols = {"DATA_COL1", "DATA_COL2"};
+    String[] loadCols = {"DATA_COL1", "DATA_COL2"};
 
-        verifyTypes(types, insertVals, validateLine, loadCols);
-    }
+    verifyTypes(types, insertVals, validateLine, loadCols);
+  }
 
-    @Test
-    public void testSkipSecondCol() {
-        String [] types = { "NUMERIC", "INTEGER", "NUMERIC" };
-        String [] insertVals = { "33333333333333333333333", "17", "-42"};
-        String validateLine = "33333333333333333333333,-42";
+  @Test
+  public void testSkipSecondCol() {
+    String[] types = {"NUMERIC", "INTEGER", "NUMERIC"};
+    String[] insertVals = {"33333333333333333333333", "17", "-42"};
+    String validateLine = "33333333333333333333333,-42";
 
-        String [] loadCols = {"DATA_COL0", "DATA_COL2"};
+    String[] loadCols = {"DATA_COL0", "DATA_COL2"};
 
-        verifyTypes(types, insertVals, validateLine, loadCols);
-    }
+    verifyTypes(types, insertVals, validateLine, loadCols);
+  }
 
-    @Test
-    public void testSkipThirdCol() {
-        String [] types = { "NUMERIC", "INTEGER", "NUMERIC" };
-        String [] insertVals = { "33333333333333333333333", "17", "-42"};
-        String validateLine = "33333333333333333333333,17";
+  @Test
+  public void testSkipThirdCol() {
+    String[] types = {"NUMERIC", "INTEGER", "NUMERIC"};
+    String[] insertVals = {"33333333333333333333333", "17", "-42"};
+    String validateLine = "33333333333333333333333,17";
 
-        String [] loadCols = {"DATA_COL0", "DATA_COL1"};
+    String[] loadCols = {"DATA_COL0", "DATA_COL1"};
 
-        verifyTypes(types, insertVals, validateLine, loadCols);
-    }
+    verifyTypes(types, insertVals, validateLine, loadCols);
+  }
 
-    /**
-     * This tests that the columns argument can handle comma-separated column
-     * names.  So this is like having:
-     *   --columns "DATA_COL0,DATA_COL1,DATA_COL2"
-     * as two args on a sqoop command line
-     *
-     * @throws IOException
-     */
-    @Test
-    public void testSingleColumnsArg() throws IOException {
-        String [] types = { "VARCHAR(32)", "VARCHAR(32)", "VARCHAR(32)" };
-        String [] insertVals = { "'foo'", "'bar'", "'baz'" };
-        String validateLine = "foo,bar,baz";
-        String [] loadCols = {"DATA_COL0,DATA_COL1,DATA_COL2"};
+  /**
+   * This tests that the columns argument can handle comma-separated column
+   * names.  So this is like having:
+   *   --columns "DATA_COL0,DATA_COL1,DATA_COL2"
+   * as two args on a sqoop command line
+   *
+   * @throws IOException
+   */
+  @Test
+  public void testSingleColumnsArg() throws IOException {
+    String[] types = {"VARCHAR(32)", "VARCHAR(32)", "VARCHAR(32)"};
+    String[] insertVals = {"'foo'", "'bar'", "'baz'"};
+    String validateLine = "foo,bar,baz";
+    String[] loadCols = {"DATA_COL0,DATA_COL1,DATA_COL2"};
 
-        verifyTypes(types, insertVals, validateLine, loadCols);
-    }
+    verifyTypes(types, insertVals, validateLine, loadCols);
+  }
 
-    /**
-     * This tests that the columns argument can handle spaces between column
-     * names.  So this is like having:
-     *   --columns "DATA_COL0, DATA_COL1, DATA_COL2"
-     * as two args on a sqoop command line
-     *
-     * @throws IOException
-     */
-    @Test
-    public void testColumnsWithSpaces() throws IOException {
-        String [] types = { "VARCHAR(32)", "VARCHAR(32)", "VARCHAR(32)" };
-        String [] insertVals = { "'foo'", "'bar'", "'baz'" };
-        String validateLine = "foo,bar,baz";
-        String [] loadCols = {"DATA_COL0, DATA_COL1, DATA_COL2"};
+  /**
+   * This tests that the columns argument can handle spaces between column
+   * names.  So this is like having:
+   *   --columns "DATA_COL0, DATA_COL1, DATA_COL2"
+   * as two args on a sqoop command line
+   *
+   * @throws IOException
+   */
+  @Test
+  public void testColumnsWithSpaces() throws IOException {
+    String[] types = {"VARCHAR(32)", "VARCHAR(32)", "VARCHAR(32)"};
+    String[] insertVals = {"'foo'", "'bar'", "'baz'"};
+    String validateLine = "foo,bar,baz";
+    String[] loadCols = {"DATA_COL0, DATA_COL1, DATA_COL2"};
 
-        verifyTypes(types, insertVals, validateLine, loadCols);
-    }
+    verifyTypes(types, insertVals, validateLine, loadCols);
+  }
 }

@@ -19,23 +19,20 @@
 package org.apache.sqoop.testutil;
 
 import java.io.IOException;
-
 import java.util.Map;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.LongWritable;
-import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.NullWritable;
+import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reporter;
-import org.apache.sqoop.lib.SqoopRecord;
 import org.apache.hadoop.util.ReflectionUtils;
+import org.apache.sqoop.lib.SqoopRecord;
 
 /**
  * Test harness mapper. Instantiate the user's specific type, explicitly
@@ -46,64 +43,64 @@ import org.apache.hadoop.util.ReflectionUtils;
 public class ExplicitSetMapper extends MapReduceBase
     implements Mapper<LongWritable, Text, Text, NullWritable> {
 
-    public static final Log LOG = LogFactory.getLog(
-                                      ExplicitSetMapper.class.getName());
+  public static final Log LOG =
+      LogFactory.getLog(ExplicitSetMapper.class.getName());
 
-    public static final String USER_TYPE_NAME_KEY = "sqoop.user.class";
-    public static final String SET_COL_KEY = "sqoop.explicit.set.col";
-    public static final String SET_VAL_KEY = "sqoop.explicit.set.val";
+  public static final String USER_TYPE_NAME_KEY = "sqoop.user.class";
+  public static final String SET_COL_KEY = "sqoop.explicit.set.col";
+  public static final String SET_VAL_KEY = "sqoop.explicit.set.val";
 
-    private SqoopRecord userRecord;
-    private String setCol;
-    private String setVal;
+  private SqoopRecord userRecord;
+  private String setCol;
+  private String setVal;
 
-    public void configure(JobConf job) {
-        String userTypeName = job.get(USER_TYPE_NAME_KEY);
-        if (null == userTypeName) {
-            throw new RuntimeException("Unconfigured parameter: "
-                                       + USER_TYPE_NAME_KEY);
-        }
-
-        setCol = job.get(SET_COL_KEY);
-        setVal = job.get(SET_VAL_KEY);
-
-        LOG.info("User type name set to " + userTypeName);
-        LOG.info("Will try to set col " + setCol + " to " + setVal);
-
-        this.userRecord = null;
-
-        try {
-            Configuration conf = new Configuration();
-            Class userClass = Class.forName(userTypeName, true,
-                                            Thread.currentThread().getContextClassLoader());
-            this.userRecord =
-                (SqoopRecord) ReflectionUtils.newInstance(userClass, conf);
-        } catch (ClassNotFoundException cnfe) {
-            // handled by the next block.
-            LOG.error("ClassNotFound exception: " + cnfe.toString());
-        } catch (Exception e) {
-            LOG.error("Got an exception reflecting user class: " + e.toString());
-        }
-
-        if (null == this.userRecord) {
-            LOG.error("Could not instantiate user record of type " + userTypeName);
-            throw new RuntimeException("Could not instantiate user record of type "
-                                       + userTypeName);
-        }
+  public void configure(JobConf job) {
+    String userTypeName = job.get(USER_TYPE_NAME_KEY);
+    if (null == userTypeName) {
+      throw new RuntimeException("Unconfigured parameter: " +
+                                 USER_TYPE_NAME_KEY);
     }
 
-    public void map(LongWritable key, Text val,
-                    OutputCollector<Text, NullWritable> out, Reporter r) throws IOException {
+    setCol = job.get(SET_COL_KEY);
+    setVal = job.get(SET_VAL_KEY);
 
-        // Try to set the field.
-        userRecord.setField(setCol, setVal);
-        Map<String, Object> fieldVals = userRecord.getFieldMap();
-        if (!fieldVals.get(setCol).equals(setVal)) {
-            throw new IOException("Could not set column value! Got back "
-                                  + fieldVals.get(setCol));
-        } else {
-            LOG.info("Correctly changed value for col " + setCol + " to " + setVal);
-        }
+    LOG.info("User type name set to " + userTypeName);
+    LOG.info("Will try to set col " + setCol + " to " + setVal);
+
+    this.userRecord = null;
+
+    try {
+      Configuration conf = new Configuration();
+      Class userClass = Class.forName(
+          userTypeName, true, Thread.currentThread().getContextClassLoader());
+      this.userRecord =
+          (SqoopRecord)ReflectionUtils.newInstance(userClass, conf);
+    } catch (ClassNotFoundException cnfe) {
+      // handled by the next block.
+      LOG.error("ClassNotFound exception: " + cnfe.toString());
+    } catch (Exception e) {
+      LOG.error("Got an exception reflecting user class: " + e.toString());
     }
+
+    if (null == this.userRecord) {
+      LOG.error("Could not instantiate user record of type " + userTypeName);
+      throw new RuntimeException("Could not instantiate user record of type " +
+                                 userTypeName);
+    }
+  }
+
+  public void map(LongWritable key, Text val,
+                  OutputCollector<Text, NullWritable> out, Reporter r)
+      throws IOException {
+
+    // Try to set the field.
+    userRecord.setField(setCol, setVal);
+    Map<String, Object> fieldVals = userRecord.getFieldMap();
+    if (!fieldVals.get(setCol).equals(setVal)) {
+      throw new IOException("Could not set column value! Got back " +
+                            fieldVals.get(setCol));
+    } else {
+      LOG.info("Correctly changed value for col " + setCol + " to " + setVal);
+    }
+  }
 }
-

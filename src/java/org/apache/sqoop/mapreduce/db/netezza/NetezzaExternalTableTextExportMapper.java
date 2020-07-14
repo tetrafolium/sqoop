@@ -19,20 +19,19 @@
 package org.apache.sqoop.mapreduce.db.netezza;
 
 import java.io.IOException;
-
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 
 /**
  * Netezza export mapper for text records.
  */
-public class NetezzaExternalTableTextExportMapper extends
-    NetezzaExternalTableExportMapper<LongWritable, Text> {
+public class NetezzaExternalTableTextExportMapper
+    extends NetezzaExternalTableExportMapper<LongWritable, Text> {
 
-    @Override
-    public void map(LongWritable key, Text text, Context context)
-    throws IOException, InterruptedException {
-        writeTextRecord(text);
-        context.progress();
-    }
+  @Override
+  public void map(LongWritable key, Text text, Context context)
+      throws IOException, InterruptedException {
+    writeTextRecord(text);
+    context.progress();
+  }
 }

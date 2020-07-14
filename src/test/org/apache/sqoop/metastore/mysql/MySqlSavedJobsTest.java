@@ -18,9 +18,9 @@
 
 package org.apache.sqoop.metastore.mysql;
 
+import org.apache.sqoop.manager.JdbcDrivers;
 import org.apache.sqoop.manager.mysql.MySQLTestUtils;
 import org.apache.sqoop.metastore.SavedJobsTestBase;
-import org.apache.sqoop.manager.JdbcDrivers;
 import org.apache.sqoop.testcategories.thirdpartytest.MysqlTest;
 import org.junit.experimental.categories.Category;
 
@@ -34,9 +34,10 @@ import org.junit.experimental.categories.Category;
  * not run it. You need to run this manually with
  * -Dtestcase=MySqlSavedJobsTest or -Dthirdparty=true.
  *
- * You need to put MySql JDBC driver library (mysql-connector-java-5.1.38-bin.jar) in a location
- * where Sqoop will be able to access it (since this library cannot be checked
- * into Apache's tree for licensing reasons) and set it's path through -Dsqoop.thirdparty.lib.dir.
+ * You need to put MySql JDBC driver library
+ * (mysql-connector-java-5.1.38-bin.jar) in a location where Sqoop will be able
+ * to access it (since this library cannot be checked into Apache's tree for
+ * licensing reasons) and set it's path through -Dsqoop.thirdparty.lib.dir.
  *
  *   Once you have a running MySql database,
  *   Set server URL, database name, username, and password with system variables
@@ -46,10 +47,10 @@ import org.junit.experimental.categories.Category;
 @Category(MysqlTest.class)
 public class MySqlSavedJobsTest extends SavedJobsTestBase {
 
-    private static MySQLTestUtils mySQLTestUtils = new MySQLTestUtils();
+  private static MySQLTestUtils mySQLTestUtils = new MySQLTestUtils();
 
-    public MySqlSavedJobsTest() {
-        super(mySQLTestUtils.getMySqlConnectString(), mySQLTestUtils.getUserName(),
-              mySQLTestUtils.getUserPass(), JdbcDrivers.MYSQL.getDriverClass());
-    }
+  public MySqlSavedJobsTest() {
+    super(mySQLTestUtils.getMySqlConnectString(), mySQLTestUtils.getUserName(),
+          mySQLTestUtils.getUserPass(), JdbcDrivers.MYSQL.getDriverClass());
+  }
 }

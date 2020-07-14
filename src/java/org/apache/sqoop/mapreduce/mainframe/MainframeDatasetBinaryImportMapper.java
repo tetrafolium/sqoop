@@ -22,16 +22,22 @@ import org.apache.hadoop.io.BytesWritable;
 import org.apache.sqoop.lib.SqoopRecord;
 
 /**
- * Mapper that writes mainframe dataset records in binary format to multiple files
- * based on the key, which is the index of the datasets in the input split.
+ * Mapper that writes mainframe dataset records in binary format to multiple
+ * files based on the key, which is the index of the datasets in the input
+ * split.
  */
-public class MainframeDatasetBinaryImportMapper extends AbstractMainframeDatasetImportMapper<BytesWritable> {
+public class MainframeDatasetBinaryImportMapper
+    extends AbstractMainframeDatasetImportMapper<BytesWritable> {
 
-    @Override
-    protected BytesWritable createOutKey(SqoopRecord sqoopRecord) {
-        BytesWritable result = new BytesWritable();
-        byte[] bytes = (byte[]) sqoopRecord.getFieldMap().entrySet().iterator().next().getValue();
-        result.set(bytes,0, bytes.length);
-        return result;
-    }
+  @Override
+  protected BytesWritable createOutKey(SqoopRecord sqoopRecord) {
+    BytesWritable result = new BytesWritable();
+    byte[] bytes = (byte[])sqoopRecord.getFieldMap()
+                       .entrySet()
+                       .iterator()
+                       .next()
+                       .getValue();
+    result.set(bytes, 0, bytes.length);
+    return result;
+  }
 }

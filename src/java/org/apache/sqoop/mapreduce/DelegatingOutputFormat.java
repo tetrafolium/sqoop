@@ -27,8 +27,8 @@ import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.util.ReflectionUtils;
-import org.apache.sqoop.lib.FieldMappable;
 import org.apache.sqoop.lib.FieldMapProcessor;
+import org.apache.sqoop.lib.FieldMappable;
 import org.apache.sqoop.lib.ProcessingException;
 
 /**
@@ -52,83 +52,80 @@ import org.apache.sqoop.lib.ProcessingException;
 public class DelegatingOutputFormat<K extends FieldMappable, V>
     extends OutputFormat<K, V> {
 
-    /** conf key: the FieldMapProcessor class to instantiate. */
-    public static final String DELEGATE_CLASS_KEY =
-        "sqoop.output.delegate.field.map.processor.class";
+  /** conf key: the FieldMapProcessor class to instantiate. */
+  public static final String DELEGATE_CLASS_KEY =
+      "sqoop.output.delegate.field.map.processor.class";
 
-    @Override
-    /** {@inheritDoc} */
-    public void checkOutputSpecs(JobContext context)
-    throws IOException, InterruptedException {
-        Configuration conf = context.getConfiguration();
+  @Override
+  /** {@inheritDoc} */
+  public void checkOutputSpecs(JobContext context)
+      throws IOException, InterruptedException {
+    Configuration conf = context.getConfiguration();
 
-        if (null == conf.get(DELEGATE_CLASS_KEY)) {
-            throw new IOException("Delegate FieldMapProcessor class is not set.");
-        }
+    if (null == conf.get(DELEGATE_CLASS_KEY)) {
+      throw new IOException("Delegate FieldMapProcessor class is not set.");
     }
+  }
 
-    @Override
-    /** {@inheritDoc} */
-    public OutputCommitter getOutputCommitter(TaskAttemptContext context)
-    throws IOException, InterruptedException {
-        return new NullOutputCommitter();
+  @Override
+  /** {@inheritDoc} */
+  public OutputCommitter getOutputCommitter(TaskAttemptContext context)
+      throws IOException, InterruptedException {
+    return new NullOutputCommitter();
+  }
+
+  @Override
+  /** {@inheritDoc} */
+  public RecordWriter<K, V> getRecordWriter(TaskAttemptContext context)
+      throws IOException {
+    try {
+      return new DelegatingRecordWriter(context);
+    } catch (ClassNotFoundException cnfe) {
+      throw new IOException(cnfe);
     }
+  }
 
-    @Override
-    /** {@inheritDoc} */
-    public RecordWriter<K, V> getRecordWriter(TaskAttemptContext context)
-    throws IOException {
-        try {
-            return new DelegatingRecordWriter(context);
-        } catch (ClassNotFoundException cnfe) {
-            throw new IOException(cnfe);
-        }
-    }
+  /**
+   * RecordWriter to write the output to a row in a database table.
+   * The actual database updates are executed in a second thread.
+   */
+  public class DelegatingRecordWriter extends RecordWriter<K, V> {
 
-    /**
-     * RecordWriter to write the output to a row in a database table.
-     * The actual database updates are executed in a second thread.
-     */
-    public class DelegatingRecordWriter extends RecordWriter<K, V> {
+    private Configuration conf;
 
-        private Configuration conf;
+    private FieldMapProcessor mapProcessor;
 
-        private FieldMapProcessor mapProcessor;
-
-        public DelegatingRecordWriter(TaskAttemptContext context)
+    public DelegatingRecordWriter(TaskAttemptContext context)
         throws ClassNotFoundException {
 
-            this.conf = context.getConfiguration();
+      this.conf = context.getConfiguration();
 
-            @SuppressWarnings("unchecked")
-            Class<? extends FieldMapProcessor> procClass =
-                (Class<? extends FieldMapProcessor>)
-                conf.getClass(DELEGATE_CLASS_KEY, null);
-            this.mapProcessor = ReflectionUtils.newInstance(procClass, this.conf);
-        }
-
-        protected Configuration getConf() {
-            return this.conf;
-        }
-
-        @Override
-        /** {@inheritDoc} */
-        public void close(TaskAttemptContext context)
-        throws IOException, InterruptedException {
-            if (mapProcessor instanceof Closeable) {
-                ((Closeable) mapProcessor).close();
-            }
-        }
-
-        @Override
-        /** {@inheritDoc} */
-        public void write(K key, V value)
-        throws InterruptedException, IOException {
-            try {
-                mapProcessor.accept(key);
-            } catch (ProcessingException pe) {
-                throw new IOException(pe);
-            }
-        }
+      @SuppressWarnings("unchecked")
+      Class<? extends FieldMapProcessor> procClass =
+          (Class<? extends FieldMapProcessor>)conf.getClass(DELEGATE_CLASS_KEY,
+                                                            null);
+      this.mapProcessor = ReflectionUtils.newInstance(procClass, this.conf);
     }
+
+    protected Configuration getConf() { return this.conf; }
+
+    @Override
+    /** {@inheritDoc} */
+    public void close(TaskAttemptContext context)
+        throws IOException, InterruptedException {
+      if (mapProcessor instanceof Closeable) {
+        ((Closeable)mapProcessor).close();
+      }
+    }
+
+    @Override
+    /** {@inheritDoc} */
+    public void write(K key, V value) throws InterruptedException, IOException {
+      try {
+        mapProcessor.accept(key);
+      } catch (ProcessingException pe) {
+        throw new IOException(pe);
+      }
+    }
+  }
 }

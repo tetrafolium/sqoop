@@ -20,8 +20,4 @@ package org.apache.sqoop.db;
 
 import java.sql.Connection;
 
-public interface JdbcConnectionFactory {
-
-    Connection createConnection();
-
-}
+public interface JdbcConnectionFactory { Connection createConnection(); }

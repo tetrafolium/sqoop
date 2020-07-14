@@ -18,12 +18,6 @@
 
 package org.apache.sqoop.manager;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import org.apache.sqoop.SqoopOptions;
-import org.apache.sqoop.metastore.JobData;
-
 import static org.apache.sqoop.manager.SupportedManagers.CUBRID;
 import static org.apache.sqoop.manager.SupportedManagers.DB2;
 import static org.apache.sqoop.manager.SupportedManagers.HSQLDB;
@@ -34,6 +28,10 @@ import static org.apache.sqoop.manager.SupportedManagers.ORACLE;
 import static org.apache.sqoop.manager.SupportedManagers.POSTGRES;
 import static org.apache.sqoop.manager.SupportedManagers.SQLSERVER;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.sqoop.SqoopOptions;
+import org.apache.sqoop.metastore.JobData;
 
 /**
  * Contains instantiation code for all ConnManager implementations
@@ -42,60 +40,60 @@ import static org.apache.sqoop.manager.SupportedManagers.SQLSERVER;
 public class DefaultManagerFactory
     extends org.apache.sqoop.manager.ManagerFactory {
 
-    public static final Log LOG = LogFactory.getLog(
-                                      DefaultManagerFactory.class.getName());
-    public static final String NET_SOURCEFORGE_JTDS_JDBC_DRIVER = "net.sourceforge.jtds.jdbc.Driver";
+  public static final Log LOG =
+      LogFactory.getLog(DefaultManagerFactory.class.getName());
+  public static final String NET_SOURCEFORGE_JTDS_JDBC_DRIVER =
+      "net.sourceforge.jtds.jdbc.Driver";
 
-    public ConnManager accept(JobData data) {
-        SqoopOptions options = data.getSqoopOptions();
+  public ConnManager accept(JobData data) {
+    SqoopOptions options = data.getSqoopOptions();
 
-        String scheme = extractScheme(options);
-        if (null == scheme) {
-            // We don't know if this is a mysql://, hsql://, etc.
-            // Can't do anything with this.
-            LOG.warn("Null scheme associated with connect string.");
-            return null;
-        }
-
-        LOG.debug("Trying with scheme: " + scheme);
-
-        if (MYSQL.isTheManagerTypeOf(options)) {
-            if (options.isDirect()) {
-                return new DirectMySQLManager(options);
-            } else {
-                return new MySQLManager(options);
-            }
-        } else if (POSTGRES.isTheManagerTypeOf(options)) {
-            if (options.isDirect()) {
-                return new DirectPostgresqlManager(options);
-            } else {
-                return new PostgresqlManager(options);
-            }
-        } else if (HSQLDB.isTheManagerTypeOf(options)) {
-            return new HsqldbManager(options);
-        } else if (ORACLE.isTheManagerTypeOf(options)) {
-            return new OracleManager(options);
-        } else if (SQLSERVER.isTheManagerTypeOf(options)) {
-            return new SQLServerManager(options);
-        } else if (JTDS_SQLSERVER.isTheManagerTypeOf(options)) {
-            return new SQLServerManager(NET_SOURCEFORGE_JTDS_JDBC_DRIVER, options);
-        } else if (DB2.isTheManagerTypeOf(options)) {
-            return new Db2Manager(options);
-        } else if (NETEZZA.isTheManagerTypeOf(options)) {
-            if (options.isDirect()) {
-                return new DirectNetezzaManager(options);
-            } else {
-                return new NetezzaManager(options);
-            }
-        } else if (CUBRID.isTheManagerTypeOf(options)) {
-            return new CubridManager(options);
-        } else {
-            return null;
-        }
+    String scheme = extractScheme(options);
+    if (null == scheme) {
+      // We don't know if this is a mysql://, hsql://, etc.
+      // Can't do anything with this.
+      LOG.warn("Null scheme associated with connect string.");
+      return null;
     }
 
-    protected String extractScheme(SqoopOptions options) {
-        return SupportedManagers.extractScheme(options);
+    LOG.debug("Trying with scheme: " + scheme);
+
+    if (MYSQL.isTheManagerTypeOf(options)) {
+      if (options.isDirect()) {
+        return new DirectMySQLManager(options);
+      } else {
+        return new MySQLManager(options);
+      }
+    } else if (POSTGRES.isTheManagerTypeOf(options)) {
+      if (options.isDirect()) {
+        return new DirectPostgresqlManager(options);
+      } else {
+        return new PostgresqlManager(options);
+      }
+    } else if (HSQLDB.isTheManagerTypeOf(options)) {
+      return new HsqldbManager(options);
+    } else if (ORACLE.isTheManagerTypeOf(options)) {
+      return new OracleManager(options);
+    } else if (SQLSERVER.isTheManagerTypeOf(options)) {
+      return new SQLServerManager(options);
+    } else if (JTDS_SQLSERVER.isTheManagerTypeOf(options)) {
+      return new SQLServerManager(NET_SOURCEFORGE_JTDS_JDBC_DRIVER, options);
+    } else if (DB2.isTheManagerTypeOf(options)) {
+      return new Db2Manager(options);
+    } else if (NETEZZA.isTheManagerTypeOf(options)) {
+      if (options.isDirect()) {
+        return new DirectNetezzaManager(options);
+      } else {
+        return new NetezzaManager(options);
+      }
+    } else if (CUBRID.isTheManagerTypeOf(options)) {
+      return new CubridManager(options);
+    } else {
+      return null;
     }
+  }
+
+  protected String extractScheme(SqoopOptions options) {
+    return SupportedManagers.extractScheme(options);
+  }
 }
-

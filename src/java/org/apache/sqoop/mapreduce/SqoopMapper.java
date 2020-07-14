@@ -18,11 +18,10 @@
 
 package org.apache.sqoop.mapreduce;
 
+import java.io.IOException;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.sqoop.util.LoggingUtils;
-
-import java.io.IOException;
 
 /**
  * Base sqoop mapper class that is convenient place for common functionality.
@@ -31,16 +30,16 @@ import java.io.IOException;
 public abstract class SqoopMapper<KI, VI, KO, VO>
     extends Mapper<KI, VI, KO, VO> {
 
-    @Override
-    protected void setup(Context context)
-    throws IOException, InterruptedException {
-        super.setup(context);
+  @Override
+  protected void setup(Context context)
+      throws IOException, InterruptedException {
+    super.setup(context);
 
-        Configuration configuration = context.getConfiguration();
+    Configuration configuration = context.getConfiguration();
 
-        // Propagate verbose flag if needed
-        if (configuration.getBoolean(JobBase.PROPERTY_VERBOSE, false)) {
-            LoggingUtils.setDebugLevel();
-        }
+    // Propagate verbose flag if needed
+    if (configuration.getBoolean(JobBase.PROPERTY_VERBOSE, false)) {
+      LoggingUtils.setDebugLevel();
     }
+  }
 }

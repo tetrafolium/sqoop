@@ -29,8 +29,8 @@ import org.apache.sqoop.testutil.InjectableConnManager;
  */
 public class InjectableManagerFactory extends ManagerFactory {
 
-    public ConnManager accept(JobData data) {
-        // Always accept and use the injectable manager.
-        return new InjectableConnManager(data.getSqoopOptions());
-    }
+  public ConnManager accept(JobData data) {
+    // Always accept and use the injectable manager.
+    return new InjectableConnManager(data.getSqoopOptions());
+  }
 }

@@ -23,16 +23,14 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
-import org.apache.sqoop.mapreduce.db.DBConfiguration;
-
 import org.apache.sqoop.lib.SqoopRecord;
+import org.apache.sqoop.mapreduce.db.DBConfiguration;
 
 /**
  * Insert the emitted keys as records into a database table.
@@ -48,107 +46,107 @@ import org.apache.sqoop.lib.SqoopRecord;
 public class ExportCallOutputFormat<K extends SqoopRecord, V>
     extends AsyncSqlOutputFormat<K, V> {
 
-    private static final Log LOG = LogFactory.getLog(
-                                       ExportCallOutputFormat.class);
+  private static final Log LOG =
+      LogFactory.getLog(ExportCallOutputFormat.class);
 
-    @Override
-    /** {@inheritDoc} */
-    public void checkOutputSpecs(JobContext context)
-    throws IOException, InterruptedException {
-        Configuration conf = context.getConfiguration();
-        DBConfiguration dbConf = new DBConfiguration(conf);
+  @Override
+  /** {@inheritDoc} */
+  public void checkOutputSpecs(JobContext context)
+      throws IOException, InterruptedException {
+    Configuration conf = context.getConfiguration();
+    DBConfiguration dbConf = new DBConfiguration(conf);
 
-        // Sanity check all the configuration values we need.
-        if (null == conf.get(DBConfiguration.URL_PROPERTY)) {
-            throw new IOException("Database connection URL is not set.");
-        } else if (null == dbConf.getOutputTableName()) {
-            throw new IOException("Procedure name is not set for export");
-        } else if (null == dbConf.getOutputFieldNames()
-                   && 0 == dbConf.getOutputFieldCount()) {
-            throw new IOException(
-                "Output field names are null and zero output field count set.");
-        }
+    // Sanity check all the configuration values we need.
+    if (null == conf.get(DBConfiguration.URL_PROPERTY)) {
+      throw new IOException("Database connection URL is not set.");
+    } else if (null == dbConf.getOutputTableName()) {
+      throw new IOException("Procedure name is not set for export");
+    } else if (null == dbConf.getOutputFieldNames() &&
+               0 == dbConf.getOutputFieldCount()) {
+      throw new IOException(
+          "Output field names are null and zero output field count set.");
+    }
+  }
+
+  @Override
+  /** {@inheritDoc} */
+  public RecordWriter<K, V> getRecordWriter(TaskAttemptContext context)
+      throws IOException {
+    try {
+      return new ExportCallRecordWriter(context);
+    } catch (Exception e) {
+      throw new IOException(e);
+    }
+  }
+
+  /**
+   * RecordWriter to write the output to a row in a database table.
+   * The actual database updates are executed in a second thread.
+   */
+  public class ExportCallRecordWriter extends AsyncSqlRecordWriter<K, V> {
+
+    protected String procedureName;
+    protected String[] columnNames; // The columns to insert into.
+    protected int columnCount;      // If columnNames is null, tells ## of cols.
+
+    public ExportCallRecordWriter(TaskAttemptContext context)
+        throws ClassNotFoundException, SQLException {
+      super(context);
+
+      Configuration conf = getConf();
+
+      DBConfiguration dbConf = new DBConfiguration(conf);
+      procedureName = dbConf.getOutputTableName();
+      columnNames = dbConf.getOutputFieldNames();
+      columnCount = dbConf.getOutputFieldCount();
     }
 
     @Override
     /** {@inheritDoc} */
-    public RecordWriter<K, V> getRecordWriter(TaskAttemptContext context)
-    throws IOException {
-        try {
-            return new ExportCallRecordWriter(context);
-        } catch (Exception e) {
-            throw new IOException(e);
-        }
+    protected PreparedStatement
+    getPreparedStatement(List<SqoopRecord> userRecords) throws SQLException {
+
+      PreparedStatement stmt = null;
+
+      // Synchronize on connection to ensure this does not conflict
+      // with the operations in the update thread.
+      Connection conn = getConnection();
+      synchronized (conn) {
+        stmt = conn.prepareCall(getCallStatement(userRecords.size()));
+      }
+
+      for (SqoopRecord record : userRecords) {
+        record.write(stmt, 0);
+        stmt.addBatch();
+      }
+
+      return stmt;
+    }
+
+    @Override
+    protected boolean isBatchExec() {
+      return true;
     }
 
     /**
-     * RecordWriter to write the output to a row in a database table.
-     * The actual database updates are executed in a second thread.
+     * @return an INSERT statement suitable for inserting 'numRows' rows.
      */
-    public class ExportCallRecordWriter extends AsyncSqlRecordWriter<K, V> {
+    protected String getCallStatement(int numRows) {
+      StringBuilder sb = new StringBuilder();
 
-        protected String procedureName;
-        protected String [] columnNames; // The columns to insert into.
-        protected int columnCount; // If columnNames is null, tells ## of cols.
+      sb.append("{call " + procedureName + " (");
 
-        public ExportCallRecordWriter(TaskAttemptContext context)
-        throws ClassNotFoundException, SQLException {
-            super(context);
+      int numSlots = columnNames == null ? columnCount : columnNames.length;
+      if (numSlots > 0) {
+        sb.append("?");
+      }
+      for (int i = 1; i < numSlots; ++i) {
+        sb.append(", ?");
+      }
 
-            Configuration conf = getConf();
+      sb.append(")}");
 
-            DBConfiguration dbConf = new DBConfiguration(conf);
-            procedureName = dbConf.getOutputTableName();
-            columnNames = dbConf.getOutputFieldNames();
-            columnCount = dbConf.getOutputFieldCount();
-        }
-
-        @Override
-        /** {@inheritDoc} */
-        protected PreparedStatement getPreparedStatement(
-            List<SqoopRecord> userRecords) throws SQLException {
-
-            PreparedStatement stmt = null;
-
-            // Synchronize on connection to ensure this does not conflict
-            // with the operations in the update thread.
-            Connection conn = getConnection();
-            synchronized (conn) {
-                stmt = conn.prepareCall(getCallStatement(userRecords.size()));
-            }
-
-            for (SqoopRecord record : userRecords) {
-                record.write(stmt, 0);
-                stmt.addBatch();
-            }
-
-            return stmt;
-        }
-
-        @Override
-        protected boolean isBatchExec() {
-            return true;
-        }
-
-        /**
-         * @return an INSERT statement suitable for inserting 'numRows' rows.
-         */
-        protected String getCallStatement(int numRows) {
-            StringBuilder sb = new StringBuilder();
-
-            sb.append("{call " + procedureName + " (");
-
-            int numSlots = columnNames == null ? columnCount : columnNames.length;
-            if (numSlots > 0) {
-                sb.append("?");
-            }
-            for(int i = 1; i < numSlots; ++i) {
-                sb.append(", ?");
-            }
-
-            sb.append(")}");
-
-            return sb.toString();
-        }
+      return sb.toString();
     }
+  }
 }

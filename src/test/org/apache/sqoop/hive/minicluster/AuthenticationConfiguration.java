@@ -18,21 +18,20 @@
 
 package org.apache.sqoop.hive.minicluster;
 
-import org.apache.sqoop.db.JdbcConnectionFactory;
-
 import java.security.PrivilegedAction;
 import java.util.Map;
+import org.apache.sqoop.db.JdbcConnectionFactory;
 
 public interface AuthenticationConfiguration {
 
-    Map<String, String> getAuthenticationConfig();
+  Map<String, String> getAuthenticationConfig();
 
-    String getUrlParams();
+  String getUrlParams();
 
-    <T> T doAsAuthenticated(PrivilegedAction<T> action);
+  <T> T doAsAuthenticated(PrivilegedAction<T> action);
 
-    void init();
+  void init();
 
-    JdbcConnectionFactory decorateConnectionFactory(JdbcConnectionFactory connectionFactory);
-
+  JdbcConnectionFactory
+  decorateConnectionFactory(JdbcConnectionFactory connectionFactory);
 }

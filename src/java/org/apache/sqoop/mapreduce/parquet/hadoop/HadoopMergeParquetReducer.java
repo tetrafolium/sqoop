@@ -18,18 +18,20 @@
 
 package org.apache.sqoop.mapreduce.parquet.hadoop;
 
+import java.io.IOException;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.sqoop.mapreduce.MergeParquetReducer;
 
-import java.io.IOException;
-
 /**
- * An implementation of {@link MergeParquetReducer} which depends on the Hadoop Parquet library.
+ * An implementation of {@link MergeParquetReducer} which depends on the Hadoop
+ * Parquet library.
  */
-public class HadoopMergeParquetReducer extends MergeParquetReducer<Void, GenericRecord> {
+public class HadoopMergeParquetReducer
+    extends MergeParquetReducer<Void, GenericRecord> {
 
-    @Override
-    protected void write(Context context, GenericRecord record) throws IOException, InterruptedException {
-        context.write(null, record);
-    }
+  @Override
+  protected void write(Context context, GenericRecord record)
+      throws IOException, InterruptedException {
+    context.write(null, record);
+  }
 }

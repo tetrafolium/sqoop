@@ -19,7 +19,6 @@
 package org.apache.sqoop.testutil;
 
 import java.io.IOException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -37,50 +36,48 @@ import org.apache.hadoop.util.ReflectionUtils;
  */
 public final class SeqFileReader {
 
-    private SeqFileReader() {
+  private SeqFileReader() {}
+
+  public static final Log LOG =
+      LogFactory.getLog(SeqFileReader.class.getName());
+
+  public static Reader getSeqFileReader(String filename) throws IOException {
+    // read from local filesystem
+    Configuration conf = new Configuration();
+    if (!BaseSqoopTestCase.isOnPhysicalCluster()) {
+      conf.set(CommonArgs.FS_DEFAULT_NAME, CommonArgs.LOCAL_FS);
     }
+    FileSystem fs = FileSystem.get(conf);
+    LOG.info("Opening SequenceFile " + filename);
+    return new SequenceFile.Reader(fs, new Path(filename), conf);
+  }
 
-    public static final Log LOG = LogFactory.getLog(
-                                      SeqFileReader.class.getName());
-
-    public static Reader getSeqFileReader(String filename) throws IOException {
-        // read from local filesystem
-        Configuration conf = new Configuration();
-        if (!BaseSqoopTestCase.isOnPhysicalCluster()) {
-            conf.set(CommonArgs.FS_DEFAULT_NAME, CommonArgs.LOCAL_FS);
-        }
-        FileSystem fs = FileSystem.get(conf);
-        LOG.info("Opening SequenceFile " + filename);
-        return new SequenceFile.Reader(fs, new Path(filename), conf);
-    }
-
-    public static Object getFirstValue(String filename) throws IOException {
-        Reader r = null;
+  public static Object getFirstValue(String filename) throws IOException {
+    Reader r = null;
+    try {
+      // read from local filesystem
+      Configuration conf = new Configuration();
+      if (!BaseSqoopTestCase.isOnPhysicalCluster()) {
+        conf.set(CommonArgs.FS_DEFAULT_NAME, CommonArgs.LOCAL_FS);
+      }
+      FileSystem fs = FileSystem.get(conf);
+      r = new SequenceFile.Reader(fs, new Path(filename), conf);
+      Object key = ReflectionUtils.newInstance(r.getKeyClass(), conf);
+      Object val = ReflectionUtils.newInstance(r.getValueClass(), conf);
+      LOG.info("Reading value of type " + r.getValueClassName() +
+               " from SequenceFile " + filename);
+      r.next(key);
+      r.getCurrentValue(val);
+      LOG.info("Value as string: " + val.toString());
+      return val;
+    } finally {
+      if (null != r) {
         try {
-            // read from local filesystem
-            Configuration conf = new Configuration();
-            if (!BaseSqoopTestCase.isOnPhysicalCluster()) {
-                conf.set(CommonArgs.FS_DEFAULT_NAME, CommonArgs.LOCAL_FS);
-            }
-            FileSystem fs = FileSystem.get(conf);
-            r = new SequenceFile.Reader(fs, new Path(filename), conf);
-            Object key = ReflectionUtils.newInstance(r.getKeyClass(), conf);
-            Object val = ReflectionUtils.newInstance(r.getValueClass(), conf);
-            LOG.info("Reading value of type " + r.getValueClassName()
-                     + " from SequenceFile " + filename);
-            r.next(key);
-            r.getCurrentValue(val);
-            LOG.info("Value as string: " + val.toString());
-            return val;
-        } finally {
-            if (null != r) {
-                try {
-                    r.close();
-                } catch (IOException ioe) {
-                    LOG.warn("IOException during close: " + ioe.toString());
-                }
-            }
+          r.close();
+        } catch (IOException ioe) {
+          LOG.warn("IOException during close: " + ioe.toString());
         }
+      }
     }
+  }
 }
-

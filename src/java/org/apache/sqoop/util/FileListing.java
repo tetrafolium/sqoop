@@ -18,13 +18,13 @@
 
 package org.apache.sqoop.util;
 
-import java.util.Arrays;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Recursive file listing under a specified directory.
@@ -37,97 +37,96 @@ import java.io.IOException;
  */
 public final class FileListing {
 
-    private FileListing() { }
+  private FileListing() {}
 
-    /**
-    * Demonstrate use.
-    *
-    * @param aArgs - <tt>aArgs[0]</tt> is the full name of an existing
-    * directory that can be read.
-    */
-    public static void main(String... aArgs) throws FileNotFoundException {
-        File startingDirectory = new File(aArgs[0]);
-        List<File> files = FileListing.getFileListing(startingDirectory);
+  /**
+   * Demonstrate use.
+   *
+   * @param aArgs - <tt>aArgs[0]</tt> is the full name of an existing
+   * directory that can be read.
+   */
+  public static void main(String... aArgs) throws FileNotFoundException {
+    File startingDirectory = new File(aArgs[0]);
+    List<File> files = FileListing.getFileListing(startingDirectory);
 
-        //print out all file names, in the the order of File.compareTo()
-        for (File file : files) {
-            System.out.println(file);
-        }
+    // print out all file names, in the the order of File.compareTo()
+    for (File file : files) {
+      System.out.println(file);
+    }
+  }
+
+  /**
+   * Recursively walk a directory tree and return a List of all
+   * Files found; the List is sorted using File.compareTo().
+   *
+   * @param aStartingDir is a valid directory, which can be read.
+   */
+  public static List<File> getFileListing(File aStartingDir)
+      throws FileNotFoundException {
+    validateDirectory(aStartingDir);
+    List<File> result = getFileListingNoSort(aStartingDir);
+    Collections.sort(result);
+    return result;
+  }
+
+  private static List<File> getFileListingNoSort(File aStartingDir)
+      throws FileNotFoundException {
+    List<File> result = new ArrayList<File>();
+    File[] filesAndDirs = aStartingDir.listFiles();
+    List<File> filesDirs = Arrays.asList(filesAndDirs);
+    for (File file : filesDirs) {
+      result.add(file); // always add, even if directory
+      if (!file.isFile()) {
+        // must be a directory
+        // recursive call!
+        List<File> deeperList = getFileListingNoSort(file);
+        result.addAll(deeperList);
+      }
+    }
+    return result;
+  }
+
+  /**
+   * Directory is valid if it exists, does not represent a file, and can be
+   * read.
+   */
+  private static void validateDirectory(File aDirectory)
+      throws FileNotFoundException {
+    if (aDirectory == null) {
+      throw new IllegalArgumentException("Directory should not be null.");
+    }
+    if (!aDirectory.exists()) {
+      throw new FileNotFoundException("Directory does not exist: " +
+                                      aDirectory);
+    }
+    if (!aDirectory.isDirectory()) {
+      throw new IllegalArgumentException("Is not a directory: " + aDirectory);
+    }
+    if (!aDirectory.canRead()) {
+      throw new IllegalArgumentException("Directory cannot be read: " +
+                                         aDirectory);
+    }
+  }
+
+  /**
+   * Recursively delete a directory and all its children.
+   * @param dir is a valid directory.
+   */
+  public static void recursiveDeleteDir(File dir) throws IOException {
+    if (!dir.exists()) {
+      throw new FileNotFoundException(dir.toString() + " does not exist");
     }
 
-    /**
-    * Recursively walk a directory tree and return a List of all
-    * Files found; the List is sorted using File.compareTo().
-    *
-    * @param aStartingDir is a valid directory, which can be read.
-    */
-    public static List<File> getFileListing(File aStartingDir)
-    throws FileNotFoundException {
-        validateDirectory(aStartingDir);
-        List<File> result = getFileListingNoSort(aStartingDir);
-        Collections.sort(result);
-        return result;
+    if (dir.isDirectory()) {
+      // recursively descend into all children and delete them.
+      File[] children = dir.listFiles();
+      for (File child : children) {
+        recursiveDeleteDir(child);
+      }
     }
 
-    private static List<File> getFileListingNoSort(File aStartingDir)
-    throws FileNotFoundException {
-        List<File> result = new ArrayList<File>();
-        File[] filesAndDirs = aStartingDir.listFiles();
-        List<File> filesDirs = Arrays.asList(filesAndDirs);
-        for (File file : filesDirs) {
-            result.add(file); //always add, even if directory
-            if (!file.isFile()) {
-                //must be a directory
-                //recursive call!
-                List<File> deeperList = getFileListingNoSort(file);
-                result.addAll(deeperList);
-            }
-        }
-        return result;
+    if (!dir.delete()) {
+      throw new IOException("Could not remove: " + dir);
     }
-
-    /**
-    * Directory is valid if it exists, does not represent a file, and can be read.
-    */
-    private static void validateDirectory(File aDirectory)
-    throws FileNotFoundException {
-        if (aDirectory == null) {
-            throw new IllegalArgumentException("Directory should not be null.");
-        }
-        if (!aDirectory.exists()) {
-            throw new FileNotFoundException("Directory does not exist: "
-                                            + aDirectory);
-        }
-        if (!aDirectory.isDirectory()) {
-            throw new IllegalArgumentException("Is not a directory: " + aDirectory);
-        }
-        if (!aDirectory.canRead()) {
-            throw new IllegalArgumentException("Directory cannot be read: "
-                                               + aDirectory);
-        }
-    }
-
-    /**
-     * Recursively delete a directory and all its children.
-     * @param dir is a valid directory.
-     */
-    public static void recursiveDeleteDir(File dir) throws IOException {
-        if (!dir.exists()) {
-            throw new FileNotFoundException(dir.toString() + " does not exist");
-        }
-
-        if (dir.isDirectory()) {
-            // recursively descend into all children and delete them.
-            File [] children = dir.listFiles();
-            for (File child : children) {
-                recursiveDeleteDir(child);
-            }
-        }
-
-        if (!dir.delete()) {
-            throw new IOException("Could not remove: " + dir);
-        }
-    }
-
+  }
 }
-

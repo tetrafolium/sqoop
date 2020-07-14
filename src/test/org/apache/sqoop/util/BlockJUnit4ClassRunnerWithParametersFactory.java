@@ -23,15 +23,21 @@ import org.junit.runners.parameterized.ParametersRunnerFactory;
 import org.junit.runners.parameterized.TestWithParameters;
 
 /**
- * Due to an issue in JUnit Gradle does not execute categorized tests which are parameterized too.
- * The issue is already reported(https://github.com/junit-team/junit4/issues/751) but its fix will be released in JUnit 4.13.
- * This factory returns a custom BlockJUnit4ClassRunnerWithParameters instance which contains the fix for this issue so
- * we have to use @Parameterized.UseParametersRunnerFactory(BlockJUnit4ClassRunnerWithParametersFactory.class) annotation
- * on parameterized test classes until JUnit 4.13 is released and we migrate to it.
+ * Due to an issue in JUnit Gradle does not execute categorized tests which are
+ * parameterized too. The issue is already
+ * reported(https://github.com/junit-team/junit4/issues/751) but its fix will be
+ * released in JUnit 4.13. This factory returns a custom
+ * BlockJUnit4ClassRunnerWithParameters instance which contains the fix for this
+ * issue so we have to use
+ * @Parameterized.UseParametersRunnerFactory(BlockJUnit4ClassRunnerWithParametersFactory.class)
+ * annotation on parameterized test classes until JUnit 4.13 is released and we
+ * migrate to it.
  */
-public class BlockJUnit4ClassRunnerWithParametersFactory implements ParametersRunnerFactory {
-    @Override
-    public Runner createRunnerForTestWithParameters(TestWithParameters test) throws InitializationError {
-        return new BlockJUnit4ClassRunnerWithParameters(test);
-    }
+public class BlockJUnit4ClassRunnerWithParametersFactory
+    implements ParametersRunnerFactory {
+  @Override
+  public Runner createRunnerForTestWithParameters(TestWithParameters test)
+      throws InitializationError {
+    return new BlockJUnit4ClassRunnerWithParameters(test);
+  }
 }

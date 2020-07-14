@@ -24,26 +24,19 @@ package org.apache.sqoop.util;
 @SuppressWarnings("serial")
 public class ExportException extends Exception {
 
-    public ExportException() {
-        super("ExportException");
-    }
+  public ExportException() { super("ExportException"); }
 
-    public ExportException(final String message) {
-        super(message);
-    }
+  public ExportException(final String message) { super(message); }
 
-    public ExportException(final Throwable cause) {
-        super(cause);
-    }
+  public ExportException(final Throwable cause) { super(cause); }
 
-    public ExportException(final String message, final Throwable cause) {
-        super(message, cause);
-    }
+  public ExportException(final String message, final Throwable cause) {
+    super(message, cause);
+  }
 
-    @Override
-    public String toString() {
-        String msg = getMessage();
-        return (null == msg) ? "ExportException" : msg;
-    }
-
+  @Override
+  public String toString() {
+    String msg = getMessage();
+    return (null == msg) ? "ExportException" : msg;
+  }
 }

@@ -26,12 +26,10 @@ import org.apache.hadoop.fs.Path;
  * Helper class for HDFS related functions.
  */
 public final class HadoopFiles {
-    private HadoopFiles() {
-    }
+  private HadoopFiles() {}
 
-    public static void delete(Path file, boolean recursive) throws Exception {
-        FileSystem fileSystem = FileSystem.get(file.toUri(), new Configuration());
-        fileSystem.delete(file, recursive);
-    }
-
+  public static void delete(Path file, boolean recursive)throws Exception {
+    FileSystem fileSystem = FileSystem.get(file.toUri(), new Configuration());
+    fileSystem.delete(file, recursive);
+  }
 }

@@ -20,7 +20,6 @@ package org.apache.sqoop.io;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -31,42 +30,43 @@ import org.apache.commons.logging.LogFactory;
  */
 public class SplittableBufferedWriter extends BufferedWriter {
 
-    public static final Log LOG = LogFactory.getLog(
-                                      SplittableBufferedWriter.class.getName());
+  public static final Log LOG =
+      LogFactory.getLog(SplittableBufferedWriter.class.getName());
 
-    private SplittingOutputStream splitOutputStream;
-    private boolean alwaysFlush;
+  private SplittingOutputStream splitOutputStream;
+  private boolean alwaysFlush;
 
-    public SplittableBufferedWriter(
-        final SplittingOutputStream splitOutputStream) {
-        super(new OutputStreamWriter(splitOutputStream));
+  public SplittableBufferedWriter(
+      final SplittingOutputStream splitOutputStream) {
+    super(new OutputStreamWriter(splitOutputStream));
 
-        this.splitOutputStream = splitOutputStream;
-        this.alwaysFlush = false;
+    this.splitOutputStream = splitOutputStream;
+    this.alwaysFlush = false;
+  }
+
+  /** For testing. */
+  protected SplittableBufferedWriter(final SplittingOutputStream
+                                         splitOutputStream,
+                                     final boolean alwaysFlush) {
+    super(new OutputStreamWriter(splitOutputStream));
+
+    this.splitOutputStream = splitOutputStream;
+    this.alwaysFlush = alwaysFlush;
+  }
+
+  public void newLine() throws IOException {
+    super.newLine();
+    this.allowSplit();
+  }
+
+  public void allowSplit() throws IOException {
+    if (alwaysFlush) {
+      this.flush();
     }
-
-    /** For testing. */
-    protected SplittableBufferedWriter(
-        final SplittingOutputStream splitOutputStream, final boolean alwaysFlush) {
-        super(new OutputStreamWriter(splitOutputStream));
-
-        this.splitOutputStream = splitOutputStream;
-        this.alwaysFlush = alwaysFlush;
+    if (this.splitOutputStream.wouldSplit()) {
+      LOG.debug("Starting new split");
+      this.flush();
+      this.splitOutputStream.allowSplit();
     }
-
-    public void newLine() throws IOException {
-        super.newLine();
-        this.allowSplit();
-    }
-
-    public void allowSplit() throws IOException {
-        if (alwaysFlush) {
-            this.flush();
-        }
-        if (this.splitOutputStream.wouldSplit()) {
-            LOG.debug("Starting new split");
-            this.flush();
-            this.splitOutputStream.allowSplit();
-        }
-    }
+  }
 }

@@ -24,13 +24,13 @@ package org.apache.sqoop.validation;
  */
 public interface ValidationFailureHandler {
 
-    /**
-     * Method that handles the validation failure.
-     *
-     * @param validationContext validation context
-     * @return if failure was handled or not
-     * @throws ValidationException
-     */
-    boolean handle(ValidationContext validationContext)
-    throws ValidationException;
+  /**
+   * Method that handles the validation failure.
+   *
+   * @param validationContext validation context
+   * @return if failure was handled or not
+   * @throws ValidationException
+   */
+  boolean handle(ValidationContext validationContext)
+      throws ValidationException;
 }

@@ -18,34 +18,33 @@
 
 package org.apache.sqoop.db.decorator;
 
+import java.security.PrivilegedAction;
+import java.sql.Connection;
 import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.sqoop.authentication.KerberosAuthenticator;
 import org.apache.sqoop.db.JdbcConnectionFactory;
 
-import java.security.PrivilegedAction;
-import java.sql.Connection;
+public class KerberizedConnectionFactoryDecorator
+    extends JdbcConnectionFactoryDecorator {
 
-public class KerberizedConnectionFactoryDecorator extends JdbcConnectionFactoryDecorator {
+  private final KerberosAuthenticator authenticator;
 
-    private final KerberosAuthenticator authenticator;
+  public KerberizedConnectionFactoryDecorator(
+      JdbcConnectionFactory decorated, KerberosAuthenticator authenticator) {
+    super(decorated);
+    this.authenticator = authenticator;
+  }
 
-    public KerberizedConnectionFactoryDecorator(JdbcConnectionFactory decorated, KerberosAuthenticator authenticator) {
-        super(decorated);
-        this.authenticator = authenticator;
-    }
+  @Override
+  public Connection createConnection() {
+    UserGroupInformation ugi = authenticator.authenticate();
+    return ugi.doAs(new PrivilegedAction<Connection>() {
+      @Override
+      public Connection run() {
+        return decorated.createConnection();
+      }
+    });
+  }
 
-    @Override
-    public Connection createConnection() {
-        UserGroupInformation ugi = authenticator.authenticate();
-        return ugi.doAs(new PrivilegedAction<Connection>() {
-            @Override
-            public Connection run() {
-                return decorated.createConnection();
-            }
-        });
-    }
-
-    public KerberosAuthenticator getAuthenticator() {
-        return authenticator;
-    }
+  public KerberosAuthenticator getAuthenticator() { return authenticator; }
 }

@@ -20,7 +20,6 @@ package org.apache.sqoop;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.apache.sqoop.testutil.ManagerCompatTestCase;
 
 /**
@@ -40,41 +39,40 @@ import org.apache.sqoop.testutil.ManagerCompatTestCase;
  */
 public class TestColumnTypes extends ManagerCompatTestCase {
 
-    public static final Log LOG = LogFactory.getLog(
-                                      TestColumnTypes.class.getName());
+  public static final Log LOG =
+      LogFactory.getLog(TestColumnTypes.class.getName());
 
-    @Override
-    protected Log getLogger() {
-        return LOG;
-    }
+  @Override
+  protected Log getLogger() {
+    return LOG;
+  }
 
-    @Override
-    protected String getDbFriendlyName() {
-        return "HSQLDB";
-    }
+  @Override
+  protected String getDbFriendlyName() {
+    return "HSQLDB";
+  }
 
-    @Override
-    protected boolean useHsqldbTestServer() {
-        return true;
-    }
+  @Override
+  protected boolean useHsqldbTestServer() {
+    return true;
+  }
 
-    // Don't need to override getConnectString() because the default uses hsqldb.
+  // Don't need to override getConnectString() because the default uses hsqldb.
 
-    // HSQLdb does not support these types over JDBC.
+  // HSQLdb does not support these types over JDBC.
 
-    @Override
-    protected boolean supportsClob() {
-        return false;
-    }
+  @Override
+  protected boolean supportsClob() {
+    return false;
+  }
 
-    @Override
-    protected boolean supportsBlob() {
-        return false;
-    }
+  @Override
+  protected boolean supportsBlob() {
+    return false;
+  }
 
-    @Override
-    protected String getVarBinarySeqOutput(String asInserted) {
-        return toLowerHexString(asInserted);
-    }
+  @Override
+  protected String getVarBinarySeqOutput(String asInserted) {
+    return toLowerHexString(asInserted);
+  }
 }
-

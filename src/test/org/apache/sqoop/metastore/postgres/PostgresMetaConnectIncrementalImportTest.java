@@ -38,13 +38,15 @@ import org.junit.experimental.categories.Category;
  *
  *   Once you have a running Postgres database,
  *   Set server URL, database name, username, and password with system variables
- *   -Dsqoop.test.postgresql.connectstring.host_url, -Dsqoop.test.postgresql.database,
- *   -Dsqoop.test.postgresql.username and -Dsqoop.test.postgresql.password respectively
+ *   -Dsqoop.test.postgresql.connectstring.host_url,
+ * -Dsqoop.test.postgresql.database, -Dsqoop.test.postgresql.username and
+ * -Dsqoop.test.postgresql.password respectively
  */
 @Category(PostgresqlTest.class)
-public class PostgresMetaConnectIncrementalImportTest extends MetaConnectIncrementalImportTestBase {
+public class PostgresMetaConnectIncrementalImportTest
+    extends MetaConnectIncrementalImportTestBase {
 
-    public PostgresMetaConnectIncrementalImportTest() {
-        super(CONNECT_STRING, DATABASE_USER, PASSWORD);
-    }
+  public PostgresMetaConnectIncrementalImportTest() {
+    super(CONNECT_STRING, DATABASE_USER, PASSWORD);
+  }
 }

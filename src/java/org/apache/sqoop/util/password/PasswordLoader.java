@@ -17,33 +17,33 @@
  */
 package org.apache.sqoop.util.password;
 
-import org.apache.hadoop.conf.Configuration;
-
 import java.io.IOException;
+import org.apache.hadoop.conf.Configuration;
 
 /**
  * Abstract class for describing password loader.
  */
 abstract public class PasswordLoader {
 
-    /**
-     * Load password from given path.
-     *
-     * @param path Path to load password from.
-     * @param configuration Configuration object.
-     * @return Password
-     * @throws IOException
-     */
-    public abstract String loadPassword(String path, Configuration configuration) throws IOException;
+  /**
+   * Load password from given path.
+   *
+   * @param path Path to load password from.
+   * @param configuration Configuration object.
+   * @return Password
+   * @throws IOException
+   */
+  public abstract String loadPassword(String path, Configuration configuration)
+      throws IOException;
 
-    /**
-     * Callback that allows to clean up configuration properties out of the
-     * configuration object that will be passed down to the mapreduce framework.
-     *
-     * It's defined by the Sqoop framework that after calling cleanUpConfiguration(),
-     * method loadPassword() will never be called again.
-     */
-    public void cleanUpConfiguration(Configuration configuration) {
-        // Default implementation is empty
-    }
+  /**
+   * Callback that allows to clean up configuration properties out of the
+   * configuration object that will be passed down to the mapreduce framework.
+   *
+   * It's defined by the Sqoop framework that after calling
+   * cleanUpConfiguration(), method loadPassword() will never be called again.
+   */
+  public void cleanUpConfiguration(Configuration configuration) {
+    // Default implementation is empty
+  }
 }

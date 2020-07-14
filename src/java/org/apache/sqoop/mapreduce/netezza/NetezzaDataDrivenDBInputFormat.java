@@ -19,51 +19,48 @@ package org.apache.sqoop.mapreduce.netezza;
 
 import java.io.IOException;
 import java.util.List;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.JobContext;
+import org.apache.sqoop.config.ConfigurationHelper;
 import org.apache.sqoop.manager.NetezzaManager;
 import org.apache.sqoop.mapreduce.DBWritable;
 import org.apache.sqoop.mapreduce.db.DataDrivenDBInputFormat;
 import org.apache.sqoop.mapreduce.db.netezza.NetezzaDBDataSliceSplitter;
 
-import org.apache.sqoop.config.ConfigurationHelper;
-
 /**
  * Netezza specific DB input format.
  */
-public class NetezzaDataDrivenDBInputFormat<T extends DBWritable> extends
-    DataDrivenDBInputFormat<T> implements Configurable {
-    private static final Log LOG = LogFactory
-                                   .getLog(NetezzaDataDrivenDBInputFormat.class);
+public class NetezzaDataDrivenDBInputFormat<T extends DBWritable>
+    extends DataDrivenDBInputFormat<T> implements Configurable {
+  private static final Log LOG =
+      LogFactory.getLog(NetezzaDataDrivenDBInputFormat.class);
 
-    @Override
-    public List<InputSplit> getSplits(JobContext job) throws IOException {
-        int numMappers = ConfigurationHelper.getJobNumMaps(job);
+  @Override
+  public List<InputSplit> getSplits(JobContext job) throws IOException {
+    int numMappers = ConfigurationHelper.getJobNumMaps(job);
 
-        String boundaryQuery = getDBConf().getInputBoundingQuery();
-        // Resort to base class if
-        // dataslice aligned import is not requested
-        // Not table extract
-        // No boundary query
-        // Only one mapper.
-        if (!getConf().getBoolean(
-                    NetezzaManager.NETEZZA_DATASLICE_ALIGNED_ACCESS_OPT, false)
-                || getDBConf().getInputTableName() == null
-                || numMappers == 1
-                || (boundaryQuery != null && !boundaryQuery.isEmpty())) {
-            return super.getSplits(job);
-        }
-
-        // Generate a splitter that splits only on datasliceid. It is an
-        // integer split. We will just use the lower bounding query to specify
-        // the restriction of dataslice and set the upper bound to a constant
-
-        NetezzaDBDataSliceSplitter splitter = new NetezzaDBDataSliceSplitter();
-
-        return splitter.split(getConf(), null, null);
+    String boundaryQuery = getDBConf().getInputBoundingQuery();
+    // Resort to base class if
+    // dataslice aligned import is not requested
+    // Not table extract
+    // No boundary query
+    // Only one mapper.
+    if (!getConf().getBoolean(
+            NetezzaManager.NETEZZA_DATASLICE_ALIGNED_ACCESS_OPT, false) ||
+        getDBConf().getInputTableName() == null || numMappers == 1 ||
+        (boundaryQuery != null && !boundaryQuery.isEmpty())) {
+      return super.getSplits(job);
     }
+
+    // Generate a splitter that splits only on datasliceid. It is an
+    // integer split. We will just use the lower bounding query to specify
+    // the restriction of dataslice and set the upper bound to a constant
+
+    NetezzaDBDataSliceSplitter splitter = new NetezzaDBDataSliceSplitter();
+
+    return splitter.split(getConf(), null, null);
+  }
 }

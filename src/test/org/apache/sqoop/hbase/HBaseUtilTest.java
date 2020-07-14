@@ -18,13 +18,12 @@
 
 package org.apache.sqoop.hbase;
 
-import org.apache.sqoop.testcategories.sqooptest.UnitTest;
-import org.junit.Test;
-import org.junit.experimental.categories.Category;
-
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import org.apache.sqoop.testcategories.sqooptest.UnitTest;
+import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 /**
  * This tests to verify that HBase is present (default when running test cases)
@@ -33,17 +32,16 @@ import static org.junit.Assert.assertTrue;
 @Category(UnitTest.class)
 public class HBaseUtilTest {
 
-    @Test
-    public void testHBasePresent() {
-        assertTrue(HBaseUtil.isHBaseJarPresent());
-    }
+  @Test
+  public void testHBasePresent() {
+    assertTrue(HBaseUtil.isHBaseJarPresent());
+  }
 
-    @Test
-    public void testHBaseNotPresent() {
-        HBaseUtil.setAlwaysNoHBaseJarMode(true);
-        boolean present = HBaseUtil.isHBaseJarPresent();
-        HBaseUtil.setAlwaysNoHBaseJarMode(false);
-        assertFalse(present);
-    }
-
+  @Test
+  public void testHBaseNotPresent() {
+    HBaseUtil.setAlwaysNoHBaseJarMode(true);
+    boolean present = HBaseUtil.isHBaseJarPresent();
+    HBaseUtil.setAlwaysNoHBaseJarMode(false);
+    assertFalse(present);
+  }
 }

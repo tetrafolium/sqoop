@@ -31,34 +31,33 @@ import java.sql.RowId;
  * reference data.
  */
 public class RowIdGenerator extends OraOopTestDataGenerator<RowId> {
-    private static final String VALID_CHARS =
-        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789/+";
-    private static final int LENGTH = 18;
-    private static Class<?> rowIdClass;
-    private static Constructor<?> rowIdConstructor;
+  private static final String VALID_CHARS =
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789/+";
+  private static final int LENGTH = 18;
+  private static Class<?> rowIdClass;
+  private static Constructor<?> rowIdConstructor;
 
-    static {
-        try {
-            rowIdClass = Class.forName("oracle.sql.ROWID");
-            rowIdConstructor = rowIdClass.getConstructor(byte[].class);
-        } catch (Exception e) {
-            throw new RuntimeException(
-                "Problem getting Oracle JDBC methods via reflection.", e);
-        }
+  static {
+    try {
+      rowIdClass = Class.forName("oracle.sql.ROWID");
+      rowIdConstructor = rowIdClass.getConstructor(byte[].class);
+    } catch (Exception e) {
+      throw new RuntimeException(
+          "Problem getting Oracle JDBC methods via reflection.", e);
     }
+  }
 
-    @Override
-    public RowId next() {
-        try {
-            StringBuffer sb = new StringBuffer();
-            while (sb.length() < LENGTH) {
-                sb.append(VALID_CHARS.charAt(rng.nextInt(VALID_CHARS.length())));
-            }
-            return (RowId) rowIdConstructor.newInstance(sb.toString().getBytes(
-                        Charset.forName("US-ASCII")));
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+  @Override
+  public RowId next() {
+    try {
+      StringBuffer sb = new StringBuffer();
+      while (sb.length() < LENGTH) {
+        sb.append(VALID_CHARS.charAt(rng.nextInt(VALID_CHARS.length())));
+      }
+      return (RowId)rowIdConstructor.newInstance(
+          sb.toString().getBytes(Charset.forName("US-ASCII")));
+    } catch (Exception e) {
+      throw new RuntimeException(e);
     }
-
+  }
 }

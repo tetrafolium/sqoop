@@ -18,18 +18,19 @@
 
 package org.apache.sqoop.mapreduce.parquet;
 
+import java.io.IOException;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.Job;
 
-import java.io.IOException;
-
 /**
- * This interface defines the type of a product of {@link ParquetJobConfiguratorFactory}.
- * The implementations of the methods of this interface help to configure Sqoop Parquet merge jobs.
+ * This interface defines the type of a product of {@link
+ * ParquetJobConfiguratorFactory}. The implementations of the methods of this
+ * interface help to configure Sqoop Parquet merge jobs.
  */
 public interface ParquetMergeJobConfigurator {
 
-    void configureParquetMergeJob(Configuration conf, Job job, Path oldPath, Path newPath, Path finalPath) throws IOException;
-
+  void configureParquetMergeJob(Configuration conf, Job job, Path oldPath,
+                                Path newPath, Path finalPath)
+      throws IOException;
 }

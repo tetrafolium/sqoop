@@ -25,9 +25,9 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.accumulo.AccumuloUtil;
 import org.apache.sqoop.hbase.HBaseUtil;
 import org.apache.sqoop.mapreduce.AccumuloImportJob;
@@ -36,131 +36,125 @@ import org.apache.sqoop.mapreduce.HBaseImportJob;
 import org.apache.sqoop.mapreduce.ImportJobBase;
 import org.apache.sqoop.mapreduce.mainframe.MainframeDatasetInputFormat;
 import org.apache.sqoop.mapreduce.mainframe.MainframeImportJob;
-
-import org.apache.sqoop.SqoopOptions;
 import org.apache.sqoop.util.ImportException;
-
 
 /**
  * ConnManager implementation for mainframe datasets.
  */
 public class MainframeManager extends org.apache.sqoop.manager.ConnManager {
-    public static final String DEFAULT_DATASET_COLUMN_NAME = "DEFAULT_COLUMN";
-    private static final Log LOG
-        = LogFactory.getLog(MainframeManager.class.getName());
+  public static final String DEFAULT_DATASET_COLUMN_NAME = "DEFAULT_COLUMN";
+  private static final Log LOG =
+      LogFactory.getLog(MainframeManager.class.getName());
 
-    /**
-     * Constructs the MainframeManager.
-     * @param opts the SqoopOptions describing the user's requested action.
-     */
-    public MainframeManager(final SqoopOptions opts) {
-        this.options = opts;
+  /**
+   * Constructs the MainframeManager.
+   * @param opts the SqoopOptions describing the user's requested action.
+   */
+  public MainframeManager(final SqoopOptions opts) { this.options = opts; }
+
+  /**
+   * Launch a MapReduce job via MainframeImportJob to read the
+   * partitioned dataset with MainframeDatasetInputFormat.
+   */
+  @Override
+  public void importTable(org.apache.sqoop.manager.ImportJobContext context)
+      throws IOException, ImportException {
+    String pdsName = context.getTableName();
+    String jarFile = context.getJarFile();
+    SqoopOptions opts = context.getOptions();
+
+    context.setConnManager(this);
+
+    ImportJobBase importer;
+    if (opts.getHBaseTable() != null) {
+      if (!HBaseUtil.isHBaseJarPresent()) {
+        throw new ImportException("HBase jars are not present in "
+                                  + "classpath, cannot import to HBase!");
+      }
+      if (!opts.isBulkLoadEnabled()) {
+        importer = new HBaseImportJob(opts, context);
+      } else {
+        importer = new HBaseBulkImportJob(opts, context);
+      }
+    } else if (opts.getAccumuloTable() != null) {
+      if (!AccumuloUtil.isAccumuloJarPresent()) {
+        throw new ImportException("Accumulo jars are not present in "
+                                  + "classpath, cannot import to Accumulo!");
+      }
+      importer = new AccumuloImportJob(opts, context);
+    } else {
+      // Import to HDFS.
+      importer = new MainframeImportJob(
+          opts, context,
+          getParquetJobConfigurator().createParquetImportJobConfigurator());
     }
 
-    /**
-     * Launch a MapReduce job via MainframeImportJob to read the
-     * partitioned dataset with MainframeDatasetInputFormat.
-     */
-    @Override
-    public void importTable(org.apache.sqoop.manager.ImportJobContext context)
-    throws IOException, ImportException {
-        String pdsName = context.getTableName();
-        String jarFile = context.getJarFile();
-        SqoopOptions opts = context.getOptions();
+    importer.setInputFormatClass(MainframeDatasetInputFormat.class);
+    importer.runImport(pdsName, jarFile, null, opts.getConf());
+  }
 
-        context.setConnManager(this);
+  @Override
+  public String[] getColumnNames(String tableName) {
+    // default is one column for the whole record
+    String[] colNames = new String[1];
+    colNames[0] = DEFAULT_DATASET_COLUMN_NAME;
+    return colNames;
+  }
 
-        ImportJobBase importer;
-        if (opts.getHBaseTable() != null) {
-            if (!HBaseUtil.isHBaseJarPresent()) {
-                throw new ImportException("HBase jars are not present in "
-                                          + "classpath, cannot import to HBase!");
-            }
-            if (!opts.isBulkLoadEnabled()) {
-                importer = new HBaseImportJob(opts, context);
-            } else {
-                importer = new HBaseBulkImportJob(opts, context);
-            }
-        } else if (opts.getAccumuloTable() != null) {
-            if (!AccumuloUtil.isAccumuloJarPresent()) {
-                throw new ImportException("Accumulo jars are not present in "
-                                          + "classpath, cannot import to Accumulo!");
-            }
-            importer = new AccumuloImportJob(opts, context);
-        } else {
-            // Import to HDFS.
-            importer = new MainframeImportJob(opts, context, getParquetJobConfigurator().createParquetImportJobConfigurator());
-        }
+  @Override
+  public Map<String, Integer> getColumnTypes(String tableName) {
+    Map<String, Integer> colTypes = new HashMap<String, Integer>();
+    String[] colNames = getColumnNames(tableName);
+    colTypes.put(colNames[0], Types.VARCHAR);
+    return colTypes;
+  }
 
-        importer.setInputFormatClass(MainframeDatasetInputFormat.class);
-        importer.runImport(pdsName, jarFile, null, opts.getConf());
-    }
+  @Override
+  public void discardConnection(boolean doClose) {
+    // do nothing
+  }
 
-    @Override
-    public String[] getColumnNames(String tableName) {
-        // default is one column for the whole record
-        String[] colNames = new String[1];
-        colNames[0] = DEFAULT_DATASET_COLUMN_NAME;
-        return colNames;
-    }
+  @Override
+  public String[] listDatabases() {
+    LOG.error("MainframeManager.listDatabases() not supported");
+    return null;
+  }
 
-    @Override
-    public Map<String, Integer> getColumnTypes(String tableName) {
-        Map<String, Integer> colTypes = new HashMap<String, Integer>();
-        String[] colNames = getColumnNames(tableName);
-        colTypes.put(colNames[0], Types.VARCHAR);
-        return colTypes;
-    }
+  @Override
+  public String[] listTables() {
+    LOG.error("MainframeManager.listTables() not supported");
+    return null;
+  }
 
-    @Override
-    public void discardConnection(boolean doClose) {
-        // do nothing
-    }
+  @Override
+  public String getPrimaryKey(String tableName) {
+    return null;
+  }
 
-    @Override
-    public String[] listDatabases() {
-        LOG.error("MainframeManager.listDatabases() not supported");
-        return null;
-    }
+  @Override
+  public ResultSet readTable(String tableName, String[] columns)
+      throws SQLException {
+    return null;
+  }
 
-    @Override
-    public String[] listTables() {
-        LOG.error("MainframeManager.listTables() not supported");
-        return null;
-    }
+  @Override
+  public Connection getConnection() throws SQLException {
+    return null;
+  }
 
-    @Override
-    public String getPrimaryKey(String tableName) {
-        return null;
-    }
+  @Override
+  public void close() throws SQLException {
+    release();
+  }
 
-    @Override
-    public ResultSet readTable(String tableName, String[] columns)
-    throws SQLException {
-        return null;
-    }
+  @Override
+  public void release() {}
 
-    @Override
-    public Connection getConnection() throws SQLException {
-        return null;
-    }
+  @Override
+  public String getDriverClass() {
+    return "";
+  }
 
-    @Override
-    public void close() throws SQLException {
-        release();
-    }
-
-    @Override
-    public void release() {
-    }
-
-    @Override
-    public String getDriverClass() {
-        return "";
-    }
-
-    @Override
-    public void execAndPrint(String s) {
-    }
-
+  @Override
+  public void execAndPrint(String s) {}
 }

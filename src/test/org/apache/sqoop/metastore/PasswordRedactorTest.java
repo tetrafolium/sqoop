@@ -17,45 +17,45 @@
  */
 package org.apache.sqoop.metastore;
 
-import org.apache.sqoop.testcategories.sqooptest.UnitTest;
-import org.junit.Test;
-import org.junit.experimental.categories.Category;
-
-import java.util.HashMap;
-import java.util.Map;
-
 import static org.apache.sqoop.SqoopOptions.DB_PASSWORD_KEY;
 import static org.apache.sqoop.metastore.PasswordRedactor.REDACTED_PASSWORD_STRING;
 import static org.junit.Assert.assertEquals;
 
+import java.util.HashMap;
+import java.util.Map;
+import org.apache.sqoop.testcategories.sqooptest.UnitTest;
+import org.junit.Test;
+import org.junit.experimental.categories.Category;
+
 @Category(UnitTest.class)
 public class PasswordRedactorTest {
 
-    @Test
-    public void testRedactValueWithPasswordFieldReturnsRedactedValue() {
-        assertEquals(REDACTED_PASSWORD_STRING, PasswordRedactor.redactValue(DB_PASSWORD_KEY, "secret"));
-    }
+  @Test
+  public void testRedactValueWithPasswordFieldReturnsRedactedValue() {
+    assertEquals(REDACTED_PASSWORD_STRING,
+                 PasswordRedactor.redactValue(DB_PASSWORD_KEY, "secret"));
+  }
 
-    @Test
-    public void testRedactValueWithNonPasswordFieldReturnsInputValue() {
-        String nonPasswordFieldKey = "non_password_field";
-        String inputValue = "not_a_secret";
-        assertEquals(inputValue, PasswordRedactor.redactValue(nonPasswordFieldKey, inputValue));
-    }
+  @Test
+  public void testRedactValueWithNonPasswordFieldReturnsInputValue() {
+    String nonPasswordFieldKey = "non_password_field";
+    String inputValue = "not_a_secret";
+    assertEquals(inputValue,
+                 PasswordRedactor.redactValue(nonPasswordFieldKey, inputValue));
+  }
 
-    @Test
-    public void testRedactValuesRedactsPasswordFieldAndDoesNotChangeTheOthers() {
-        String nonPasswordFieldKey = "non_password_field";
-        String nonPasswordFieldValue = "non_password_value";
-        Map<String, String> input = new HashMap<>();
-        input.put(nonPasswordFieldKey, nonPasswordFieldValue);
-        input.put(DB_PASSWORD_KEY, "secret");
+  @Test
+  public void testRedactValuesRedactsPasswordFieldAndDoesNotChangeTheOthers() {
+    String nonPasswordFieldKey = "non_password_field";
+    String nonPasswordFieldValue = "non_password_value";
+    Map<String, String> input = new HashMap<>();
+    input.put(nonPasswordFieldKey, nonPasswordFieldValue);
+    input.put(DB_PASSWORD_KEY, "secret");
 
-        Map<String, String> expected = new HashMap<>();
-        expected.put(nonPasswordFieldKey, nonPasswordFieldValue);
-        expected.put(DB_PASSWORD_KEY, REDACTED_PASSWORD_STRING);
+    Map<String, String> expected = new HashMap<>();
+    expected.put(nonPasswordFieldKey, nonPasswordFieldValue);
+    expected.put(DB_PASSWORD_KEY, REDACTED_PASSWORD_STRING);
 
-        assertEquals(expected, PasswordRedactor.redactValues(input));
-    }
-
+    assertEquals(expected, PasswordRedactor.redactValues(input));
+  }
 }
