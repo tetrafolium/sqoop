@@ -131,10 +131,10 @@ public class DB2XmlTypeImportManualTest extends ImportJobTestCase {
             conn = manager.getConnection();
             conn.setAutoCommit(false);
             stmt = conn.createStatement();
-            String xml ="xmlparse(document '<company name=\"Company1\">\n"+
-                        "<emp id=\"31201\" salary=\"60000\" gender=\"Female\">"+
-                        "<name><first>Laura </first><last>Brown</last></name>"+
-                        "<dept id=\"M25\">Finance</dept></emp></company>')";
+            String xml ="xmlparse(document '<company name=\"Company1\">\n"
+                        + "<emp id=\"31201\" salary=\"60000\" gender=\"Female\">"
+                        + "<name><first>Laura </first><last>Brown</last></name>"
+                        + "<dept id=\"M25\">Finance</dept></emp></company>')";
 
 
             // create the database table and populate it with data.

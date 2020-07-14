@@ -426,8 +426,8 @@ public class OraOopManagerFactory extends ManagerFactory {
         if (testDynamicallyGeneratedOracleRacInstanceConnection(jdbcUrl, jobData
                 .getSqoopOptions().getUsername(), jobData.getSqoopOptions()
                 .getPassword(), jobData.getSqoopOptions().getConnectionParams()
-                , false // <- ShowInstanceSysTimestamp
-                , "" // <- instanceDescription
+, false // <- ShowInstanceSysTimestamp
+, "" // <- instanceDescription
                                                                )) {
 
             LOG.info(String.format(

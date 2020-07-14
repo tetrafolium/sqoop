@@ -141,8 +141,8 @@ public class BasicRetrySQLFailureHandler
         } while (doRetry);
 
         if (!validConnection) {
-            throw new IOException("Failed to recover connection after " +
-                                  retryAttempts + " retries. Giving up");
+            throw new IOException("Failed to recover connection after "
+                                  + retryAttempts + " retries. Giving up");
         }
         return conn;
     }

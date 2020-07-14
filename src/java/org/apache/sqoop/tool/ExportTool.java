@@ -43,8 +43,8 @@ import static org.apache.sqoop.manager.SupportedManagers.MYSQL;
 public class ExportTool extends BaseSqoopTool {
 
     public static final Log LOG = LogFactory.getLog(ExportTool.class.getName());
-    public static final String NOT_SUPPORTED_FILE_FORMAT_ERROR_MSG = "Please note that the export tool " +
-            "detects the file format automatically and does not support it as an argument: %s";
+    public static final String NOT_SUPPORTED_FILE_FORMAT_ERROR_MSG = "Please note that the export tool "
+            + "detects the file format automatically and does not support it as an argument: %s";
 
     private final List<String> unsupportedArguments =
         Collections.unmodifiableList(
@@ -428,8 +428,8 @@ public class ExportTool extends BaseSqoopTool {
         }
         if (options.getInNullStringValue() != null || options.getInNullNonStringValue() != null) {
             throw new InvalidOptionsException(
-                "The --direct option is not compatible with the --input-null-string or " +
-                "--input-null-non-string command for MySQL exports");
+                "The --direct option is not compatible with the --input-null-string or "
+                + "--input-null-non-string command for MySQL exports");
         }
     }
 

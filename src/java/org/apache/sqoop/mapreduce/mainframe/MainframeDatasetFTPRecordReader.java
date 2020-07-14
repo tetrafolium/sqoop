@@ -115,8 +115,8 @@ public class MainframeDatasetFTPRecordReader <T extends SqoopRecord>
                 }
             } while(line == null);
         } catch (IOException ioe) {
-            throw new IOException("IOException during data transfer: " +
-                                  ioe.toString());
+            throw new IOException("IOException during data transfer: "
+                                  + ioe.toString());
         }
         if (line != null) {
             convertToSqoopRecord(line, (SqoopRecord)sqoopRecord);

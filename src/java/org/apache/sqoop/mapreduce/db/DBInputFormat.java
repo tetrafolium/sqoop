@@ -187,8 +187,7 @@ public class DBInputFormat<T extends DBWritable>
                     this.connection.setTransactionIsolation(
                         Connection.TRANSACTION_READ_UNCOMMITTED);
                 }
-            }
-            else {
+            } else {
                 LOG.info("Using read commited transaction isolation");
                 this.connection.setTransactionIsolation(
                     Connection.TRANSACTION_READ_COMMITTED);

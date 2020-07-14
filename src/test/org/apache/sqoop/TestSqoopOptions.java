@@ -742,8 +742,8 @@ public class TestSqoopOptions {
         };
 
         thrown.expect(SqoopOptions.InvalidOptionsException.class);
-        thrown.reportMissingExceptionWithMessage("Expected InvalidOptionsException on incompatibility of " +
-                "--delete-target-dir and --append");
+        thrown.reportMissingExceptionWithMessage("Expected InvalidOptionsException on incompatibility of "
+                + "--delete-target-dir and --append");
         validateImportOptions(extraArgs);
     }
 
@@ -756,8 +756,8 @@ public class TestSqoopOptions {
         };
 
         thrown.expect(SqoopOptions.InvalidOptionsException.class);
-        thrown.reportMissingExceptionWithMessage("Expected InvalidOptionsException on incompatibility of " +
-                "--delete-target-dir and --incremental");
+        thrown.reportMissingExceptionWithMessage("Expected InvalidOptionsException on incompatibility of "
+                + "--delete-target-dir and --incremental");
         validateImportOptions(extraArgs);
     }
 
@@ -817,8 +817,8 @@ public class TestSqoopOptions {
         };
 
         thrown.expect(SqoopOptions.InvalidOptionsException.class);
-        thrown.reportMissingExceptionWithMessage("Expected Exception on incompatibility of " +
-                "--autoreset-to-one-mapper and --split-by");
+        thrown.reportMissingExceptionWithMessage("Expected Exception on incompatibility of "
+                + "--autoreset-to-one-mapper and --split-by");
         validateImportOptions(extraArgs);
     }
 
@@ -941,59 +941,44 @@ public class TestSqoopOptions {
         if(type.isEnum()) {
             Object[] enumValues = type.getEnumConstants();
             return enumValues[random.nextInt(enumValues.length)];
-        }
-        else if(type.equals(Integer.TYPE) || type.equals(Integer.class)) {
+        } else if(type.equals(Integer.TYPE) || type.equals(Integer.class)) {
             return random.nextInt();
-        }
-        else if(type.equals(Long.TYPE) || type.equals(Long.class)) {
+        } else if(type.equals(Long.TYPE) || type.equals(Long.class)) {
             return random.nextLong();
-        }
-        else if(type.equals(Double.TYPE) || type.equals(Double.class)) {
+        } else if(type.equals(Double.TYPE) || type.equals(Double.class)) {
             return random.nextDouble();
-        }
-        else if(type.equals(Float.TYPE) || type.equals(Float.class)) {
+        } else if(type.equals(Float.TYPE) || type.equals(Float.class)) {
             return random.nextFloat();
-        }
-        else if(type.equals(String.class)) {
+        } else if(type.equals(String.class)) {
             return UUID.randomUUID().toString();
-        }
-        else if(type.equals(Character.TYPE) || type.equals(Character.class)) {
+        } else if(type.equals(Character.TYPE) || type.equals(Character.class)) {
             return UUID.randomUUID().toString().charAt(0);
-        }
-        else if(type.equals(BigInteger.class)) {
+        } else if(type.equals(BigInteger.class)) {
             return BigInteger.valueOf(random.nextInt());
-        }
-        else if(type.isAssignableFrom(HashMap.class)) {
+        } else if(type.isAssignableFrom(HashMap.class)) {
             HashMap<String, String> map = new HashMap<>();
             map.put("key1", "value1");
             map.put("key2", "value2");
             map.put("key3", "value3");
             return map;
-        }
-        else if(type.equals(Set.class)) {
+        } else if(type.equals(Set.class)) {
             Set<String> set = new HashSet<>();
             set.add("value1");
             set.add("value2");
             set.add("value3");
             return set;
-        }
-        else if (type.isArray()) {
+        } else if (type.isArray()) {
             int length = random.nextInt(9) + 1;
             return Array.newInstance(type.getComponentType(), length);
-        }
-        else if (type.equals(ConcurrentHashMap.class)) {
+        } else if (type.equals(ConcurrentHashMap.class)) {
             return type.getConstructor().newInstance();
-        }
-        else if (Number.class.isAssignableFrom(type)) {
+        } else if (Number.class.isAssignableFrom(type)) {
             return random.nextInt(Byte.MAX_VALUE) + 1;
-        }
-        else if(type.equals(boolean.class)) {
+        } else if(type.equals(boolean.class)) {
             return random.nextBoolean();
-        }
-        else if(SqoopTool.class.equals(field.getType())) {
+        } else if(SqoopTool.class.equals(field.getType())) {
             return new ImportAllTablesTool();
-        }
-        else if (field.getType().equals(ArrayList.class)) {
+        } else if (field.getType().equals(ArrayList.class)) {
             return new ArrayList<>();
         } else if (field.getType().equals(Class.class)) {
             return AbsoluteValidationThreshold.class;

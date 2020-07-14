@@ -1073,8 +1073,8 @@ public final class OraOopUtilities {
                                                 // 1,000 mappers before
                                                 // exceeding 30
                                                 // characters
-                                                , partitionName // <- Partition name is 22 characters
-                                                , mapperId);
+, partitionName // <- Partition name is 22 characters
+, mapperId);
 
         // Check the length of the name...
         if (subPartitionName.length()
@@ -1106,7 +1106,7 @@ public final class OraOopUtilities {
             Object sysDateTime, String schema) {
         //mapperId: should allow 10,000,000 mappers before it exceeds 30 characters.
         return generateExportTableMapperTableName(Integer.toString(mapperId)
-                , sysDateTime, schema);
+, sysDateTime, schema);
     }
 
     public static OracleTable generateExportTableMapperTableName(
@@ -1122,7 +1122,7 @@ public final class OraOopUtilities {
         // Generate the name...
         String tableName = String.format("%s_%s", mapperTableNamePrefix // <- 22
                                          // chars
-                                         , mapperSuffix);
+, mapperSuffix);
 
         // Check the length of the name...
         if (tableName.length() > OraOopConstants.Oracle.MAX_IDENTIFIER_LENGTH) {

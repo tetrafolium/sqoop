@@ -470,8 +470,8 @@ public class ImportTool extends BaseSqoopTool {
 
                 // Local job tracker needs jars in the classpath.
                 if (options.getFileLayout() == SqoopOptions.FileLayout.ParquetFile) {
-                    loadJars(options.getConf(), context.getJarFile(), ClassWriter.toJavaIdentifier("codegen_" +
-                             context.getTableName()));
+                    loadJars(options.getConf(), context.getJarFile(), ClassWriter.toJavaIdentifier("codegen_"
+                             + context.getTableName()));
                 } else {
                     loadJars(options.getConf(), context.getJarFile(), context.getTableName());
                 }
@@ -1140,8 +1140,8 @@ public class ImportTool extends BaseSqoopTool {
         }
         if (options.getNullStringValue() != null || options.getNullNonStringValue() != null) {
             throw new InvalidOptionsException(
-                "The --direct option is not compatible with the --null-string or " +
-                "--null-non-string command for MySQL imports");
+                "The --direct option is not compatible with the --null-string or "
+                + "--null-non-string command for MySQL imports");
         }
     }
     /**

@@ -179,8 +179,7 @@ public final class SqoopHCatUtilities {
             HiveMetaStoreClient client = HCatUtil.getHiveClient(hiveConf);
             Table table = HCatUtil.getTable(client, hCatDatabaseName, hCatTableName);
             return table.isView();
-        }
-        catch(Exception e) {
+        } catch(Exception e) {
             LOG.warn("We were not able to determine if "+hCatDatabaseName+ ":"+hCatTableName+ "is view or table.");
             LOG.info("isHCatView threw an exception:", e);
             return false;

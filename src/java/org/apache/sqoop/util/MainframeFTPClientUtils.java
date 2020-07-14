@@ -114,8 +114,7 @@ public final class MainframeFTPClientUtils {
                             LOG.info(String.format("Name: %s, Type: %s",f.getName(),f.getType()));
                         }
                     }
-                }
-                else {
+                } else {
                     // partitioned datasets have a different FTP listing structure
                     LOG.info("Dataset is a partitioned dataset, using default FTP list parsing");
                     ftpFiles = ftp.listFiles();
@@ -143,7 +142,7 @@ public final class MainframeFTPClientUtils {
                 }
             }
         } catch(IOException ioe) {
-            throw new IOException ("Could not list datasets from " + pdsName + ":"
+            throw new IOException("Could not list datasets from " + pdsName + ":"
                                    + ioe.toString());
         } finally {
             if (ftp != null) {
@@ -162,8 +161,7 @@ public final class MainframeFTPClientUtils {
             if (username == null) {
                 username = "anonymous";
                 password = "";
-            }
-            else {
+            } else {
                 password = DBConfiguration.getPassword((JobConf) conf);
             }
 
@@ -208,8 +206,8 @@ public final class MainframeFTPClientUtils {
                 throw new IOException("FTP server " + server
                                       + " refused connection:" + ftp.getReplyString());
             }
-            LOG.info("Connected to " + server + " on " +
-                     (port>0 ? port : ftp.getDefaultPort()));
+            LOG.info("Connected to " + server + " on "
+                     + (port>0 ? port : ftp.getDefaultPort()));
             if (!ftp.login(username, password)) {
                 ftp.logout();
                 throw new IOException("Could not login to server " + server

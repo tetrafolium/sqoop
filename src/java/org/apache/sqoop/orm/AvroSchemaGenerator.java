@@ -106,8 +106,8 @@ public class AvroSchemaGenerator {
         TableClassName tableClassName = new TableClassName(options);
         String shortClassName = (tableName == null && options.getClassName() == null) ? DEFAULT_SCHEMA_NAME : tableClassName.getShortClassForTable(tableName);
         String avroTableName = (tableName == null ? TableClassName.QUERY_RESULT : tableName);
-        String avroName = schemaNameOverride != null ? schemaNameOverride :
-                          (shortClassName == null ? avroTableName : shortClassName);
+        String avroName = schemaNameOverride != null ? schemaNameOverride
+                          : (shortClassName == null ? avroTableName : shortClassName);
         String avroNamespace = tableClassName.getPackageForTable();
 
         String doc = "Sqoop import of " + avroTableName;
@@ -147,8 +147,7 @@ public class AvroSchemaGenerator {
     private boolean isLogicalTypeConversionEnabled() {
         if (ParquetFile.equals(options.getFileLayout())) {
             return options.getConf().getBoolean(ConfigurationConstants.PROP_ENABLE_PARQUET_LOGICAL_TYPE_DECIMAL, false);
-        }
-        else if (AvroDataFile.equals(options.getFileLayout())) {
+        } else if (AvroDataFile.equals(options.getFileLayout())) {
             return options.getConf().getBoolean(ConfigurationConstants.PROP_ENABLE_AVRO_LOGICAL_TYPE_DECIMAL, false);
         }
         return false;
