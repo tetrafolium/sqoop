@@ -184,12 +184,12 @@ private void setTxIsolation(Connection conn) {
 				this.connection.setTransactionIsolation(
 					Connection.TRANSACTION_READ_COMMITTED);
 			} else {
-				LOG.info("Using read uncommited transaction isolation");
+				LOG.info("Using read uncommitted transaction isolation");
 				this.connection.setTransactionIsolation(
 					Connection.TRANSACTION_READ_UNCOMMITTED);
 			}
 		} else {
-			LOG.info("Using read commited transaction isolation");
+			LOG.info("Using read committed transaction isolation");
 			this.connection.setTransactionIsolation(
 				Connection.TRANSACTION_READ_COMMITTED);
 		}

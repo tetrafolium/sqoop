@@ -77,7 +77,7 @@ public void run() {
 	boolean interruptParent = false;
 	try {
 
-		// Excecute the statement - this will make data to flow in the
+		// Execute the statement - this will make data to flow in the
 		// named pipes
 		ps.execute();
 

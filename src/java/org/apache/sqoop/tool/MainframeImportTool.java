@@ -168,7 +168,7 @@ public void printHelp(ToolOptions toolOptions) {
 	toolOptions.printHelp();
 
 	System.out.println("\nGeneric Hadoop command-line arguments:");
-	System.out.println("(must preceed any tool-specific arguments)");
+	System.out.println("(must precede any tool-specific arguments)");
 	ToolRunner.printGenericCommandUsage(System.out);
 	System.out.println("\nAt minimum, you must specify --connect and --" +
 	                   DS_ARG);

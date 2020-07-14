@@ -120,8 +120,8 @@ protected void propagateOptionsToJob(Job job) {
 	conf.set("mapred.jar", context.getJarFile());
 	conf.setBoolean("mapred.map.tasks.speculative.execution", false);
 	conf.setBoolean("mapred.reduce.tasks.speculative.execution", false);
-	conf.setInt(HADOOP_MAP_TASK_MAX_ATTEMTPS, 1);
-	conf.setInt(HADOOP_REDUCE_TASK_MAX_ATTEMTPS, 1);
+	conf.setInt(HADOOP_MAP_TASK_MAX_ATTEMPTS, 1);
+	conf.setInt(HADOOP_REDUCE_TASK_MAX_ATTEMPTS, 1);
 }
 
 @Override

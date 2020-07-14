@@ -250,7 +250,7 @@ public static final String NEW_DATASET_ARG = "new-data";
 public static final String OLD_DATASET_ARG = "onto";
 public static final String MERGE_KEY_ARG = "merge-key";
 
-// Reset number of mappers to one if there is no primary key avaliable and
+// Reset number of mappers to one if there is no primary key available and
 // split by column is explicitly not provided
 
 public static final String AUTORESET_TO_ONE_MAPPER =
@@ -550,7 +550,7 @@ protected RelatedOptions getCommonOptions() {
 		.withDescription(
 			"Defines the transaction isolation level for metadata queries. "
 			+
-			"For more details check java.sql.Connection javadoc or the JDBC specificaiton")
+			"For more details check java.sql.Connection javadoc or the JDBC specifications")
 		.withLongOpt(METADATA_TRANSACTION_ISOLATION_LEVEL)
 		.hasArg()
 		.withArgName("isolationlevel")
