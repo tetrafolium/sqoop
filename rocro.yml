@@ -23,9 +23,9 @@ inspecode:
     options:
       -targets: /
     thresholds: { num-issues: 999 }
-  - *spotbugs-base-config
+  - <<: *spotbugs-base-config
     machine: { cpu: 1.0 }
-  - *spotbugs-base-config
+  - <<: *spotbugs-base-config
     machine: { cpu: 1.5 }
-  - *spotbugs-base-config
+  - <<: *spotbugs-base-config
     machine: { cpu: 2.0 }
